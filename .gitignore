@@ -1,0 +1,16 @@
+.DS_Store
+.idea/
+.vscode/
+node_modules/
+vendor/
+dist/
+build/
+.env
+.env.*
+!.env.example
+runtime/
+storage/logs/
+*.log
+coverage/
+.phpunit.result.cache
+

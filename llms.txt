@@ -1,0 +1,38 @@
+# TrueAdmin
+
+> 面向 AI 协作开发的企业级后台管理脚手架，包含 Hyperf 后端、React + Ant Design 管理端、uni-app + Wot UI 移动端预留，以及清晰的工程文档体系。
+
+## 项目概览
+
+TrueAdmin 是一个开源框架型 Monorepo。第一阶段聚焦通用后台基础版，后续扩展消息、待办、流程审批和移动端轻量管理能力。
+
+## 关键技术
+
+- Backend: PHP, Hyperf, PostgreSQL, Redis, JWT, OpenAPI/Swagger
+- Web: React, Vite, TypeScript, Ant Design
+- Mobile: uni-app, Vue 3, TypeScript, Wot UI
+- API: RESTful API with OpenAPI contracts
+
+## 重要文档
+
+- [README](README.md): 项目定位、模块范围和入口说明。
+- [Architecture](docs/architecture.md): 总体架构、分层原则和模块边界。
+- [Modules](docs/modules.md): 第一阶段模块和企业增强模块规划。
+- [Tech Stack](docs/tech-stack.md): 技术栈选择和理由。
+- [API Conventions](docs/api/api-conventions.md): RESTful API、错误码、分页、鉴权和 OpenAPI 规范。
+- [AI Development Guide](docs/ai/ai-development-guide.md): AI 协作开发约定。
+- [Task Template](docs/ai/task-template.md): 面向 AI 的任务拆分模板。
+- [Module Prompt Template](docs/ai/module-prompt-template.md): 模块开发 Prompt 模板。
+- [Local Development](docs/deploy/local-development.md): 本地开发环境和 Docker Compose 说明。
+
+## 代码目录
+
+- [backend](backend/README.md): Hyperf 后端应用目录预留。
+- [web](web/README.md): React 管理端目录预留。
+- [mobile](mobile/README.md): uni-app 移动端目录预留。
+- [deploy](deploy/docker/docker-compose.yml): 本地基础设施编排预留。
+
+## AI 协作提醒
+
+修改代码前先阅读对应端的 README、架构文档、API 规范和 AI 开发指南。新增模块时先补充模块说明、接口契约、权限点和测试约定，再进入代码实现。
+

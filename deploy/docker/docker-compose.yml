@@ -1,0 +1,27 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: trueadmin-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: trueadmin
+      POSTGRES_USER: trueadmin
+      POSTGRES_PASSWORD: trueadmin
+    ports:
+      - "5432:5432"
+    volumes:
+      - trueadmin-postgres-data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: trueadmin-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - trueadmin-redis-data:/data
+
+volumes:
+  trueadmin-postgres-data:
+  trueadmin-redis-data:
+
