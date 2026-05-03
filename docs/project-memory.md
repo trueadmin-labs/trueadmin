@@ -39,6 +39,7 @@ TrueAdmin 要成为一个面向 AI 协作开发的企业级后台管理脚手架
 - 第一版不做多租户。
 - 权限模型采用企业后台完整组织体系。
 - 后台用户、用户端用户和开放平台主体分域建模，不默认共用用户表。
+- API 版本只隔离入口契约，不复制整个业务模块；Controller、Request、Resource 按端和版本隔离，Domain、Model、Repository 复用。
 - 移动端定位为轻量管理端。
 - 第一阶段聚焦后台基础版。
 - 后续扩展消息、待办、流程审批。
@@ -178,6 +179,8 @@ backend/app/Module
 `packages/kernel` 放框架层和横切基础能力，并以 `trueadmin/kernel` 作为 Composer 包雏形。业务代码必须归属到 `backend/app/Module` 下的具体模块。
 
 Listener 和 Crontab 也按职责归属：框架级放 `Kernel`，业务级放模块内。
+
+API 版本和多端复用边界见 `docs/api-versioning-and-reuse.md`。
 
 ## 重要提醒
 

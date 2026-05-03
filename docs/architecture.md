@@ -77,6 +77,8 @@ packages/
 - Crontab：模块级定时任务。
 - Test：模块测试。
 
+多端 API 和 API 版本的组织规则见 [API 版本与复用边界规范](api-versioning-and-reuse.md)。默认做法是 Controller、Request、Resource 按端和版本隔离，Domain、Model、Repository 复用。
+
 ## 事件与定时任务边界
 
 事件和定时任务按职责归属：
