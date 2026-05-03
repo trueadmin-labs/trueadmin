@@ -3,13 +3,13 @@
 ## 第一阶段：后台基础版
 
 - Monorepo 骨架。
-- Hyperf 后端应用初始化。
+- Hyperf 后端应用初始化。已完成第一版。
 - React + Vite + Ant Design 管理端初始化。
-- JWT 登录认证。
+- JWT 登录认证。已完成最小闭环。
 - 用户、角色、菜单、部门、岗位。
 - 字典、日志、文件上传。
-- OpenAPI/Swagger 接口契约。
-- PostgreSQL + Redis 本地开发环境。
+- OpenAPI/Swagger 接口契约。已添加第一版 JSON 文档。
+- PostgreSQL + Redis 本地开发环境。已完成 Docker Compose。
 - CRUD 代码生成能力预留。
 - AI 开发指南和任务模板。
 
@@ -38,4 +38,3 @@
 - OpenAPI 类型生成。
 - 多租户能力评估。
 - 对象存储和队列服务扩展。
-

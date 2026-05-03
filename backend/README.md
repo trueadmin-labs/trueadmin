@@ -48,11 +48,45 @@ Test/
 ## 第一阶段后端能力
 
 - JWT 登录认证。
+- 后台管理 API 分区：`/api/v1/admin`。
+- 用户端 API 预留：`/api/v1/client`。
+- 外部开放 API 预留：`/api/v1/open`。
 - 用户、角色、菜单、按钮权限、接口权限。
 - 部门、岗位和组织树。
 - 字典、日志、文件上传。
 - OpenAPI 接口契约。
 - CRUD 代码生成模块预留。
+
+## 本地启动
+
+安装依赖：
+
+```bash
+composer install
+```
+
+启动服务：
+
+```bash
+composer start
+```
+
+默认管理员账号用于第一阶段认证闭环：
+
+```text
+username: admin
+password: trueadmin
+```
+
+## 当前接口
+
+```text
+GET  /
+POST /api/v1/admin/auth/login
+POST /api/v1/admin/auth/logout
+GET  /api/v1/admin/auth/me
+GET  /api/v1/open/openapi.json
+```
 
 ## AI 开发提醒
 
@@ -64,4 +98,3 @@ Test/
 - 权限点。
 - 数据表和字段。
 - OpenAPI 契约。
-

@@ -114,6 +114,12 @@ TrueAdmin 第一版的 AI 基建按标准版建设，包含：
 - 添加 AI 开发指南、任务模板、模块 Prompt 模板和测试约定。
 - 添加 PostgreSQL + Redis 的 Docker Compose 文件。
 - 添加根级 `llms.txt`。
+- 初始化 `backend/` Hyperf 3.1 应用骨架。
+- 接入 PostgreSQL、Redis、JWT 基础配置。
+- 建立统一 API 响应、错误码和业务异常处理。
+- 实现后台认证最小闭环：登录、退出、当前用户。
+- 预留 API 分区：`admin`、`client`、`open`。
+- 添加第一版 OpenAPI JSON 文档入口。
 
 ## Git 状态
 
@@ -125,21 +131,31 @@ ce09fcd chore: initialize TrueAdmin scaffold
 
 当前新增的项目记忆文档应在下一次提交中记录。
 
+后端初始化阶段提交后，应记录新的提交号。
+
 ## 推荐下一步
 
-下一步建议初始化后端 Hyperf 应用骨架。
+后端 Hyperf 应用骨架已经初始化完成。下一步建议建设系统权限基础模块。
 
 推荐顺序：
 
-1. 在 `backend/` 初始化 Hyperf 应用。
-2. 接入环境变量配置。
-3. 配置 PostgreSQL 和 Redis。
-4. 接入 JWT 认证基础能力。
-5. 建立模块目录约定。
-6. 输出第一版 OpenAPI 文档入口。
-7. 实现最小认证链路：登录、当前用户、退出。
+1. 设计用户、角色、菜单、部门、岗位数据表。
+2. 添加数据库迁移和种子数据。
+3. 将内置管理员账号切换为数据库用户。
+4. 实现权限点和菜单查询接口。
+5. 扩展 OpenAPI 文档。
+6. 为 Web 管理端初始化提供稳定接口。
+
+## API 边界
+
+TrueAdmin 第一阶段已经预留三类 API：
+
+- `/api/v1/admin`：后台管理端 API。
+- `/api/v1/client`：未来用户端 API。
+- `/api/v1/open`：未来外部开放平台 API。
+
+开放 API 不应直接复用后台管理接口。相关说明见 `docs/api/api-boundaries.md`。
 
 ## 重要提醒
 
 当项目目标、技术栈、阶段范围、模块边界或路线图发生变化时，必须更新本文档。
-

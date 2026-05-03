@@ -10,6 +10,16 @@ TrueAdmin 使用 RESTful API，并通过 OpenAPI/Swagger 描述接口契约。
 /api/v1
 ```
 
+TrueAdmin 按调用方进一步划分 API 边界：
+
+```text
+/api/v1/admin
+/api/v1/client
+/api/v1/open
+```
+
+详细说明见 [API 边界设计](api-boundaries.md)。
+
 ## 认证
 
 认证方式使用 JWT Token。
@@ -77,14 +87,14 @@ Authorization: Bearer <token>
 ## 常用接口示例
 
 ```text
-POST   /api/v1/auth/login
-POST   /api/v1/auth/logout
-GET    /api/v1/auth/me
-GET    /api/v1/system/users
-POST   /api/v1/system/users
-GET    /api/v1/system/users/{id}
-PUT    /api/v1/system/users/{id}
-DELETE /api/v1/system/users/{id}
+POST   /api/v1/admin/auth/login
+POST   /api/v1/admin/auth/logout
+GET    /api/v1/admin/auth/me
+GET    /api/v1/admin/system/users
+POST   /api/v1/admin/system/users
+GET    /api/v1/admin/system/users/{id}
+PUT    /api/v1/admin/system/users/{id}
+DELETE /api/v1/admin/system/users/{id}
 ```
 
 ## 错误码区间
@@ -111,4 +121,3 @@ DELETE /api/v1/system/users/{id}
 - 至少一个示例。
 
 AI 生成后端或前端代码时，应优先参考 OpenAPI 契约，而不是仅根据页面描述猜测字段。
-

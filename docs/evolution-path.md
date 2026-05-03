@@ -42,7 +42,7 @@
 
 ## 阶段 2：后端工程初始化
 
-推荐下一阶段。
+已完成第一版。
 
 目标：让后端从文档预留进入可运行工程。
 
@@ -57,14 +57,24 @@
 - 建立异常处理和错误码。
 - 建立 OpenAPI/Swagger 文档入口。
 - 实现认证最小闭环。
+- 预留 Admin、Client、Open API 分区。
 
 认证最小闭环：
 
-- `POST /api/v1/auth/login`
-- `POST /api/v1/auth/logout`
-- `GET /api/v1/auth/me`
+- `POST /api/v1/admin/auth/login`
+- `POST /api/v1/admin/auth/logout`
+- `GET /api/v1/admin/auth/me`
+
+当前说明：
+
+- 第一版使用内置管理员账号跑通认证链路。
+- 默认管理员账号为 `admin / trueadmin`。
+- OpenAPI 文档入口为 `/api/v1/open/openapi.json`。
+- PostgreSQL 本地端口映射为 `15432`，避免和本机默认 `5432` 冲突。
 
 ## 阶段 3：系统权限基础模块
+
+推荐下一阶段。
 
 目标：完成企业后台基础权限模型。
 
@@ -159,4 +169,3 @@
 - 插件化能力。
 - 文档站点。
 - 示例业务模板。
-

@@ -33,7 +33,7 @@ docker compose -f deploy/docker/docker-compose.yml down
 
 - `DB_CONNECTION=pgsql`
 - `DB_HOST=127.0.0.1`
-- `DB_PORT=5432`
+- `DB_PORT=15432`
 - `REDIS_HOST=127.0.0.1`
 - `REDIS_PORT=6379`
 - `JWT_SECRET=change-me`
@@ -42,10 +42,38 @@ docker compose -f deploy/docker/docker-compose.yml down
 
 当后端和 Web 应用初始化后，本文件应继续补充：
 
-- 后端启动命令。
 - Web 启动命令。
 - 移动端启动命令。
 - 数据迁移命令。
-- 默认管理员账号。
 - 常见问题。
 
+## 后端启动
+
+进入后端目录：
+
+```bash
+cd backend
+composer install
+composer start
+```
+
+默认服务地址：
+
+```text
+http://localhost:9501
+```
+
+默认管理员账号：
+
+```text
+username: admin
+password: trueadmin
+```
+
+第一阶段已预留 API 分区：
+
+```text
+/api/v1/admin
+/api/v1/client
+/api/v1/open
+```
