@@ -2,9 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Controller\OpenApi;
-
-use App\Controller\AbstractController;
+namespace App\Kernel\Http\Controller;
 
 final class OpenApiController extends AbstractController
 {
@@ -18,4 +16,3 @@ final class OpenApiController extends AbstractController
         );
     }
 }
-

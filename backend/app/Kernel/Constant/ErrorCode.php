@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Constant;
+namespace App\Kernel\Constant;
 
 final class ErrorCode
 {
@@ -16,4 +16,3 @@ final class ErrorCode
     public const NOT_FOUND = 404000;
     public const SERVER_ERROR = 500000;
 }
-

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Middleware;
+namespace App\Kernel\Http\Middleware;
 
-use App\Constant\ErrorCode;
-use App\Exception\BusinessException;
+use App\Kernel\Constant\ErrorCode;
+use App\Kernel\Exception\BusinessException;
 use App\Module\Auth\Service\AuthService;
 use Hyperf\Context\Context;
 use Psr\Http\Message\ResponseInterface;

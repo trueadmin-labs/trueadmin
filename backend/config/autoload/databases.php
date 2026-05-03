@@ -32,9 +32,9 @@ return [
         ],
         'commands' => [
             'gen:model' => [
-                'path' => 'app/Model',
+                'path' => 'app/Module/System/Model',
                 'force_casts' => true,
-                'inheritance' => 'Model',
+                'inheritance' => 'App\\Kernel\\Database\\Model',
             ],
         ],
     ],

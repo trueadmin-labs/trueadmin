@@ -10,11 +10,11 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
 
-namespace App\Controller;
+namespace App\Kernel\Http\Controller;
 
-use App\Support\ApiResponse;
+use App\Kernel\Support\ApiResponse;
 
-class IndexController extends AbstractController
+class HealthController extends AbstractController
 {
     public function index()
     {

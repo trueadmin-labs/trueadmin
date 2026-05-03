@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Module\Auth\Service;
 
-use App\Constant\ErrorCode;
-use App\Exception\BusinessException;
+use App\Kernel\Constant\ErrorCode;
+use App\Kernel\Exception\BusinessException;
+use App\Kernel\Support\Password;
 use App\Module\Auth\DTO\AuthUser;
-use App\Support\Password;
 
 final class AuthService
 {

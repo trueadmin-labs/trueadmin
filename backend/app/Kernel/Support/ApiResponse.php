@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Support;
+namespace App\Kernel\Support;
 
-use App\Constant\ErrorCode;
+use App\Kernel\Constant\ErrorCode;
 
 final class ApiResponse
 {
@@ -26,4 +26,3 @@ final class ApiResponse
         ];
     }
 }
-

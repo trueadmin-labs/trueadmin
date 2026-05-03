@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Exception;
+namespace App\Kernel\Exception;
 
 use RuntimeException;
 use Throwable;
@@ -23,4 +23,3 @@ class BusinessException extends RuntimeException
         return $this->businessCode;
     }
 }
-

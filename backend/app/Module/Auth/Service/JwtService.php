@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Module\Auth\Service;
 
-use App\Constant\ErrorCode;
-use App\Exception\BusinessException;
+use App\Kernel\Constant\ErrorCode;
+use App\Kernel\Exception\BusinessException;
 use Hyperf\Config\Annotation\Value;
 
 final class JwtService
@@ -74,4 +74,3 @@ final class JwtService
         return base64_decode(strtr($value, '-_', '+/')) ?: '';
     }
 }
-

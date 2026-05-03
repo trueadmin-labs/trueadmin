@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Controller\Auth;
+namespace App\Module\Auth\Controller;
 
-use App\Constant\ErrorCode;
-use App\Controller\AbstractController;
-use App\Exception\BusinessException;
+use App\Kernel\Constant\ErrorCode;
+use App\Kernel\Exception\BusinessException;
+use App\Kernel\Http\Controller\AbstractController;
+use App\Kernel\Support\ApiResponse;
 use App\Module\Auth\DTO\AuthUser;
 use App\Module\Auth\Service\AuthService;
-use App\Support\ApiResponse;
 use Hyperf\Context\Context;
 
 final class AuthController extends AbstractController
@@ -45,4 +45,3 @@ final class AuthController extends AbstractController
         return ApiResponse::success($user->toArray());
     }
 }
-

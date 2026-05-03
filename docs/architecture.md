@@ -34,6 +34,17 @@ TrueAdmin/
 ```text
 backend/
   app/
+    Kernel/
+      Constant/
+      Database/
+      Event/
+        Listener/
+      Exception/
+      Http/
+        Controller/
+        Middleware/
+      Crontab/
+      Support/
     Module/
       System/
       Auth/
@@ -44,6 +55,10 @@ backend/
       File/
       Generator/
 ```
+
+`Kernel` 只放框架层和横切基础能力，例如统一响应、错误码、基础模型、异常处理、HTTP 中间件、健康检查、OpenAPI 文档入口、框架生命周期监听器和全局定时任务。
+
+`Module` 放业务能力。业务 Controller、Request、Service、Repository、Model、DTO、Policy、Event、Listener、Crontab 都应归属到具体模块，不应散落在 `app/` 外层。
 
 每个模块建议包含：
 
@@ -56,7 +71,29 @@ backend/
 - Policy：权限策略。
 - Event：领域事件。
 - Listener：事件监听。
+- Crontab：模块级定时任务。
 - Test：模块测试。
+
+## 事件与定时任务边界
+
+事件和定时任务按职责归属：
+
+- 框架生命周期监听器、SQL 日志监听器、全局异常相关监听器放在 `app/Kernel/Event/Listener`。
+- 业务事件放在对应模块的 `Event` 目录。
+- 业务事件监听器放在对应模块的 `Listener` 目录。
+- 全局维护类定时任务放在 `app/Kernel/Crontab`。
+- 业务定时任务放在对应模块的 `Crontab` 目录。
+
+示例：
+
+```text
+app/Kernel/Event/Listener/DbQueryExecutedListener.php
+app/Module/System/Event/UserCreated.php
+app/Module/System/Listener/WriteUserAuditLogListener.php
+app/Module/System/Crontab/ClearExpiredLoginLogTask.php
+```
+
+定时任务不应直接写复杂业务逻辑。任务类只负责调度入口，业务规则应下沉到模块 Service。
 
 ## Web 管理端架构
 
@@ -139,4 +176,3 @@ TrueAdmin 使用 RESTful API + OpenAPI/Swagger。
 - 示例代码短小完整。
 - 测试约定随模块一起出现。
 - 不让业务规则只存在于聊天记录中。
-

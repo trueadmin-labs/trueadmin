@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Support;
+namespace App\Kernel\Support;
 
 final class Password
 {
@@ -16,4 +16,3 @@ final class Password
         return password_verify($plain, $hash);
     }
 }
-
