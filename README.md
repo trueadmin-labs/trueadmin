@@ -65,6 +65,8 @@ TrueAdmin/
 
 ## 文档入口
 
+- [项目记忆](docs/project-memory.md)
+- [演化路径](docs/evolution-path.md)
 - [架构设计](docs/architecture.md)
 - [模块规划](docs/modules.md)
 - [技术栈说明](docs/tech-stack.md)
@@ -74,7 +76,10 @@ TrueAdmin/
 - [模块 Prompt 模板](docs/ai/module-prompt-template.md)
 - [本地开发与部署](docs/deploy/local-development.md)
 
+## AI 协作入口
+
+AI 编码助手或长期协作任务应先阅读 [AGENTS.md](AGENTS.md)。该文件会指向项目记忆、演化路径、架构文档和 AI 开发规范，帮助新会话快速恢复上下文。
+
 ## 开源协议
 
 TrueAdmin 使用 MIT License。
-
