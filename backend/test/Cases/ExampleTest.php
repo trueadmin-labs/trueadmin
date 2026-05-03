@@ -46,4 +46,13 @@ class ExampleTest extends TestCase
         $this->assertSame(0, $me['code']);
         $this->assertSame('admin', $me['data']['username']);
     }
+
+    public function testClientProfileExample()
+    {
+        $profile = $this->get('/api/v1/client/profile');
+
+        $this->assertSame(0, $profile['code']);
+        $this->assertSame(10001, $profile['data']['id']);
+        $this->assertSame('Client User', $profile['data']['nickname']);
+    }
 }

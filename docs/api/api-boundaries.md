@@ -38,6 +38,32 @@ API 按调用方和安全模型分区，而不是只按业务模块分区。
 - 更关注个人资源、业务流程、移动端体验和隐私边界。
 - 示例：`/api/v1/client/profile`、`/api/v1/client/tasks`。
 
+### Client API 示例
+
+当前仓库提供了一个最小用户端示例：
+
+```text
+GET /api/v1/client/profile
+```
+
+对应代码：
+
+```text
+backend/app/Module/Client/Controller/ProfileController.php
+backend/app/Module/Client/Service/ProfileService.php
+```
+
+这个示例表达的是用户端 API 的组织方式，而不是完整认证方案。后续真实用户端应补充独立的 Client 登录、Token audience、用户身份上下文和用户侧权限策略。
+
+如果用户端接口属于独立用户中心能力，可以放在 `Module/Client`。如果接口属于明确业务域，例如待办、订单、课程、工单，则优先放到对应业务模块中，并在 Controller 层区分入口语义。
+
+示例：
+
+```text
+backend/app/Module/Workflow/Controller/ClientTaskController.php
+backend/app/Module/Workflow/Service/TaskService.php
+```
+
 ## Open API
 
 `open` 分区服务第三方系统或外部开发者。

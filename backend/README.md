@@ -97,6 +97,7 @@ GET  /
 POST /api/v1/admin/auth/login
 POST /api/v1/admin/auth/logout
 GET  /api/v1/admin/auth/me
+GET  /api/v1/client/profile
 GET  /api/v1/open/openapi.json
 ```
 

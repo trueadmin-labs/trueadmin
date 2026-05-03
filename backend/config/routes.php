@@ -20,7 +20,7 @@ Router::addGroup('/api/v1/admin', static function () {
 });
 
 Router::addGroup('/api/v1/client', static function () {
-    // Reserved for future user-facing applications.
+    Router::get('/profile', 'App\Module\Client\Controller\ProfileController@show');
 });
 
 Router::addGroup('/api/v1/open', static function () {

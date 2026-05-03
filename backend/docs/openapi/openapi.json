@@ -72,6 +72,22 @@
         }
       }
     },
+    "/client/profile": {
+      "get": {
+        "summary": "Get current client profile example",
+        "tags": ["Client"],
+        "responses": {
+          "200": {
+            "description": "Client profile",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ClientProfileResponse"}
+              }
+            }
+          }
+        }
+      }
+    },
     "/open/openapi.json": {
       "get": {
         "summary": "Get OpenAPI document",
@@ -136,6 +152,27 @@
             "type": "object",
             "properties": {
               "data": {"$ref": "#/components/schemas/AuthUser"}
+            }
+          }
+        ]
+      },
+      "ClientProfile": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "integer", "example": 10001},
+          "nickname": {"type": "string", "example": "Client User"},
+          "avatar": {"type": "string", "nullable": true},
+          "mobile": {"type": "string", "example": "13800000000"},
+          "scopes": {"type": "array", "items": {"type": "string"}}
+        }
+      },
+      "ClientProfileResponse": {
+        "allOf": [
+          {"$ref": "#/components/schemas/ApiResponse"},
+          {
+            "type": "object",
+            "properties": {
+              "data": {"$ref": "#/components/schemas/ClientProfile"}
             }
           }
         ]
