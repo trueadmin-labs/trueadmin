@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Kernel\Support;
+namespace TrueAdmin\Kernel\Support;
 
-use App\Kernel\Constant\ErrorCode;
+use TrueAdmin\Kernel\Constant\ErrorCode;
 
 final class ApiResponse
 {

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Kernel\Constant;
+namespace TrueAdmin\Kernel\Constant;
 
 final class ErrorCode
 {

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Kernel\Support;
+namespace TrueAdmin\Kernel\Support;
 
 final class Password
 {

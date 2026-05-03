@@ -55,18 +55,18 @@ API 按调用方和安全模型分区，而不是只按业务模块分区。
 后端 Controller 可按入口分区组织：
 
 ```text
-app/Controller/Admin
-app/Controller/Client
-app/Controller/OpenApi
+backend/app/Module/System/Controller
+backend/app/Module/Auth/Controller
+packages/kernel/src/Http/Controller
 ```
 
 业务模块仍然按领域组织：
 
 ```text
-app/Module/Auth
-app/Module/System
-app/Module/Organization
-app/Module/Workflow
+backend/app/Module/Auth
+backend/app/Module/System
+backend/app/Module/Organization
+backend/app/Module/Workflow
 ```
 
 Controller 负责入口协议和调用方差异，Module 负责领域能力。不要为了不同 API 入口复制业务规则。
@@ -104,4 +104,3 @@ backend/docs/openapi/open.openapi.json
 - 不要让后台管理员 Token 调用开放平台接口。
 - 需要审计的 API 从第一版就记录调用方、操作者、资源和结果。
 - 版本号放在路径中，便于外部 API 长期兼容。
-

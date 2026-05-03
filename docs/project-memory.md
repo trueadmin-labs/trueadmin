@@ -120,7 +120,7 @@ TrueAdmin 第一版的 AI 基建按标准版建设，包含：
 - 实现后台认证最小闭环：登录、退出、当前用户。
 - 预留 API 分区：`admin`、`client`、`open`。
 - 添加第一版 OpenAPI JSON 文档入口。
-- 调整后端为干净的 `Kernel + Module` 单体模块化结构。
+- 调整后端为 `packages/kernel + backend/app/Module` 结构，核心包可通过 Composer 复用。
 
 ## Git 状态
 
@@ -162,11 +162,11 @@ TrueAdmin 第一阶段已经预留三类 API：
 后端当前采用：
 
 ```text
-backend/app/Kernel
+packages/kernel/src
 backend/app/Module
 ```
 
-`Kernel` 放框架层和横切基础能力。业务代码必须归属到具体 `Module`。
+`packages/kernel` 放框架层和横切基础能力，并以 `trueadmin/kernel` 作为 Composer 包雏形。业务代码必须归属到 `backend/app/Module` 下的具体模块。
 
 Listener 和 Crontab 也按职责归属：框架级放 `Kernel`，业务级放模块内。
 

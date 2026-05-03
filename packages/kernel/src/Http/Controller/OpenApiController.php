@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Kernel\Http\Controller;
+namespace TrueAdmin\Kernel\Http\Controller;
 
 final class OpenApiController extends AbstractController
 {

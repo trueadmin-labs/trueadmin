@@ -15,6 +15,7 @@
     "license": "MIT",
     "require": {
         "php": ">=8.1",
+        "trueadmin/kernel": "dev-main",
         "hyperf/cache": "~3.1.0",
         "hyperf/command": "~3.1.0",
         "hyperf/config": "~3.1.0",
@@ -62,6 +63,15 @@
         "optimize-autoloader": true,
         "sort-packages": true
     },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../packages/kernel",
+            "options": {
+                "symlink": true
+            }
+        }
+    ],
     "extra": [],
     "scripts": {
         "post-root-package-install": [

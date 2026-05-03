@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Module\Auth\Service;
 
-use App\Kernel\Constant\ErrorCode;
-use App\Kernel\Exception\BusinessException;
+use TrueAdmin\Kernel\Constant\ErrorCode;
+use TrueAdmin\Kernel\Exception\BusinessException;
 use Hyperf\Config\Annotation\Value;
 
 final class JwtService

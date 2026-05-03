@@ -10,11 +10,11 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
 
-namespace App\Kernel\Exception\Handler;
+namespace TrueAdmin\Kernel\Exception\Handler;
 
-use App\Kernel\Constant\ErrorCode;
-use App\Kernel\Exception\BusinessException;
-use App\Kernel\Support\ApiResponse;
+use TrueAdmin\Kernel\Constant\ErrorCode;
+use TrueAdmin\Kernel\Exception\BusinessException;
+use TrueAdmin\Kernel\Support\ApiResponse;
 use Hyperf\Contract\StdoutLoggerInterface;
 use Hyperf\ExceptionHandler\ExceptionHandler;
 use Hyperf\HttpMessage\Stream\SwooleStream;

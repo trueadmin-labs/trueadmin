@@ -13,7 +13,7 @@ return [
     'handler' => [
         'http' => [
             Hyperf\HttpServer\Exception\Handler\HttpExceptionHandler::class,
-            App\Kernel\Exception\Handler\AppExceptionHandler::class,
+            TrueAdmin\Kernel\Exception\Handler\AppExceptionHandler::class,
         ],
     ],
 ];

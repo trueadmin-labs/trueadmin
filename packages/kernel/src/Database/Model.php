@@ -10,7 +10,7 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
 
-namespace App\Kernel\Database;
+namespace TrueAdmin\Kernel\Database;
 
 use Hyperf\DbConnection\Model\Model as BaseModel;
 

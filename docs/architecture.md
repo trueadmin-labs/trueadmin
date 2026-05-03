@@ -34,7 +34,19 @@ TrueAdmin/
 ```text
 backend/
   app/
-    Kernel/
+    Module/
+      System/
+      Auth/
+      Permission/
+      Organization/
+      Dictionary/
+      Log/
+      File/
+      Generator/
+
+packages/
+  kernel/
+    src/
       Constant/
       Database/
       Event/
@@ -45,20 +57,11 @@ backend/
         Middleware/
       Crontab/
       Support/
-    Module/
-      System/
-      Auth/
-      Permission/
-      Organization/
-      Dictionary/
-      Log/
-      File/
-      Generator/
 ```
 
-`Kernel` 只放框架层和横切基础能力，例如统一响应、错误码、基础模型、异常处理、HTTP 中间件、健康检查、OpenAPI 文档入口、框架生命周期监听器和全局定时任务。
+`packages/kernel` 是可复用 Composer 核心包，包名为 `trueadmin/kernel`。它只放框架层和横切基础能力，例如统一响应、错误码、基础模型、异常处理、HTTP 中间件、健康检查、OpenAPI 文档入口、框架生命周期监听器和全局定时任务。
 
-`Module` 放业务能力。业务 Controller、Request、Service、Repository、Model、DTO、Policy、Event、Listener、Crontab 都应归属到具体模块，不应散落在 `app/` 外层。
+`backend/app/Module` 放业务能力。业务 Controller、Request、Service、Repository、Model、DTO、Policy、Event、Listener、Crontab 都应归属到具体模块，不应散落在 `backend/app` 外层。
 
 每个模块建议包含：
 
@@ -78,19 +81,19 @@ backend/
 
 事件和定时任务按职责归属：
 
-- 框架生命周期监听器、SQL 日志监听器、全局异常相关监听器放在 `app/Kernel/Event/Listener`。
+- 框架生命周期监听器、SQL 日志监听器、全局异常相关监听器放在 `packages/kernel/src/Event/Listener`。
 - 业务事件放在对应模块的 `Event` 目录。
 - 业务事件监听器放在对应模块的 `Listener` 目录。
-- 全局维护类定时任务放在 `app/Kernel/Crontab`。
+- 全局维护类定时任务放在 `packages/kernel/src/Crontab`。
 - 业务定时任务放在对应模块的 `Crontab` 目录。
 
 示例：
 
 ```text
-app/Kernel/Event/Listener/DbQueryExecutedListener.php
-app/Module/System/Event/UserCreated.php
-app/Module/System/Listener/WriteUserAuditLogListener.php
-app/Module/System/Crontab/ClearExpiredLoginLogTask.php
+packages/kernel/src/Event/Listener/DbQueryExecutedListener.php
+backend/app/Module/System/Event/UserCreated.php
+backend/app/Module/System/Listener/WriteUserAuditLogListener.php
+backend/app/Module/System/Crontab/ClearExpiredLoginLogTask.php
 ```
 
 定时任务不应直接写复杂业务逻辑。任务类只负责调度入口，业务规则应下沉到模块 Service。

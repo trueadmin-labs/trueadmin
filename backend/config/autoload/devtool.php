@@ -26,16 +26,16 @@ return [
             'namespace' => 'App\\Command',
         ],
         'controller' => [
-            'namespace' => 'App\\Controller',
+                'namespace' => 'App\\Module\\System\\Controller',
         ],
         'job' => [
             'namespace' => 'App\\Job',
         ],
         'listener' => [
-            'namespace' => 'App\\Listener',
+                'namespace' => 'App\\Module\\System\\Listener',
         ],
         'middleware' => [
-            'namespace' => 'App\\Middleware',
+                'namespace' => 'App\\Module\\System\\Middleware',
         ],
         'Process' => [
             'namespace' => 'App\\Processes',

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Module\Auth\Service;
 
-use App\Kernel\Constant\ErrorCode;
-use App\Kernel\Exception\BusinessException;
-use App\Kernel\Support\Password;
+use TrueAdmin\Kernel\Constant\ErrorCode;
+use TrueAdmin\Kernel\Exception\BusinessException;
+use TrueAdmin\Kernel\Support\Password;
 use App\Module\Auth\DTO\AuthUser;
 
 final class AuthService

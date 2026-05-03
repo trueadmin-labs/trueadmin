@@ -34,7 +34,7 @@ return [
             'gen:model' => [
                 'path' => 'app/Module/System/Model',
                 'force_casts' => true,
-                'inheritance' => 'App\\Kernel\\Database\\Model',
+                'inheritance' => 'TrueAdmin\\Kernel\\Database\\Model',
             ],
         ],
     ],

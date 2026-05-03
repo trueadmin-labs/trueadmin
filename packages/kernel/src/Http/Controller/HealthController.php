@@ -10,9 +10,9 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
 
-namespace App\Kernel\Http\Controller;
+namespace TrueAdmin\Kernel\Http\Controller;
 
-use App\Kernel\Support\ApiResponse;
+use TrueAdmin\Kernel\Support\ApiResponse;
 
 class HealthController extends AbstractController
 {

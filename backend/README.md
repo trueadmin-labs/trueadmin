@@ -15,14 +15,14 @@
 
 后端采用单体模块化架构。
 
-当前后端使用 `Kernel + Module` 结构：
+当前后端使用 `packages/kernel + backend/app/Module` 结构：
 
 ```text
-app/Kernel   框架层、横切能力和基础设施
-app/Module   业务模块
+../packages/kernel/src   可复用框架核心包
+app/Module                后台应用业务模块
 ```
 
-`Kernel` 可以放统一响应、错误码、异常处理、中间件、基础模型、框架级 Listener、全局 Crontab。
+`trueadmin/kernel` 可以放统一响应、错误码、异常处理、基础中间件、基础模型、框架级 Listener、全局 Crontab。
 
 业务代码必须放进具体模块。不要在 `app/` 外层继续新增 `Controller`、`Model`、`Listener`、`Crontab`。
 

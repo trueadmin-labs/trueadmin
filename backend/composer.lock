@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fec0f7e7f3b6bef4e10039b5eff4b1ae",
+    "content-hash": "731468ab9a72b391592fad3eac72e20a",
     "packages": [
         {
             "name": "carbonphp/carbon-doctrine-types",
@@ -5407,6 +5407,42 @@
             "time": "2025-07-15T13:41:35+00:00"
         },
         {
+            "name": "trueadmin/kernel",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "../packages/kernel",
+                "reference": "8b0447cedb2fd1830517a2f21dae31e537907cdf"
+            },
+            "require": {
+                "hyperf/config": "~3.1.0",
+                "hyperf/context": "~3.1.0",
+                "hyperf/contract": "~3.1.0",
+                "hyperf/database": "~3.1.0",
+                "hyperf/db-connection": "~3.1.0",
+                "hyperf/di": "~3.1.0",
+                "hyperf/event": "~3.1.0",
+                "hyperf/exception-handler": "~3.1.0",
+                "hyperf/http-server": "~3.1.0",
+                "hyperf/logger": "~3.1.0",
+                "php": ">=8.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "TrueAdmin\\Kernel\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "TrueAdmin reusable backend kernel package.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
             "name": "vlucas/phpdotenv",
             "version": "v5.6.3",
             "source": {
@@ -9317,7 +9353,9 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [],
+    "stability-flags": {
+        "trueadmin/kernel": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

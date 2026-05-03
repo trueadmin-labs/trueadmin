@@ -11,12 +11,12 @@ declare(strict_types=1);
  */
 use Hyperf\HttpServer\Router\Router;
 
-Router::addRoute(['GET', 'POST', 'HEAD'], '/', 'App\Kernel\Http\Controller\HealthController@index');
+Router::addRoute(['GET', 'POST', 'HEAD'], '/', 'TrueAdmin\Kernel\Http\Controller\HealthController@index');
 
 Router::addGroup('/api/v1/admin', static function () {
     Router::post('/auth/login', 'App\Module\Auth\Controller\AuthController@login');
-    Router::post('/auth/logout', 'App\Module\Auth\Controller\AuthController@logout', ['middleware' => [App\Kernel\Http\Middleware\AuthMiddleware::class]]);
-    Router::get('/auth/me', 'App\Module\Auth\Controller\AuthController@me', ['middleware' => [App\Kernel\Http\Middleware\AuthMiddleware::class]]);
+    Router::post('/auth/logout', 'App\Module\Auth\Controller\AuthController@logout', ['middleware' => [TrueAdmin\Kernel\Http\Middleware\AuthMiddleware::class]]);
+    Router::get('/auth/me', 'App\Module\Auth\Controller\AuthController@me', ['middleware' => [TrueAdmin\Kernel\Http\Middleware\AuthMiddleware::class]]);
 });
 
 Router::addGroup('/api/v1/client', static function () {
@@ -24,7 +24,7 @@ Router::addGroup('/api/v1/client', static function () {
 });
 
 Router::addGroup('/api/v1/open', static function () {
-    Router::get('/openapi.json', 'App\Kernel\Http\Controller\OpenApiController@document');
+    Router::get('/openapi.json', 'TrueAdmin\Kernel\Http\Controller\OpenApiController@document');
 });
 
 Router::get('/favicon.ico', function () {
