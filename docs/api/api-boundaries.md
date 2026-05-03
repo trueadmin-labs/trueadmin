@@ -55,8 +55,8 @@ GET /api/v1/client/profile
 对应代码：
 
 ```text
-backend/app/Module/Client/Controller/ProfileController.php
-backend/app/Module/Client/Service/ProfileService.php
+backend/app/Module/Client/Controller/Client/V1/ProfileController.php
+backend/app/Module/Client/Service/Client/ProfileService.php
 ```
 
 这个示例表达的是用户端 API 的组织方式，而不是完整认证方案。后续真实用户端应补充独立的 Client 登录、Token audience、用户身份上下文和用户侧权限策略。

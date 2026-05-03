@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace TrueAdmin\Kernel\Http\Middleware;
+namespace App\Module\Auth\Middleware;
 
 use TrueAdmin\Kernel\Constant\ErrorCode;
 use TrueAdmin\Kernel\Exception\BusinessException;
-use App\Module\Auth\Service\AuthService;
+use App\Module\Auth\Service\Admin\AuthService;
 use Hyperf\Context\Context;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-final class AuthMiddleware implements MiddlewareInterface
+final class AdminAuthMiddleware implements MiddlewareInterface
 {
     public function __construct(private readonly AuthService $authService)
     {

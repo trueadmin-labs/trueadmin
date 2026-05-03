@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Module\Auth\Service;
+namespace App\Module\Auth\Service\Admin;
 
 use TrueAdmin\Kernel\Constant\ErrorCode;
 use TrueAdmin\Kernel\Exception\BusinessException;
 use TrueAdmin\Kernel\Support\Password;
-use App\Module\Auth\DTO\AuthUser;
+use App\Module\Auth\Domain\DTO\AuthUser;
+use App\Module\Auth\Domain\Service\JwtService;
 
 final class AuthService
 {

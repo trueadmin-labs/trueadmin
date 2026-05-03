@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Module\Auth\DTO;
+namespace App\Module\Auth\Domain\DTO;
 
 final readonly class AuthUser
 {
@@ -26,4 +26,3 @@ final readonly class AuthUser
         ];
     }
 }
-

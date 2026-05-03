@@ -14,13 +14,13 @@ use Hyperf\HttpServer\Router\Router;
 Router::addRoute(['GET', 'POST', 'HEAD'], '/', 'TrueAdmin\Kernel\Http\Controller\HealthController@index');
 
 Router::addGroup('/api/v1/admin', static function () {
-    Router::post('/auth/login', 'App\Module\Auth\Controller\AuthController@login');
-    Router::post('/auth/logout', 'App\Module\Auth\Controller\AuthController@logout', ['middleware' => [TrueAdmin\Kernel\Http\Middleware\AuthMiddleware::class]]);
-    Router::get('/auth/me', 'App\Module\Auth\Controller\AuthController@me', ['middleware' => [TrueAdmin\Kernel\Http\Middleware\AuthMiddleware::class]]);
+    Router::post('/auth/login', 'App\Module\Auth\Controller\Admin\V1\AuthController@login');
+    Router::post('/auth/logout', 'App\Module\Auth\Controller\Admin\V1\AuthController@logout', ['middleware' => [App\Module\Auth\Middleware\AdminAuthMiddleware::class]]);
+    Router::get('/auth/me', 'App\Module\Auth\Controller\Admin\V1\AuthController@me', ['middleware' => [App\Module\Auth\Middleware\AdminAuthMiddleware::class]]);
 });
 
 Router::addGroup('/api/v1/client', static function () {
-    Router::get('/profile', 'App\Module\Client\Controller\ProfileController@show');
+    Router::get('/profile', 'App\Module\Client\Controller\Client\V1\ProfileController@show');
 });
 
 Router::addGroup('/api/v1/open', static function () {

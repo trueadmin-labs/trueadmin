@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Module\Auth\Controller;
+namespace App\Module\Auth\Controller\Admin\V1;
 
 use TrueAdmin\Kernel\Constant\ErrorCode;
 use TrueAdmin\Kernel\Exception\BusinessException;
 use TrueAdmin\Kernel\Http\Controller\AbstractController;
 use TrueAdmin\Kernel\Support\ApiResponse;
-use App\Module\Auth\DTO\AuthUser;
-use App\Module\Auth\Service\AuthService;
+use App\Module\Auth\Domain\DTO\AuthUser;
+use App\Module\Auth\Service\Admin\AuthService;
 use Hyperf\Context\Context;
 
 final class AuthController extends AbstractController

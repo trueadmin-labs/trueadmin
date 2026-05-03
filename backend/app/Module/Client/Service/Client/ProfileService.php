@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Module\Client\Service;
+namespace App\Module\Client\Service\Client;
 
 final class ProfileService
 {
@@ -17,4 +17,3 @@ final class ProfileService
         ];
     }
 }
-
