@@ -2,6 +2,8 @@
 
 TrueAdmin 虽然首先是后台管理系统，但后续可能同时服务 Web 管理端、用户端应用和外部开放平台。因此 API 必须从第一阶段就预留清晰边界。
 
+身份和权限的详细分域规则见 [身份与权限边界规范](../auth-identity-boundaries.md)。
+
 ## 分区原则
 
 API 按调用方和安全模型分区，而不是只按业务模块分区。
@@ -22,6 +24,7 @@ API 按调用方和安全模型分区，而不是只按业务模块分区。
 
 - 面向管理员、运营人员和企业内部用户。
 - 使用后台 JWT 登录态。
+- 使用 `admin_users` 身份体系。
 - 强依赖角色、菜单、按钮、接口权限和数据权限。
 - 操作需要审计日志。
 - 示例：`/api/v1/admin/auth/login`、`/api/v1/admin/system/users`。
@@ -34,6 +37,7 @@ API 按调用方和安全模型分区，而不是只按业务模块分区。
 
 - 面向普通用户、会员、员工或业务参与者。
 - 可使用独立 JWT audience，例如 `client`。
+- 使用 `client_users` 身份体系，不复用后台用户表。
 - 权限模型通常不同于后台 RBAC。
 - 更关注个人资源、业务流程、移动端体验和隐私边界。
 - 示例：`/api/v1/client/profile`、`/api/v1/client/tasks`。
@@ -71,6 +75,7 @@ backend/app/Module/Workflow/Service/TaskService.php
 特点：
 
 - 不复用后台管理员登录态。
+- 使用 `open_apps` 一类开放平台主体，不复用后台用户或用户端用户。
 - 应使用独立认证方式，例如 App Key + Secret、签名、OAuth2 或长期访问令牌。
 - 必须具备限流、签名校验、时间戳、防重放和调用审计。
 - 响应结构可以保持 TrueAdmin 统一格式，但错误码应预留开放平台区间。

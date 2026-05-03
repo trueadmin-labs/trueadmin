@@ -72,6 +72,7 @@ TrueAdmin/
 - [技术栈说明](docs/tech-stack.md)
 - [API 规范](docs/api/api-conventions.md)
 - [API 边界设计](docs/api/api-boundaries.md)
+- [身份与权限边界规范](docs/auth-identity-boundaries.md)
 - [AI 开发指南](docs/ai/ai-development-guide.md)
 - [任务拆分模板](docs/ai/task-template.md)
 - [模块 Prompt 模板](docs/ai/module-prompt-template.md)

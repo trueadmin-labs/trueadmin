@@ -1,0 +1,193 @@
+# 身份与权限边界规范
+
+TrueAdmin 同时考虑后台管理端、用户端和外部开放平台。三类调用方的身份模型、权限模型和数据生命周期不同，默认不共用一张用户表。
+
+## 核心决策
+
+TrueAdmin 默认采用三套身份边界：
+
+```text
+admin_*   后台管理身份和权限体系
+client_*  用户端身份和业务用户体系
+open_*    外部开放平台应用和调用体系
+```
+
+后台用户和用户端用户不共用一张表。
+
+## 后台身份体系
+
+后台身份体系服务 Web 管理端、运营人员、企业内部管理人员。
+
+推荐表名前缀：
+
+```text
+admin_users
+admin_roles
+admin_menus
+admin_permissions
+admin_user_roles
+admin_role_permissions
+admin_departments
+admin_positions
+```
+
+后台体系默认支持：
+
+- 菜单权限。
+- 按钮权限。
+- 接口权限。
+- 数据权限。
+- 部门岗位。
+- 操作日志。
+- 登录日志。
+- 后台审计。
+
+后台 Token 应使用：
+
+```text
+aud = admin
+```
+
+## 用户端身份体系
+
+用户端身份体系服务 App、小程序、H5、会员端、员工轻量工作台或其他用户端应用。
+
+推荐表名前缀：
+
+```text
+client_users
+client_profiles
+client_identities
+client_sessions
+```
+
+用户端默认只做：
+
+- 登录鉴权。
+- 用户身份上下文。
+- 个人资料。
+- 第三方身份绑定。
+- 业务接口访问控制。
+
+用户端默认不做：
+
+- 后台菜单权限。
+- 后台按钮权限。
+- 后台数据权限。
+- 后台组织岗位权限。
+
+用户端 Token 应使用：
+
+```text
+aud = client
+```
+
+## 用户端授权方式
+
+用户端授权通常是业务级授权，不套后台 RBAC。
+
+常见判断方式：
+
+- 是否已登录。
+- 资源是否属于当前 `client_user`。
+- 当前用户是否满足业务状态。
+- 当前用户是否具备某个轻量 scope。
+- 当前用户是否处于某个业务关系中。
+
+示例：
+
+```text
+GET /api/v1/client/orders/{id}
+```
+
+应该判断订单是否属于当前用户，而不是判断用户是否拥有 `order:view` 菜单权限。
+
+如果确实需要用户端能力控制，可以引入轻量 scope：
+
+```text
+client_user_scopes
+```
+
+但它不等同于后台菜单和数据权限。
+
+## 开放平台身份体系
+
+开放平台体系服务第三方系统、外部开发者和系统集成。
+
+推荐表名前缀：
+
+```text
+open_apps
+open_app_secrets
+open_access_tokens
+open_call_logs
+```
+
+开放平台默认应支持：
+
+- App Key / Secret。
+- 请求签名。
+- 时间戳和防重放。
+- 限流。
+- 调用审计。
+- 独立错误码。
+
+开放平台不复用后台管理员 Token，也不复用用户端 Token。
+
+## 同一自然人的关联
+
+如果同一个自然人既有后台账号，又有用户端账号，不通过共用主表解决。
+
+推荐使用关联表：
+
+```text
+admin_client_links
+```
+
+示例字段：
+
+```text
+id
+admin_user_id
+client_user_id
+link_type
+created_at
+```
+
+这样可以关联身份，又不污染两套模型。
+
+## 第一阶段迁移建议
+
+第一阶段优先建设后台管理体系：
+
+```text
+admin_users
+admin_roles
+admin_menus
+admin_permissions
+admin_user_roles
+admin_role_permissions
+admin_departments
+admin_positions
+```
+
+用户端先预留基础身份表：
+
+```text
+client_users
+client_profiles
+client_identities
+```
+
+开放平台先预留设计，不急于落表。
+
+## AI 开发提醒
+
+AI 生成代码时必须先判断接口属于哪类调用方：
+
+- `admin`：使用后台身份和 RBAC 权限。
+- `client`：使用用户端身份和业务授权。
+- `open`：使用开放平台认证和签名。
+
+不要把后台用户表、用户端用户表和开放平台应用表混用。
+
