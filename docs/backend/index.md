@@ -78,7 +78,6 @@ Module/Xxx/
   Database/
     Migrations/
     Seeders/
-  routes.php
   module.php
   menus.php
   permissions.php
@@ -90,13 +89,13 @@ Module/Xxx/
 
 ## 路由和注解
 
-当前已落地配置模式路由模块化：根 `backend/config/routes.php` 只保留框架入口、OpenAPI 入口和模块路由注册器，业务路由放在各模块 `routes.php`。
+当前已落地注解路由注册：根 `backend/config/routes.php` 只保留框架入口、OpenAPI 入口和注解路由注册器，业务路由写在 Controller 的 `#[AdminGet]`、`#[ClientGet]`、`#[OpenGet]` 等 Attribute 上。模块内不再默认创建 `routes.php`。
 
 ```bash
-php bin/hyperf.php trueadmin:route-files
+php bin/hyperf.php trueadmin:routes
 ```
 
-业务开发后续推荐使用 Attribute 声明权限、操作日志、数据权限、OpenAPI 和接口元数据。第一版已经把接口元数据、`DataScope`、`OperationLog` 的基础 Attribute/AOP/Event 原语放入 `packages/kernel`，但注解路由自动注册和菜单权限同步暂未启用。
+业务开发推荐使用 Attribute 声明路由、权限、操作日志、数据权限、OpenAPI 和接口元数据。第一版已经把接口元数据、`DataScope`、`OperationLog` 的基础 Attribute/AOP/Event 原语放入 `packages/kernel`，并启用注解路由注册；菜单权限同步仍以后续 MetadataScanner 落库能力为准。
 
 ## 数据库迁移
 

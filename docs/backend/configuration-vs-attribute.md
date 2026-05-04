@@ -82,50 +82,46 @@ Module/Xxx/llms.txt
 
 ## 路由双模式
 
-路由必须同时支持配置模式和注解模式。
+路由支持配置模式和注解模式，但业务模块默认使用注解模式。
 
-配置模式用于框架和模块的显式路由定义。它解决 `config/routes.php` 过于集中的问题。
+配置模式用于框架入口和极少数非常规路由兜底。业务模块不再默认维护 `routes.php`，避免每个模块都多一个配置文件概念。
 
 推荐结构：
 
 ```text
 backend/config/routes.php
-backend/app/Module/Auth/routes.php
-backend/app/Module/Product/routes.php
-backend/app/Module/User/routes.php
+backend/app/Module/Product/Http/Admin/Controller/ProductController.php
+backend/app/Module/Product/Http/Client/Controller/V1/ProductController.php
 ```
 
-`config/routes.php` 只保留框架入口和模块路由注册器：
+`config/routes.php` 只保留框架入口、OpenAPI 入口和注解路由注册器：
 
 ```php
 Router::addRoute(['GET', 'POST', 'HEAD'], '/', HealthController::class . '@index');
-$moduleRouteRegistrar->register();
+$attributeRouteRegistrar->register();
 ```
 
-模块 `routes.php` 自己维护模块路由：
+业务模块在 Controller 上声明路由：
 
 ```php
-use Hyperf\HttpServer\Router\Router;
-
-Router::addGroup('/api/v1/admin', static function () {
-    Router::get('/products', ProductController::class . '@index', [
-        'middleware' => [AdminAuthMiddleware::class],
-    ]);
-});
-```
-
-注解模式用于业务接口快捷声明，适合标准 CRUD、生成器产物和低复杂度接口。
-
-接口元数据 Attribute 的完整设计见 [接口元数据体系设计](interface-metadata.md)。当前 Attribute 只是声明契约，尚未启用注解路由自动注册。
-
-示例方向：
-
-```php
-#[AdminRoute(prefix: 'products')]
+#[AdminController(middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
 final class ProductController extends AdminController
 {
-    #[GetMapping('')]
-    #[Permission('product:list')]
+    #[AdminGet('products', name: 'product.list')]
+    #[Permission('product:list', title: '商品列表', group: '商品管理')]
+    public function index(): array
+    {
+    }
+}
+```
+
+Client/Open 同理使用对应端的 Controller 和方法注解：
+
+```php
+#[ClientController]
+final class ProductController extends ClientController
+{
+    #[ClientGet('products')]
     public function index(): array
     {
     }
@@ -134,17 +130,17 @@ final class ProductController extends AdminController
 
 路由冲突处理规则：
 
-- 显式配置路由优先级高于注解路由。
-- 模块内 `routes.php` 优先级高于自动注解扫描。
+- 全局 `config/routes.php` 中的显式框架路由优先保留。
+- 业务模块默认不写 `routes.php`，避免注解路由与配置路由重复。
 - 注解路由必须可导出为路由清单，便于调试和 AI 理解。
 - 同一路径和方法重复注册时，启动期应给出明确错误。
 
-第一版已落地模块 `routes.php` 扫描，后续再叠加注解路由能力。
+第一版已落地注解路由注册。
 
-可使用以下命令查看当前扫描到的模块路由文件：
+可使用以下命令查看当前扫描到的注解路由：
 
 ```bash
-php bin/hyperf.php trueadmin:route-files
+php bin/hyperf.php trueadmin:routes
 ```
 
 ## 推荐矩阵
@@ -153,12 +149,12 @@ php bin/hyperf.php trueadmin:route-files
 | --- | --- | --- |
 | 数据库、Redis、JWT | 配置 | 环境和部署相关 |
 | 异常处理、日志、扫描路径 | 配置 | 框架装配相关 |
-| 路由 | 配置 + 注解 | 模块 `routes.php` 为主，注解作为业务快捷声明 |
+| 路由 | 注解 + 全局配置兜底 | 业务模块默认注解，框架入口和非常规路由留在全局配置 |
 | 全局命令注册 | 配置 | 框架启动期明确注册 |
 | 业务命令 | 注解或模块清单 | 归属模块，不放全局目录 |
 | 监听器 | 注解 | 使用 Hyperf `#[Listener]`，类放对应职责目录 |
 | 定时任务 | 注解或模块清单 | 业务任务归模块 |
-| 权限点 | 注解 + 模块清单 | 方法声明权限，模块清单负责分组和导入 |
+| 权限点 | 注解 | 方法声明权限，MetadataScanner 聚合后用于同步和检查 |
 | 菜单 | 模块清单 | 菜单是模块资产，不建议散落在方法上 |
 | 数据权限 | 注解 | 与查询入口强绑定 |
 | 操作日志 | 注解 | 与具体操作强绑定 |

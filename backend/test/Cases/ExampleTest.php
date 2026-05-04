@@ -24,7 +24,7 @@ class ExampleTest extends TestCase
     {
         $response = $this->get('/');
 
-        $this->assertSame(0, $response['code']);
+        $this->assertSame('SUCCESS', $response['code']);
         $this->assertSame('TrueAdmin Backend', $response['data']['name']);
     }
 
@@ -36,8 +36,34 @@ class ExampleTest extends TestCase
             'Authorization' => 'Bearer ' . $login['data']['accessToken'],
         ]);
 
-        $this->assertSame(0, $me['code']);
+        $this->assertSame('SUCCESS', $me['code']);
         $this->assertSame('admin', $me['data']['username']);
+    }
+
+    public function testAdminLoginFailureUsesStringErrorCode()
+    {
+        $login = $this->json('/api/v1/admin/auth/login', [
+            'username' => 'admin',
+            'password' => 'wrong-password',
+        ]);
+
+        $this->assertSame('SYSTEM.AUTH.INVALID_CREDENTIALS', $login['code']);
+        $this->assertSame('用户名或密码错误', $login['message']);
+        $this->assertNull($login['data']);
+    }
+
+    public function testAdminLoginFailureUsesRequestLocale()
+    {
+        $login = $this->json('/api/v1/admin/auth/login', [
+            'username' => 'admin',
+            'password' => 'wrong-password',
+        ], [
+            'Accept-Language' => 'en-US,en;q=0.9',
+        ]);
+
+        $this->assertSame('SYSTEM.AUTH.INVALID_CREDENTIALS', $login['code']);
+        $this->assertSame('Invalid username or password.', $login['message']);
+        $this->assertNull($login['data']);
     }
 
     public function testClientProfileExample()
@@ -47,7 +73,7 @@ class ExampleTest extends TestCase
             'X-Client-User-Name' => 'Second Client',
         ]);
 
-        $this->assertSame(0, $profile['code']);
+        $this->assertSame('SUCCESS', $profile['code']);
         $this->assertSame(10002, $profile['data']['id']);
         $this->assertSame('Second Client', $profile['data']['nickname']);
     }
@@ -60,14 +86,14 @@ class ExampleTest extends TestCase
             'Authorization' => 'Bearer ' . $login['data']['accessToken'],
         ]);
 
-        $this->assertSame(0, $adminProducts['code']);
+        $this->assertSame('SUCCESS', $adminProducts['code']);
         $this->assertCount(2, $adminProducts['data']);
         $this->assertArrayHasKey('status', $adminProducts['data'][0]);
         $this->assertArrayHasKey('ownerUserId', $adminProducts['data'][0]);
 
         $clientProducts = $this->get('/api/v1/client/products');
 
-        $this->assertSame(0, $clientProducts['code']);
+        $this->assertSame('SUCCESS', $clientProducts['code']);
         $this->assertCount(1, $clientProducts['data']);
         $this->assertArrayNotHasKey('status', $clientProducts['data'][0]);
         $this->assertSame('TrueAdmin Starter License', $clientProducts['data'][0]['name']);
@@ -77,9 +103,21 @@ class ExampleTest extends TestCase
             'X-Client-User-Name' => 'Second Client',
         ]);
 
-        $this->assertSame(0, $ownerProducts['code']);
+        $this->assertSame('SUCCESS', $ownerProducts['code']);
         $this->assertCount(2, $ownerProducts['data']);
         $this->assertSame('Draft Internal Product', $ownerProducts['data'][1]['name']);
+    }
+
+    public function testSystemPermissionEntrances()
+    {
+        $login = $this->loginAsAdmin();
+        $headers = ['Authorization' => 'Bearer ' . $login['data']['accessToken']];
+
+        $menus = $this->get('/api/v1/admin/system/menus', [], $headers);
+        $this->assertSame('SUCCESS', $menus['code']);
+
+        $permissions = $this->get('/api/v1/admin/system/permissions', [], $headers);
+        $this->assertSame('SUCCESS', $permissions['code']);
     }
 
     private function loginAsAdmin()
@@ -89,7 +127,7 @@ class ExampleTest extends TestCase
             'password' => 'trueadmin',
         ]);
 
-        $this->assertSame(0, $login['code']);
+        $this->assertSame('SUCCESS', $login['code']);
         $this->assertSame('Bearer', $login['data']['tokenType']);
         $this->assertNotEmpty($login['data']['accessToken']);
 

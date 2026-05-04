@@ -58,12 +58,12 @@ GET  /api/v1/client/products
 GET  /api/v1/open/openapi.json
 ```
 
-业务路由采用模块配置模式，优先写在各模块 `routes.php`。全局 `config/routes.php` 只保留框架入口、OpenAPI 入口和模块路由注册器。
+业务路由默认使用 Attribute 声明，模块内不再要求维护 `routes.php`。全局 `config/routes.php` 只保留框架入口、OpenAPI 入口和注解路由注册器；确有非常规路由时，再在全局配置中显式兜底。
 
-查看模块路由文件：
+查看注解路由清单：
 
 ```bash
-php bin/hyperf.php trueadmin:route-files
+php bin/hyperf.php trueadmin:routes
 ```
 
 ## 本地启动
@@ -80,6 +80,13 @@ composer start
 ```text
 username: admin
 password: trueadmin
+```
+
+该账号由 `App\\Module\\System\\Database\\Seeders\\SystemSeeder` 写入数据库。首次启动前请先执行迁移和种子数据：
+
+```bash
+php bin/hyperf.php migrate
+php bin/hyperf.php db:seed --path=app/Module/System/Database/Seeders
 ```
 
 ## AI 开发提醒

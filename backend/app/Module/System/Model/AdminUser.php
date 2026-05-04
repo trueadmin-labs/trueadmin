@@ -1,0 +1,32 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Module\System\Model;
+
+use App\Foundation\Database\Model;
+use Hyperf\Database\Model\Relations\BelongsToMany;
+
+final class AdminUser extends Model
+{
+    protected ?string $table = 'admin_users';
+
+    protected array $fillable = [
+        'username',
+        'password',
+        'nickname',
+        'status',
+        'dept_id',
+        'created_by',
+        'updated_by',
+    ];
+
+    protected array $hidden = [
+        'password',
+    ];
+
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(AdminRole::class, 'admin_role_user', 'user_id', 'role_id');
+    }
+}

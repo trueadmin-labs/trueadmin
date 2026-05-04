@@ -25,11 +25,18 @@ final class Plugin
         return $this->name;
     }
 
-    public function routeFile(): ?string
+    public function sourcePath(): ?string
     {
-        $routeFile = $this->assetPath('routes', 'routes.php');
+        $sourcePath = $this->assetPath('source', 'src');
 
-        return $routeFile !== null && is_file($routeFile) ? $routeFile : null;
+        return $sourcePath !== null && is_dir($sourcePath) ? $sourcePath : null;
+    }
+
+    public function languagePath(): ?string
+    {
+        $languagePath = $this->assetPath('lang', 'resources/lang');
+
+        return $languagePath !== null && is_dir($languagePath) ? $languagePath : null;
     }
 
     /**

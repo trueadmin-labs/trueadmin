@@ -30,7 +30,7 @@ open_*    外部开放平台应用和调用体系
 
 ```json
 {
-  "code": 0,
+  "code": "SUCCESS",
   "message": "success",
   "data": {}
 }
@@ -40,7 +40,7 @@ open_*    外部开放平台应用和调用体系
 
 ```json
 {
-  "code": 0,
+  "code": "SUCCESS",
   "message": "success",
   "data": {
     "items": [],

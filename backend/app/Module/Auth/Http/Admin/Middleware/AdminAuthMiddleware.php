@@ -24,12 +24,12 @@ final class AdminAuthMiddleware implements MiddlewareInterface
     {
         $authorization = $request->getHeaderLine('Authorization');
         if (! str_starts_with($authorization, 'Bearer ')) {
-            throw new BusinessException(ErrorCode::UNAUTHORIZED, '请先登录');
+            throw new BusinessException(ErrorCode::UNAUTHORIZED, 401, ['reason' => 'missing_bearer_token']);
         }
 
         $token = trim(substr($authorization, 7));
         if ($token === '') {
-            throw new BusinessException(ErrorCode::UNAUTHORIZED, '请先登录');
+            throw new BusinessException(ErrorCode::UNAUTHORIZED, 401, ['reason' => 'empty_bearer_token']);
         }
 
         $user = $this->passportService->userFromToken($token);

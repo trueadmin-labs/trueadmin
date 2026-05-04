@@ -30,6 +30,7 @@
         "hyperf/memory": "~3.1.0",
         "hyperf/process": "~3.1.0",
         "hyperf/redis": "~3.1.0",
+        "hyperf/translation": "~3.1.0",
         "trueadmin/kernel": "dev-main"
     },
     "require-dev": {
@@ -54,8 +55,7 @@
         },
         "classmap": [
             "plugin/"
-        ],
-        "files": []
+        ]
     },
     "autoload-dev": {
         "psr-4": {

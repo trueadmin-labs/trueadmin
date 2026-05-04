@@ -75,6 +75,13 @@ username: admin
 password: trueadmin
 ```
 
+默认管理员由 System 模块 Seeder 写入数据库。首次初始化后执行：
+
+```bash
+php bin/hyperf.php migrate
+php bin/hyperf.php db:seed --path=app/Module/System/Database/Seeders
+```
+
 第一阶段已预留 API 分区：
 
 ```text

@@ -67,8 +67,8 @@
 
 当前说明：
 
-- 第一版使用内置管理员账号跑通认证链路。
-- 默认管理员账号为 `admin / trueadmin`。
+- 后台认证已切换为 `admin_users` 数据库用户。
+- 默认管理员账号由 System 模块 Seeder 创建，账号为 `admin / trueadmin`。
 - OpenAPI 文档入口为 `/api/v1/open/openapi.json`。
 - PostgreSQL 本地端口映射为 `15432`，避免和本机默认 `5432` 冲突。
 

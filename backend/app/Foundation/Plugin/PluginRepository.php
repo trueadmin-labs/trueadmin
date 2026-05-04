@@ -46,25 +46,6 @@ final class PluginRepository
     /**
      * @return list<string>
      */
-    public function routeFiles(): array
-    {
-        $files = [];
-
-        foreach ($this->enabled() as $plugin) {
-            $routeFile = $plugin->routeFile();
-            if ($routeFile !== null) {
-                $files[] = $routeFile;
-            }
-        }
-
-        sort($files);
-
-        return array_values($files);
-    }
-
-    /**
-     * @return list<string>
-     */
     public function migrationPaths(): array
     {
         $paths = [];

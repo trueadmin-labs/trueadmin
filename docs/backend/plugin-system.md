@@ -8,7 +8,7 @@ TrueAdmin 第一版就预留插件系统基线。插件系统采用 Composer 作
 
 - 本地插件、市场插件和未来私有插件使用同一标准。
 - 插件通过代码、Composer 和配置完成安装、卸载、升级、启用、禁用，不提供后台运行时动态维护。
-- 插件可以携带后端路由、迁移、种子数据、菜单、权限、OpenAPI、Web 页面、Mobile 页面和 AI 上下文。
+- 插件可以携带后端注解路由、迁移、种子数据、菜单、权限、OpenAPI、Web 页面、Mobile 页面和 AI 上下文。
 - 插件生命周期可审计、可回滚、可灰度。
 - 尽量复用 Composer 生态，不自研包管理器。
 
@@ -19,7 +19,6 @@ TrueAdmin 第一版就预留插件系统基线。插件系统采用 Composer 作
 ```text
 backend/plugin/{vendor}/{name}/
   composer.json
-  routes.php
   src/
   Database/
     Migrations/
@@ -93,7 +92,7 @@ src/
       },
       "assets": {
         "source": "src",
-        "routes": "routes.php",
+        "lang": "resources/lang",
         "migrations": "Database/Migrations",
         "seeders": "Database/Seeders",
         "menus": "resources/menus.php",
@@ -134,11 +133,12 @@ backend/config/autoload/plugins.php
 - 读取 `extra.trueadmin.config.defaults` 作为插件默认配置。
 - 通过 `config/autoload/plugins.php` 覆盖插件配置，避免修改插件源码。
 - `enabled` / `disabled` 配置控制插件是否参与本次应用启动。
-- 插件 `routes.php` 自动加入路由扫描。
+- 启用插件的 `src/` 会加入 Hyperf 注解扫描路径，插件路由通过 Controller Attribute 自动注册。
+- 插件错误码按代码契约声明，不进入框架级收集；如需文案多语言，继续使用 Hyperf `#[Message]` 和插件 `resources/lang`。
+- 插件 `resources/lang` 自动加入后端多语言加载路径。
 - 插件 `Database/Migrations` 自动加入 Hyperf 原生迁移扫描。
 - 插件 `Database/Seeders` 自动加入种子路径查看。
 - 插件目录加入 Composer classmap 兜底 autoload。
-- 只有启用插件的 `src/` 会加入 Hyperf 注解扫描路径。
 - `php bin/hyperf.php trueadmin:plugin:list` 查看本地插件。
 
 ## 代码化启停

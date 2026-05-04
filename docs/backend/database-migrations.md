@@ -68,6 +68,12 @@ php bin/hyperf.php migrate
 php bin/hyperf.php trueadmin:migration-paths
 ```
 
+执行模块种子数据时仍使用 Hyperf 原生命令，并指定模块 Seeder 路径：
+
+```bash
+php bin/hyperf.php db:seed --path=app/Module/System/Database/Seeders
+```
+
 ## 生成迁移
 
 仍使用 Hyperf 原生命令，但指定模块路径：

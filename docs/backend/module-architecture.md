@@ -51,11 +51,10 @@ Schema
 Service
 Database/Migrations
 Database/Seeders
-routes.php
 module.php
 ```
 
-`routes.php` 是模块配置模式路由入口。当前已由 Foundation 的模块路由注册器扫描模块 `routes.php`，解决全局 `config/routes.php` 过于集中的问题；后续再叠加注解路由作为业务接口快捷声明。配置模式与注解模式边界见 [配置模式与注解模式规范](configuration-vs-attribute.md)。
+模块业务接口默认通过 Controller 上的 Attribute 声明路由、权限、日志和 OpenAPI 元数据，不再要求每个模块维护 `routes.php`。配置模式与注解模式边界见 [配置模式与注解模式规范](configuration-vs-attribute.md)。
 
 第一阶段不需要每个模块都创建完整目录，只创建实际需要的部分。
 

@@ -11,5 +11,6 @@ declare(strict_types=1);
  */
 return [
     'http' => [
+        App\Foundation\I18n\Middleware\LocaleMiddleware::class,
     ],
 ];

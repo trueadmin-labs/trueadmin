@@ -43,17 +43,17 @@ final class JwtService
     {
         $segments = explode('.', $token);
         if (count($segments) !== 3) {
-            throw new BusinessException(ErrorCode::UNAUTHORIZED, '无效的 Token');
+            throw new BusinessException(ErrorCode::UNAUTHORIZED, 401, ['reason' => 'invalid_token']);
         }
 
         [$header, $payload, $signature] = $segments;
         if (! hash_equals($this->signature($header, $payload), $signature)) {
-            throw new BusinessException(ErrorCode::UNAUTHORIZED, '无效的 Token');
+            throw new BusinessException(ErrorCode::UNAUTHORIZED, 401, ['reason' => 'invalid_signature']);
         }
 
         $claims = json_decode($this->base64UrlDecode($payload), true, 512, JSON_THROW_ON_ERROR);
         if (($claims['exp'] ?? 0) < time()) {
-            throw new BusinessException(ErrorCode::TOKEN_EXPIRED, 'Token 已过期');
+            throw new BusinessException(ErrorCode::TOKEN_EXPIRED, 401);
         }
 
         return $claims;

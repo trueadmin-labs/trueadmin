@@ -8,14 +8,19 @@ use App\Foundation\Http\Controller\ClientController;
 use App\Foundation\Support\ApiResponse;
 use App\Module\Product\Http\Client\Vo\V1\ProductResource;
 use App\Module\Product\Service\ClientProductQueryService;
+use App\Module\User\Http\Client\Middleware\ClientActorMiddleware;
 use TrueAdmin\Kernel\Context\ActorContext;
+use TrueAdmin\Kernel\Http\Attribute\ClientController as ClientRouteController;
+use TrueAdmin\Kernel\Http\Attribute\ClientGet;
 
+#[ClientRouteController(middleware: [ClientActorMiddleware::class])]
 final class ProductController extends ClientController
 {
     public function __construct(private readonly ClientProductQueryService $productQueryService)
     {
     }
 
+    #[ClientGet('products')]
     public function index(): array
     {
         $operator = ActorContext::requireOperator();

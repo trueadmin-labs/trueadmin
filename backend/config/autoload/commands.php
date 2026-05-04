@@ -11,6 +11,7 @@ declare(strict_types=1);
  */
 return [
     App\Foundation\Database\Command\TrueAdminMigrationPathsCommand::class,
-    App\Foundation\Http\Command\TrueAdminRouteFilesCommand::class,
+    App\Foundation\Http\Command\TrueAdminRoutesCommand::class,
+    App\Foundation\Metadata\Command\TrueAdminMetadataCommand::class,
     App\Foundation\Plugin\Command\TrueAdminPluginListCommand::class,
 ];

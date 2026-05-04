@@ -26,9 +26,9 @@ class AppExceptionHandler extends ExceptionHandler
 
             return $response
                 ->withHeader('Content-Type', 'application/json; charset=utf-8')
-                ->withStatus($this->httpStatus($throwable->businessCode()))
+                ->withStatus($throwable->httpStatus())
                 ->withBody(new SwooleStream(json_encode(
-                    ApiResponse::fail($throwable->businessCode(), $throwable->getMessage()),
+                    ApiResponse::fail($throwable->businessCode(), $throwable->getMessage(), $throwable->params() ?: null),
                     JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR
                 )));
         }
@@ -41,7 +41,7 @@ class AppExceptionHandler extends ExceptionHandler
             ->withHeader('Content-Type', 'application/json; charset=utf-8')
             ->withStatus(500)
             ->withBody(new SwooleStream(json_encode(
-                ApiResponse::fail(ErrorCode::SERVER_ERROR, '服务内部错误'),
+                ApiResponse::fail(ErrorCode::SERVER_ERROR->code(), ErrorCode::SERVER_ERROR->message()),
                 JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR
             )));
     }
@@ -49,15 +49,5 @@ class AppExceptionHandler extends ExceptionHandler
     public function isValid(Throwable $throwable): bool
     {
         return true;
-    }
-
-    private function httpStatus(int $businessCode): int
-    {
-        return match (true) {
-            $businessCode >= 401000 && $businessCode < 402000 => 401,
-            $businessCode >= 403000 && $businessCode < 404000 => 403,
-            $businessCode >= 404000 && $businessCode < 405000 => 404,
-            default => 400,
-        };
     }
 }

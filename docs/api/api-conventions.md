@@ -36,7 +36,7 @@ Authorization: Bearer <token>
 
 ```json
 {
-  "code": 0,
+  "code": "SUCCESS",
   "message": "success",
   "data": {}
 }
@@ -46,10 +46,35 @@ Authorization: Bearer <token>
 
 ```json
 {
-  "code": 400001,
+  "code": "KERNEL.REQUEST.VALIDATION_FAILED",
   "message": "参数校验失败",
   "data": {
-    "errors": []
+    "errors": [
+      {
+        "field": "username",
+        "code": "REQUIRED",
+        "message": "用户名不能为空",
+        "params": {}
+      }
+    ]
+  }
+}
+```
+
+`code` 是稳定的机器契约，前端、SDK 和自动化测试都应优先依赖 `code`。`message` 由后端根据请求语言返回本地化后的展示文案，前端通常可以直接展示；前端仍可根据 `code` 做特殊交互，例如跳转登录、标记表单字段、弹出确认框或触发重试。
+
+后端默认读取 `Accept-Language` 请求头设置语言，例如 `zh-CN`、`zh_CN`、`en-US`、`en`。未传语言时使用默认 `zh_CN`，找不到翻译时回退 `en`。
+
+插件错误码必须带插件命名空间，不使用数字号段，避免插件市场和第三方扩展冲突：
+
+```json
+{
+  "code": "PLUGIN.ACME.CMS.BANNER_NOT_FOUND",
+  "message": "Banner 不存在",
+  "data": {
+    "params": {
+      "id": 10001
+    }
   }
 }
 ```
@@ -58,7 +83,7 @@ Authorization: Bearer <token>
 
 ```json
 {
-  "code": 0,
+  "code": "SUCCESS",
   "message": "success",
   "data": {
     "items": [],
@@ -97,15 +122,57 @@ PUT    /api/v1/admin/system/users/{id}
 DELETE /api/v1/admin/system/users/{id}
 ```
 
-## 错误码区间
+## 错误码规范
 
-- `0`：成功。
-- `400xxx`：请求错误或参数错误。
-- `401xxx`：认证失败。
-- `403xxx`：权限不足。
-- `404xxx`：资源不存在。
-- `409xxx`：资源冲突。
-- `500xxx`：服务端错误。
+错误码统一使用大写字符串，不使用数字号段。
+
+- `SUCCESS`：成功。
+- `KERNEL.*`：框架、请求、认证、权限、资源和服务端通用错误。
+- `SYSTEM.*`：系统模块错误，例如后台认证、角色、菜单、权限点。
+- `{MODULE}.{DOMAIN}.{ERROR}`：业务模块错误，例如 `PRODUCT.ADMIN.SKU_DUPLICATED`。
+- `PLUGIN.{VENDOR}.{PACKAGE}.{ERROR}`：插件错误，例如 `PLUGIN.ACME.CMS.BANNER_NOT_FOUND`。
+
+后端异常响应必须包含 `code`、`message`、`data`。`message` 来自错误码 enum 上的 `#[Message]` 翻译 key，并通过 `hyperf/translation` 返回当前语言文案，但不作为前端逻辑判断依据。需要插值展示的信息放入 `data.params` 或具体业务字段中，禁止把动态变量拼进 `code` 或在业务抛错时临时拼接 `message`。
+
+错误码是运行时异常响应契约，不是框架资产清单。第一版不做错误码收集、注册、同步和扫描命令，也不要求每个模块维护 `error_codes.php`。开发者新增错误码时，只需要在对应模块的 `Constant/*ErrorCode.php` 中声明 string backed enum，并使用 `TrueAdmin\Kernel\Constant\ErrorCodeTrait` 复用 Hyperf 官方 `hyperf/constants` 的 `EnumConstantsTrait`、`code()` 和 `message()` 默认实现。错误文案应通过 `#[Message]` 放在对应模块的 `resources/lang/{locale}/errors.php` 中；`app/Foundation/resources/lang` 只维护 `KERNEL.*` 通用文案，项目根级 `resources/lang` 作为最终覆盖层。`packages/kernel` 只保留 `SUCCESS` 和 `KERNEL.*` 通用错误码，业务模块和插件不得把自己的业务错误码放进 kernel。
+
+是否需要错误码清单、重复检查、OpenAPI 错误响应导出，留到后续确有明确场景时再设计。若以后需要，也应优先基于专门的错误码 Attribute 或独立构建期检查，而不是复用 `#[Constants]` 这个通用枚举注解。
+
+普通业务多语言不再封装 TrueAdmin 自定义 `t()` 或 `ta_trans()` 函数，优先直接使用 Hyperf 官方 `hyperf/translation` 提供的 `trans()` 或 `__()`。TrueAdmin 只补充模块、插件、项目覆盖层的语言包加载能力，不改变 Hyperf 的翻译调用方式。这样开发者查文档、排查行为和升级依赖时都能直接对齐 Hyperf 官方语义。
+
+```php
+use function Hyperf\Translation\trans;
+
+$title = trans('messages.product.created');
+```
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Module\Product\Constant;
+
+use Hyperf\Constants\Annotation\Constants;
+use Hyperf\Constants\Annotation\Message;
+use TrueAdmin\Kernel\Constant\ErrorCodeInterface;
+use TrueAdmin\Kernel\Constant\ErrorCodeTrait;
+
+#[Constants]
+enum ProductErrorCode: string implements ErrorCodeInterface
+{
+    use ErrorCodeTrait;
+
+    #[Message('errors.product.admin.not_found')]
+    case NOT_FOUND = 'PRODUCT.ADMIN.NOT_FOUND';
+}
+```
+
+业务抛错只传 enum、HTTP 状态和可选参数：
+
+```php
+throw new BusinessException(ProductErrorCode::NOT_FOUND, 404, ['id' => $id]);
+```
 
 ## OpenAPI 要求
 

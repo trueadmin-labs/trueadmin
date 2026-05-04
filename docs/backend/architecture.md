@@ -127,7 +127,6 @@ Module/Xxx/
   Database/
     Migrations/
     Seeders/
-  routes.php
   module.php
   permissions.php
   menus.php
@@ -684,7 +683,6 @@ backend/plugin/trueadmin/product
 ```text
 plugin/trueadmin/product/
   composer.json
-  routes.php
   src/
   Database/Migrations/
   Database/Seeders/

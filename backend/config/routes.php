@@ -9,15 +9,15 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
-use App\Foundation\Http\Routing\ModuleRouteRegistrar;
 use App\Foundation\Http\Controller\HealthController;
 use App\Foundation\Http\Controller\OpenApiController;
+use App\Foundation\Http\Routing\AttributeRouteRegistrar;
 use Hyperf\Context\ApplicationContext;
 use Hyperf\HttpServer\Router\Router;
 
 Router::addRoute(['GET', 'POST', 'HEAD'], '/', HealthController::class . '@index');
 
-ApplicationContext::getContainer()->get(ModuleRouteRegistrar::class)->register();
+ApplicationContext::getContainer()->get(AttributeRouteRegistrar::class)->register();
 
 Router::addGroup('/api/v1/open', static function () {
     Router::get('/openapi.json', OpenApiController::class . '@document');

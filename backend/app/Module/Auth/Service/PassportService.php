@@ -4,38 +4,30 @@ declare(strict_types=1);
 
 namespace App\Module\Auth\Service;
 
+use App\Module\Auth\Constant\AuthErrorCode;
 use TrueAdmin\Kernel\Constant\ErrorCode;
 use TrueAdmin\Kernel\Exception\BusinessException;
 use App\Foundation\Support\Password;
 use App\Module\Auth\Http\Admin\Vo\AuthUser;
-use App\Module\Auth\Service\JwtService;
+use App\Module\System\Contract\AdminIdentityProviderInterface;
 
 final class PassportService
 {
-    /**
-     * The first backend stage uses an in-memory admin account. This keeps the
-     * JWT contract runnable before the user module and migrations exist.
-     */
-    private const ADMIN = [
-        'id' => 1,
-        'username' => 'admin',
-        'password' => '$2y$10$ysOpeUAW7srRQEatZhkGAutDjsKJaX9VdYJPukCPfrnOM0Yc7g5kK',
-        'nickname' => 'TrueAdmin',
-        'roles' => ['super-admin'],
-        'permissions' => ['*'],
-    ];
-
-    public function __construct(private readonly JwtService $jwtService)
+    public function __construct(
+        private readonly JwtService $jwtService,
+        private readonly AdminIdentityProviderInterface $identities,
+    )
     {
     }
 
     public function login(string $username, string $password): array
     {
-        if ($username !== self::ADMIN['username'] || ! Password::verify($password, self::ADMIN['password'])) {
-            throw new BusinessException(ErrorCode::INVALID_CREDENTIALS, '用户名或密码错误');
+        $credential = $this->identities->findCredentialByUsername($username);
+        if ($credential === null || ! Password::verify($password, $credential->passwordHash)) {
+            throw new BusinessException(AuthErrorCode::INVALID_CREDENTIALS, 401);
         }
 
-        $user = $this->adminUser();
+        $user = $credential->user;
 
         return [
             'tokenType' => 'Bearer',
@@ -52,21 +44,11 @@ final class PassportService
     public function userFromToken(string $token): AuthUser
     {
         $claims = $this->jwtService->parse($token);
-        if ((int) ($claims['sub'] ?? 0) !== self::ADMIN['id']) {
-            throw new BusinessException(ErrorCode::UNAUTHORIZED, '用户不存在或已禁用');
+        $user = $this->identities->findAuthUserById((int) ($claims['sub'] ?? 0));
+        if ($user === null) {
+            throw new BusinessException(ErrorCode::UNAUTHORIZED, 401, ['reason' => 'admin_user_missing_or_disabled']);
         }
 
-        return $this->adminUser();
-    }
-
-    private function adminUser(): AuthUser
-    {
-        return new AuthUser(
-            self::ADMIN['id'],
-            self::ADMIN['username'],
-            self::ADMIN['nickname'],
-            self::ADMIN['roles'],
-            self::ADMIN['permissions'],
-        );
+        return $user;
     }
 }

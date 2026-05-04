@@ -6,7 +6,7 @@ TrueAdmin 后端会参考 MineAdmin 的 Hyperf 使用方式，多使用 PHP Attr
 
 注解不是替代配置。TrueAdmin 的总体原则是：框架本身优先配置模式，业务开发优先注解模式。完整边界见 [配置模式与注解模式规范](configuration-vs-attribute.md)。
 
-接口元数据注解体系见 [接口元数据体系设计](interface-metadata.md)。该体系用于统一描述路由、权限、菜单按钮、OpenAPI、日志和数据权限，但第一版只提供 Attribute 设计契约，不直接替代模块 `routes.php`。
+接口元数据注解体系见 [接口元数据体系设计](interface-metadata.md)。该体系用于统一描述路由、权限、菜单按钮、OpenAPI、日志和数据权限；第一版已启用注解路由注册，业务模块不再默认维护 `routes.php`。
 
 ## 适合使用注解的能力
 
