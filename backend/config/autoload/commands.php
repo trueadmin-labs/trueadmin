@@ -10,4 +10,7 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
 return [
+    App\Foundation\Database\Command\TrueAdminMigrationPathsCommand::class,
+    App\Foundation\Http\Command\TrueAdminRouteFilesCommand::class,
+    App\Foundation\Plugin\Command\TrueAdminPluginListCommand::class,
 ];

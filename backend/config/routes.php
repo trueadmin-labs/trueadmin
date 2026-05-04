@@ -9,22 +9,18 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+use App\Foundation\Http\Routing\ModuleRouteRegistrar;
+use App\Foundation\Http\Controller\HealthController;
+use App\Foundation\Http\Controller\OpenApiController;
+use Hyperf\Context\ApplicationContext;
 use Hyperf\HttpServer\Router\Router;
 
-Router::addRoute(['GET', 'POST', 'HEAD'], '/', 'TrueAdmin\Kernel\Http\Controller\HealthController@index');
+Router::addRoute(['GET', 'POST', 'HEAD'], '/', HealthController::class . '@index');
 
-Router::addGroup('/api/v1/admin', static function () {
-    Router::post('/auth/login', 'App\Module\Auth\Controller\Admin\V1\AuthController@login');
-    Router::post('/auth/logout', 'App\Module\Auth\Controller\Admin\V1\AuthController@logout', ['middleware' => [App\Module\Auth\Middleware\AdminAuthMiddleware::class]]);
-    Router::get('/auth/me', 'App\Module\Auth\Controller\Admin\V1\AuthController@me', ['middleware' => [App\Module\Auth\Middleware\AdminAuthMiddleware::class]]);
-});
-
-Router::addGroup('/api/v1/client', static function () {
-    Router::get('/profile', 'App\Module\Client\Controller\Client\V1\ProfileController@show');
-});
+ApplicationContext::getContainer()->get(ModuleRouteRegistrar::class)->register();
 
 Router::addGroup('/api/v1/open', static function () {
-    Router::get('/openapi.json', 'TrueAdmin\Kernel\Http\Controller\OpenApiController@document');
+    Router::get('/openapi.json', OpenApiController::class . '@document');
 });
 
 Router::get('/favicon.ico', function () {

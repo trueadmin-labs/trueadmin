@@ -6,89 +6,44 @@
 
 - PHP。
 - Hyperf。
-- PostgreSQL。
+- PostgreSQL，默认数据库。
+- MySQL，兼容数据库。
 - Redis。
 - JWT。
 - OpenAPI/Swagger。
 
 ## 架构方式
 
-后端采用单体模块化架构。
+后端采用 `kernel + app/Foundation + app/Infrastructure + app/Module` 的分层方式，其中业务模块采用 `app/Module + 模块内 MineAdmin 分层`。
 
-当前后端使用 `packages/kernel + backend/app/Module` 结构：
+完整说明见：
 
-```text
-../packages/kernel/src   可复用框架核心包
-app/Module                后台应用业务模块
-```
-
-`trueadmin/kernel` 可以放统一响应、错误码、异常处理、基础中间件、基础模型、框架级 Listener、全局 Crontab。
-
-业务代码必须放进具体模块。不要在 `app/` 外层继续新增 `Controller`、`Model`、`Listener`、`Crontab`。
-
-推荐模块：
+- [后端架构](../docs/backend/index.md)
+- [后端完整架构方案](../docs/backend/architecture.md)
+- [数据库迁移规范](../docs/backend/database-migrations.md)
 
 ```text
+app/Foundation
+app/Infrastructure
 app/Module/Auth
 app/Module/System
-app/Module/Permission
-app/Module/Organization
-app/Module/Dictionary
-app/Module/Log
-app/Module/File
-app/Module/Generator
+app/Module/Product
+app/Module/User
 ```
 
-## 分层约定
-
-每个模块优先保持以下结构：
+模块内部参考 MineAdmin：
 
 ```text
-Controller/
-Request/
-Service/
-Repository/
-Model/
-DTO/
-Policy/
-Event/
-Listener/
-Crontab/
-Test/
+Http/Admin      后台管理端入口
+Http/Client     用户端入口
+Service         业务服务
+Repository      数据访问
+Model           数据模型
+Library         数据权限、操作日志、AOP、Attribute 等横切能力
+Schema          结构化输出和代码生成元数据预留
 ```
 
-## 第一阶段后端能力
-
-- JWT 登录认证。
-- 后台管理 API 分区：`/api/v1/admin`。
-- 用户端 API 预留：`/api/v1/client`。
-- 外部开放 API 预留：`/api/v1/open`。
-- 用户、角色、菜单、按钮权限、接口权限。
-- 部门、岗位和组织树。
-- 字典、日志、文件上传。
-- OpenAPI 接口契约。
-- CRUD 代码生成模块预留。
-
-## 本地启动
-
-安装依赖：
-
-```bash
-composer install
-```
-
-启动服务：
-
-```bash
-composer start
-```
-
-默认管理员账号用于第一阶段认证闭环：
-
-```text
-username: admin
-password: trueadmin
-```
+`packages/kernel` 保留错误码、业务异常、ActorContext、接口元数据 Attribute、数据权限 Attribute/AOP、操作日志 Attribute/Event/AOP 等可复用基础原语。`app/Foundation` 放项目级可改基础行为，例如统一响应、异常处理、健康检查、OpenAPI 入口、CRUD 默认行为、密码策略、模块路由扫描和模块迁移扫描规则。`app/Infrastructure` 放缓存、存储、队列、短信、邮件等技术适配。
 
 ## 当前接口
 
@@ -97,17 +52,43 @@ GET  /
 POST /api/v1/admin/auth/login
 POST /api/v1/admin/auth/logout
 GET  /api/v1/admin/auth/me
+GET  /api/v1/admin/products
 GET  /api/v1/client/profile
+GET  /api/v1/client/products
 GET  /api/v1/open/openapi.json
+```
+
+业务路由采用模块配置模式，优先写在各模块 `routes.php`。全局 `config/routes.php` 只保留框架入口、OpenAPI 入口和模块路由注册器。
+
+查看模块路由文件：
+
+```bash
+php bin/hyperf.php trueadmin:route-files
+```
+
+## 本地启动
+
+后端默认使用 `DB_DRIVER=pgsql`，PostgreSQL 支持来自 Hyperf 官方扩展包 `hyperf/database-pgsql`。如需切换 MySQL，可把 `DB_DRIVER` 改为 `mysql` 并调整端口、账号和密码。
+
+```bash
+composer install
+composer start
+```
+
+默认管理员账号：
+
+```text
+username: admin
+password: trueadmin
 ```
 
 ## AI 开发提醒
 
 新增后端能力前，先确认：
 
-- 模块归属。
-- API 路径。
-- Request 校验规则。
-- 权限点。
-- 数据表和字段。
-- OpenAPI 契约。
+- 属于哪个模块。
+- Controller 放模块内 `Http/Admin` 还是 `Http/Client`。
+- Service、Repository、Model 是否需要新增。
+- 是否需要 Request、Vo、Schema。
+- 是否需要 DataScope、操作日志或 Listener。
+- 是否需要 OpenAPI、迁移和种子数据。

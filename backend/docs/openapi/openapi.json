@@ -14,17 +14,28 @@
     "/admin/auth/login": {
       "post": {
         "summary": "Login with username and password",
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["username", "password"],
+                "required": [
+                  "username",
+                  "password"
+                ],
                 "properties": {
-                  "username": {"type": "string", "example": "admin"},
-                  "password": {"type": "string", "example": "trueadmin"}
+                  "username": {
+                    "type": "string",
+                    "example": "admin"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "trueadmin"
+                  }
                 }
               }
             }
@@ -35,53 +46,81 @@
             "description": "Login success",
             "content": {
               "application/json": {
-                "schema": {"$ref": "#/components/schemas/LoginResponse"}
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
               }
             }
           },
-          "401": {"description": "Invalid credentials"}
+          "401": {
+            "description": "Invalid credentials"
+          }
         }
       }
     },
     "/admin/auth/logout": {
       "post": {
         "summary": "Logout current user",
-        "tags": ["Auth"],
-        "security": [{"bearerAuth": []}],
+        "tags": [
+          "Auth"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "responses": {
-          "200": {"description": "Logout success"},
-          "401": {"description": "Unauthenticated"}
+          "200": {
+            "description": "Logout success"
+          },
+          "401": {
+            "description": "Unauthenticated"
+          }
         }
       }
     },
     "/admin/auth/me": {
       "get": {
         "summary": "Get current user profile",
-        "tags": ["Auth"],
-        "security": [{"bearerAuth": []}],
+        "tags": [
+          "Auth"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "Current user",
             "content": {
               "application/json": {
-                "schema": {"$ref": "#/components/schemas/UserResponse"}
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
               }
             }
           },
-          "401": {"description": "Unauthenticated"}
+          "401": {
+            "description": "Unauthenticated"
+          }
         }
       }
     },
     "/client/profile": {
       "get": {
         "summary": "Get current client profile example",
-        "tags": ["Client"],
+        "tags": [
+          "Client"
+        ],
         "responses": {
           "200": {
             "description": "Client profile",
             "content": {
               "application/json": {
-                "schema": {"$ref": "#/components/schemas/ClientProfileResponse"}
+                "schema": {
+                  "$ref": "#/components/schemas/ClientProfileResponse"
+                }
               }
             }
           }
@@ -91,9 +130,61 @@
     "/open/openapi.json": {
       "get": {
         "summary": "Get OpenAPI document",
-        "tags": ["OpenAPI"],
+        "tags": [
+          "OpenAPI"
+        ],
         "responses": {
-          "200": {"description": "OpenAPI document"}
+          "200": {
+            "description": "OpenAPI document"
+          }
+        }
+      }
+    },
+    "/admin/products": {
+      "get": {
+        "summary": "List products for admin management",
+        "tags": [
+          "Product"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Admin product list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminProductListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated"
+          }
+        }
+      }
+    },
+    "/client/products": {
+      "get": {
+        "summary": "List visible products for client users",
+        "tags": [
+          "Product"
+        ],
+        "responses": {
+          "200": {
+            "description": "Client visible product list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientProductListResponse"
+                }
+              }
+            }
+          }
         }
       }
     }
@@ -109,36 +200,77 @@
     "schemas": {
       "ApiResponse": {
         "type": "object",
-        "required": ["code", "message", "data"],
+        "required": [
+          "code",
+          "message",
+          "data"
+        ],
         "properties": {
-          "code": {"type": "integer", "example": 0},
-          "message": {"type": "string", "example": "success"},
+          "code": {
+            "type": "integer",
+            "example": 0
+          },
+          "message": {
+            "type": "string",
+            "example": "success"
+          },
           "data": {}
         }
       },
       "AuthUser": {
         "type": "object",
         "properties": {
-          "id": {"type": "integer", "example": 1},
-          "username": {"type": "string", "example": "admin"},
-          "nickname": {"type": "string", "example": "TrueAdmin"},
-          "roles": {"type": "array", "items": {"type": "string"}},
-          "permissions": {"type": "array", "items": {"type": "string"}}
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "username": {
+            "type": "string",
+            "example": "admin"
+          },
+          "nickname": {
+            "type": "string",
+            "example": "TrueAdmin"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
         }
       },
       "LoginResponse": {
         "allOf": [
-          {"$ref": "#/components/schemas/ApiResponse"},
+          {
+            "$ref": "#/components/schemas/ApiResponse"
+          },
           {
             "type": "object",
             "properties": {
               "data": {
                 "type": "object",
                 "properties": {
-                  "tokenType": {"type": "string", "example": "Bearer"},
-                  "accessToken": {"type": "string"},
-                  "expiresIn": {"type": "integer", "example": 7200},
-                  "user": {"$ref": "#/components/schemas/AuthUser"}
+                  "tokenType": {
+                    "type": "string",
+                    "example": "Bearer"
+                  },
+                  "accessToken": {
+                    "type": "string"
+                  },
+                  "expiresIn": {
+                    "type": "integer",
+                    "example": 7200
+                  },
+                  "user": {
+                    "$ref": "#/components/schemas/AuthUser"
+                  }
                 }
               }
             }
@@ -147,11 +279,15 @@
       },
       "UserResponse": {
         "allOf": [
-          {"$ref": "#/components/schemas/ApiResponse"},
+          {
+            "$ref": "#/components/schemas/ApiResponse"
+          },
           {
             "type": "object",
             "properties": {
-              "data": {"$ref": "#/components/schemas/AuthUser"}
+              "data": {
+                "$ref": "#/components/schemas/AuthUser"
+              }
             }
           }
         ]
@@ -159,20 +295,119 @@
       "ClientProfile": {
         "type": "object",
         "properties": {
-          "id": {"type": "integer", "example": 10001},
-          "nickname": {"type": "string", "example": "Client User"},
-          "avatar": {"type": "string", "nullable": true},
-          "mobile": {"type": "string", "example": "13800000000"},
-          "scopes": {"type": "array", "items": {"type": "string"}}
+          "id": {
+            "type": "integer",
+            "example": 10001
+          },
+          "nickname": {
+            "type": "string",
+            "example": "Client User"
+          },
+          "avatar": {
+            "type": "string",
+            "nullable": true
+          },
+          "mobile": {
+            "type": "string",
+            "example": "13800000000"
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
         }
       },
       "ClientProfileResponse": {
         "allOf": [
-          {"$ref": "#/components/schemas/ApiResponse"},
+          {
+            "$ref": "#/components/schemas/ApiResponse"
+          },
           {
             "type": "object",
             "properties": {
-              "data": {"$ref": "#/components/schemas/ClientProfile"}
+              "data": {
+                "$ref": "#/components/schemas/ClientProfile"
+              }
+            }
+          }
+        ]
+      },
+      "AdminProduct": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "example": "TrueAdmin Starter License"
+          },
+          "status": {
+            "type": "string",
+            "example": "published"
+          },
+          "ownerUserId": {
+            "type": "integer",
+            "example": 10001
+          },
+          "cover": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ClientProduct": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "example": "TrueAdmin Starter License"
+          },
+          "cover": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AdminProductListResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ApiResponse"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/AdminProduct"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "ClientProductListResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ApiResponse"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ClientProduct"
+                }
+              }
             }
           }
         ]

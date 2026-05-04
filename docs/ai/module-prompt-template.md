@@ -7,7 +7,9 @@
 
 请先阅读：
 - README.md
-- docs/architecture.md
+- docs/README.md
+- docs/architecture/index.md
+- docs/backend/index.md
 - docs/api/api-conventions.md
 - docs/ai/ai-development-guide.md
 
@@ -38,4 +40,3 @@ API 列表：
 
 请先输出实现计划，再按计划修改文件。新增接口必须同步 OpenAPI 说明，新增权限必须登记权限点，完成后给出验证结果。
 ```
-

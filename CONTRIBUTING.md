@@ -7,7 +7,9 @@ TrueAdmin 是一个面向 AI 协作开发的企业级后台管理脚手架。贡
 ## 贡献前请阅读
 
 - `README.md`
-- `docs/architecture.md`
+- `docs/README.md`
+- `docs/architecture/index.md`
+- `docs/backend/index.md`
 - `docs/api/api-conventions.md`
 - `docs/ai/ai-development-guide.md`
 
@@ -32,4 +34,3 @@ fix: correct api response contract
 ## AI 协作
 
 如果使用 AI 参与开发，请把任务背景、修改范围、非目标、API 契约、权限点和验收标准写清楚。推荐使用 `docs/ai/task-template.md`。
-

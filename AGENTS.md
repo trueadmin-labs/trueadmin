@@ -8,12 +8,13 @@ TrueAdmin is an AI-ready enterprise admin scaffold. The current repository is a 
 
 Before changing files, read these documents in order:
 
-1. `docs/project-memory.md`
-2. `docs/evolution-path.md`
+1. `docs/development/project-memory.md`
+2. `docs/README.md`
 3. `README.md`
-4. `docs/architecture.md`
-5. `docs/api/api-conventions.md`
-6. `docs/ai/ai-development-guide.md`
+4. `docs/architecture/index.md`
+5. `docs/backend/index.md`
+6. `docs/api/index.md`
+7. `docs/ai/ai-development-guide.md`
 
 ## Current Goal
 
@@ -28,7 +29,7 @@ Confirmed stack:
 
 ## Current Repository State
 
-The repository currently contains project structure and documentation only. Backend, Web, and Mobile application code has not been initialized yet.
+The repository contains the Monorepo foundation, a runnable Hyperf backend scaffold, backend module examples, kernel primitives, local infrastructure configuration, OpenAPI entry files, and structured documentation. Web and Mobile application code are still reserved for later phases.
 
 Initial commit:
 
@@ -47,5 +48,4 @@ ce09fcd chore: initialize TrueAdmin scaffold
 
 ## Recommended Next Step
 
-Initialize the backend Hyperf application scaffold under `backend/`, then connect environment configuration, PostgreSQL, Redis, JWT, and the first OpenAPI documentation path.
-
+Continue the System permission foundation: database-backed admin users, roles, menus, permissions, departments, positions, data permission strategies, and operation log persistence.

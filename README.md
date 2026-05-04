@@ -65,23 +65,18 @@ TrueAdmin/
 
 ## 文档入口
 
-- [项目记忆](docs/project-memory.md)
-- [演化路径](docs/evolution-path.md)
-- [架构设计](docs/architecture.md)
-- [模块规划](docs/modules.md)
-- [技术栈说明](docs/tech-stack.md)
-- [API 规范](docs/api/api-conventions.md)
-- [API 边界设计](docs/api/api-boundaries.md)
-- [身份与权限边界规范](docs/auth-identity-boundaries.md)
-- [API 版本与复用边界规范](docs/api-versioning-and-reuse.md)
+- [文档中心](docs/README.md)
+- [项目概览](docs/overview/index.md)
+- [总体架构](docs/architecture/index.md)
+- [后端架构](docs/backend/index.md)
+- [API 文档](docs/api/index.md)
+- [开发指南](docs/development/index.md)
 - [AI 开发指南](docs/ai/ai-development-guide.md)
-- [任务拆分模板](docs/ai/task-template.md)
-- [模块 Prompt 模板](docs/ai/module-prompt-template.md)
-- [本地开发与部署](docs/deploy/local-development.md)
+- [项目记忆](docs/development/project-memory.md)
 
 ## AI 协作入口
 
-AI 编码助手或长期协作任务应先阅读 [AGENTS.md](AGENTS.md)。该文件会指向项目记忆、演化路径、架构文档和 AI 开发规范，帮助新会话快速恢复上下文。
+AI 编码助手或长期协作任务应先阅读 [AGENTS.md](AGENTS.md)。该文件会指向项目记忆、架构文档和 AI 开发规范，帮助新会话快速恢复上下文。
 
 ## 开源协议
 

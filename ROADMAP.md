@@ -1,5 +1,7 @@
 # 路线图
 
+更完整的阶段演化说明见 [演化路径](docs/overview/evolution-path.md)，模块范围见 [模块规划](docs/overview/modules.md)。
+
 ## 第一阶段：后台基础版
 
 - Monorepo 骨架。
