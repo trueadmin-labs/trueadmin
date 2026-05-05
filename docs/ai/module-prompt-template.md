@@ -12,6 +12,7 @@
 - docs/backend/index.md
 - docs/api/api-conventions.md
 - docs/ai/ai-development-guide.md
+- docs/ai/golden-crud-module.md（如果本次是标准后台 CRUD）
 
 模块名称：
 
@@ -39,4 +40,6 @@ API 列表：
 验收标准：
 
 请先输出实现计划，再按计划修改文件。新增接口必须同步 OpenAPI 说明，新增权限必须登记权限点，完成后给出验证结果。
+
+如果本次是标准后台 CRUD，请优先参考 examples/backend/golden-crud，不要新增与黄金样板冲突的分层、命名、分页参数或权限命名方式。
 ```

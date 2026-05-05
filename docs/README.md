@@ -22,7 +22,7 @@ AI 编码代理应先阅读根目录的 [AGENTS.md](../AGENTS.md)，再根据任
 - [backend](backend/index.md)：Hyperf 后端、模块化目录、注解、迁移、接口元数据、插件系统和层级边界。
 - [api](api/index.md)：API 响应、身份边界、多端 API、版本管理和复用边界。
 - [development](development/index.md)：本地开发、长期项目记忆和协作上下文。
-- [ai](ai/ai-development-guide.md)：AI 协作开发约定、任务模板、模块 Prompt 和测试约定。
+- [ai](ai/ai-development-guide.md)：AI 协作开发约定、黄金 CRUD 模块、任务模板、模块 Prompt 和测试约定。
 - [research](research/mineadmin-backend-analysis.md)：MineAdmin 等参考项目分析，不作为日常开发主路径。
 
 ## 维护原则
