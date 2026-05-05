@@ -721,7 +721,7 @@ sync permissions
 Web 管理端技术栈：
 
 ```text
-React + Vite + TypeScript + Ant Design
+React + Umi Max + TypeScript + Ant Design Pro + Ant Design
 ```
 
 建议目录：

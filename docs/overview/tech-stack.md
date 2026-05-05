@@ -19,13 +19,13 @@ PostgreSQL 适合组织权限、流程、审计和复杂查询场景。Redis 用
 
 ## Web 管理端
 
-Web 管理端使用 React + Vite + TypeScript + Ant Design。
+Web 管理端使用 React + Umi Max + TypeScript + Ant Design Pro + Ant Design。
 
 选择理由：
 
 - Ant Design 对企业后台场景支持成熟。
 - React 生态适合构建复杂管理界面。
-- Vite 提供轻量、快速的开发体验。
+- Umi Max 和 Ant Design Pro 提供成熟的后台布局、路由、权限、请求、国际化和 OpenAPI 生成能力。
 - TypeScript 能提升接口契约和 AI 生成代码的稳定性。
 
 ## 移动端

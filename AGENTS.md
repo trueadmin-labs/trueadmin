@@ -23,7 +23,7 @@ Build TrueAdmin into an open-source enterprise admin scaffold inspired by the fu
 Confirmed stack:
 
 - Backend: PHP + Hyperf + PostgreSQL + Redis + JWT + OpenAPI/Swagger.
-- Web: React + Vite + TypeScript + Ant Design.
+- Web: React + Umi Max + TypeScript + Ant Design Pro + Ant Design.
 - Mobile: uni-app + Vue 3 + TypeScript + Wot UI.
 - Architecture: Monorepo with modular monolith backend.
 

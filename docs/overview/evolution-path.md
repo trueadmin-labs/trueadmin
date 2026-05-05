@@ -101,7 +101,7 @@
 
 主要任务：
 
-- 初始化 React + Vite + TypeScript + Ant Design。
+- 初始化 React + Umi Max + TypeScript + Ant Design Pro + Ant Design。
 - 建立登录页。
 - 建立基础布局。
 - 建立路由和权限守卫。

@@ -25,7 +25,7 @@ TrueAdmin 要成为一个面向 AI 协作开发的企业级后台管理脚手架
 ## 已确认技术栈
 
 - 后端：PHP + Hyperf。
-- Web 管理端：React + Vite + TypeScript + Ant Design。
+- Web 管理端：React + Umi Max + TypeScript + Ant Design Pro + Ant Design。
 - 移动端：uni-app + Vue 3 + TypeScript + Wot UI。
 - 数据库：PostgreSQL 优先，MySQL 兼容。
 - 缓存：Redis。

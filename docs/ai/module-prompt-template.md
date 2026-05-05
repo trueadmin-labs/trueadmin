@@ -19,7 +19,7 @@
 
 技术范围：
 - 后端：Hyperf
-- Web：React + Vite + Ant Design
+- Web：React + Umi Max + Ant Design Pro + Ant Design
 - 移动端：本次是否涉及
 
 主要实体：

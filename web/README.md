@@ -1,52 +1,29 @@
 # TrueAdmin Web
 
-Web 目录用于承载 React 管理端应用。
+TrueAdmin Web 是基于 Ant Design Pro / Umi Max 初始化的后台管理端。
 
-## 技术选择
+## 技术栈
 
-- React。
-- Vite。
-- TypeScript。
-- Ant Design。
+- React 19
+- TypeScript
+- Ant Design 6
+- Ant Design Pro Components
+- Umi Max
 
-## 推荐结构
+## 常用命令
 
-```text
-src/
-  app/
-  pages/
-  features/
-  shared/
-  services/
-  stores/
+```bash
+npm install
+npm run dev
+npm run tsc
+npm run build
 ```
 
-## 第一阶段 Web 能力
+开发环境默认将 `/api/` 代理到 `http://127.0.0.1:9501`。
 
-- 登录页。
-- 基础布局。
-- 动态菜单。
-- 权限路由。
-- 用户管理。
-- 角色管理。
-- 菜单管理。
-- 部门管理。
-- 岗位管理。
-- 字典管理。
-- 日志管理。
-- 文件上传。
-- 个人中心。
-- 基础仪表盘。
+## 登录
 
-## 页面约定
+默认后端种子账号：
 
-- 列表页包含查询表单、表格、分页和操作列。
-- 新增和编辑表单尽量复用。
-- 删除操作需要二次确认。
-- 按钮显示必须受权限点控制。
-- API 请求统一放在 `services/` 或业务模块服务文件中。
-
-## AI 开发提醒
-
-AI 生成页面时，应先读取 API 契约和权限点，不要根据页面名称猜测字段。
-
+- 用户名：`admin`
+- 密码：`trueadmin`
