@@ -571,7 +571,7 @@ backend/plugin/*/*/Database/Seeders
 执行命令：
 
 ```bash
-php bin/hyperf.php trueadmin:init
+php bin/hyperf.php migrate:fresh --seed
 php bin/hyperf.php migrate
 php bin/hyperf.php migrate:status
 php bin/hyperf.php migrate:rollback
@@ -582,8 +582,9 @@ php bin/hyperf.php trueadmin:migration-paths
 
 规则：
 
-- `trueadmin:init` 用于首次初始化，默认调用 Hyperf 原生 `migrate --seed`。
-- `migrate`、`migrate:status`、`migrate:rollback`、`db:seed`、`migrate --seed` 仍使用 Hyperf 原生命令。
+- 开发环境首次初始化优先使用 `migrate:fresh --seed`。
+- 正常初始化或升级使用 `migrate --seed`。
+- `migrate`、`migrate:status`、`migrate:rollback`、`migrate:refresh --seed`、`db:seed` 仍使用 Hyperf 原生命令。
 - TrueAdmin 通过 `RegisterMigrationPathsListener` 把 `app/Module/*/Database/Migrations` 和 `plugin/*/*/Database/Migrations` 注册到 Hyperf Migrator。
 - TrueAdmin 通过 `RegisterSeederPathsListener` 把 `app/Module/*/Database/Seeders` 和 `plugin/*/*/Database/Seeders` 注册到 Hyperf Seed，并通过 `NamespacedSeed` 支持命名空间 Seeder。
 - `trueadmin:migration-paths` 只用于查看扫描结果，不负责执行迁移或填充。

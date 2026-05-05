@@ -72,7 +72,7 @@ php bin/hyperf.php trueadmin:routes
 
 ```bash
 composer install
-php bin/hyperf.php trueadmin:init
+php bin/hyperf.php migrate:fresh --seed
 composer start
 ```
 
@@ -83,7 +83,7 @@ username: admin
 password: trueadmin
 ```
 
-该账号由 `App\\Module\\System\\Database\\Seeders\\SystemSeeder` 写入数据库。首次启动前执行 `trueadmin:init` 会自动调用 Hyperf 原生迁移和原生 Seeder；也可以直接运行 `php bin/hyperf.php migrate --seed` 或 `php bin/hyperf.php db:seed --force`。
+该账号由 `App\\Module\\System\\Database\\Seeders\\SystemSeeder` 写入数据库。开发环境首次启动推荐执行 `php bin/hyperf.php migrate:fresh --seed`；正常升级执行 `php bin/hyperf.php migrate --seed`；只补种子数据执行 `php bin/hyperf.php db:seed --force`。
 
 ## AI 开发提醒
 

@@ -68,17 +68,23 @@ php bin/hyperf.php migrate
 php bin/hyperf.php trueadmin:migration-paths
 ```
 
-首次初始化可以使用 TrueAdmin 初始化命令；迁移和填充也可以直接使用 Hyperf 原生命令：
+迁移和填充直接使用 Hyperf 原生命令：
 
 ```bash
-php bin/hyperf.php trueadmin:init
-php bin/hyperf.php trueadmin:init --seed-only
-php bin/hyperf.php trueadmin:init --fresh
-php bin/hyperf.php db:seed --force
+# 开发环境清库重建，优先使用
+php bin/hyperf.php migrate:fresh --seed
+
+# 正常初始化或升级，不清库
 php bin/hyperf.php migrate --seed
+
+# 只补跑种子数据
+php bin/hyperf.php db:seed --force
+
+# 验证 down() 可回滚时使用
+php bin/hyperf.php migrate:refresh --seed
 ```
 
-`trueadmin:init` 只是便捷组合命令：默认调用 `migrate --seed`，`--seed-only` 调用 `db:seed`，`--fresh` 调用 `migrate:fresh --seed`。模块 Seeder 支持命名空间类，路径由 `RegisterSeederPathsListener` 在启动期注册到 Hyperf 原生 `Seed`。
+模块 Seeder 支持命名空间类，路径由 `RegisterSeederPathsListener` 在启动期注册到 Hyperf 原生 `Seed`。
 
 ## 生成迁移
 
@@ -100,15 +106,15 @@ php bin/hyperf.php gen:migration create_products_table --path=app/Module/Product
 
 ## 执行原则
 
-迁移和填充主入口继续使用 Hyperf 原生命令，项目初始化入口使用 `trueadmin:init`：
+迁移和填充主入口继续使用 Hyperf 原生命令：
 
 ```bash
-php bin/hyperf.php trueadmin:init
+php bin/hyperf.php migrate:fresh --seed
 php bin/hyperf.php migrate
+php bin/hyperf.php migrate --seed
 php bin/hyperf.php migrate:status
 php bin/hyperf.php migrate:rollback
 php bin/hyperf.php db:seed --force
-php bin/hyperf.php migrate --seed
 ```
 
-`trueadmin:migration-paths` 只用于查看扫描结果，不负责执行迁移或填充。`trueadmin:init` 负责把 Hyperf 原生迁移和原生 Seeder 串成开箱即用的初始化流程。
+`trueadmin:migration-paths` 只用于查看扫描结果，不负责执行迁移或填充。
