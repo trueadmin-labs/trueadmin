@@ -208,16 +208,15 @@ admin_menus / admin_permissions / admin_role_*
 - `--force` 才允许覆盖部分字段。
 - 同步记录模块名、来源、版本和最近同步时间。
 
-## 元数据扫描器规划
+## 元数据扫描与同步
 
-后续新增 `MetadataScanner`，扫描 Controller、Service 和模块清单，输出统一接口元数据。
+当前已提供 `InterfaceMetadataScanner`、`MetadataSynchronizer` 和 `OpenApiDocumentBuilder`，用于扫描 Controller Attribute，输出统一接口元数据，同步菜单/按钮权限默认元数据，并生成 OpenAPI 文档。
 
-建议命令：
+可用命令：
 
 ```bash
 php bin/hyperf.php trueadmin:metadata
-php bin/hyperf.php trueadmin:metadata:export
-php bin/hyperf.php trueadmin:module:sync Product
+php bin/hyperf.php trueadmin:metadata-sync
 ```
 
 扫描结果包含：
@@ -226,12 +225,12 @@ php bin/hyperf.php trueadmin:module:sync Product
 routes
 permissions
 menu_buttons
-operation_logs
-data_scopes
 openapi
-frontend_api_types
-ai_context
 ```
+
+`MetadataSynchronizer` 位于 Foundation，但不直接依赖 `Module/System`。Foundation 只定义同步流程和 `MetadataMenuRepositoryInterface`，`Module/System` 通过 `AdminMenuRepository` 提供菜单权限落库实现，保持依赖方向为 `Module -> Foundation -> Kernel`。
+
+后续可以继续扩展：操作日志元数据、数据权限元数据、前端 API 类型生成和 AI 上下文导出。
 
 生产环境建议使用缓存或导出文件，避免每次启动动态扫描带来不确定性。
 

@@ -4,26 +4,33 @@ declare(strict_types=1);
 
 namespace App\Foundation\Auth;
 
-use App\Module\Auth\Http\Admin\Vo\AuthUser;
 use TrueAdmin\Kernel\Context\Actor;
 
 final class ActorFactory
 {
-    public static function fromAdmin(AuthUser $user, ?int $operationDeptId = null): Actor
-    {
-        $operationDeptId ??= $user->primaryDeptId;
+    public static function fromAdmin(
+        int $id,
+        string $username,
+        string $nickname = '',
+        array $roles = [],
+        array $permissions = [],
+        ?int $primaryDeptId = null,
+        array $deptIds = [],
+        ?int $operationDeptId = null,
+    ): Actor {
+        $operationDeptId ??= $primaryDeptId;
 
         return new Actor(
             type: 'admin',
-            id: $user->id,
-            name: $user->username,
+            id: $id,
+            name: $username,
             source: 'http',
             claims: [
-                'nickname' => $user->nickname,
-                'roles' => $user->roles,
-                'permissions' => $user->permissions,
-                'primaryDeptId' => $user->primaryDeptId,
-                'deptIds' => $user->deptIds,
+                'nickname' => $nickname,
+                'roles' => $roles,
+                'permissions' => $permissions,
+                'primaryDeptId' => $primaryDeptId,
+                'deptIds' => $deptIds,
                 'operationDeptId' => $operationDeptId,
             ],
         );

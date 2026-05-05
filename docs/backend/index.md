@@ -35,7 +35,6 @@ backend/app/
   Module/
     Auth/
     System/
-    User/
 ```
 
 一句话边界：`Kernel` 提供稳定原语，`Foundation` 提供项目默认行为，`Infrastructure` 提供技术适配，`Module` 承载系统能力和业务能力。
@@ -94,7 +93,12 @@ Module/Xxx/
 php bin/hyperf.php trueadmin:routes
 ```
 
-业务开发推荐使用 Attribute 声明路由、权限、操作日志、数据权限、OpenAPI 和接口元数据。第一版已经把接口元数据、`DataScope`、`OperationLog` 的基础 Attribute/AOP/Event 原语放入 `packages/kernel`，并启用注解路由注册；菜单权限同步仍以后续 MetadataScanner 落库能力为准。
+业务开发推荐使用 Attribute 声明路由、权限、操作日志、数据权限、OpenAPI 和接口元数据。第一版已经把接口元数据、`DataScope`、`OperationLog` 的基础 Attribute/AOP/Event 原语放入 `packages/kernel`，并启用注解路由注册、接口元数据扫描、菜单权限同步和 OpenAPI 输出。
+
+```bash
+php bin/hyperf.php trueadmin:metadata
+php bin/hyperf.php trueadmin:metadata-sync
+```
 
 ## 数据库迁移
 

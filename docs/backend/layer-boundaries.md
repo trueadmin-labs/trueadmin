@@ -61,7 +61,6 @@ backend/
     Module/
       Auth/
       System/
-      User/
       Product/
       Order/
       Workflow/

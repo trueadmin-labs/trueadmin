@@ -12,9 +12,6 @@ TrueAdmin 数据库迁移采用：迁移归模块，执行归框架。
 backend/app/Module/System/Database/Migrations
 backend/app/Module/System/Database/Seeders
 
-backend/app/Module/User/Database/Migrations
-backend/app/Module/User/Database/Seeders
-
 backend/app/Module/Product/Database/Migrations
 backend/app/Module/Product/Database/Seeders
 
@@ -71,16 +68,16 @@ admin_roles.sort
 
 `parent_id` 指向父角色，`level` 便于排序和查询，`path` 存储祖先链，例如 `,1,8,23,`，用于快速判断角色树关系。迁移层只负责字段和索引，是否允许移动、是否越权授权、子角色权限是否超过父角色，必须在 `Module/System` 的 Service 层校验。
 
-用户端身份表放 `Module/User`。
+第一版不内置用户端身份模块。项目需要用户端能力时，再按业务语义新增 `Member`、`Customer` 或其他模块，并在对应模块内维护用户端身份表。
 
 ```text
-client_users
-client_user_profiles
+member_users
+member_user_profiles
 ```
 
 插件表跟随插件目录。插件迁移只有在插件启用时才进入扫描路径，插件启停和清单规则见 [插件系统规范](plugin-system.md)。
 
-第一版不保留 `backend/database/migrations` 根级迁移目录。框架自身不应该创建业务表；系统基础表归属 `Module/System`，用户端身份表归属 `Module/User`，业务表归属对应业务模块。
+第一版不保留 `backend/database/migrations` 根级迁移目录。框架自身不应该创建业务表；系统基础表归属 `Module/System`，用户端身份表在项目需要时归属对应业务模块，业务表归属对应业务模块。
 
 ## 执行命令
 

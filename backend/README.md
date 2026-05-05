@@ -27,7 +27,6 @@ app/Foundation
 app/Infrastructure
 app/Module/Auth
 app/Module/System
-app/Module/User
 ```
 
 模块内部参考 MineAdmin：
@@ -51,7 +50,6 @@ GET  /
 POST /api/admin/auth/login
 POST /api/admin/auth/logout
 GET  /api/admin/auth/me
-GET  /api/v1/client/profile
 GET  /api/v1/open/openapi.json
 ```
 

@@ -34,7 +34,16 @@ final class AdminAuthMiddleware implements MiddlewareInterface
 
         $user = $this->passportService->userFromToken($token);
         $operationDeptId = $this->operationDeptId($request->getHeaderLine('X-Operation-Dept-Id'), $user->deptIds, $user->primaryDeptId);
-        ActorContext::set(ActorFactory::fromAdmin($user, $operationDeptId));
+        ActorContext::set(ActorFactory::fromAdmin(
+            id: $user->id,
+            username: $user->username,
+            nickname: $user->nickname,
+            roles: $user->roles,
+            permissions: $user->permissions,
+            primaryDeptId: $user->primaryDeptId,
+            deptIds: $user->deptIds,
+            operationDeptId: $operationDeptId,
+        ));
 
         return $handler->handle($request);
     }

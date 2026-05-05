@@ -39,16 +39,18 @@ Module/Order/Http/Admin/Controller/OrderController.php
 代码放在对应模块内：
 
 ```text
-Module/User/Http/Client/Controller/V1/ProfileController.php
+Module/Member/Http/Client/Controller/V1/ProfileController.php
 Module/Order/Http/Client/Controller/V1/OrderController.php
 ```
 
-当前示例：
+示例路径：
 
 ```text
 GET /api/v1/client/profile
 GET /api/v1/client/orders
 ```
+
+第一版只预留 Client API 分区，不内置用户端用户模块；项目需要用户端能力时，再按业务语义新增 `Member`、`Customer` 或其他更贴切的模块。
 
 ## Open API
 

@@ -140,7 +140,6 @@ Module/Xxx/
 ```text
 Module/Auth
 Module/System
-Module/User
 ```
 
 ## 5. 分层职责
@@ -763,15 +762,15 @@ admin_users
 admin_roles
 admin_menus
 admin_operation_logs
-client_users
+member_users
 products
 workflow_definitions
 message_notifications
 ```
 
-后台用户和用户端用户默认分表。
+后台用户和用户端用户默认分表。第一版不内置用户端身份模块，项目需要时再按业务语义新增 `Member`、`Customer` 或其他模块。
 
-第一版已提供 System、User 的模块迁移示例。业务模块迁移按相同规范放入对应模块目录。
+第一版已提供 System 的模块迁移示例。业务模块迁移按相同规范放入对应模块目录。
 
 ## 15. OpenAPI 与契约中心
 

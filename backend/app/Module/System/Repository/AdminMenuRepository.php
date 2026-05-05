@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Module\System\Repository;
 
+use App\Foundation\Metadata\MetadataMenuRepositoryInterface;
 use App\Foundation\Query\AdminQuery;
 use App\Foundation\Repository\AbstractRepository;
 use App\Foundation\Tree\TreeHelper;
 use App\Module\System\Model\AdminMenu;
 use Hyperf\DbConnection\Db;
 
-final class AdminMenuRepository extends AbstractRepository
+final class AdminMenuRepository extends AbstractRepository implements MetadataMenuRepositoryInterface
 {
     protected ?string $modelClass = AdminMenu::class;
 
@@ -130,6 +131,49 @@ final class AdminMenuRepository extends AbstractRepository
             ->unique()
             ->values()
             ->all();
+    }
+
+    public function upsertMenu(array $menu, int $parentId, string $syncedAt): int
+    {
+        $code = (string) $menu['code'];
+        $exists = AdminMenu::query()->where('code', $code)->first();
+        if ($exists === null && (string) ($menu['permission'] ?? '') !== '') {
+            $exists = AdminMenu::query()->where('permission', (string) $menu['permission'])->first();
+        }
+
+        $defaults = [
+            'parent_id' => $parentId,
+            'code' => $code,
+            'type' => (string) ($menu['type'] ?? 'menu'),
+            'name' => (string) ($menu['title'] ?? $code),
+            'path' => (string) ($menu['path'] ?? ''),
+            'component' => (string) ($menu['component'] ?? ''),
+            'icon' => (string) ($menu['icon'] ?? ''),
+            'permission' => (string) ($menu['permission'] ?? ''),
+            'sort' => (int) ($menu['sort'] ?? 0),
+            'status' => 'enabled',
+            'metadata_synced_at' => $syncedAt,
+            'created_at' => $syncedAt,
+            'updated_at' => $syncedAt,
+        ];
+
+        if ($exists === null) {
+            $created = AdminMenu::query()->create($defaults);
+            return (int) $created->getAttribute('id');
+        }
+
+        $updates = ['code' => $code, 'metadata_synced_at' => $syncedAt, 'updated_at' => $syncedAt];
+        foreach (['permission', 'type', 'path', 'component', 'icon', 'parent_id'] as $field) {
+            $current = $exists->getAttribute($field);
+            if ($current === null || $current === '' || ($field === 'parent_id' && (int) $current === 0 && $parentId > 0)) {
+                $updates[$field] = $defaults[$field];
+            }
+        }
+
+        $exists->fill($updates);
+        $exists->save();
+
+        return (int) $exists->getAttribute('id');
     }
 
     private function tree(array $menus): array

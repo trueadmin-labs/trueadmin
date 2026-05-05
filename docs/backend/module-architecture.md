@@ -20,9 +20,6 @@ backend/app/Module/
     Model/
     Repository/
     Service/
-  User/
-    Http/Client/Controller/V1/
-    Service/
 ```
 
 模块内部可以按需包含：
@@ -95,9 +92,6 @@ backend/app/Module/Auth/Http/Admin/Vo/AuthUser.php
 backend/app/Module/Auth/Service/PassportService.php
 backend/app/Module/Auth/Service/JwtService.php
 
-backend/app/Module/User/Http/Client/Controller/V1/ProfileController.php
-backend/app/Module/User/Service/ProfileService.php
-
 packages/kernel/src/DataPermission/Attribute/DataScope.php
 packages/kernel/src/DataPermission/Aspects/DataScopeAspect.php
 packages/kernel/src/OperationLog/Attribute/OperationLog.php
@@ -111,7 +105,7 @@ backend/app/Module/System/Listener/Logstash/WriteOperationLogListener.php
 -> Module/Auth/Http/Admin/Controller/PassportController.php
 
 /api/v1/client/profile
--> Module/User/Http/Client/Controller/V1/ProfileController.php
+-> Module/Member/Http/Client/Controller/V1/ProfileController.php
 ```
 
 ## 模块职责
@@ -120,7 +114,7 @@ backend/app/Module/System/Listener/Logstash/WriteOperationLogListener.php
 
 `System` 承载系统级通用能力，例如数据权限、配置、字典、基础日志、全局设置。
 
-`User` 当前承载用户端个人中心示例，后续可扩展为会员/用户体系。
+第一版不内置用户端用户模块。项目需要用户端能力时，再按业务语义新增 `Member`、`Customer` 或其他更贴切的模块，并放入对应模块的 `Http/Client`。
 
 业务模块，例如 `Order`、`Workflow`、`Message`，后续按同一目录规范新增，不作为第一版内置模块。
 

@@ -66,18 +66,6 @@ class ExampleTest extends TestCase
         $this->assertNull($login['data']);
     }
 
-    public function testClientProfileExample()
-    {
-        $profile = $this->get('/api/v1/client/profile', [], [
-            'X-Client-User-Id' => '10002',
-            'X-Client-User-Name' => 'Second Client',
-        ]);
-
-        $this->assertSame('SUCCESS', $profile['code']);
-        $this->assertSame(10002, $profile['data']['id']);
-        $this->assertSame('Second Client', $profile['data']['nickname']);
-    }
-
     public function testSystemPermissionEntrances()
     {
         $roleId = (int) \Hyperf\DbConnection\Db::table('admin_roles')->where('code', 'super-admin')->value('id');
