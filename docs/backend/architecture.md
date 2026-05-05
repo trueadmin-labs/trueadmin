@@ -553,7 +553,7 @@ ActorContext::runAsAdmin($admin, ...)
 
 数据库驱动采用 PostgreSQL 优先、MySQL 兼容。默认 `DB_DRIVER=pgsql`，PostgreSQL 支持来自 Hyperf 官方扩展包 `hyperf/database-pgsql`；MySQL 走 Hyperf 原生 MySQL connector。业务模块迁移必须优先使用 Hyperf Schema Builder 的跨库安全写法，确需数据库专属能力时在模块文档中显式说明驱动要求。
 
-底层仍使用 Hyperf 默认 migration 方案和 `migrations` 执行记录表。TrueAdmin 在应用启动时把模块和插件迁移目录注册到 Hyperf Migrator，不另造迁移系统。
+底层仍使用 Hyperf 默认 migration、seeder 方案和 `migrations` 执行记录表。TrueAdmin 在应用启动时把模块和插件迁移目录注册到 Hyperf Migrator，把模块和插件 Seeder 目录注册到 Hyperf Seed，不另造迁移或填充系统。
 
 目录规则：
 
@@ -575,15 +575,18 @@ php bin/hyperf.php trueadmin:init
 php bin/hyperf.php migrate
 php bin/hyperf.php migrate:status
 php bin/hyperf.php migrate:rollback
+php bin/hyperf.php db:seed --force
+php bin/hyperf.php migrate --seed
 php bin/hyperf.php trueadmin:migration-paths
 ```
 
 规则：
 
-- `trueadmin:init` 用于首次初始化，内部调用 Hyperf 原生迁移并自动执行模块 Seeder。
-- `migrate`、`migrate:status`、`migrate:rollback` 仍使用 Hyperf 原生命令。
+- `trueadmin:init` 用于首次初始化，默认调用 Hyperf 原生 `migrate --seed`。
+- `migrate`、`migrate:status`、`migrate:rollback`、`db:seed`、`migrate --seed` 仍使用 Hyperf 原生命令。
 - TrueAdmin 通过 `RegisterMigrationPathsListener` 把 `app/Module/*/Database/Migrations` 和 `plugin/*/*/Database/Migrations` 注册到 Hyperf Migrator。
-- `trueadmin:migration-paths` 只用于查看扫描结果，不负责执行迁移。
+- TrueAdmin 通过 `RegisterSeederPathsListener` 把 `app/Module/*/Database/Seeders` 和 `plugin/*/*/Database/Seeders` 注册到 Hyperf Seed，并通过 `NamespacedSeed` 支持命名空间 Seeder。
+- `trueadmin:migration-paths` 只用于查看扫描结果，不负责执行迁移或填充。
 - 模块自己的表放模块内迁移。
 - 系统业务表放 `Module/System`。
 - 第一版不保留 `backend/database/migrations` 根级迁移目录；框架自身不创建业务表。

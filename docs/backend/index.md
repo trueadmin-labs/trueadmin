@@ -99,7 +99,7 @@ php bin/hyperf.php trueadmin:routes
 
 ## 数据库迁移
 
-迁移采用“迁移归模块，执行归框架”。底层使用 Hyperf 原生 migration，TrueAdmin 在启动期把模块迁移目录注册到 Hyperf Migrator。
+迁移和填充采用“资源归模块，执行归框架”。底层使用 Hyperf 原生 migration/seeder，TrueAdmin 在启动期把模块迁移目录注册到 Hyperf Migrator，把模块 Seeder 目录注册到 Hyperf Seed。
 
 ```text
 backend/app/Module/*/Database/Migrations
@@ -108,7 +108,7 @@ backend/plugin/*/*/Database/Migrations
 backend/plugin/*/*/Database/Seeders
 ```
 
-默认数据库是 PostgreSQL，MySQL 保持兼容。第一版不保留 `backend/database` 根级迁移目录。
+默认数据库是 PostgreSQL，MySQL 保持兼容。第一版不保留 `backend/database` 根级迁移目录；模块种子数据可直接通过 `php bin/hyperf.php db:seed --force` 或 `php bin/hyperf.php migrate --seed` 执行。
 
 ## 专题文档
 

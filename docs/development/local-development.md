@@ -76,7 +76,7 @@ username: admin
 password: trueadmin
 ```
 
-默认管理员由 System 模块 Seeder 写入数据库。首次初始化执行 `php bin/hyperf.php trueadmin:init`，它会运行 Hyperf 原生迁移并执行模块 Seeder。
+默认管理员由 System 模块 Seeder 写入数据库。首次初始化执行 `php bin/hyperf.php trueadmin:init`，它会调用 Hyperf 原生 `migrate --seed`；模块 Seeder 目录已在启动期注册，也可以直接执行 `php bin/hyperf.php db:seed --force`。
 
 第一阶段已预留 API 分区：
 

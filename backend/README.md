@@ -83,7 +83,7 @@ username: admin
 password: trueadmin
 ```
 
-该账号由 `App\\Module\\System\\Database\\Seeders\\SystemSeeder` 写入数据库。首次启动前执行 `trueadmin:init` 会自动完成模块迁移和模块 Seeder。
+该账号由 `App\\Module\\System\\Database\\Seeders\\SystemSeeder` 写入数据库。首次启动前执行 `trueadmin:init` 会自动调用 Hyperf 原生迁移和原生 Seeder；也可以直接运行 `php bin/hyperf.php migrate --seed` 或 `php bin/hyperf.php db:seed --force`。
 
 ## AI 开发提醒
 

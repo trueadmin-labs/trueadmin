@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace App\Foundation\Database\Command;
 
-use App\Foundation\Database\ModuleSeederRunner;
 use Hyperf\Command\Command;
 use Symfony\Component\Console\Input\InputOption;
 
 final class TrueAdminInitCommand extends Command
 {
-    public function __construct(private readonly ModuleSeederRunner $seeders)
+    public function __construct()
     {
         parent::__construct('trueadmin:init');
-        $this->setDescription('Run TrueAdmin migrations and module seeders');
+        $this->setDescription('Run TrueAdmin migrations and seeders');
     }
 
     protected function configure(): void
@@ -35,19 +34,23 @@ final class TrueAdminInitCommand extends Command
             return self::INVALID;
         }
 
-        if (! $seedOnly) {
-            $command = $fresh ? 'migrate:fresh' : 'migrate';
-            $this->line(sprintf('Running %s...', $command));
-            $exitCode = $this->call($command, ['--force' => true]);
+        if ($seedOnly) {
+            $this->line('Running db:seed...');
+            $exitCode = $this->call('db:seed', ['--force' => true]);
             if ($exitCode !== self::SUCCESS) {
                 return $exitCode;
             }
-        }
+        } else {
+            $command = $fresh ? 'migrate:fresh' : 'migrate';
+            $arguments = ['--force' => true];
+            if (! $noSeed) {
+                $arguments['--seed'] = true;
+            }
 
-        if (! $noSeed) {
-            $this->line('Running module seeders...');
-            foreach ($this->seeders->run() as $class) {
-                $this->line(' - ' . $class);
+            $this->line(sprintf('Running %s%s...', $command, $noSeed ? '' : ' --seed'));
+            $exitCode = $this->call($command, $arguments);
+            if ($exitCode !== self::SUCCESS) {
+                return $exitCode;
             }
         }
 
