@@ -170,7 +170,7 @@ TrueAdmin 第一阶段已经预留三类 API：
 身份与权限边界采用：
 
 - `admin_*`：后台管理身份和权限体系。
-- `client_*`：用户端身份和业务用户体系。
+- `client_*`：未来用户端身份和业务用户体系的推荐表名前缀，第一版不内置用户端身份表。
 - `open_*`：外部开放平台应用和调用体系。
 
 用户端默认不使用后台菜单权限、按钮权限和数据权限，主要做登录鉴权和业务级授权。详细规则见 `docs/api/identity-and-permissions.md`。
@@ -190,7 +190,7 @@ backend/app/Module
 
 Command、Listener 和 Crontab 也按职责归属：框架级放 `Kernel`，项目级基础能力放 `Foundation` 的具体能力目录，技术适配类任务放 `Infrastructure`，业务级放模块内。第一版不保留 `backend/app/Command`、`backend/app/Listener`、`backend/app/Crontab` 这类全局默认落点。
 
-数据库迁移只扫描模块和插件目录。第一版不保留 `backend/database/migrations` 根级迁移目录；系统基础表归属 `Module/System`，用户端身份表不作为第一版内置表，项目需要时归属对应业务模块，业务表归属对应业务模块。
+数据库迁移只扫描模块和插件目录。第一版不保留 `backend/database/migrations` 根级迁移目录；系统基础表归属 `Module/System`。用户端身份表不作为第一版内置表，项目需要时按业务语义归属 `Member`、`Customer` 等对应业务模块；用户端认证入口归属 `Module/Auth/Http/Client`，不要新增泛化 `Module/User`。
 
 后端主入口见 `docs/backend/index.md`。层级边界见 `docs/backend/layer-boundaries.md`，数据库迁移规范见 `docs/backend/database-migrations.md`，初始化和迁移统一使用 Hyperf 原生命令，开发环境优先 `migrate:fresh --seed`，正常升级使用 `migrate --seed`，模块/插件路径由启动监听器注册，模块 Seeder 目录由启动监听器注册到 Hyperf 原生 `db:seed`，命名空间 Seeder 由 `NamespacedSeed` 适配执行。后端完整架构见 `docs/backend/architecture.md`，注解驱动设计见 `docs/backend/annotation-driven.md`。API 版本和多端复用边界见 `docs/backend/module-architecture.md` 与 `docs/api/versioning-and-reuse.md`。当前阶段使用 `kernel + Foundation + Infrastructure + Module` 作为后端主结构，并在业务模块内部采用 MineAdmin 分层。
 

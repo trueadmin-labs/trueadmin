@@ -618,26 +618,6 @@
                     }
                 ]
             }
-        },
-        "/api/v1/client/profile": {
-            "get": {
-                "operationId": "App_Module_User_Http_Client_Controller_V1_ProfileController_detail",
-                "summary": "",
-                "description": "",
-                "tags": [],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                },
-                "x-trueadmin": {
-                    "action": "App\\Module\\User\\Http\\Client\\Controller\\V1\\ProfileController@detail",
-                    "permission": null,
-                    "permissionMode": null,
-                    "permissions": [],
-                    "public": false
-                }
-            }
         }
     },
     "components": {

@@ -68,7 +68,7 @@ admin_roles.sort
 
 `parent_id` 指向父角色，`level` 便于排序和查询，`path` 存储祖先链，例如 `,1,8,23,`，用于快速判断角色树关系。迁移层只负责字段和索引，是否允许移动、是否越权授权、子角色权限是否超过父角色，必须在 `Module/System` 的 Service 层校验。
 
-第一版不内置用户端身份模块。项目需要用户端能力时，再按业务语义新增 `Member`、`Customer` 或其他模块，并在对应模块内维护用户端身份表。
+第一版不内置用户端身份模块。项目需要用户端能力时，再按业务语义新增 `Member`、`Customer` 或其他模块，并在对应模块内维护用户端身份表；用户端认证入口仍归属 `Module/Auth/Http/Client`，不要新增泛化 `Module/User`。
 
 ```text
 member_users

@@ -8,11 +8,13 @@ TrueAdmin 默认采用三套身份边界：
 
 ```text
 admin_*   后台管理身份和权限体系
-client_*  用户端身份和业务用户体系
+client_*  未来用户端身份和业务用户体系的推荐表名前缀
 open_*    外部开放平台应用和调用体系
 ```
 
 后台用户和用户端用户不共用一张表。
+
+第一版只内置后台管理身份体系。`client_*` 是未来用户端业务模块落表时的命名约定，不代表第一版存在内置 `Module/User` 或内置 `client_users` 表。
 
 ## 后台身份体系
 
@@ -89,6 +91,8 @@ client_profiles
 client_identities
 client_sessions
 ```
+
+这些表应由真实业务模块按需维护，例如 `Member` 或 `Customer`，而不是放入泛化的 `User` 模块。用户端登录、刷新 Token、获取当前身份这类认证入口归属 `Module/Auth/Http/Client`；会员资料、客户资料、订单等业务接口归属对应业务模块的 `Http/Client`。
 
 用户端默认只做：
 
@@ -200,12 +204,12 @@ admin_departments
 admin_positions
 ```
 
-用户端先预留基础身份表：
+用户端第一版只预留架构边界和命名规范，不创建基础身份表。项目真正需要 App、小程序、H5 或会员端时，再按业务语义新增模块并在该模块内维护身份表，例如：
 
 ```text
-client_users
-client_profiles
-client_identities
+Module/Member/Model/Member.php
+Module/Member/Database/Migrations/*_create_client_users_table.php
+Module/Auth/Http/Client/Controller/V1/PassportController.php
 ```
 
 开放平台先预留设计，不急于落表。

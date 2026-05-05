@@ -36,21 +36,22 @@ Module/Order/Http/Admin/Controller/OrderController.php
 
 `client` 分区服务未来用户端应用。
 
-代码放在对应模块内：
+代码放在对应业务模块内。认证入口归属 `Auth`，业务入口归属真实业务模块：
 
 ```text
-Module/Member/Http/Client/Controller/V1/ProfileController.php
+Module/Auth/Http/Client/Controller/V1/PassportController.php
 Module/Order/Http/Client/Controller/V1/OrderController.php
 ```
 
 示例路径：
 
 ```text
-GET /api/v1/client/profile
+POST /api/v1/client/auth/login
+GET /api/v1/client/auth/me
 GET /api/v1/client/orders
 ```
 
-第一版只预留 Client API 分区，不内置用户端用户模块；项目需要用户端能力时，再按业务语义新增 `Member`、`Customer` 或其他更贴切的模块。
+第一版只预留 Client API 分区，不内置通用 `User` 模块，也不内置用户端身份表。项目需要用户端能力时，再按业务语义新增 `Member`、`Customer`、`Order` 或其他更贴切的模块。不要为了一个用户端接口创建泛化的 `Module/User`。
 
 ## Open API
 
