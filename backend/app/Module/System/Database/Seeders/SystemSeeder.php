@@ -75,17 +75,6 @@ final class SystemSeeder extends Seeder
             'type' => 'menu',
             'sort' => 40,
         ], $systemMenuId, $now);
-        $this->upsertMenu([
-            'code' => 'products',
-            'name' => '商品管理',
-            'path' => '/products',
-            'component' => './products',
-            'icon' => 'appstore',
-            'permission' => 'product:list',
-            'type' => 'menu',
-            'sort' => 50,
-        ], 0, $now);
-
         foreach ([
             ['parentId' => $userMenuId, 'code' => 'system.user.detail', 'name' => '用户详情', 'permission' => 'system:user:detail', 'sort' => 21],
             ['parentId' => $userMenuId, 'code' => 'system.user.create', 'name' => '新增用户', 'permission' => 'system:user:create', 'sort' => 22],

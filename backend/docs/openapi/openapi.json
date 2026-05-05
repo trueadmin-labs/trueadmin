@@ -1,417 +1,652 @@
 {
-  "openapi": "3.0.3",
-  "info": {
-    "title": "TrueAdmin Backend API",
-    "version": "0.1.0",
-    "description": "TrueAdmin first backend scaffold API contract."
-  },
-  "servers": [
-    {
-      "url": "http://localhost:9501/api/v1"
-    }
-  ],
-  "paths": {
-    "/admin/auth/login": {
-      "post": {
-        "summary": "Login with username and password",
-        "tags": [
-          "Auth"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "username",
-                  "password"
-                ],
-                "properties": {
-                  "username": {
-                    "type": "string",
-                    "example": "admin"
-                  },
-                  "password": {
-                    "type": "string",
-                    "example": "trueadmin"
-                  }
-                }
-              }
+    "openapi": "3.1.0",
+    "info": {
+        "title": "TrueAdmin API",
+        "version": "0.1.0",
+        "description": "Generated from TrueAdmin controller attributes. Code annotations provide default interface metadata."
+    },
+    "servers": [
+        {
+            "url": "/"
+        }
+    ],
+    "paths": {
+        "/api/admin/auth/login": {
+            "post": {
+                "operationId": "App_Module_Auth_Http_Admin_Controller_PassportController_login",
+                "summary": "",
+                "description": "",
+                "tags": [],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\Auth\\Http\\Admin\\Controller\\PassportController@login",
+                    "permission": null,
+                    "permissionMode": null,
+                    "permissions": [],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
-          }
         },
-        "responses": {
-          "200": {
-            "description": "Login success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoginResponse"
-                }
-              }
+        "/api/admin/auth/logout": {
+            "post": {
+                "operationId": "App_Module_Auth_Http_Admin_Controller_PassportController_logout",
+                "summary": "",
+                "description": "",
+                "tags": [],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\Auth\\Http\\Admin\\Controller\\PassportController@logout",
+                    "permission": null,
+                    "permissionMode": null,
+                    "permissions": [],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
-          },
-          "401": {
-            "description": "Invalid credentials"
-          }
-        }
-      }
-    },
-    "/admin/auth/logout": {
-      "post": {
-        "summary": "Logout current user",
-        "tags": [
-          "Auth"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Logout success"
-          },
-          "401": {
-            "description": "Unauthenticated"
-          }
-        }
-      }
-    },
-    "/admin/auth/me": {
-      "get": {
-        "summary": "Get current user profile",
-        "tags": [
-          "Auth"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Current user",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserResponse"
-                }
-              }
+        },
+        "/api/admin/auth/me": {
+            "get": {
+                "operationId": "App_Module_Auth_Http_Admin_Controller_PassportController_me",
+                "summary": "",
+                "description": "",
+                "tags": [],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\Auth\\Http\\Admin\\Controller\\PassportController@me",
+                    "permission": null,
+                    "permissionMode": null,
+                    "permissions": [],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
-          },
-          "401": {
-            "description": "Unauthenticated"
-          }
-        }
-      }
-    },
-    "/client/profile": {
-      "get": {
-        "summary": "Get current client profile example",
-        "tags": [
-          "Client"
-        ],
-        "responses": {
-          "200": {
-            "description": "Client profile",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientProfileResponse"
-                }
-              }
+        },
+        "/api/admin/system/menu-tree": {
+            "get": {
+                "operationId": "App_Module_System_Http_Admin_Controller_PermissionController_listMenuTree",
+                "summary": "菜单树",
+                "description": "",
+                "tags": [
+                    "系统管理"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\PermissionController@listMenuTree",
+                    "permission": "system:menu:list",
+                    "permissionMode": "single",
+                    "permissions": [
+                        "system:menu:list"
+                    ],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
-          }
-        }
-      }
-    },
-    "/open/openapi.json": {
-      "get": {
-        "summary": "Get OpenAPI document",
-        "tags": [
-          "OpenAPI"
-        ],
-        "responses": {
-          "200": {
-            "description": "OpenAPI document"
-          }
-        }
-      }
-    },
-    "/admin/products": {
-      "get": {
-        "summary": "List products for admin management",
-        "tags": [
-          "Product"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Admin product list",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AdminProductListResponse"
-                }
-              }
+        },
+        "/api/admin/system/menus": {
+            "post": {
+                "operationId": "App_Module_System_Http_Admin_Controller_AdminMenuController_create",
+                "summary": "新增菜单",
+                "description": "",
+                "tags": [
+                    "系统管理"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\AdminMenuController@create",
+                    "permission": "system:menu:create",
+                    "permissionMode": "single",
+                    "permissions": [
+                        "system:menu:create"
+                    ],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "get": {
+                "operationId": "App_Module_System_Http_Admin_Controller_AdminMenuController_list",
+                "summary": "菜单列表",
+                "description": "",
+                "tags": [
+                    "系统管理"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\AdminMenuController@list",
+                    "permission": "system:menu:list",
+                    "permissionMode": "single",
+                    "permissions": [
+                        "system:menu:list"
+                    ],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
-          },
-          "401": {
-            "description": "Unauthenticated"
-          }
-        }
-      }
-    },
-    "/client/products": {
-      "get": {
-        "summary": "List visible products for client users",
-        "tags": [
-          "Product"
-        ],
-        "responses": {
-          "200": {
-            "description": "Client visible product list",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientProductListResponse"
-                }
-              }
+        },
+        "/api/admin/system/menus/{id}": {
+            "delete": {
+                "operationId": "App_Module_System_Http_Admin_Controller_AdminMenuController_delete",
+                "summary": "删除菜单",
+                "description": "",
+                "tags": [
+                    "系统管理"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\AdminMenuController@delete",
+                    "permission": "system:menu:delete",
+                    "permissionMode": "single",
+                    "permissions": [
+                        "system:menu:delete"
+                    ],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "get": {
+                "operationId": "App_Module_System_Http_Admin_Controller_AdminMenuController_detail",
+                "summary": "菜单详情",
+                "description": "",
+                "tags": [
+                    "系统管理"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\AdminMenuController@detail",
+                    "permission": "system:menu:detail",
+                    "permissionMode": "single",
+                    "permissions": [
+                        "system:menu:detail"
+                    ],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "operationId": "App_Module_System_Http_Admin_Controller_AdminMenuController_update",
+                "summary": "编辑菜单",
+                "description": "",
+                "tags": [
+                    "系统管理"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\AdminMenuController@update",
+                    "permission": "system:menu:update",
+                    "permissionMode": "single",
+                    "permissions": [
+                        "system:menu:update"
+                    ],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
-          }
+        },
+        "/api/admin/system/permissions": {
+            "get": {
+                "operationId": "App_Module_System_Http_Admin_Controller_PermissionController_listPermissionCodes",
+                "summary": "权限点列表",
+                "description": "",
+                "tags": [
+                    "系统管理"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\PermissionController@listPermissionCodes",
+                    "permission": "system:permission:list",
+                    "permissionMode": "single",
+                    "permissions": [
+                        "system:permission:list"
+                    ],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/system/roles": {
+            "post": {
+                "operationId": "App_Module_System_Http_Admin_Controller_AdminRoleController_create",
+                "summary": "新增角色",
+                "description": "",
+                "tags": [
+                    "系统管理"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\AdminRoleController@create",
+                    "permission": "system:role:create",
+                    "permissionMode": "single",
+                    "permissions": [
+                        "system:role:create"
+                    ],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "get": {
+                "operationId": "App_Module_System_Http_Admin_Controller_AdminRoleController_list",
+                "summary": "角色列表",
+                "description": "",
+                "tags": [
+                    "系统管理"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\AdminRoleController@list",
+                    "permission": "system:role:list",
+                    "permissionMode": "single",
+                    "permissions": [
+                        "system:role:list"
+                    ],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/system/roles/{id}": {
+            "delete": {
+                "operationId": "App_Module_System_Http_Admin_Controller_AdminRoleController_delete",
+                "summary": "删除角色",
+                "description": "",
+                "tags": [
+                    "系统管理"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\AdminRoleController@delete",
+                    "permission": "system:role:delete",
+                    "permissionMode": "single",
+                    "permissions": [
+                        "system:role:delete"
+                    ],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "get": {
+                "operationId": "App_Module_System_Http_Admin_Controller_AdminRoleController_detail",
+                "summary": "角色详情",
+                "description": "",
+                "tags": [
+                    "系统管理"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\AdminRoleController@detail",
+                    "permission": "system:role:detail",
+                    "permissionMode": "single",
+                    "permissions": [
+                        "system:role:detail"
+                    ],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "operationId": "App_Module_System_Http_Admin_Controller_AdminRoleController_update",
+                "summary": "编辑角色",
+                "description": "",
+                "tags": [
+                    "系统管理"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\AdminRoleController@update",
+                    "permission": "system:role:update",
+                    "permissionMode": "single",
+                    "permissions": [
+                        "system:role:update"
+                    ],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/system/roles/{id}/menus": {
+            "post": {
+                "operationId": "App_Module_System_Http_Admin_Controller_AdminRoleController_authorize",
+                "summary": "角色菜单授权",
+                "description": "",
+                "tags": [
+                    "系统管理"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\AdminRoleController@authorize",
+                    "permission": "system:role:authorize",
+                    "permissionMode": "single",
+                    "permissions": [
+                        "system:role:authorize"
+                    ],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/system/users": {
+            "post": {
+                "operationId": "App_Module_System_Http_Admin_Controller_AdminUserController_create",
+                "summary": "新增管理员用户",
+                "description": "",
+                "tags": [
+                    "系统管理"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\AdminUserController@create",
+                    "permission": "system:user:create",
+                    "permissionMode": "single",
+                    "permissions": [
+                        "system:user:create"
+                    ],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "get": {
+                "operationId": "App_Module_System_Http_Admin_Controller_AdminUserController_list",
+                "summary": "管理员用户列表",
+                "description": "",
+                "tags": [
+                    "系统管理"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\AdminUserController@list",
+                    "permission": "system:user:list",
+                    "permissionMode": "single",
+                    "permissions": [
+                        "system:user:list"
+                    ],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/system/users/role-options": {
+            "get": {
+                "operationId": "App_Module_System_Http_Admin_Controller_AdminUserController_listRoleOptions",
+                "summary": "角色选项",
+                "description": "",
+                "tags": [
+                    "系统管理"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\AdminUserController@listRoleOptions",
+                    "permission": "system:role:list",
+                    "permissionMode": "single",
+                    "permissions": [
+                        "system:role:list"
+                    ],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/system/users/{id}": {
+            "delete": {
+                "operationId": "App_Module_System_Http_Admin_Controller_AdminUserController_delete",
+                "summary": "删除管理员用户",
+                "description": "",
+                "tags": [
+                    "系统管理"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\AdminUserController@delete",
+                    "permission": "system:user:delete",
+                    "permissionMode": "single",
+                    "permissions": [
+                        "system:user:delete"
+                    ],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "get": {
+                "operationId": "App_Module_System_Http_Admin_Controller_AdminUserController_detail",
+                "summary": "管理员用户详情",
+                "description": "",
+                "tags": [
+                    "系统管理"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\AdminUserController@detail",
+                    "permission": "system:user:detail",
+                    "permissionMode": "single",
+                    "permissions": [
+                        "system:user:detail"
+                    ],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "operationId": "App_Module_System_Http_Admin_Controller_AdminUserController_update",
+                "summary": "编辑管理员用户",
+                "description": "",
+                "tags": [
+                    "系统管理"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\AdminUserController@update",
+                    "permission": "system:user:update",
+                    "permissionMode": "single",
+                    "permissions": [
+                        "system:user:update"
+                    ],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/client/profile": {
+            "get": {
+                "operationId": "App_Module_User_Http_Client_Controller_V1_ProfileController_detail",
+                "summary": "",
+                "description": "",
+                "tags": [],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\User\\Http\\Client\\Controller\\V1\\ProfileController@detail",
+                    "permission": null,
+                    "permissionMode": null,
+                    "permissions": [],
+                    "public": false
+                }
+            }
         }
-      }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        }
     }
-  },
-  "components": {
-    "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
-      }
-    },
-    "schemas": {
-      "ApiResponse": {
-        "type": "object",
-        "required": [
-          "code",
-          "message",
-          "data"
-        ],
-        "properties": {
-          "code": {
-            "type": "string",
-            "example": "SUCCESS"
-          },
-          "message": {
-            "type": "string",
-            "example": "success"
-          },
-          "data": {}
-        }
-      },
-      "AuthUser": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "example": 1
-          },
-          "username": {
-            "type": "string",
-            "example": "admin"
-          },
-          "nickname": {
-            "type": "string",
-            "example": "TrueAdmin"
-          },
-          "roles": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "permissions": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "LoginResponse": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/ApiResponse"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "data": {
-                "type": "object",
-                "properties": {
-                  "tokenType": {
-                    "type": "string",
-                    "example": "Bearer"
-                  },
-                  "accessToken": {
-                    "type": "string"
-                  },
-                  "expiresIn": {
-                    "type": "integer",
-                    "example": 7200
-                  },
-                  "user": {
-                    "$ref": "#/components/schemas/AuthUser"
-                  }
-                }
-              }
-            }
-          }
-        ]
-      },
-      "UserResponse": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/ApiResponse"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "data": {
-                "$ref": "#/components/schemas/AuthUser"
-              }
-            }
-          }
-        ]
-      },
-      "ClientProfile": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "example": 10001
-          },
-          "nickname": {
-            "type": "string",
-            "example": "Client User"
-          },
-          "avatar": {
-            "type": "string",
-            "nullable": true
-          },
-          "mobile": {
-            "type": "string",
-            "example": "13800000000"
-          },
-          "scopes": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "ClientProfileResponse": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/ApiResponse"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "data": {
-                "$ref": "#/components/schemas/ClientProfile"
-              }
-            }
-          }
-        ]
-      },
-      "AdminProduct": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "example": 1
-          },
-          "name": {
-            "type": "string",
-            "example": "TrueAdmin Starter License"
-          },
-          "status": {
-            "type": "string",
-            "example": "published"
-          },
-          "ownerUserId": {
-            "type": "integer",
-            "example": 10001
-          },
-          "cover": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "ClientProduct": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "example": 1
-          },
-          "name": {
-            "type": "string",
-            "example": "TrueAdmin Starter License"
-          },
-          "cover": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "AdminProductListResponse": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/ApiResponse"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "data": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/AdminProduct"
-                }
-              }
-            }
-          }
-        ]
-      },
-      "ClientProductListResponse": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/ApiResponse"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "data": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/ClientProduct"
-                }
-              }
-            }
-          }
-        ]
-      }
-    }
-  }
 }

@@ -21,12 +21,11 @@ final class TestingAdminPermissionProvider implements AdminPermissionProviderInt
     {
         return [
             ['id' => 1, 'name' => '系统管理', 'path' => '/system', 'permission' => '', 'type' => 'directory'],
-            ['id' => 2, 'name' => '商品管理', 'path' => '/products', 'permission' => 'product:list', 'type' => 'menu'],
         ];
     }
 
     public function permissionCodes(): array
     {
-        return ['system:menu:list', 'system:permission:list', 'product:list'];
+        return ['system:menu:list', 'system:permission:list'];
     }
 }

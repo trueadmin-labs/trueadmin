@@ -36,7 +36,6 @@ backend/app/
     Auth/
     System/
     User/
-    Product/
 ```
 
 一句话边界：`Kernel` 提供稳定原语，`Foundation` 提供项目默认行为，`Infrastructure` 提供技术适配，`Module` 承载系统能力和业务能力。

@@ -20,14 +20,6 @@ backend/app/Module/
     Model/
     Repository/
     Service/
-  Product/
-    Http/Admin/Controller/
-    Http/Admin/Vo/
-    Http/Client/Controller/V1/
-    Service/
-    Repository/
-    Model/
-    Library/
   User/
     Http/Client/Controller/V1/
     Service/
@@ -79,15 +71,6 @@ backend/app/Module/Auth/Http/Admin/Vo/AuthUser.php
 backend/app/Module/Auth/Service/PassportService.php
 backend/app/Module/Auth/Service/JwtService.php
 
-backend/app/Module/Product/Http/Admin/Controller/ProductController.php
-backend/app/Module/Product/Http/Admin/Vo/ProductVo.php
-backend/app/Module/Product/Http/Client/Controller/V1/ProductController.php
-backend/app/Module/Product/Http/Client/Vo/V1/ProductResource.php
-backend/app/Module/Product/Service/ProductQueryService.php
-backend/app/Module/Product/Service/ClientProductQueryService.php
-backend/app/Module/Product/Repository/ProductRepository.php
-backend/app/Module/Product/Model/Product.php
-
 backend/app/Module/User/Http/Client/Controller/V1/ProfileController.php
 backend/app/Module/User/Service/ProfileService.php
 
@@ -103,14 +86,8 @@ backend/app/Module/System/Listener/Logstash/WriteOperationLogListener.php
 /api/admin/auth/login
 -> Module/Auth/Http/Admin/Controller/PassportController.php
 
-/api/admin/products
--> Module/Product/Http/Admin/Controller/ProductController.php
-
 /api/v1/client/profile
 -> Module/User/Http/Client/Controller/V1/ProfileController.php
-
-/api/v1/client/products
--> Module/Product/Http/Client/Controller/V1/ProductController.php
 ```
 
 ## 模块职责
@@ -119,9 +96,9 @@ backend/app/Module/System/Listener/Logstash/WriteOperationLogListener.php
 
 `System` 承载系统级通用能力，例如数据权限、配置、字典、基础日志、全局设置。
 
-`Product` 是业务模块示例，展示 Admin 和 Client 两类入口如何在同一模块内共存。
-
 `User` 当前承载用户端个人中心示例，后续可扩展为会员/用户体系。
+
+业务模块，例如 `Order`、`Workflow`、`Message`，后续按同一目录规范新增，不作为第一版内置模块。
 
 ## 统一事件目录规则
 
@@ -140,8 +117,8 @@ Listener 响应 Event，处理日志、通知、统计、清缓存等副作用
 推荐：
 
 ```text
-Module/Product/Event/ProductPublished.php
-Module/Product/Listener/NotifyProductPublishedListener.php
+Module/Order/Event/OrderPaid.php
+Module/Order/Listener/NotifyOrderPaidListener.php
 Module/System/Event/OperationLogged.php
 Module/System/Listener/Logstash/WriteOperationLogListener.php
 ```
@@ -191,13 +168,13 @@ packages/kernel/src/Context/ActorContext.php
 当业务模块成熟后，可以从：
 
 ```text
-backend/app/Module/Product
+backend/app/Module/Order
 ```
 
 迁移为：
 
 ```text
-backend/plugin/trueadmin/product
+backend/plugin/trueadmin/order
 ```
 
 模块内部结构保持一致，迁移成本会比较低。

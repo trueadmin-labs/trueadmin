@@ -64,7 +64,6 @@ backend/
       Auth/
       System/
       User/
-      Product/
       Order/
       Workflow/
       Message/
@@ -142,7 +141,6 @@ Module/Xxx/
 Module/Auth
 Module/System
 Module/User
-Module/Product
 ```
 
 ## 5. 分层职责
@@ -276,17 +274,17 @@ Actor / ActorContext 原语
 /api/v1/open    外部开放平台 API
 ```
 
-代码映射：
+代码映射示例：
 
 ```text
-/api/admin/products
--> Module/Product/Http/Admin/Controller/ProductController.php
+/api/admin/orders
+-> Module/Order/Http/Admin/Controller/OrderController.php
 
-/api/v1/client/products
--> Module/Product/Http/Client/Controller/V1/ProductController.php
+/api/v1/client/orders
+-> Module/Order/Http/Client/Controller/V1/OrderController.php
 
-/api/v1/open/products
--> Module/Product/Http/Open/Controller/V1/ProductController.php
+/api/v1/open/orders
+-> Module/Order/Http/Open/Controller/V1/OrderController.php
 ```
 
 版本主要隔离对外入口契约，不复制整个模块。Admin 后台端默认不拆 `V1`、`V2` 代码目录；Client 和 Open 因为可能面向用户端 App、第三方系统或长期兼容场景，才在 Controller/Request/Vo 层按版本组织。
@@ -561,9 +559,6 @@ ActorContext::runAsAdmin($admin, ...)
 backend/app/Module/System/Database/Migrations
 backend/app/Module/System/Database/Seeders
 
-backend/app/Module/Product/Database/Migrations
-backend/app/Module/Product/Database/Seeders
-
 backend/plugin/*/*/Database/Migrations
 backend/plugin/*/*/Database/Seeders
 ```
@@ -608,7 +603,7 @@ message_notifications
 
 后台用户和用户端用户默认分表。
 
-第一版已提供 System、User、Product 的模块迁移示例。
+第一版已提供 System、User 的模块迁移示例。业务模块迁移按相同规范放入对应模块目录。
 
 ## 15. OpenAPI 与契约中心
 
@@ -627,7 +622,7 @@ OpenAPI 不只是文档，而是契约中心。
 模块可以维护自己的 OpenAPI 片段：
 
 ```text
-Module/Product/openapi.json
+Module/Order/openapi.json
 ```
 
 最终聚合到：
@@ -675,7 +670,7 @@ AI 模块 Prompt
 成熟模块可以从：
 
 ```text
-backend/app/Module/Product
+backend/app/Module/Order
 ```
 
 迁移为：

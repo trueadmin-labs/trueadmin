@@ -78,36 +78,6 @@ class ExampleTest extends TestCase
         $this->assertSame('Second Client', $profile['data']['nickname']);
     }
 
-    public function testProductModuleAdminAndClientEntrances()
-    {
-        $login = $this->loginAsAdmin();
-
-        $adminProducts = $this->get('/api/admin/products', [], [
-            'Authorization' => 'Bearer ' . $login['data']['accessToken'],
-        ]);
-
-        $this->assertSame('SUCCESS', $adminProducts['code']);
-        $this->assertCount(2, $adminProducts['data']);
-        $this->assertArrayHasKey('status', $adminProducts['data'][0]);
-        $this->assertArrayHasKey('ownerUserId', $adminProducts['data'][0]);
-
-        $clientProducts = $this->get('/api/v1/client/products');
-
-        $this->assertSame('SUCCESS', $clientProducts['code']);
-        $this->assertCount(1, $clientProducts['data']);
-        $this->assertArrayNotHasKey('status', $clientProducts['data'][0]);
-        $this->assertSame('TrueAdmin Starter License', $clientProducts['data'][0]['name']);
-
-        $ownerProducts = $this->get('/api/v1/client/products', [], [
-            'X-Client-User-Id' => '10002',
-            'X-Client-User-Name' => 'Second Client',
-        ]);
-
-        $this->assertSame('SUCCESS', $ownerProducts['code']);
-        $this->assertCount(2, $ownerProducts['data']);
-        $this->assertSame('Draft Internal Product', $ownerProducts['data'][1]['name']);
-    }
-
     public function testSystemPermissionEntrances()
     {
         $roleId = (int) \Hyperf\DbConnection\Db::table('admin_roles')->where('code', 'super-admin')->value('id');
@@ -193,7 +163,7 @@ class ExampleTest extends TestCase
             ->get(\App\Foundation\Metadata\MetadataSynchronizer::class)
             ->sync();
 
-        $this->assertSame(5, $sync['menus']);
+        $this->assertSame(4, $sync['menus']);
         $this->assertGreaterThanOrEqual(10, $sync['permissions']);
 
         $roleId = (int) \Hyperf\DbConnection\Db::table('admin_roles')->where('code', 'super-admin')->value('id');

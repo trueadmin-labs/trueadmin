@@ -22,7 +22,7 @@ API 版本和多端代码复用规则见 [后端模块目录规范](../backend/m
 
 ```text
 Module/Auth/Http/Admin/Controller/PassportController.php
-Module/Product/Http/Admin/Controller/ProductController.php
+Module/Order/Http/Admin/Controller/OrderController.php
 ```
 
 特点：
@@ -40,14 +40,14 @@ Module/Product/Http/Admin/Controller/ProductController.php
 
 ```text
 Module/User/Http/Client/Controller/V1/ProfileController.php
-Module/Product/Http/Client/Controller/V1/ProductController.php
+Module/Order/Http/Client/Controller/V1/OrderController.php
 ```
 
 当前示例：
 
 ```text
 GET /api/v1/client/profile
-GET /api/v1/client/products
+GET /api/v1/client/orders
 ```
 
 ## Open API

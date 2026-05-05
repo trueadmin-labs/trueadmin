@@ -47,12 +47,6 @@ export default [
     ],
   },
   {
-    path: '/products',
-    name: 'products',
-    icon: 'appstore',
-    component: './products',
-  },
-  {
     path: '/',
     redirect: '/dashboard',
   },
