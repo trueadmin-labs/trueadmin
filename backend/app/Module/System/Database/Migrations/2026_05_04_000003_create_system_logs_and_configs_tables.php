@@ -18,6 +18,7 @@ return new class extends Migration {
             $table->string('principal_id', 64)->default('');
             $table->string('operator_type', 32)->default('');
             $table->string('operator_id', 64)->default('');
+            $table->unsignedBigInteger('operation_dept_id')->nullable();
             $table->json('context')->nullable();
             $table->datetimes();
         });

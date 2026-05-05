@@ -4,12 +4,29 @@ declare(strict_types=1);
 
 namespace App\Module\System\Repository;
 
+use App\Foundation\Query\AdminQuery;
 use App\Foundation\Pagination\PageResult;
+use App\Foundation\Repository\AbstractRepository;
 use App\Module\System\Model\AdminUser;
 use Hyperf\DbConnection\Db;
 
-final class AdminUserRepository
+final class AdminUserRepository extends AbstractRepository
 {
+    protected array $keywordFields = ['username', 'nickname'];
+
+    protected array $filterable = [
+        'id' => ['=', 'in'],
+        'username' => ['=', 'like'],
+        'nickname' => ['=', 'like'],
+        'status' => ['=', 'in'],
+        'primary_dept_id' => ['=', 'in'],
+        'created_at' => ['between', '>=', '<='],
+    ];
+
+    protected array $sortable = ['id', 'username', 'status', 'created_at', 'updated_at'];
+
+    protected array $defaultSort = ['id' => 'asc'];
+
     public function findEnabledByUsername(string $username): ?AdminUser
     {
         return AdminUser::query()
@@ -62,25 +79,13 @@ final class AdminUserRepository
             ->all();
     }
 
-    public function paginate(int $page, int $pageSize, string $keyword = '', string $status = ''): PageResult
+    public function paginate(AdminQuery $adminQuery): PageResult
     {
-        $query = AdminUser::query()->when($keyword !== '', static function ($query) use ($keyword): void {
-            $query->where(static function ($query) use ($keyword): void {
-                $query->where('username', 'like', '%' . $keyword . '%')
-                    ->orWhere('nickname', 'like', '%' . $keyword . '%');
-            });
-        })->when($status !== '', static function ($query) use ($status): void {
-            $query->where('status', $status);
-        });
-
-        $total = (int) (clone $query)->count();
-        $items = $query->orderBy('id')
-            ->forPage($page, $pageSize)
-            ->get()
-            ->map(fn (AdminUser $user): array => $this->toArray($user))
-            ->all();
-
-        return new PageResult($items, $total, $page, $pageSize);
+        return $this->pageQuery(
+            AdminUser::query(),
+            $adminQuery,
+            fn (AdminUser $user): array => $this->toArray($user),
+        );
     }
 
     public function findById(int $id): ?AdminUser
@@ -114,6 +119,7 @@ final class AdminUserRepository
     public function delete(AdminUser $user): void
     {
         $userId = (int) $user->getAttribute('id');
+        Db::table('admin_user_departments')->where('user_id', $userId)->delete();
         Db::table('admin_role_user')->where('user_id', $userId)->delete();
         $user->delete();
     }
@@ -144,6 +150,36 @@ final class AdminUserRepository
             ->all();
     }
 
+    /**
+     * @param list<int> $deptIds
+     */
+    public function syncDepartments(AdminUser $user, array $deptIds, ?int $primaryDeptId): void
+    {
+        $userId = (int) $user->getAttribute('id');
+        Db::table('admin_user_departments')->where('user_id', $userId)->delete();
+
+        foreach (array_values(array_unique($deptIds)) as $deptId) {
+            Db::table('admin_user_departments')->insert([
+                'user_id' => $userId,
+                'dept_id' => $deptId,
+                'is_primary' => $primaryDeptId !== null && $deptId === $primaryDeptId,
+            ]);
+        }
+    }
+
+    /**
+     * @return list<int>
+     */
+    public function departmentIds(AdminUser $user): array
+    {
+        return Db::table('admin_user_departments')
+            ->where('user_id', (int) $user->getAttribute('id'))
+            ->pluck('dept_id')
+            ->map(static fn ($id): int => (int) $id)
+            ->values()
+            ->all();
+    }
+
     public function toArray(AdminUser $user): array
     {
         return [
@@ -151,7 +187,8 @@ final class AdminUserRepository
             'username' => (string) $user->getAttribute('username'),
             'nickname' => (string) $user->getAttribute('nickname'),
             'status' => (string) $user->getAttribute('status'),
-            'deptId' => $user->getAttribute('dept_id') === null ? null : (int) $user->getAttribute('dept_id'),
+            'primaryDeptId' => $user->getAttribute('primary_dept_id') === null ? null : (int) $user->getAttribute('primary_dept_id'),
+            'deptIds' => $this->departmentIds($user),
             'roles' => $this->roleCodes($user),
             'roleIds' => $this->roleIds($user),
             'createdAt' => (string) $user->getAttribute('created_at'),

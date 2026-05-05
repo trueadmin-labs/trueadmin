@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Module\System\Contract;
+namespace App\Foundation\Contract;
 
 use TrueAdmin\Kernel\Context\Actor;
 

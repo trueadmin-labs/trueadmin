@@ -5,30 +5,35 @@ declare(strict_types=1);
 namespace App\Module\System\Repository;
 
 use App\Foundation\Pagination\PageResult;
+use App\Foundation\Query\AdminQuery;
+use App\Foundation\Repository\AbstractRepository;
 use App\Module\System\Model\AdminRole;
 use Hyperf\DbConnection\Db;
 
-final class AdminRoleRepository
+final class AdminRoleRepository extends AbstractRepository
 {
-    public function paginate(int $page, int $pageSize, string $keyword = '', string $status = ''): PageResult
+    protected array $keywordFields = ['code', 'name'];
+
+    protected array $filterable = [
+        'id' => ['=', 'in'],
+        'parent_id' => ['=', 'in'],
+        'code' => ['=', 'like'],
+        'name' => ['=', 'like'],
+        'level' => ['=', 'in', '>=', '<='],
+        'status' => ['=', 'in'],
+    ];
+
+    protected array $sortable = ['id', 'level', 'sort', 'created_at', 'updated_at'];
+
+    protected array $defaultSort = ['level' => 'asc', 'sort' => 'asc', 'id' => 'asc'];
+
+    public function paginate(AdminQuery $adminQuery): PageResult
     {
-        $query = AdminRole::query()->when($keyword !== '', static function ($query) use ($keyword): void {
-            $query->where(static function ($query) use ($keyword): void {
-                $query->where('code', 'like', '%' . $keyword . '%')
-                    ->orWhere('name', 'like', '%' . $keyword . '%');
-            });
-        })->when($status !== '', static function ($query) use ($status): void {
-            $query->where('status', $status);
-        });
-
-        $total = (int) (clone $query)->count();
-        $items = $query->orderBy('id')
-            ->forPage($page, $pageSize)
-            ->get()
-            ->map(fn (AdminRole $role): array => $this->toArray($role))
-            ->all();
-
-        return new PageResult($items, $total, $page, $pageSize);
+        return $this->pageQuery(
+            AdminRole::query(),
+            $adminQuery,
+            fn (AdminRole $role): array => $this->toArray($role),
+        );
     }
 
     public function find(int $id): ?AdminRole
@@ -57,6 +62,7 @@ final class AdminRoleRepository
     public function delete(AdminRole $role): void
     {
         $roleId = (int) $role->getAttribute('id');
+        AdminRole::query()->where('parent_id', $roleId)->update(['parent_id' => 0, 'level' => 1, 'path' => '']);
         Db::table('admin_role_menu')->where('role_id', $roleId)->delete();
         Db::table('admin_role_user')->where('role_id', $roleId)->delete();
         $role->delete();
@@ -88,6 +94,18 @@ final class AdminRoleRepository
             ->all();
     }
 
+    public function childCount(int $roleId): int
+    {
+        return (int) AdminRole::query()->where('parent_id', $roleId)->count();
+    }
+
+    public function isDescendant(AdminRole $role, int $ancestorId): bool
+    {
+        $path = (string) $role->getAttribute('path');
+
+        return str_contains($path, ',' . $ancestorId . ',');
+    }
+
 
     /**
      * @return list<int>
@@ -109,6 +127,8 @@ final class AdminRoleRepository
     {
         return AdminRole::query()
             ->where('status', 'enabled')
+            ->orderBy('level')
+            ->orderBy('sort')
             ->orderBy('id')
             ->get()
             ->map(fn (AdminRole $role): array => $this->toArray($role))
@@ -119,8 +139,13 @@ final class AdminRoleRepository
     {
         return [
             'id' => (int) $role->getAttribute('id'),
+            'parentId' => (int) $role->getAttribute('parent_id'),
+            'parent_id' => (int) $role->getAttribute('parent_id'),
             'code' => (string) $role->getAttribute('code'),
             'name' => (string) $role->getAttribute('name'),
+            'level' => (int) $role->getAttribute('level'),
+            'path' => (string) $role->getAttribute('path'),
+            'sort' => (int) $role->getAttribute('sort'),
             'status' => (string) $role->getAttribute('status'),
         ];
     }

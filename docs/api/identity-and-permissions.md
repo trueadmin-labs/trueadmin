@@ -28,6 +28,7 @@ admin_permissions
 admin_user_roles
 admin_role_permissions
 admin_departments
+admin_user_departments
 admin_positions
 ```
 
@@ -37,10 +38,38 @@ admin_positions
 - 按钮权限。
 - 接口权限。
 - 数据权限。
-- 部门岗位。
+- 角色层级和子角色授权边界。
+- 多部门、主部门、部门岗位。
 - 操作日志。
 - 登录日志。
 - 后台审计。
+
+角色层级用于控制授权边界，而不是默认继承权限。子角色的权限范围必须是父角色权限范围的子集：
+
+```text
+admin_roles.parent_id
+admin_roles.level
+admin_roles.path
+admin_roles.sort
+```
+
+父角色拥有的菜单、按钮、接口权限和数据权限，是子角色可被授权的上限。普通管理员只能管理自己可管理角色树内的角色，不能创建或授权超过自身权限范围的角色。`super-admin` 是根级特殊角色，可以绕过角色层级约束，但仍应保留操作日志。
+
+后台管理员第一版按多部门设计：
+
+```text
+admin_departments.parent_id       父部门
+admin_departments.level           部门层级
+admin_departments.path            祖先链
+admin_users.primary_dept_id       默认操作部门
+admin_user_departments.user_id    管理员 ID
+admin_user_departments.dept_id    所属部门 ID
+admin_user_departments.is_primary 是否主部门
+```
+
+`admin_departments` 是标准部门资源，由后台部门管理接口维护。主部门用于默认操作部门和写入归属，不等同于唯一可见部门。数据权限应基于当前 operator 的可见部门集合计算：用户所属部门集合、所属部门及子部门、角色自定义部门集合等都可以成为数据范围。
+
+如果用户属于多个部门，前端可以提供“当前操作部门”切换能力，但只能切换到该用户所属部门集合内。未显式切换时，当前操作部门等于主部门。操作日志和审计信息应记录本次操作部门，方便还原当时是以哪个部门身份执行操作。
 
 后台 Token 应使用：
 
@@ -190,4 +219,3 @@ AI 生成代码时必须先判断接口属于哪类调用方：
 - `open`：使用开放平台认证和签名。
 
 不要把后台用户表、用户端用户表和开放平台应用表混用。
-

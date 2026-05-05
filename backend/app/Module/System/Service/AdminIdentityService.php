@@ -44,6 +44,8 @@ final class AdminIdentityService implements AdminIdentityProviderInterface
             (string) $user->getAttribute('nickname'),
             $this->users->roleCodes($user),
             $this->users->permissions($user),
+            $user->getAttribute('primary_dept_id') === null ? null : (int) $user->getAttribute('primary_dept_id'),
+            $this->users->departmentIds($user),
         );
     }
 }

@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Module\System\Http\Admin\Controller;
 
 use App\Foundation\Http\Controller\AdminController;
+use App\Foundation\Http\Middleware\PermissionMiddleware;
 use App\Foundation\Support\ApiResponse;
+use App\Foundation\Contract\AdminPermissionProviderInterface;
 use App\Module\Auth\Http\Admin\Middleware\AdminAuthMiddleware;
-use App\Module\System\Contract\AdminPermissionProviderInterface;
-use App\Module\System\Http\Admin\Middleware\PermissionMiddleware;
 use TrueAdmin\Kernel\Http\Attribute\AdminController as AdminRouteController;
 use TrueAdmin\Kernel\Http\Attribute\AdminGet;
 use TrueAdmin\Kernel\Http\Attribute\Menu;

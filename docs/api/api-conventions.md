@@ -109,6 +109,16 @@ Authorization: Bearer <token>
 }
 ```
 
+后台管理列表查询使用统一参数协议：
+
+```http
+GET /api/admin/system/users?page=1&pageSize=20&keyword=admin
+GET /api/admin/system/users?filter={"status":"enabled"}&op={"status":"="}
+GET /api/admin/system/users?sort=created_at&order=desc
+```
+
+`filter` 和 `op` 为 JSON 对象字符串，后端只会应用 Repository 白名单中允许的字段和操作符。常用操作符包括 `=`、`<>`、`>`、`>=`、`<`、`<=`、`like`、`in`、`between`。
+
 ## HTTP 方法
 
 - `GET`：查询列表或详情。

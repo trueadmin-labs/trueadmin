@@ -12,8 +12,12 @@ final class AdminRole extends Model
     protected ?string $table = 'admin_roles';
 
     protected array $fillable = [
+        'parent_id',
         'code',
         'name',
+        'level',
+        'path',
+        'sort',
         'status',
     ];
 

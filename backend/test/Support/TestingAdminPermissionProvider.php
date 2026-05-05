@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace HyperfTest\Support;
 
-use App\Module\System\Contract\AdminPermissionProviderInterface;
+use App\Foundation\Contract\AdminPermissionProviderInterface;
 use TrueAdmin\Kernel\Context\Actor;
 
 final class TestingAdminPermissionProvider implements AdminPermissionProviderInterface

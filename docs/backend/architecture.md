@@ -165,6 +165,40 @@ Controller 只负责：
 
 Controller 不直接写复杂业务规则。
 
+### 5.1.1 Request 与 Service 校验边界
+
+TrueAdmin 按“输入契约”和“业务不变量”拆分校验职责。这条规则对 AI 生成代码尤其重要：看到 Request 就知道这里是 HTTP 入参契约，看到 Service 就知道这里是业务规则。
+
+Request 层负责不依赖业务上下文的输入校验和归一化，例如：
+
+- 字段是否必填。
+- 字段类型，例如整数、字符串、数组、布尔值。
+- 长度、格式、基础枚举，例如 `status in enabled,disabled`。
+- HTTP 入参命名归一，例如 `parent_id` 转 `parentId`。
+- 空字符串转 `null`、分页参数默认值等纯输入处理。
+
+Service 层负责必须在所有入口都成立的业务不变量，例如：
+
+- `primaryDeptId` 必须属于 `deptIds`。
+- 父角色、父部门、菜单、角色、部门是否真实存在。
+- 角色不能移动到自己或子孙节点。
+- 子角色权限不能超过父角色权限范围。
+- 部门不能删除有子部门或已绑定用户的部门。
+- 当前操作者是否允许创建、授权或删除目标资源。
+
+不要把业务不变量只放在 Request 层。Service 可能被 Controller、Command、Crontab、Listener、Queue、插件或测试直接调用；如果业务规则只存在于 HTTP Request，非 HTTP 入口就会绕过约束。
+
+推荐调用形态：
+
+```php
+public function create(CreateAdminUserRequest $request): array
+{
+    return ApiResponse::success($this->users->create($request->validated()));
+}
+```
+
+Service 不应该长期保留 `requiredString()`、`status()` 这类纯输入校验辅助方法；它应该保留 `assertPrimaryDepartmentInDepartments()`、`assertWithinParentMenuScope()` 这类业务语义方法。开发早期可以先在 Service 内收敛校验，稳定后应迁移到 Request 层，让 Controller、Request、Service 三者更容易被 AI 和人同时理解。
+
 ### 5.2 Service 层
 
 Service 负责业务编排。
@@ -179,7 +213,23 @@ Repository 负责数据访问。
 
 普通 Repository 可以继承 `backend/app/Foundation` 提供的轻量 `AbstractRepository`。
 
-搜索条件优先通过 `handleSearch()` 扩展。
+后台管理列表统一使用 `AdminQueryRequest -> AdminQuery -> AbstractRepository::handleSearch()` 这一条链路，避免每个列表接口各自解析分页、关键字、筛选和排序。
+
+标准查询参数：
+
+```text
+page=1
+pageSize=20
+keyword=admin
+filter={"status":"enabled"}
+op={"status":"="}
+sort=created_at
+order=desc
+```
+
+分页响应统一输出 `pageSize`，请求参数和 JSON 字段都使用 camelCase，数据库字段仍使用 snake_case。`filter`、`op`、`sort` 只允许命中 Repository 声明的白名单字段，禁止把前端参数直接映射成任意 SQL 字段。
+
+搜索条件优先通过 `handleSearch()` 扩展。简单场景只需要配置 `$keywordFields`、`$filterable`、`$sortable`、`$defaultSort`；复杂场景可以在具体 Repository 覆盖 `handleSearch()`，但仍应保留字段白名单和业务语义清晰的查询封装。
 
 Repository 不应该处理 HTTP 语义。
 
@@ -310,6 +360,7 @@ principal  实际登录主体
 operator   本次业务操作人
 source     http / crontab / queue / system
 reason     代操作或系统操作原因
+operation_dept_id 本次操作部门
 ```
 
 普通 HTTP 请求：
@@ -341,9 +392,37 @@ source = crontab
 
 - 鉴权看 principal。
 - 数据权限看 operator。
+- 写入默认使用 operator 的当前操作部门。
 - `created_by`、`updated_by` 默认写 operator。
 - 操作日志同时记录 principal 和 operator。
+- 操作日志应记录本次 operation_dept_id，便于审计还原当时以哪个部门身份操作。
 - 队列、定时任务、Listener 不允许隐式假设存在 HTTP 用户。
+
+后台管理员第一版支持多部门。用户拥有一个主部门和多个所属部门：
+
+```text
+admin_users.primary_dept_id
+admin_departments.id
+admin_departments.parent_id
+admin_departments.level
+admin_departments.path
+admin_user_departments.user_id
+admin_user_departments.dept_id
+admin_user_departments.is_primary
+```
+
+`admin_departments` 按树形部门设计，后台提供 `/api/admin/system/departments` 作为标准管理入口。部门树是用户所属部门、主部门、后续数据权限范围和组织审计的基础资源，不应该只通过数据库手工维护。
+
+主部门用于默认操作部门，不代表用户只能查看主部门数据。一次请求的操作部门优先级：
+
+```text
+显式指定 operation_dept_id
+-> operator.claims.operationDeptId
+-> operator.claims.primaryDeptId
+-> null
+```
+
+如果允许前端切换当前操作部门，只能在用户所属部门集合内切换；切换结果进入 Token claims、服务端 Session 或请求上下文，具体实现可按项目部署形态选择。定时任务和队列必须显式传入 operator 及 operation_dept_id，不能默认取某个 HTTP 用户。
 
 推荐目录：
 
@@ -370,6 +449,7 @@ ActorContext::runAsAdmin($admin, fn () => ...)
 ```text
 管理员
 角色
+角色层级
 菜单
 按钮权限
 接口权限
@@ -401,6 +481,41 @@ AI 模块说明
 
 超级管理员可以绕过权限点校验，但仍应保留操作日志。
 
+### 角色层级
+
+角色第一版建议支持层级，但角色层级只表达授权边界和管理边界，不建议默认表达权限继承。
+
+推荐字段：
+
+```text
+admin_roles.parent_id
+admin_roles.level
+admin_roles.path
+admin_roles.sort
+```
+
+核心规则：
+
+- 父角色可以创建、编辑、授权子角色。
+- 子角色的菜单、按钮、接口权限必须是父角色权限集合的子集。
+- 子角色的数据权限范围不能超过父角色的数据权限范围。
+- 普通管理员只能分配自己可管理角色树内的角色。
+- 禁止移动角色到自己的子孙节点下，避免环形层级。
+- `super-admin` 是根级特殊角色，不受父级约束，但仍记录操作日志。
+- 角色层级不自动继承权限。父角色拥有 `A/B/C`，子角色不会自动拥有 `A/B/C`，必须显式授权，且只能授权其中子集。
+
+为什么不默认继承：后台角色经常用于岗位职责拆分，“上级能管理下级”不等于“下级拥有上级全部权限”。默认继承容易导致权限扩散；子集约束更安全，也更符合企业后台授权习惯。
+
+授权时应校验三类边界：
+
+```text
+当前 principal 可管理的角色范围
+目标父角色已拥有的权限范围
+目标角色即将保存的权限范围
+```
+
+当角色绑定数据权限时，数据范围也要做子集校验。例如父角色只能查看华东大区，子角色不能被授予全国范围；父角色只能查看部门 A/B，子角色只能在 A/B 内选择。
+
 ## 10. 数据权限设计
 
 参考 MineAdmin：
@@ -415,10 +530,27 @@ Rule / Factory
 TrueAdmin 增强点：
 
 - 数据权限基于 ActorContext 的 operator。
+- 数据权限支持多部门，计算时使用 operator 的可见部门集合，而不是只使用主部门。
+- 当前操作部门只决定写入归属和审计上下文，不应该收窄用户本来拥有的可见部门集合。
 - 支持 HTTP、队列、定时任务显式注入 operator。
 - 支持查询别名和多表查询规范。
 - 支持测试断言数据权限是否生效。
 - 支持调试最终数据范围。
+
+后台数据权限建议内置这些范围：
+
+```text
+all                         全部数据
+self                        本人创建
+current_department          当前操作部门
+current_department_tree     当前操作部门及子部门
+assigned_departments        用户所属部门集合
+assigned_departments_tree   用户所属部门集合及子部门
+department_created_by       所属部门集合 + 本人创建
+custom_departments          角色指定部门集合
+```
+
+当用户属于多个部门时，`assigned_departments` 和 `assigned_departments_tree` 才是主要数据权限入口。`primary_dept_id` 只是默认操作部门，不应该被误用为唯一数据部门。
 
 推荐使用位置：
 
@@ -466,6 +598,24 @@ created_at
 - create/update/delete/export/status/approval 必须记录。
 - 权限变更、角色变更、用户禁用、数据导出必须重点记录。
 - 日志写入通过 Event + Listener 解耦。
+
+`action` 使用点分层级命名，格式为 `{端}.{资源}.{动作}`。
+
+示例：
+
+```text
+admin.user.create
+admin.user.update
+admin.user.delete
+admin.role.create
+admin.role.update
+admin.role.authorize
+admin.menu.create
+admin.menu.update
+admin.menu.delete
+```
+
+不使用 `admin_user_create`、`admin_role_update`、`admin_menu_delete` 这类下划线拼接格式。点分格式更适合日志检索、审计聚合、权限/接口动作对齐和后续 OpenTelemetry/BI 维度分析。
 
 推荐目录：
 

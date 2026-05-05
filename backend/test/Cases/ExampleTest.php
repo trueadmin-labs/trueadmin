@@ -104,6 +104,38 @@ class ExampleTest extends TestCase
         $login = $this->loginAsAdmin();
         $headers = ['Authorization' => 'Bearer ' . $login['data']['accessToken']];
         $suffix = str_replace('.', '', uniqid('', true));
+        $operationLogStartId = (int) \Hyperf\DbConnection\Db::table('admin_operation_logs')->max('id');
+        $adminPrimaryDeptId = (int) \Hyperf\DbConnection\Db::table('admin_users')
+            ->where('username', 'admin')
+            ->value('primary_dept_id');
+        $superAdminRoleId = (int) \Hyperf\DbConnection\Db::table('admin_roles')->where('code', 'super-admin')->value('id');
+
+        $deptA = $this->json('/api/admin/system/departments', [
+            'code' => 'test-dept-a-' . $suffix,
+            'name' => '测试部门A' . $suffix,
+            'sort' => 10,
+            'status' => 'enabled',
+        ], $headers);
+        $this->assertSame('SUCCESS', $deptA['code']);
+        $this->assertSame(1, $deptA['data']['level']);
+
+        $deptB = $this->json('/api/admin/system/departments', [
+            'code' => 'test-dept-b-' . $suffix,
+            'name' => '测试部门B' . $suffix,
+            'parentId' => $deptA['data']['id'],
+            'sort' => 20,
+            'status' => 'enabled',
+        ], $headers);
+        $this->assertSame('SUCCESS', $deptB['code']);
+        $this->assertSame($deptA['data']['id'], $deptB['data']['parentId']);
+        $this->assertSame(2, $deptB['data']['level']);
+
+        $departments = $this->get('/api/admin/system/departments', ['keyword' => 'test-dept-a-' . $suffix], $headers);
+        $this->assertSame('SUCCESS', $departments['code']);
+        $this->assertGreaterThanOrEqual(1, count($departments['data']));
+
+        $deptAId = $deptA['data']['id'];
+        $deptBId = $deptB['data']['id'];
 
         $menu = $this->json('/api/admin/system/menus', [
             'name' => '测试菜单' . $suffix,
@@ -119,11 +151,45 @@ class ExampleTest extends TestCase
         $role = $this->json('/api/admin/system/roles', [
             'code' => 'test-role-' . $suffix,
             'name' => '测试角色' . $suffix,
+            'parentId' => $superAdminRoleId,
+            'sort' => 10,
             'status' => 'enabled',
             'menuIds' => [$menu['data']['id']],
         ], $headers);
         $this->assertSame('SUCCESS', $role['code']);
+        $this->assertSame($superAdminRoleId, $role['data']['parentId']);
+        $this->assertSame(2, $role['data']['level']);
         $this->assertContains($menu['data']['id'], $role['data']['menuIds']);
+
+        $menuOutsideParent = $this->json('/api/admin/system/menus', [
+            'name' => '父角色外菜单' . $suffix,
+            'path' => '/tests/outside-' . $suffix,
+            'permission' => 'test:' . $suffix . ':outside',
+            'type' => 'menu',
+            'sort' => 101,
+            'status' => 'enabled',
+        ], $headers);
+        $this->assertSame('SUCCESS', $menuOutsideParent['code']);
+
+        $childRoleDenied = $this->json('/api/admin/system/roles', [
+            'code' => 'test-child-role-denied-' . $suffix,
+            'name' => '越权子角色' . $suffix,
+            'parentId' => $role['data']['id'],
+            'status' => 'enabled',
+            'menuIds' => [$menuOutsideParent['data']['id']],
+        ], $headers);
+        $this->assertSame('KERNEL.REQUEST.VALIDATION_FAILED', $childRoleDenied['code']);
+
+        $childRole = $this->json('/api/admin/system/roles', [
+            'code' => 'test-child-role-' . $suffix,
+            'name' => '子角色' . $suffix,
+            'parentId' => $role['data']['id'],
+            'status' => 'enabled',
+            'menuIds' => [$menu['data']['id']],
+        ], $headers);
+        $this->assertSame('SUCCESS', $childRole['code']);
+        $this->assertSame($role['data']['id'], $childRole['data']['parentId']);
+        $this->assertSame(3, $childRole['data']['level']);
 
         $user = $this->json('/api/admin/system/users', [
             'username' => 'test-user-' . $suffix,
@@ -131,10 +197,46 @@ class ExampleTest extends TestCase
             'nickname' => '测试用户' . $suffix,
             'status' => 'enabled',
             'roleIds' => [$role['data']['id']],
+            'deptIds' => [$deptAId, $deptBId],
+            'primaryDeptId' => $deptBId,
         ], $headers);
         $this->assertSame('SUCCESS', $user['code']);
         $this->assertSame('test-user-' . $suffix, $user['data']['username']);
         $this->assertContains($role['data']['id'], $user['data']['roleIds']);
+        $this->assertSame($deptBId, $user['data']['primaryDeptId']);
+        $this->assertEqualsCanonicalizing([$deptAId, $deptBId], $user['data']['deptIds']);
+
+        $updatedMenu = $this->put('/api/admin/system/menus/' . $menu['data']['id'], [
+            'name' => '测试菜单更新' . $suffix,
+            'path' => '/tests/' . $suffix,
+            'permission' => 'test:' . $suffix . ':list',
+            'type' => 'menu',
+            'sort' => 100,
+            'status' => 'enabled',
+        ], $headers);
+        $this->assertSame('SUCCESS', $updatedMenu['code']);
+        $this->assertSame('测试菜单更新' . $suffix, $updatedMenu['data']['name']);
+
+        $updatedRole = $this->put('/api/admin/system/roles/' . $role['data']['id'], [
+            'code' => 'test-role-' . $suffix,
+            'name' => '测试角色更新' . $suffix,
+            'status' => 'enabled',
+            'menuIds' => [$menu['data']['id']],
+        ], $headers);
+        $this->assertSame('SUCCESS', $updatedRole['code']);
+        $this->assertSame('测试角色更新' . $suffix, $updatedRole['data']['name']);
+
+        $updatedUser = $this->put('/api/admin/system/users/' . $user['data']['id'], [
+            'username' => 'test-user-' . $suffix,
+            'nickname' => '测试用户更新' . $suffix,
+            'status' => 'enabled',
+            'roleIds' => [$role['data']['id']],
+            'deptIds' => [$deptAId, $deptBId],
+            'primaryDeptId' => $deptAId,
+        ], $headers);
+        $this->assertSame('SUCCESS', $updatedUser['code']);
+        $this->assertSame('测试用户更新' . $suffix, $updatedUser['data']['nickname']);
+        $this->assertSame($deptAId, $updatedUser['data']['primaryDeptId']);
 
         $users = $this->get('/api/admin/system/users', ['keyword' => 'test-user-' . $suffix], $headers);
         $this->assertSame('SUCCESS', $users['code']);
@@ -149,11 +251,65 @@ class ExampleTest extends TestCase
         $deleteUser = $this->delete('/api/admin/system/users/' . $user['data']['id'], [], $headers);
         $this->assertSame('SUCCESS', $deleteUser['code']);
 
+        $deleteChildRole = $this->delete('/api/admin/system/roles/' . $childRole['data']['id'], [], $headers);
+        $this->assertSame('SUCCESS', $deleteChildRole['code']);
+
         $deleteRole = $this->delete('/api/admin/system/roles/' . $role['data']['id'], [], $headers);
         $this->assertSame('SUCCESS', $deleteRole['code']);
 
         $deleteMenu = $this->delete('/api/admin/system/menus/' . $menu['data']['id'], [], $headers);
         $this->assertSame('SUCCESS', $deleteMenu['code']);
+
+        $deleteMenuOutsideParent = $this->delete('/api/admin/system/menus/' . $menuOutsideParent['data']['id'], [], $headers);
+        $this->assertSame('SUCCESS', $deleteMenuOutsideParent['code']);
+
+        $deleteDeptB = $this->delete('/api/admin/system/departments/' . $deptBId, [], $headers);
+        $this->assertSame('SUCCESS', $deleteDeptB['code']);
+
+        $deleteDeptA = $this->delete('/api/admin/system/departments/' . $deptAId, [], $headers);
+        $this->assertSame('SUCCESS', $deleteDeptA['code']);
+
+        $expectedActions = [
+            'admin.department.create',
+            'admin.department.delete',
+            'admin.menu.create',
+            'admin.menu.update',
+            'admin.menu.delete',
+            'admin.role.create',
+            'admin.role.update',
+            'admin.role.authorize',
+            'admin.role.delete',
+            'admin.user.create',
+            'admin.user.update',
+            'admin.user.delete',
+        ];
+        $actions = \Hyperf\DbConnection\Db::table('admin_operation_logs')
+            ->where('id', '>', $operationLogStartId)
+            ->whereIn('action', $expectedActions)
+            ->pluck('action')
+            ->all();
+        $this->assertEqualsCanonicalizing($expectedActions, array_values(array_unique($actions)));
+        $this->assertSame(0, \Hyperf\DbConnection\Db::table('admin_operation_logs')
+            ->where('id', '>', $operationLogStartId)
+            ->whereIn('action', [
+                'admin_menu_create',
+                'admin_menu_update',
+                'admin_menu_delete',
+                'admin_department_create',
+                'admin_department_delete',
+                'admin_role_create',
+                'admin_role_update',
+                'admin_role_authorize',
+                'admin_role_delete',
+                'admin_user_create',
+                'admin_user_update',
+                'admin_user_delete',
+            ])
+            ->count());
+        $this->assertGreaterThanOrEqual(1, \Hyperf\DbConnection\Db::table('admin_operation_logs')
+            ->where('id', '>', $operationLogStartId)
+            ->where('operation_dept_id', $adminPrimaryDeptId)
+            ->count());
     }
 
 
@@ -163,7 +319,7 @@ class ExampleTest extends TestCase
             ->get(\App\Foundation\Metadata\MetadataSynchronizer::class)
             ->sync();
 
-        $this->assertSame(4, $sync['menus']);
+        $this->assertSame(5, $sync['menus']);
         $this->assertGreaterThanOrEqual(10, $sync['permissions']);
 
         $roleId = (int) \Hyperf\DbConnection\Db::table('admin_roles')->where('code', 'super-admin')->value('id');
@@ -176,6 +332,7 @@ class ExampleTest extends TestCase
         }
 
         $this->assertSame(1, \Hyperf\DbConnection\Db::table('admin_menus')->where('code', 'system')->count());
+        $this->assertSame(1, \Hyperf\DbConnection\Db::table('admin_menus')->where('code', 'system.departments')->count());
         $this->assertSame(1, \Hyperf\DbConnection\Db::table('admin_menus')->where('code', 'system.users')->count());
         $this->assertSame('system:user:create', \Hyperf\DbConnection\Db::table('admin_menus')
             ->where('code', 'system:user:create')
@@ -246,4 +403,5 @@ class ExampleTest extends TestCase
 
         return $login;
     }
+
 }

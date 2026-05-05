@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Module\System\Service;
 
-use App\Module\System\Contract\AdminPermissionProviderInterface;
+use App\Foundation\Contract\AdminPermissionProviderInterface;
 use App\Module\System\Repository\AdminMenuRepository;
 use TrueAdmin\Kernel\Context\Actor;
 use TrueAdmin\Kernel\Context\ActorContext;

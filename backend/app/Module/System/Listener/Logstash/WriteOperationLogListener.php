@@ -47,6 +47,7 @@ final class WriteOperationLogListener implements ListenerInterface
                 'principal_id' => $principal === null ? '' : (string) $principal->id,
                 'operator_type' => $operator?->type ?? '',
                 'operator_id' => $operator === null ? '' : (string) $operator->id,
+                'operation_dept_id' => $operator?->claims['operationDeptId'] ?? null,
                 'context' => $event->context,
             ]);
         } catch (Throwable $exception) {

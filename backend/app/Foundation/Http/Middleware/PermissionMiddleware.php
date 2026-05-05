@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Module\System\Http\Admin\Middleware;
+namespace App\Foundation\Http\Middleware;
 
-use App\Module\System\Contract\AdminPermissionProviderInterface;
+use App\Foundation\Contract\AdminPermissionProviderInterface;
 use Hyperf\Di\Annotation\AnnotationCollector;
 use Hyperf\HttpServer\Router\Dispatched;
 use Psr\Http\Message\ResponseInterface;

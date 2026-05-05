@@ -25,9 +25,21 @@ TrueAdmin 后端会参考 MineAdmin 的 Hyperf 使用方式，多使用 PHP Attr
 
 不建议用注解承载复杂业务规则。复杂业务规则仍然应该写在 Service、Repository、Policy 或独立业务类里。
 
+注解、Request、Service 的职责边界如下：
+
+```text
+Attribute  声明路由、权限、菜单、日志、OpenAPI、数据权限等横切元数据
+Request    声明 HTTP 入参契约和输入归一化
+Service    承载业务编排和跨入口业务不变量
+```
+
+不要为了减少文件数量，把 Request 输入校验写进注解，也不要把业务不变量只写进 Request。Controller、Command、Crontab、Queue、Listener 和插件都可能调用同一个 Service，因此真正的业务约束必须留在 Service、Policy 或独立业务类中。
+
 ## 数据权限
 
 数据权限参考 MineAdmin 的思路：业务方法通过 `#[DataScope]` 声明数据范围，底层通过 AOP 在当前协程上下文中记录数据权限配置，后续查询构建器或 Repository 根据上下文追加查询条件。
+
+多部门场景下，数据权限计算读取 operator 的可见部门集合。主部门只作为默认操作部门，不应被误用为唯一数据部门。
 
 示例：
 
@@ -35,40 +47,42 @@ TrueAdmin 后端会参考 MineAdmin 的 Hyperf 使用方式，多使用 PHP Attr
 use TrueAdmin\Kernel\DataPermission\Attribute\DataScope;
 use TrueAdmin\Kernel\DataPermission\ScopeType;
 
-final class ProductQueryService
+final class AdminUserQueryService
 {
-    #[DataScope(onlyTables: ['products'], scopeType: ScopeType::DEPARTMENT_CREATED_BY)]
+    #[DataScope(onlyTables: ['admin_users'], scopeType: ScopeType::DEPARTMENT_CREATED_BY)]
     public function list(): array
     {
         // Repository 会读取 DataPermission Context 并追加查询约束。
-        return $this->productRepository->listForExample();
+        return $this->adminUserRepository->listForExample();
     }
 }
 ```
 
-第一阶段先建立 Attribute、Aspect 和上下文机制。后续接入真实用户、部门、角色和数据权限表后，再把查询条件注入逻辑补完整。
+第一阶段先建立 Attribute、Aspect 和上下文机制。接入真实用户、部门、角色和数据权限表时，应同时支持：当前操作部门、所属部门集合、所属部门树、角色自定义部门集合和本人创建数据。
 
 ## 操作日志
 
 操作日志也采用声明式方式：业务方法使用 `#[OperationLog]` 声明模块、动作和备注，AOP 在方法执行成功后发布事件，监听器负责写日志。
+
+`action` 使用点分层级命名，格式为 `{端}.{资源}.{动作}`，例如 `admin.user.create`、`admin.role.update`、`admin.menu.delete`。不要使用 `admin_user_create` 这类下划线拼接格式。
 
 示例：
 
 ```php
 use TrueAdmin\Kernel\OperationLog\Attribute\OperationLog;
 
-final class ProductQueryService
+final class AdminUserController
 {
-    #[OperationLog(module: 'product', action: 'list', remark: '查询商品列表')]
-    public function list(): array
+    #[OperationLog(module: 'system', action: 'admin.user.create', remark: '新增管理员用户')]
+    public function create(): array
     {
-        // Repository 会读取 DataPermission Context 并追加查询约束。
-        return $this->productRepository->listForExample();
+        // 写操作成功后，AOP 会发布 OperationLogged 事件。
+        return ApiResponse::success($this->users->create($this->request->all()));
     }
 }
 ```
 
-这个设计让日志写入和业务方法解耦。后续可以把日志监听器从写文件升级为写 `admin_operation_logs` 表，业务代码不用变。
+这个设计让日志写入和业务方法解耦。当前 `Module/System` 已通过 Listener 写入 `admin_operation_logs` 表，后续也可以扩展为写消息队列、审计仓库或日志平台，业务代码不用变。
 
 ## 监听器
 

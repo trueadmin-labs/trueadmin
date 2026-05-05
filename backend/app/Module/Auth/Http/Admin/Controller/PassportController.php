@@ -60,6 +60,9 @@ final class PassportController extends AdminController
             'nickname' => $actor->claims['nickname'] ?? $actor->name,
             'roles' => $actor->claims['roles'] ?? [],
             'permissions' => $actor->claims['permissions'] ?? [],
+            'primaryDeptId' => $actor->claims['primaryDeptId'] ?? null,
+            'deptIds' => $actor->claims['deptIds'] ?? [],
+            'operationDeptId' => $actor->claims['operationDeptId'] ?? null,
         ]);
     }
 }

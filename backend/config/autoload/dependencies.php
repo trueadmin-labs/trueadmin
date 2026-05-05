@@ -10,8 +10,8 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
 use App\Foundation\Database\Seeder\NamespacedSeed;
+use App\Foundation\Contract\AdminPermissionProviderInterface;
 use App\Module\System\Contract\AdminIdentityProviderInterface;
-use App\Module\System\Contract\AdminPermissionProviderInterface;
 use App\Module\System\Service\AdminIdentityService;
 use App\Module\System\Service\AdminPermissionService;
 use Hyperf\Contract\TranslatorLoaderInterface;

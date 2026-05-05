@@ -16,7 +16,7 @@ final class AdminUser extends Model
         'password',
         'nickname',
         'status',
-        'dept_id',
+        'primary_dept_id',
         'created_by',
         'updated_by',
     ];
@@ -28,5 +28,10 @@ final class AdminUser extends Model
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(AdminRole::class, 'admin_role_user', 'user_id', 'role_id');
+    }
+
+    public function departments(): BelongsToMany
+    {
+        return $this->belongsToMany(AdminDepartment::class, 'admin_user_departments', 'user_id', 'dept_id');
     }
 }

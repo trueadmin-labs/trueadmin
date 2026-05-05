@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Module\System\Service;
 
+use App\Foundation\Query\AdminQuery;
 use App\Module\System\Model\AdminMenu;
 use App\Module\System\Repository\AdminMenuRepository;
 use TrueAdmin\Kernel\Constant\ErrorCode;
@@ -15,9 +16,9 @@ final class AdminMenuManagementService
     {
     }
 
-    public function list(string $keyword = '', string $status = ''): array
+    public function list(AdminQuery $query): array
     {
-        return $this->menus->all($keyword, $status);
+        return $this->menus->all($query);
     }
 
     public function detail(int $id): array
@@ -34,7 +35,8 @@ final class AdminMenuManagementService
 
     public function update(int $id, array $payload): array
     {
-        $menu = $this->menus->update($this->mustFind($id), $this->data($payload));
+        $current = $this->mustFind($id);
+        $menu = $this->menus->update($current, $this->data($payload, $current));
 
         return $this->detail((int) $menu->getAttribute('id'));
     }
@@ -54,34 +56,19 @@ final class AdminMenuManagementService
         return $menu;
     }
 
-    private function data(array $payload): array
+    private function data(array $payload, ?AdminMenu $current = null): array
     {
-        $name = trim((string) ($payload['name'] ?? ''));
-        if ($name === '') {
-            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'name', 'reason' => 'required']);
-        }
-
-        $type = (string) ($payload['type'] ?? 'menu');
-        if (! in_array($type, ['directory', 'menu', 'button'], true)) {
-            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'type', 'reason' => 'invalid']);
-        }
-
-        $status = (string) ($payload['status'] ?? 'enabled');
-        if (! in_array($status, ['enabled', 'disabled'], true)) {
-            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'status', 'reason' => 'invalid']);
-        }
-
         return [
-            'parent_id' => (int) ($payload['parentId'] ?? $payload['parent_id'] ?? 0),
-            'code' => trim((string) ($payload['code'] ?? '')),
-            'type' => $type,
-            'name' => $name,
-            'path' => trim((string) ($payload['path'] ?? '')),
-            'component' => trim((string) ($payload['component'] ?? '')),
-            'icon' => trim((string) ($payload['icon'] ?? '')),
-            'permission' => trim((string) ($payload['permission'] ?? '')),
-            'sort' => (int) ($payload['sort'] ?? 0),
-            'status' => $status,
+            'parent_id' => (int) ($payload['parentId'] ?? $payload['parent_id'] ?? $current?->getAttribute('parent_id') ?? 0),
+            'code' => (string) ($payload['code'] ?? $current?->getAttribute('code') ?? ''),
+            'type' => (string) ($payload['type'] ?? $current?->getAttribute('type') ?? 'menu'),
+            'name' => (string) $payload['name'],
+            'path' => (string) ($payload['path'] ?? $current?->getAttribute('path') ?? ''),
+            'component' => (string) ($payload['component'] ?? $current?->getAttribute('component') ?? ''),
+            'icon' => (string) ($payload['icon'] ?? $current?->getAttribute('icon') ?? ''),
+            'permission' => (string) ($payload['permission'] ?? $current?->getAttribute('permission') ?? ''),
+            'sort' => (int) ($payload['sort'] ?? $current?->getAttribute('sort') ?? 0),
+            'status' => (string) ($payload['status'] ?? $current?->getAttribute('status') ?? 'enabled'),
         ];
     }
 }

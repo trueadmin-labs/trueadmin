@@ -33,8 +33,22 @@ final class AdminAuthMiddleware implements MiddlewareInterface
         }
 
         $user = $this->passportService->userFromToken($token);
-        ActorContext::set(ActorFactory::fromAdmin($user));
+        $operationDeptId = $this->operationDeptId($request->getHeaderLine('X-Operation-Dept-Id'), $user->deptIds, $user->primaryDeptId);
+        ActorContext::set(ActorFactory::fromAdmin($user, $operationDeptId));
 
         return $handler->handle($request);
+    }
+
+    private function operationDeptId(string $header, array $deptIds, ?int $primaryDeptId): ?int
+    {
+        $operationDeptId = trim($header) === '' ? $primaryDeptId : (int) trim($header);
+        if ($operationDeptId === null || $operationDeptId <= 0) {
+            return null;
+        }
+        if (! in_array($operationDeptId, $deptIds, true)) {
+            throw new BusinessException(ErrorCode::FORBIDDEN, 403, ['reason' => 'operation_dept_not_assigned']);
+        }
+
+        return $operationDeptId;
     }
 }

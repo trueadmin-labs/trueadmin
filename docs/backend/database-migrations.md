@@ -36,12 +36,40 @@ Workflow/Database/Migrations/create_workflow_definitions_table.php
 
 ```text
 admin_users
+admin_departments
+admin_user_departments
+admin_positions
 admin_roles
 admin_menus
 admin_operation_logs
 system_dicts
 system_configs
 ```
+
+后台管理员按多部门设计，不使用单一 `dept_id` 表达全部部门关系。推荐结构：
+
+```text
+admin_users.primary_dept_id
+admin_departments.parent_id
+admin_departments.level
+admin_departments.path
+admin_user_departments.user_id
+admin_user_departments.dept_id
+admin_user_departments.is_primary
+```
+
+`admin_departments` 使用树形结构维护组织部门；`primary_dept_id` 是默认操作部门；`admin_user_departments` 是所属部门集合。迁移应保证一个用户最多一个主部门，且主部门必须属于该用户所属部门集合。PostgreSQL 和 MySQL 对部分唯一索引能力不同，第一版可以在 Service 层保证一致性，数据库层保留普通索引和唯一组合索引。
+
+角色按层级结构预留授权边界字段：
+
+```text
+admin_roles.parent_id
+admin_roles.level
+admin_roles.path
+admin_roles.sort
+```
+
+`parent_id` 指向父角色，`level` 便于排序和查询，`path` 存储祖先链，例如 `,1,8,23,`，用于快速判断角色树关系。迁移层只负责字段和索引，是否允许移动、是否越权授权、子角色权限是否超过父角色，必须在 `Module/System` 的 Service 层校验。
 
 用户端身份表放 `Module/User`。
 

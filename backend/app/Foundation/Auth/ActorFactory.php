@@ -9,8 +9,10 @@ use TrueAdmin\Kernel\Context\Actor;
 
 final class ActorFactory
 {
-    public static function fromAdmin(AuthUser $user): Actor
+    public static function fromAdmin(AuthUser $user, ?int $operationDeptId = null): Actor
     {
+        $operationDeptId ??= $user->primaryDeptId;
+
         return new Actor(
             type: 'admin',
             id: $user->id,
@@ -20,6 +22,9 @@ final class ActorFactory
                 'nickname' => $user->nickname,
                 'roles' => $user->roles,
                 'permissions' => $user->permissions,
+                'primaryDeptId' => $user->primaryDeptId,
+                'deptIds' => $user->deptIds,
+                'operationDeptId' => $operationDeptId,
             ],
         );
     }

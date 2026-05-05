@@ -50,6 +50,30 @@ module.php
 
 第一阶段不需要每个模块都创建完整目录，只创建实际需要的部分。
 
+## Request 与 Service 边界
+
+模块内推荐按端放置 Request：
+
+```text
+Module/Xxx/Http/Admin/Request/CreateXxxRequest.php
+Module/Xxx/Http/Admin/Request/UpdateXxxRequest.php
+Module/Xxx/Http/Client/Request/V1/CreateXxxRequest.php
+Module/Xxx/Http/Open/Request/V1/CreateXxxRequest.php
+```
+
+Request 只描述当前入口的输入契约，适合字段必填、类型、长度、格式、基础枚举和入参归一化。Service 描述模块业务能力，适合跨入口共享的业务规则和不变量。
+
+示例边界：
+
+```text
+Request 校验：name 必填、status 只能是 enabled/disabled、pageSize 最大 100。
+Service 校验：父部门不能是自己或子孙、主部门必须属于用户所属部门、子角色权限不能超过父角色。
+```
+
+如果一个规则需要查数据库、读取当前 operator、判断角色树/部门树/数据权限范围，默认属于 Service、Policy 或独立业务类，不属于 Request。
+
+这能避免 Controller 变厚，也能避免 Service 混入大量 HTTP 输入细节。AI 新增模块时，应优先生成 Request，再让 Controller 传入 `$request->validated()` 给 Service。
+
 ## 为什么这样设计
 
 纯 MineAdmin 全局分层适合单项目后台，但 TrueAdmin 是脚手架和未来开源框架，需要更清晰的模块上下文。

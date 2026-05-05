@@ -11,8 +11,12 @@ return new class extends Migration {
     {
         Schema::create('admin_roles', function (Blueprint $table): void {
             $table->bigIncrements('id');
+            $table->unsignedBigInteger('parent_id')->default(0);
             $table->string('code', 64)->unique();
             $table->string('name', 64);
+            $table->integer('level')->default(1);
+            $table->string('path', 255)->default('');
+            $table->integer('sort')->default(0);
             $table->string('status', 32)->default('enabled');
             $table->timestamp('metadata_synced_at')->nullable();
             $table->datetimes();

@@ -8,6 +8,7 @@ use App\Foundation\Support\ApiResponse;
 use Hyperf\Contract\StdoutLoggerInterface;
 use Hyperf\ExceptionHandler\ExceptionHandler;
 use Hyperf\HttpMessage\Stream\SwooleStream;
+use Hyperf\Validation\ValidationException;
 use Psr\Http\Message\ResponseInterface;
 use Throwable;
 use TrueAdmin\Kernel\Constant\ErrorCode;
@@ -29,6 +30,18 @@ class AppExceptionHandler extends ExceptionHandler
                 ->withStatus($throwable->httpStatus())
                 ->withBody(new SwooleStream(json_encode(
                     ApiResponse::fail($throwable->businessCode(), $throwable->getMessage(), $throwable->params() ?: null),
+                    JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR
+            )));
+        }
+
+        if ($throwable instanceof ValidationException) {
+            $this->stopPropagation();
+
+            return $response
+                ->withHeader('Content-Type', 'application/json; charset=utf-8')
+                ->withStatus(422)
+                ->withBody(new SwooleStream(json_encode(
+                    ApiResponse::fail(ErrorCode::VALIDATION_FAILED->code(), ErrorCode::VALIDATION_FAILED->message(), $throwable->errors()),
                     JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR
                 )));
         }

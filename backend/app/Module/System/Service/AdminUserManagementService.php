@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Module\System\Service;
 
 use App\Foundation\Pagination\PageResult;
+use App\Foundation\Query\AdminQuery;
 use App\Foundation\Support\Password;
 use App\Module\System\Model\AdminUser;
+use App\Module\System\Repository\AdminDepartmentRepository;
 use App\Module\System\Repository\AdminRoleRepository;
 use App\Module\System\Repository\AdminUserRepository;
 use TrueAdmin\Kernel\Constant\ErrorCode;
@@ -17,12 +19,13 @@ final class AdminUserManagementService
     public function __construct(
         private readonly AdminUserRepository $users,
         private readonly AdminRoleRepository $roles,
+        private readonly AdminDepartmentRepository $departments,
     ) {
     }
 
-    public function paginate(int $page, int $pageSize, string $keyword = '', string $status = ''): PageResult
+    public function paginate(AdminQuery $query): PageResult
     {
-        return $this->users->paginate($page, $pageSize, $keyword, $status);
+        return $this->users->paginate($query);
     }
 
     public function detail(int $id): array
@@ -32,21 +35,24 @@ final class AdminUserManagementService
 
     public function create(array $payload): array
     {
-        $username = $this->requiredString($payload, 'username');
-        $password = $this->requiredString($payload, 'password');
+        $username = (string) $payload['username'];
         if ($this->users->existsUsername($username)) {
             throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'username', 'reason' => 'duplicated']);
         }
 
+        $departmentIds = $this->departmentIds($this->departmentInput($payload));
+        $primaryDeptId = $this->primaryDeptId($payload['primaryDeptId'] ?? $payload['deptId'] ?? null, $departmentIds);
+
         $user = $this->users->create([
             'username' => $username,
-            'password' => Password::make($password),
-            'nickname' => $this->optionalString($payload, 'nickname', $username),
-            'status' => $this->status($payload['status'] ?? 'enabled'),
-            'dept_id' => $this->optionalInt($payload, 'deptId'),
+            'password' => Password::make((string) $payload['password']),
+            'nickname' => (string) ($payload['nickname'] ?: $username),
+            'status' => (string) $payload['status'],
+            'primary_dept_id' => $primaryDeptId,
         ]);
 
         $this->users->syncRoles($user, $this->roleIds($payload['roleIds'] ?? []));
+        $this->users->syncDepartments($user, $departmentIds, $primaryDeptId);
 
         return $this->detail((int) $user->getAttribute('id'));
     }
@@ -54,16 +60,24 @@ final class AdminUserManagementService
     public function update(int $id, array $payload): array
     {
         $user = $this->mustFind($id);
-        $username = $this->requiredString($payload, 'username');
+        $username = (string) $payload['username'];
         if ($this->users->existsUsername($username, $id)) {
             throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'username', 'reason' => 'duplicated']);
         }
 
+        $hasDepartmentPayload = array_key_exists('deptIds', $payload) || array_key_exists('primaryDeptId', $payload) || array_key_exists('deptId', $payload);
+        $departmentIds = $hasDepartmentPayload ? $this->departmentIds($this->departmentInput($payload)) : $this->users->departmentIds($user);
+        $primaryDeptId = $hasDepartmentPayload
+            ? $this->primaryDeptId($payload['primaryDeptId'] ?? $payload['deptId'] ?? null, $departmentIds)
+            : ($user->getAttribute('primary_dept_id') === null ? null : (int) $user->getAttribute('primary_dept_id'));
+
         $data = [
             'username' => $username,
-            'nickname' => $this->optionalString($payload, 'nickname', $username),
-            'status' => $this->status($payload['status'] ?? $user->getAttribute('status')),
-            'dept_id' => $this->optionalInt($payload, 'deptId'),
+            'nickname' => array_key_exists('nickname', $payload) && $payload['nickname'] !== ''
+                ? (string) $payload['nickname']
+                : (string) $user->getAttribute('nickname'),
+            'status' => (string) ($payload['status'] ?? $user->getAttribute('status')),
+            'primary_dept_id' => $primaryDeptId,
         ];
 
         $password = trim((string) ($payload['password'] ?? ''));
@@ -74,6 +88,9 @@ final class AdminUserManagementService
         $user = $this->users->update($user, $data);
         if (array_key_exists('roleIds', $payload)) {
             $this->users->syncRoles($user, $this->roleIds($payload['roleIds']));
+        }
+        if ($hasDepartmentPayload) {
+            $this->users->syncDepartments($user, $departmentIds, $primaryDeptId);
         }
 
         return $this->detail((int) $user->getAttribute('id'));
@@ -107,42 +124,6 @@ final class AdminUserManagementService
         return $user;
     }
 
-    private function requiredString(array $payload, string $key): string
-    {
-        $value = trim((string) ($payload[$key] ?? ''));
-        if ($value === '') {
-            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => $key, 'reason' => 'required']);
-        }
-
-        return $value;
-    }
-
-    private function optionalString(array $payload, string $key, string $default = ''): string
-    {
-        $value = trim((string) ($payload[$key] ?? ''));
-
-        return $value === '' ? $default : $value;
-    }
-
-    private function optionalInt(array $payload, string $key): ?int
-    {
-        if (! array_key_exists($key, $payload) || $payload[$key] === null || $payload[$key] === '') {
-            return null;
-        }
-
-        return (int) $payload[$key];
-    }
-
-    private function status(mixed $status): string
-    {
-        $status = (string) $status;
-        if (! in_array($status, ['enabled', 'disabled'], true)) {
-            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'status', 'reason' => 'invalid']);
-        }
-
-        return $status;
-    }
-
     /**
      * @return list<int>
      */
@@ -161,5 +142,54 @@ final class AdminUserManagementService
         }
 
         return $roleIds;
+    }
+
+    private function departmentInput(array $payload): mixed
+    {
+        if (array_key_exists('deptIds', $payload)) {
+            return $payload['deptIds'];
+        }
+        if (array_key_exists('deptId', $payload) && $payload['deptId'] !== null && $payload['deptId'] !== '') {
+            return [(int) $payload['deptId']];
+        }
+
+        return [];
+    }
+
+    /**
+     * @return list<int>
+     */
+    private function departmentIds(mixed $value): array
+    {
+        if (! is_array($value)) {
+            return [];
+        }
+
+        $departmentIds = array_values(array_unique(array_filter(array_map('intval', $value), static fn (int $id): bool => $id > 0)));
+        $existingIds = $this->departments->existingIds($departmentIds);
+        sort($departmentIds);
+        sort($existingIds);
+        if ($departmentIds !== $existingIds) {
+            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'deptIds', 'reason' => 'contains_missing_department']);
+        }
+
+        return $departmentIds;
+    }
+
+    private function primaryDeptId(mixed $value, array $departmentIds): ?int
+    {
+        if ($value === null || $value === '') {
+            return $departmentIds[0] ?? null;
+        }
+
+        $primaryDeptId = (int) $value;
+        if ($primaryDeptId <= 0) {
+            return null;
+        }
+        if (! in_array($primaryDeptId, $departmentIds, true)) {
+            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'primaryDeptId', 'reason' => 'must_be_in_deptIds']);
+        }
+
+        return $primaryDeptId;
     }
 }

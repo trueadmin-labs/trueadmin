@@ -6,7 +6,7 @@ namespace HyperfTest\Support\Controller;
 
 use App\Foundation\Support\ApiResponse;
 use App\Module\Auth\Http\Admin\Middleware\AdminAuthMiddleware;
-use App\Module\System\Http\Admin\Middleware\PermissionMiddleware;
+use App\Foundation\Http\Middleware\PermissionMiddleware;
 use TrueAdmin\Kernel\Http\Attribute\AdminController;
 use TrueAdmin\Kernel\Http\Attribute\AdminGet;
 use TrueAdmin\Kernel\Http\Attribute\Permission;

@@ -18,6 +18,7 @@ final class AdminOperationLog extends Model
         'principal_id',
         'operator_type',
         'operator_id',
+        'operation_dept_id',
         'context',
     ];
 

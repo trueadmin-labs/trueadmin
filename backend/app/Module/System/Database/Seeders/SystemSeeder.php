@@ -14,12 +14,28 @@ final class SystemSeeder extends Seeder
     {
         $now = date('Y-m-d H:i:s');
 
+        Db::table('admin_departments')->updateOrInsert(
+            ['code' => 'headquarters'],
+            [
+                'parent_id' => 0,
+                'name' => '总部',
+                'level' => 1,
+                'path' => '',
+                'sort' => 10,
+                'status' => 'enabled',
+                'updated_at' => $now,
+                'created_at' => $now,
+            ]
+        );
+        $deptId = (int) Db::table('admin_departments')->where('code', 'headquarters')->value('id');
+
         Db::table('admin_users')->updateOrInsert(
             ['username' => 'admin'],
             [
                 'password' => Password::make('trueadmin'),
                 'nickname' => 'TrueAdmin',
                 'status' => 'enabled',
+                'primary_dept_id' => $deptId,
                 'updated_at' => $now,
                 'created_at' => $now,
             ]
@@ -27,13 +43,26 @@ final class SystemSeeder extends Seeder
 
         Db::table('admin_roles')->updateOrInsert(
             ['code' => 'super-admin'],
-            ['name' => '超级管理员', 'status' => 'enabled', 'updated_at' => $now, 'created_at' => $now]
+            [
+                'parent_id' => 0,
+                'name' => '超级管理员',
+                'level' => 1,
+                'path' => '',
+                'sort' => 0,
+                'status' => 'enabled',
+                'updated_at' => $now,
+                'created_at' => $now,
+            ]
         );
 
         $userId = (int) Db::table('admin_users')->where('username', 'admin')->value('id');
         $roleId = (int) Db::table('admin_roles')->where('code', 'super-admin')->value('id');
 
         Db::table('admin_role_user')->updateOrInsert(['user_id' => $userId, 'role_id' => $roleId]);
+        Db::table('admin_user_departments')->updateOrInsert(
+            ['user_id' => $userId, 'dept_id' => $deptId],
+            ['is_primary' => true]
+        );
 
         $systemMenuId = $this->upsertMenu([
             'code' => 'system',
@@ -54,6 +83,16 @@ final class SystemSeeder extends Seeder
             'permission' => 'system:user:list',
             'type' => 'menu',
             'sort' => 20,
+        ], $systemMenuId, $now);
+        $departmentMenuId = $this->upsertMenu([
+            'code' => 'system.departments',
+            'name' => '部门管理',
+            'path' => '/system/departments',
+            'component' => './system/departments',
+            'icon' => '',
+            'permission' => 'system:department:list',
+            'type' => 'menu',
+            'sort' => 15,
         ], $systemMenuId, $now);
         $roleMenuId = $this->upsertMenu([
             'code' => 'system.roles',
@@ -76,6 +115,10 @@ final class SystemSeeder extends Seeder
             'sort' => 40,
         ], $systemMenuId, $now);
         foreach ([
+            ['parentId' => $departmentMenuId, 'code' => 'system.department.detail', 'name' => '部门详情', 'permission' => 'system:department:detail', 'sort' => 16],
+            ['parentId' => $departmentMenuId, 'code' => 'system.department.create', 'name' => '新增部门', 'permission' => 'system:department:create', 'sort' => 17],
+            ['parentId' => $departmentMenuId, 'code' => 'system.department.update', 'name' => '编辑部门', 'permission' => 'system:department:update', 'sort' => 18],
+            ['parentId' => $departmentMenuId, 'code' => 'system.department.delete', 'name' => '删除部门', 'permission' => 'system:department:delete', 'sort' => 19],
             ['parentId' => $userMenuId, 'code' => 'system.user.detail', 'name' => '用户详情', 'permission' => 'system:user:detail', 'sort' => 21],
             ['parentId' => $userMenuId, 'code' => 'system.user.create', 'name' => '新增用户', 'permission' => 'system:user:create', 'sort' => 22],
             ['parentId' => $userMenuId, 'code' => 'system.user.update', 'name' => '编辑用户', 'permission' => 'system:user:update', 'sort' => 23],

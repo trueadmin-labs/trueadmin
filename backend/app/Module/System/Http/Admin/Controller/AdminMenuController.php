@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Module\System\Http\Admin\Controller;
 
 use App\Foundation\Http\Controller\AdminController;
+use App\Foundation\Http\Middleware\PermissionMiddleware;
+use App\Foundation\Http\Request\AdminQueryRequest;
 use App\Foundation\Support\ApiResponse;
 use App\Module\Auth\Http\Admin\Middleware\AdminAuthMiddleware;
-use App\Module\System\Http\Admin\Middleware\PermissionMiddleware;
+use App\Module\System\Http\Admin\Request\SaveAdminMenuRequest;
 use App\Module\System\Service\AdminMenuManagementService;
 use TrueAdmin\Kernel\Http\Attribute\AdminController as AdminRouteController;
 use TrueAdmin\Kernel\Http\Attribute\AdminDelete;
@@ -28,12 +30,9 @@ final class AdminMenuController extends AdminController
 
     #[AdminGet('')]
     #[Permission('system:menu:list', title: '菜单列表', group: '系统管理')]
-    public function list(): array
+    public function list(AdminQueryRequest $request): array
     {
-        return ApiResponse::success($this->menus->list(
-            trim((string) $this->request->input('keyword', '')),
-            trim((string) $this->request->input('status', '')),
-        ));
+        return ApiResponse::success($this->menus->list($request->adminQuery()));
     }
 
     #[AdminGet('{id}')]
@@ -45,23 +44,23 @@ final class AdminMenuController extends AdminController
 
     #[AdminPost('')]
     #[Permission('system:menu:create', title: '新增菜单', group: '系统管理')]
-    #[OperationLog(module: 'system', action: 'admin_menu_create', remark: '新增菜单')]
-    public function create(): array
+    #[OperationLog(module: 'system', action: 'admin.menu.create', remark: '新增菜单')]
+    public function create(SaveAdminMenuRequest $request): array
     {
-        return ApiResponse::success($this->menus->create($this->request->all()));
+        return ApiResponse::success($this->menus->create($request->validated()));
     }
 
     #[AdminPut('{id}')]
     #[Permission('system:menu:update', title: '编辑菜单', group: '系统管理')]
-    #[OperationLog(module: 'system', action: 'admin_menu_update', remark: '编辑菜单')]
-    public function update(int $id): array
+    #[OperationLog(module: 'system', action: 'admin.menu.update', remark: '编辑菜单')]
+    public function update(int $id, SaveAdminMenuRequest $request): array
     {
-        return ApiResponse::success($this->menus->update($id, $this->request->all()));
+        return ApiResponse::success($this->menus->update($id, $request->validated()));
     }
 
     #[AdminDelete('{id}')]
     #[Permission('system:menu:delete', title: '删除菜单', group: '系统管理')]
-    #[OperationLog(module: 'system', action: 'admin_menu_delete', remark: '删除菜单')]
+    #[OperationLog(module: 'system', action: 'admin.menu.delete', remark: '删除菜单')]
     public function delete(int $id): array
     {
         $this->menus->delete($id);

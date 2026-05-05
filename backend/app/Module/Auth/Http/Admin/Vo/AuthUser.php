@@ -12,6 +12,8 @@ final readonly class AuthUser
         public string $nickname,
         public array $roles,
         public array $permissions,
+        public ?int $primaryDeptId,
+        public array $deptIds,
     ) {
     }
 
@@ -23,6 +25,8 @@ final readonly class AuthUser
             'nickname' => $this->nickname,
             'roles' => $this->roles,
             'permissions' => $this->permissions,
+            'primaryDeptId' => $this->primaryDeptId,
+            'deptIds' => $this->deptIds,
         ];
     }
 }

@@ -4,29 +4,37 @@ declare(strict_types=1);
 
 namespace App\Module\System\Repository;
 
+use App\Foundation\Query\AdminQuery;
+use App\Foundation\Repository\AbstractRepository;
 use App\Module\System\Model\AdminMenu;
 use Hyperf\DbConnection\Db;
 
-final class AdminMenuRepository
+final class AdminMenuRepository extends AbstractRepository
 {
-    public function all(string $keyword = '', string $status = ''): array
+    protected array $keywordFields = ['code', 'name', 'path', 'permission'];
+
+    protected array $filterable = [
+        'id' => ['=', 'in'],
+        'parent_id' => ['=', 'in'],
+        'code' => ['=', 'like'],
+        'type' => ['=', 'in'],
+        'name' => ['=', 'like'],
+        'path' => ['=', 'like'],
+        'permission' => ['=', 'like'],
+        'status' => ['=', 'in'],
+    ];
+
+    protected array $sortable = ['id', 'sort', 'created_at', 'updated_at'];
+
+    protected array $defaultSort = ['sort' => 'asc', 'id' => 'asc'];
+
+    public function all(AdminQuery $adminQuery): array
     {
-        return AdminMenu::query()
-            ->when($keyword !== '', static function ($query) use ($keyword): void {
-                $query->where(static function ($query) use ($keyword): void {
-                    $query->where('name', 'like', '%' . $keyword . '%')
-                        ->orWhere('path', 'like', '%' . $keyword . '%')
-                        ->orWhere('permission', 'like', '%' . $keyword . '%');
-                });
-            })
-            ->when($status !== '', static function ($query) use ($status): void {
-                $query->where('status', $status);
-            })
-            ->orderBy('sort')
-            ->orderBy('id')
-            ->get()
-            ->map(fn (AdminMenu $menu): array => $this->toArray($menu))
-            ->all();
+        return $this->listQuery(
+            AdminMenu::query(),
+            $adminQuery,
+            fn (AdminMenu $menu): array => $this->toArray($menu),
+        );
     }
 
     public function find(int $id): ?AdminMenu
