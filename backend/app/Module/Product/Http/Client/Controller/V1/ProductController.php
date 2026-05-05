@@ -13,14 +13,14 @@ use TrueAdmin\Kernel\Context\ActorContext;
 use TrueAdmin\Kernel\Http\Attribute\ClientController as ClientRouteController;
 use TrueAdmin\Kernel\Http\Attribute\ClientGet;
 
-#[ClientRouteController(middleware: [ClientActorMiddleware::class])]
+#[ClientRouteController(path: '/api/v1/client/products', middleware: [ClientActorMiddleware::class])]
 final class ProductController extends ClientController
 {
     public function __construct(private readonly ClientProductQueryService $productQueryService)
     {
     }
 
-    #[ClientGet('products')]
+    #[ClientGet('')]
     public function index(): array
     {
         $operator = ActorContext::requireOperator();

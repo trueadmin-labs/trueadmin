@@ -11,7 +11,7 @@ use Hyperf\Di\Annotation\AbstractAnnotation;
 class AdminController extends AbstractAnnotation
 {
     public function __construct(
-        public readonly string $prefix = '',
+        public readonly string $path = '',
         public readonly string $title = '',
         public readonly array $middleware = [],
         public readonly array $tags = [],

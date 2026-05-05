@@ -17,14 +17,14 @@ use TrueAdmin\Kernel\Http\Attribute\Permission;
 use TrueAdmin\Kernel\OperationLog\Attribute\OperationLog;
 
 #[Menu(code: 'products', title: '商品管理', path: '/products', permission: 'product:list', icon: 'appstore', component: './products', sort: 50)]
-#[AdminRouteController(middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
+#[AdminRouteController(path: '/api/admin/products', middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
 final class ProductController extends AdminController
 {
     public function __construct(private readonly ProductQueryService $productQueryService)
     {
     }
 
-    #[AdminGet('products')]
+    #[AdminGet('')]
     #[Permission('product:list', title: '商品列表', group: '商品管理')]
     #[OperationLog(module: 'product', action: 'list', remark: '查询商品列表')]
     public function index(): array

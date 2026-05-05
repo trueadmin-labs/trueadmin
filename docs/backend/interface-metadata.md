@@ -46,9 +46,9 @@ public function index(): array
 控制器分组：
 
 ```php
-#[AdminController(prefix: 'products', title: '商品管理', tags: ['商品'])]
-#[ClientController(prefix: 'products', title: '商品')]
-#[OpenController(prefix: 'products', title: '开放商品接口')]
+#[AdminController(path: '/api/admin/products', title: '商品管理', tags: ['商品'])]
+#[ClientController(path: '/api/v1/client/products', title: '商品')]
+#[OpenController(path: '/api/v1/open/products', title: '开放商品接口')]
 ```
 
 方法路由：

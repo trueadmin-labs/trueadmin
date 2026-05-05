@@ -41,7 +41,7 @@ final class AttributeRouteRegistrar
             $mapping = $item['annotation'];
             $routes[] = [
                 'methods' => $mapping->methods,
-                'path' => $this->join($controller['base'], $controller['prefix'], $mapping->path),
+                'path' => $this->join($controller['path'], $mapping->path),
                 'action' => $item['class'] . '@' . $item['method'],
                 'middleware' => array_values(array_unique([...$controller['middleware'], ...$mapping->middleware])),
                 'name' => $mapping->name,
@@ -63,36 +63,23 @@ final class AttributeRouteRegistrar
     }
 
     /**
-     * @return array{base: string, prefix: string, middleware: list<class-string>}|null
+     * @return array{path: string, middleware: list<class-string>}|null
      */
     private function controller(string $class): ?array
     {
-        foreach ($this->controllerAnnotations() as $annotationClass => $base) {
+        foreach ([AdminController::class, ClientController::class, OpenController::class] as $annotationClass) {
             $annotation = AnnotationCollector::getClassAnnotation($class, $annotationClass);
             if ($annotation === null) {
                 continue;
             }
 
             return [
-                'base' => $base,
-                'prefix' => $annotation->prefix,
+                'path' => $annotation->path,
                 'middleware' => $annotation->middleware,
             ];
         }
 
         return null;
-    }
-
-    /**
-     * @return array<class-string, string>
-     */
-    private function controllerAnnotations(): array
-    {
-        return [
-            AdminController::class => '/api/admin',
-            ClientController::class => '/api/v1/client',
-            OpenController::class => '/api/v1/open',
-        ];
     }
 
     /**

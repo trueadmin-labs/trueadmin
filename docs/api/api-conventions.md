@@ -4,13 +4,9 @@
 
 TrueAdmin 使用 RESTful API，并通过 OpenAPI/Swagger 描述接口契约。
 
-推荐前缀：
+TrueAdmin 路由路径由 Controller 注解显式声明。注解里的 `path` 是完整控制器资源路径，不再由框架隐式追加 `/api/admin`、`/api/v1/client` 等 base path。方法注解的 `path` 只表示资源内子路径，例如空字符串、`{id}`、`{id}/enable`。
 
-```text
-/api/v1
-```
-
-TrueAdmin 按调用方进一步划分 API 边界：
+TrueAdmin 按调用方划分 API 边界：
 
 ```text
 /api/admin
@@ -18,7 +14,26 @@ TrueAdmin 按调用方进一步划分 API 边界：
 /api/v1/open
 ```
 
-详细说明见 [API 边界设计](api-boundaries.md)。
+详细说明见 [API 边界设计](api-boundaries.md) 和 [API 版本与复用边界](versioning-and-reuse.md)。
+
+示例：
+
+```php
+#[AdminController(path: '/api/admin/system/users')]
+final class AdminUserController extends AdminController
+{
+}
+
+#[ClientController(path: '/api/v1/client/products')]
+final class ProductController extends ClientController
+{
+}
+
+#[ClientController(path: '/api/v2/client/products')]
+final class ProductController extends ClientController
+{
+}
+```
 
 ## 认证
 

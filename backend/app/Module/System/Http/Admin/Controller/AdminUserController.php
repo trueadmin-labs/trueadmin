@@ -19,7 +19,7 @@ use TrueAdmin\Kernel\Http\Attribute\Permission;
 use TrueAdmin\Kernel\OperationLog\Attribute\OperationLog;
 
 #[Menu(code: 'system.users', title: '用户管理', path: '/system/users', parent: 'system', permission: 'system:user:list', component: './system/users', sort: 20)]
-#[AdminRouteController(prefix: 'system/users', middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
+#[AdminRouteController(path: '/api/admin/system/users', middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
 final class AdminUserController extends AdminController
 {
     public function __construct(private readonly AdminUserManagementService $users)

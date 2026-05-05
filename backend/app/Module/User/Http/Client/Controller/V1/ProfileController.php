@@ -11,14 +11,14 @@ use App\Module\User\Service\ProfileService;
 use TrueAdmin\Kernel\Http\Attribute\ClientController as ClientRouteController;
 use TrueAdmin\Kernel\Http\Attribute\ClientGet;
 
-#[ClientRouteController(middleware: [ClientActorMiddleware::class])]
+#[ClientRouteController(path: '/api/v1/client/profile', middleware: [ClientActorMiddleware::class])]
 final class ProfileController extends ClientController
 {
     public function __construct(private readonly ProfileService $profileService)
     {
     }
 
-    #[ClientGet('profile')]
+    #[ClientGet('')]
     public function show(): array
     {
         return ApiResponse::success($this->profileService->currentProfile());

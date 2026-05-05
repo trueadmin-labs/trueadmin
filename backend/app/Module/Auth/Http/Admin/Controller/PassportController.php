@@ -15,7 +15,7 @@ use TrueAdmin\Kernel\Http\Attribute\AdminController as AdminRouteController;
 use TrueAdmin\Kernel\Http\Attribute\AdminGet;
 use TrueAdmin\Kernel\Http\Attribute\AdminPost;
 
-#[AdminRouteController(prefix: 'auth')]
+#[AdminRouteController(path: '/api/admin/auth')]
 final class PassportController extends AdminController
 {
     public function __construct(private readonly PassportService $passportService)

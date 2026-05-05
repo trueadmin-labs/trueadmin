@@ -104,10 +104,10 @@ $attributeRouteRegistrar->register();
 业务模块在 Controller 上声明路由：
 
 ```php
-#[AdminController(middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
+#[AdminController(path: '/api/admin/products', middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
 final class ProductController extends AdminController
 {
-    #[AdminGet('products', name: 'product.list')]
+    #[AdminGet('', name: 'product.list')]
     #[Permission('product:list', title: '商品列表', group: '商品管理')]
     public function index(): array
     {
@@ -118,10 +118,10 @@ final class ProductController extends AdminController
 Client/Open 同理使用对应端的 Controller 和方法注解：
 
 ```php
-#[ClientController]
+#[ClientController(path: '/api/v1/client/products')]
 final class ProductController extends ClientController
 {
-    #[ClientGet('products')]
+    #[ClientGet('')]
     public function index(): array
     {
     }
