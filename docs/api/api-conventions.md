@@ -13,7 +13,7 @@ TrueAdmin 使用 RESTful API，并通过 OpenAPI/Swagger 描述接口契约。
 TrueAdmin 按调用方进一步划分 API 边界：
 
 ```text
-/api/v1/admin
+/api/admin
 /api/v1/client
 /api/v1/open
 ```
@@ -112,14 +112,14 @@ Authorization: Bearer <token>
 ## 常用接口示例
 
 ```text
-POST   /api/v1/admin/auth/login
-POST   /api/v1/admin/auth/logout
-GET    /api/v1/admin/auth/me
-GET    /api/v1/admin/system/users
-POST   /api/v1/admin/system/users
-GET    /api/v1/admin/system/users/{id}
-PUT    /api/v1/admin/system/users/{id}
-DELETE /api/v1/admin/system/users/{id}
+POST   /api/admin/auth/login
+POST   /api/admin/auth/logout
+GET    /api/admin/auth/me
+GET    /api/admin/system/users
+POST   /api/admin/system/users
+GET    /api/admin/system/users/{id}
+PUT    /api/admin/system/users/{id}
+DELETE /api/admin/system/users/{id}
 ```
 
 ## 错误码规范

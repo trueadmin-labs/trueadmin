@@ -100,10 +100,10 @@ backend/app/Module/System/Listener/Logstash/WriteOperationLogListener.php
 ## API 与代码映射
 
 ```text
-/api/v1/admin/auth/login
+/api/admin/auth/login
 -> Module/Auth/Http/Admin/Controller/PassportController.php
 
-/api/v1/admin/products
+/api/admin/products
 -> Module/Product/Http/Admin/Controller/ProductController.php
 
 /api/v1/client/profile

@@ -32,7 +32,7 @@ class ExampleTest extends TestCase
     {
         $login = $this->loginAsAdmin();
 
-        $me = $this->get('/api/v1/admin/auth/me', [], [
+        $me = $this->get('/api/admin/auth/me', [], [
             'Authorization' => 'Bearer ' . $login['data']['accessToken'],
         ]);
 
@@ -42,7 +42,7 @@ class ExampleTest extends TestCase
 
     public function testAdminLoginFailureUsesStringErrorCode()
     {
-        $login = $this->json('/api/v1/admin/auth/login', [
+        $login = $this->json('/api/admin/auth/login', [
             'username' => 'admin',
             'password' => 'wrong-password',
         ]);
@@ -54,7 +54,7 @@ class ExampleTest extends TestCase
 
     public function testAdminLoginFailureUsesRequestLocale()
     {
-        $login = $this->json('/api/v1/admin/auth/login', [
+        $login = $this->json('/api/admin/auth/login', [
             'username' => 'admin',
             'password' => 'wrong-password',
         ], [
@@ -82,7 +82,7 @@ class ExampleTest extends TestCase
     {
         $login = $this->loginAsAdmin();
 
-        $adminProducts = $this->get('/api/v1/admin/products', [], [
+        $adminProducts = $this->get('/api/admin/products', [], [
             'Authorization' => 'Bearer ' . $login['data']['accessToken'],
         ]);
 
@@ -122,10 +122,10 @@ class ExampleTest extends TestCase
         $login = $this->loginAsAdmin();
         $headers = ['Authorization' => 'Bearer ' . $login['data']['accessToken']];
 
-        $menus = $this->get('/api/v1/admin/system/menu-tree', [], $headers);
+        $menus = $this->get('/api/admin/system/menu-tree', [], $headers);
         $this->assertSame('SUCCESS', $menus['code']);
 
-        $permissions = $this->get('/api/v1/admin/system/permissions', [], $headers);
+        $permissions = $this->get('/api/admin/system/permissions', [], $headers);
         $this->assertSame('SUCCESS', $permissions['code']);
     }
 
@@ -135,7 +135,7 @@ class ExampleTest extends TestCase
         $headers = ['Authorization' => 'Bearer ' . $login['data']['accessToken']];
         $suffix = str_replace('.', '', uniqid('', true));
 
-        $menu = $this->json('/api/v1/admin/system/menus', [
+        $menu = $this->json('/api/admin/system/menus', [
             'name' => '测试菜单' . $suffix,
             'path' => '/tests/' . $suffix,
             'permission' => 'test:' . $suffix . ':list',
@@ -146,7 +146,7 @@ class ExampleTest extends TestCase
         $this->assertSame('SUCCESS', $menu['code']);
         $this->assertSame('测试菜单' . $suffix, $menu['data']['name']);
 
-        $role = $this->json('/api/v1/admin/system/roles', [
+        $role = $this->json('/api/admin/system/roles', [
             'code' => 'test-role-' . $suffix,
             'name' => '测试角色' . $suffix,
             'status' => 'enabled',
@@ -155,7 +155,7 @@ class ExampleTest extends TestCase
         $this->assertSame('SUCCESS', $role['code']);
         $this->assertContains($menu['data']['id'], $role['data']['menuIds']);
 
-        $user = $this->json('/api/v1/admin/system/users', [
+        $user = $this->json('/api/admin/system/users', [
             'username' => 'test-user-' . $suffix,
             'password' => 'trueadmin',
             'nickname' => '测试用户' . $suffix,
@@ -166,23 +166,23 @@ class ExampleTest extends TestCase
         $this->assertSame('test-user-' . $suffix, $user['data']['username']);
         $this->assertContains($role['data']['id'], $user['data']['roleIds']);
 
-        $users = $this->get('/api/v1/admin/system/users', ['keyword' => 'test-user-' . $suffix], $headers);
+        $users = $this->get('/api/admin/system/users', ['keyword' => 'test-user-' . $suffix], $headers);
         $this->assertSame('SUCCESS', $users['code']);
         $this->assertGreaterThanOrEqual(1, $users['data']['total']);
 
-        $roleAuthorize = $this->json('/api/v1/admin/system/roles/' . $role['data']['id'] . '/menus', [
+        $roleAuthorize = $this->json('/api/admin/system/roles/' . $role['data']['id'] . '/menus', [
             'menuIds' => [],
         ], $headers);
         $this->assertSame('SUCCESS', $roleAuthorize['code']);
         $this->assertSame([], $roleAuthorize['data']['menuIds']);
 
-        $deleteUser = $this->delete('/api/v1/admin/system/users/' . $user['data']['id'], [], $headers);
+        $deleteUser = $this->delete('/api/admin/system/users/' . $user['data']['id'], [], $headers);
         $this->assertSame('SUCCESS', $deleteUser['code']);
 
-        $deleteRole = $this->delete('/api/v1/admin/system/roles/' . $role['data']['id'], [], $headers);
+        $deleteRole = $this->delete('/api/admin/system/roles/' . $role['data']['id'], [], $headers);
         $this->assertSame('SUCCESS', $deleteRole['code']);
 
-        $deleteMenu = $this->delete('/api/v1/admin/system/menus/' . $menu['data']['id'], [], $headers);
+        $deleteMenu = $this->delete('/api/admin/system/menus/' . $menu['data']['id'], [], $headers);
         $this->assertSame('SUCCESS', $deleteMenu['code']);
     }
 
@@ -213,14 +213,14 @@ class ExampleTest extends TestCase
 
         $openapi = $this->get('/api/v1/open/openapi.json');
         $this->assertSame('3.1.0', $openapi['openapi']);
-        $this->assertArrayHasKey('/api/v1/admin/system/users', $openapi['paths']);
-        $this->assertSame('system:user:list', $openapi['paths']['/api/v1/admin/system/users']['get']['x-trueadmin']['permission']);
+        $this->assertArrayHasKey('/api/admin/system/users', $openapi['paths']);
+        $this->assertSame('system:user:list', $openapi['paths']['/api/admin/system/users']['get']['x-trueadmin']['permission']);
     }
 
 
     private function loginAsAdmin()
     {
-        $login = $this->json('/api/v1/admin/auth/login', [
+        $login = $this->json('/api/admin/auth/login', [
             'username' => 'admin',
             'password' => 'trueadmin',
         ]);

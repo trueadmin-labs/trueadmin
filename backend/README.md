@@ -49,10 +49,10 @@ Schema          结构化输出和代码生成元数据预留
 
 ```text
 GET  /
-POST /api/v1/admin/auth/login
-POST /api/v1/admin/auth/logout
-GET  /api/v1/admin/auth/me
-GET  /api/v1/admin/products
+POST /api/admin/auth/login
+POST /api/admin/auth/logout
+GET  /api/admin/auth/me
+GET  /api/admin/products
 GET  /api/v1/client/profile
 GET  /api/v1/client/products
 GET  /api/v1/open/openapi.json

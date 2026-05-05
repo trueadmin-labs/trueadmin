@@ -55,7 +55,7 @@ web/src/stores
 TrueAdmin 使用 RESTful API + OpenAPI/Swagger。接口按调用方分为：
 
 ```text
-/api/v1/admin   后台管理端
+/api/admin   后台管理端
 /api/v1/client  用户端
 /api/v1/open    外部开放平台
 ```

@@ -271,7 +271,7 @@ Actor / ActorContext 原语
 路径规划：
 
 ```text
-/api/v1/admin   后台管理端 API
+/api/admin   后台管理端 API
 /api/v1/client  用户端 API
 /api/v1/open    外部开放平台 API
 ```
@@ -279,7 +279,7 @@ Actor / ActorContext 原语
 代码映射：
 
 ```text
-/api/v1/admin/products
+/api/admin/products
 -> Module/Product/Http/Admin/Controller/ProductController.php
 
 /api/v1/client/products

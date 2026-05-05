@@ -113,7 +113,7 @@ export async function login(
   options?: Record<string, unknown>,
 ) {
   return unwrap(
-    request<ApiResponse<LoginResult>>('/api/v1/admin/auth/login', {
+    request<ApiResponse<LoginResult>>('/api/admin/auth/login', {
       method: 'POST',
       data: body,
       ...(options || {}),
@@ -123,7 +123,7 @@ export async function login(
 
 export async function currentUser(options?: Record<string, unknown>) {
   const user = await unwrap(
-    request<ApiResponse<CurrentAdminPayload>>('/api/v1/admin/auth/me', {
+    request<ApiResponse<CurrentAdminPayload>>('/api/admin/auth/me', {
       method: 'GET',
       ...(options || {}),
     }),
@@ -138,7 +138,7 @@ export async function currentUser(options?: Record<string, unknown>) {
 
 export async function outLogin(options?: Record<string, unknown>) {
   return unwrap(
-    request<ApiResponse<null>>('/api/v1/admin/auth/logout', {
+    request<ApiResponse<null>>('/api/admin/auth/logout', {
       method: 'POST',
       ...(options || {}),
     }),
@@ -147,7 +147,7 @@ export async function outLogin(options?: Record<string, unknown>) {
 
 export async function adminMenus(options?: Record<string, unknown>) {
   return unwrap(
-    request<ApiResponse<AdminMenu[]>>('/api/v1/admin/system/menu-tree', {
+    request<ApiResponse<AdminMenu[]>>('/api/admin/system/menu-tree', {
       method: 'GET',
       ...(options || {}),
     }),
@@ -156,7 +156,7 @@ export async function adminMenus(options?: Record<string, unknown>) {
 
 export async function adminPermissions(options?: Record<string, unknown>) {
   return unwrap(
-    request<ApiResponse<string[]>>('/api/v1/admin/system/permissions', {
+    request<ApiResponse<string[]>>('/api/admin/system/permissions', {
       method: 'GET',
       ...(options || {}),
     }),
@@ -168,7 +168,7 @@ export async function adminUserPage(
   options?: Record<string, unknown>,
 ) {
   return unwrap(
-    request<ApiResponse<PageResult<AdminUser>>>('/api/v1/admin/system/users', {
+    request<ApiResponse<PageResult<AdminUser>>>('/api/admin/system/users', {
       method: 'GET',
       params,
       ...(options || {}),
@@ -181,7 +181,7 @@ export async function createAdminUser(
   options?: Record<string, unknown>,
 ) {
   return unwrap(
-    request<ApiResponse<AdminUser>>('/api/v1/admin/system/users', {
+    request<ApiResponse<AdminUser>>('/api/admin/system/users', {
       method: 'POST',
       data,
       ...(options || {}),
@@ -195,7 +195,7 @@ export async function updateAdminUser(
   options?: Record<string, unknown>,
 ) {
   return unwrap(
-    request<ApiResponse<AdminUser>>(`/api/v1/admin/system/users/${id}`, {
+    request<ApiResponse<AdminUser>>(`/api/admin/system/users/${id}`, {
       method: 'PUT',
       data,
       ...(options || {}),
@@ -208,7 +208,7 @@ export async function deleteAdminUser(
   options?: Record<string, unknown>,
 ) {
   return unwrap(
-    request<ApiResponse<null>>(`/api/v1/admin/system/users/${id}`, {
+    request<ApiResponse<null>>(`/api/admin/system/users/${id}`, {
       method: 'DELETE',
       ...(options || {}),
     }),
@@ -217,7 +217,7 @@ export async function deleteAdminUser(
 
 export async function adminRoleOptions(options?: Record<string, unknown>) {
   return unwrap(
-    request<ApiResponse<AdminRole[]>>('/api/v1/admin/system/users/role-options', {
+    request<ApiResponse<AdminRole[]>>('/api/admin/system/users/role-options', {
       method: 'GET',
       ...(options || {}),
     }),
@@ -229,7 +229,7 @@ export async function adminRolePage(
   options?: Record<string, unknown>,
 ) {
   return unwrap(
-    request<ApiResponse<PageResult<AdminRole>>>('/api/v1/admin/system/roles', {
+    request<ApiResponse<PageResult<AdminRole>>>('/api/admin/system/roles', {
       method: 'GET',
       params,
       ...(options || {}),
@@ -242,7 +242,7 @@ export async function adminRoleDetail(
   options?: Record<string, unknown>,
 ) {
   return unwrap(
-    request<ApiResponse<AdminRole>>(`/api/v1/admin/system/roles/${id}`, {
+    request<ApiResponse<AdminRole>>(`/api/admin/system/roles/${id}`, {
       method: 'GET',
       ...(options || {}),
     }),
@@ -254,7 +254,7 @@ export async function createAdminRole(
   options?: Record<string, unknown>,
 ) {
   return unwrap(
-    request<ApiResponse<AdminRole>>('/api/v1/admin/system/roles', {
+    request<ApiResponse<AdminRole>>('/api/admin/system/roles', {
       method: 'POST',
       data,
       ...(options || {}),
@@ -268,7 +268,7 @@ export async function updateAdminRole(
   options?: Record<string, unknown>,
 ) {
   return unwrap(
-    request<ApiResponse<AdminRole>>(`/api/v1/admin/system/roles/${id}`, {
+    request<ApiResponse<AdminRole>>(`/api/admin/system/roles/${id}`, {
       method: 'PUT',
       data,
       ...(options || {}),
@@ -281,7 +281,7 @@ export async function deleteAdminRole(
   options?: Record<string, unknown>,
 ) {
   return unwrap(
-    request<ApiResponse<null>>(`/api/v1/admin/system/roles/${id}`, {
+    request<ApiResponse<null>>(`/api/admin/system/roles/${id}`, {
       method: 'DELETE',
       ...(options || {}),
     }),
@@ -294,7 +294,7 @@ export async function authorizeAdminRoleMenus(
   options?: Record<string, unknown>,
 ) {
   return unwrap(
-    request<ApiResponse<AdminRole>>(`/api/v1/admin/system/roles/${id}/menus`, {
+    request<ApiResponse<AdminRole>>(`/api/admin/system/roles/${id}/menus`, {
       method: 'POST',
       data: { menuIds },
       ...(options || {}),
@@ -307,7 +307,7 @@ export async function adminMenuList(
   options?: Record<string, unknown>,
 ) {
   return unwrap(
-    request<ApiResponse<AdminMenu[]>>('/api/v1/admin/system/menus', {
+    request<ApiResponse<AdminMenu[]>>('/api/admin/system/menus', {
       method: 'GET',
       params,
       ...(options || {}),
@@ -320,7 +320,7 @@ export async function createAdminMenu(
   options?: Record<string, unknown>,
 ) {
   return unwrap(
-    request<ApiResponse<AdminMenu>>('/api/v1/admin/system/menus', {
+    request<ApiResponse<AdminMenu>>('/api/admin/system/menus', {
       method: 'POST',
       data,
       ...(options || {}),
@@ -334,7 +334,7 @@ export async function updateAdminMenu(
   options?: Record<string, unknown>,
 ) {
   return unwrap(
-    request<ApiResponse<AdminMenu>>(`/api/v1/admin/system/menus/${id}`, {
+    request<ApiResponse<AdminMenu>>(`/api/admin/system/menus/${id}`, {
       method: 'PUT',
       data,
       ...(options || {}),
@@ -347,7 +347,7 @@ export async function deleteAdminMenu(
   options?: Record<string, unknown>,
 ) {
   return unwrap(
-    request<ApiResponse<null>>(`/api/v1/admin/system/menus/${id}`, {
+    request<ApiResponse<null>>(`/api/admin/system/menus/${id}`, {
       method: 'DELETE',
       ...(options || {}),
     }),

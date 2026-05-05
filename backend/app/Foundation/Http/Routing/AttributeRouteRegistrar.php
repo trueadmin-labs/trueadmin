@@ -89,7 +89,7 @@ final class AttributeRouteRegistrar
     private function controllerAnnotations(): array
     {
         return [
-            AdminController::class => '/api/v1/admin',
+            AdminController::class => '/api/admin',
             ClientController::class => '/api/v1/client',
             OpenController::class => '/api/v1/open',
         ];

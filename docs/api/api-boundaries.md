@@ -9,7 +9,7 @@ API 版本和多端代码复用规则见 [后端模块目录规范](../backend/m
 ## 分区原则
 
 ```text
-/api/v1/admin   后台管理端 API
+/api/admin   后台管理端 API
 /api/v1/client  用户端 API
 /api/v1/open    外部开放平台 API
 ```

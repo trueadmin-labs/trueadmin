@@ -61,9 +61,9 @@
 
 认证最小闭环：
 
-- `POST /api/v1/admin/auth/login`
-- `POST /api/v1/admin/auth/logout`
-- `GET /api/v1/admin/auth/me`
+- `POST /api/admin/auth/login`
+- `POST /api/admin/auth/logout`
+- `GET /api/admin/auth/me`
 
 当前说明：
 

@@ -160,7 +160,7 @@ ce09fcd chore: initialize TrueAdmin scaffold
 
 TrueAdmin 第一阶段已经预留三类 API：
 
-- `/api/v1/admin`：后台管理端 API。
+- `/api/admin`：后台管理端 API。
 - `/api/v1/client`：未来用户端 API。
 - `/api/v1/open`：未来外部开放平台 API。
 

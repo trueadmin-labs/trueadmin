@@ -81,7 +81,7 @@ password: trueadmin
 第一阶段已预留 API 分区：
 
 ```text
-/api/v1/admin
+/api/admin
 /api/v1/client
 /api/v1/open
 ```

@@ -87,7 +87,7 @@ final class OpenApiDocumentBuilder
             ],
         ];
 
-        if (! (bool) ($permission['public'] ?? false) && str_starts_with((string) $route['path'], '/api/v1/admin')) {
+        if (! (bool) ($permission['public'] ?? false) && str_starts_with((string) $route['path'], '/api/admin')) {
             $operation['security'] = $spec['security'] ?? [['bearerAuth' => []]];
         }
 

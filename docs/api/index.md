@@ -5,7 +5,7 @@ TrueAdmin 使用 RESTful API + OpenAPI/Swagger。API 文档同时服务后端实
 ## API 分区
 
 ```text
-/api/v1/admin   后台管理端 API
+/api/admin   后台管理端 API
 /api/v1/client  用户端 API
 /api/v1/open    外部开放平台 API
 ```
