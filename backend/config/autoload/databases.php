@@ -11,16 +11,18 @@ declare(strict_types=1);
  */
 use function Hyperf\Support\env;
 
+$driver = env('DB_DRIVER', 'pgsql');
+
 return [
     'default' => [
-        'driver' => env('DB_DRIVER', 'pgsql'),
+        'driver' => $driver,
         'host' => env('DB_HOST', '127.0.0.1'),
         'database' => env('DB_DATABASE', 'trueadmin'),
         'port' => env('DB_PORT', 15432),
         'username' => env('DB_USERNAME', 'trueadmin'),
         'password' => env('DB_PASSWORD', ''),
-        'charset' => env('DB_CHARSET', 'utf8'),
-        'collation' => env('DB_COLLATION', 'utf8_unicode_ci'),
+        'charset' => env('DB_CHARSET', $driver === 'pgsql' ? 'utf8' : 'utf8mb4'),
+        'collation' => env('DB_COLLATION', $driver === 'pgsql' ? '' : 'utf8mb4_unicode_ci'),
         'prefix' => env('DB_PREFIX', ''),
         'pool' => [
             'min_connections' => 1,

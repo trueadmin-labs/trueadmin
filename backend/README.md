@@ -72,6 +72,7 @@ php bin/hyperf.php trueadmin:routes
 
 ```bash
 composer install
+php bin/hyperf.php trueadmin:init
 composer start
 ```
 
@@ -82,12 +83,7 @@ username: admin
 password: trueadmin
 ```
 
-该账号由 `App\\Module\\System\\Database\\Seeders\\SystemSeeder` 写入数据库。首次启动前请先执行迁移和种子数据：
-
-```bash
-php bin/hyperf.php migrate
-php bin/hyperf.php db:seed --path=app/Module/System/Database/Seeders
-```
+该账号由 `App\\Module\\System\\Database\\Seeders\\SystemSeeder` 写入数据库。首次启动前执行 `trueadmin:init` 会自动完成模块迁移和模块 Seeder。
 
 ## AI 开发提醒
 

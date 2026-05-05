@@ -59,6 +59,7 @@ TrueAdmin 默认优先使用 PostgreSQL，后端通过 Hyperf 官方扩展包 `h
 ```bash
 cd backend
 composer install
+php bin/hyperf.php trueadmin:init
 composer start
 ```
 
@@ -75,12 +76,7 @@ username: admin
 password: trueadmin
 ```
 
-默认管理员由 System 模块 Seeder 写入数据库。首次初始化后执行：
-
-```bash
-php bin/hyperf.php migrate
-php bin/hyperf.php db:seed --path=app/Module/System/Database/Seeders
-```
+默认管理员由 System 模块 Seeder 写入数据库。首次初始化执行 `php bin/hyperf.php trueadmin:init`，它会运行 Hyperf 原生迁移并执行模块 Seeder。
 
 第一阶段已预留 API 分区：
 

@@ -571,6 +571,7 @@ backend/plugin/*/*/Database/Seeders
 执行命令：
 
 ```bash
+php bin/hyperf.php trueadmin:init
 php bin/hyperf.php migrate
 php bin/hyperf.php migrate:status
 php bin/hyperf.php migrate:rollback
@@ -579,7 +580,8 @@ php bin/hyperf.php trueadmin:migration-paths
 
 规则：
 
-- `migrate`、`migrate:status`、`migrate:rollback` 使用 Hyperf 原生命令。
+- `trueadmin:init` 用于首次初始化，内部调用 Hyperf 原生迁移并自动执行模块 Seeder。
+- `migrate`、`migrate:status`、`migrate:rollback` 仍使用 Hyperf 原生命令。
 - TrueAdmin 通过 `RegisterMigrationPathsListener` 把 `app/Module/*/Database/Migrations` 和 `plugin/*/*/Database/Migrations` 注册到 Hyperf Migrator。
 - `trueadmin:migration-paths` 只用于查看扫描结果，不负责执行迁移。
 - 模块自己的表放模块内迁移。
