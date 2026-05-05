@@ -28,7 +28,7 @@ final class AdminRoleController extends AdminController
 
     #[AdminGet('')]
     #[Permission('system:role:list', title: '角色列表', group: '系统管理')]
-    public function index(): array
+    public function list(): array
     {
         return ApiResponse::success($this->roles->paginate(
             max(1, (int) $this->request->input('page', 1)),
@@ -40,7 +40,7 @@ final class AdminRoleController extends AdminController
 
     #[AdminGet('{id}')]
     #[Permission('system:role:detail', title: '角色详情', group: '系统管理')]
-    public function show(int $id): array
+    public function detail(int $id): array
     {
         return ApiResponse::success($this->roles->detail($id));
     }
@@ -48,7 +48,7 @@ final class AdminRoleController extends AdminController
     #[AdminPost('')]
     #[Permission('system:role:create', title: '新增角色', group: '系统管理')]
     #[OperationLog(module: 'system', action: 'admin_role_create', remark: '新增角色')]
-    public function store(): array
+    public function create(): array
     {
         return ApiResponse::success($this->roles->create($this->request->all()));
     }
@@ -64,7 +64,7 @@ final class AdminRoleController extends AdminController
     #[AdminDelete('{id}')]
     #[Permission('system:role:delete', title: '删除角色', group: '系统管理')]
     #[OperationLog(module: 'system', action: 'admin_role_delete', remark: '删除角色')]
-    public function destroy(int $id): array
+    public function delete(int $id): array
     {
         $this->roles->delete($id);
 
@@ -74,7 +74,7 @@ final class AdminRoleController extends AdminController
     #[AdminPost('{id}/menus')]
     #[Permission('system:role:authorize', title: '角色菜单授权', group: '系统管理')]
     #[OperationLog(module: 'system', action: 'admin_role_authorize', remark: '角色菜单授权')]
-    public function authorizeMenus(int $id): array
+    public function authorize(int $id): array
     {
         return ApiResponse::success($this->roles->authorizeMenus($id, $this->request->input('menuIds', [])));
     }

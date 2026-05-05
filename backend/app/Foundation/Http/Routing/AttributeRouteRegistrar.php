@@ -41,7 +41,7 @@ final class AttributeRouteRegistrar
             $mapping = $item['annotation'];
             $routes[] = [
                 'methods' => $mapping->methods,
-                'path' => $this->join($controller['path'], $mapping->path),
+                'path' => $this->routePath($controller['path'], $mapping->path),
                 'action' => $item['class'] . '@' . $item['method'],
                 'middleware' => array_values(array_unique([...$controller['middleware'], ...$mapping->middleware])),
                 'name' => $mapping->name,
@@ -119,6 +119,15 @@ final class AttributeRouteRegistrar
             OpenPut::class,
             OpenDelete::class,
         ];
+    }
+
+    private function routePath(string $controllerPath, string $methodPath): string
+    {
+        if (str_starts_with($methodPath, '/')) {
+            return $this->join($methodPath);
+        }
+
+        return $this->join($controllerPath, $methodPath);
     }
 
     private function join(string ...$segments): string

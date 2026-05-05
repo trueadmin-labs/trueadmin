@@ -19,7 +19,7 @@ final class ProfileController extends ClientController
     }
 
     #[ClientGet('')]
-    public function show(): array
+    public function detail(): array
     {
         return ApiResponse::success($this->profileService->currentProfile());
     }

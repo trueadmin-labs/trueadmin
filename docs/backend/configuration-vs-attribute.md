@@ -109,7 +109,7 @@ final class ProductController extends AdminController
 {
     #[AdminGet('', name: 'product.list')]
     #[Permission('product:list', title: '商品列表', group: '商品管理')]
-    public function index(): array
+    public function list(): array
     {
     }
 }
@@ -122,7 +122,7 @@ Client/Open 同理使用对应端的 Controller 和方法注解：
 final class ProductController extends ClientController
 {
     #[ClientGet('')]
-    public function index(): array
+    public function list(): array
     {
     }
 }

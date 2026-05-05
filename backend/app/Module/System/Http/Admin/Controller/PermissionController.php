@@ -24,14 +24,14 @@ final class PermissionController extends AdminController
 
     #[AdminGet('menu-tree')]
     #[Permission('system:menu:list', title: '菜单树', group: '系统管理')]
-    public function menus(): array
+    public function listMenuTree(): array
     {
         return ApiResponse::success($this->permissions->menuTree());
     }
 
     #[AdminGet('permissions')]
     #[Permission('system:permission:list', title: '权限点列表', group: '系统管理')]
-    public function permissions(): array
+    public function listPermissionCodes(): array
     {
         return ApiResponse::success($this->permissions->permissionCodes());
     }

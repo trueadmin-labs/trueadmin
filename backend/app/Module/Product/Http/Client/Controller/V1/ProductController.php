@@ -21,7 +21,7 @@ final class ProductController extends ClientController
     }
 
     #[ClientGet('')]
-    public function index(): array
+    public function list(): array
     {
         $operator = ActorContext::requireOperator();
 

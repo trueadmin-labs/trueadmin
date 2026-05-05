@@ -52,8 +52,8 @@ Module/Product/Http/Client/Vo/V2/ProductResource.php
 #[ClientController(path: '/api/v2/client/products')]
 final class ProductController extends ClientController
 {
-    #[ClientGet('products')]
-    public function index(): array
+    #[ClientGet('')]
+    public function list(): array
     {
     }
 }

@@ -27,7 +27,7 @@ final class ProductController extends AdminController
     #[AdminGet('')]
     #[Permission('product:list', title: '商品列表', group: '商品管理')]
     #[OperationLog(module: 'product', action: 'list', remark: '查询商品列表')]
-    public function index(): array
+    public function list(): array
     {
         return ApiResponse::success(array_map(
             static fn ($product): array => ProductVo::make($product),

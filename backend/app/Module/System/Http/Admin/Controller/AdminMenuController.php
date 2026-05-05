@@ -28,7 +28,7 @@ final class AdminMenuController extends AdminController
 
     #[AdminGet('')]
     #[Permission('system:menu:list', title: '菜单列表', group: '系统管理')]
-    public function index(): array
+    public function list(): array
     {
         return ApiResponse::success($this->menus->list(
             trim((string) $this->request->input('keyword', '')),
@@ -38,7 +38,7 @@ final class AdminMenuController extends AdminController
 
     #[AdminGet('{id}')]
     #[Permission('system:menu:detail', title: '菜单详情', group: '系统管理')]
-    public function show(int $id): array
+    public function detail(int $id): array
     {
         return ApiResponse::success($this->menus->detail($id));
     }
@@ -46,7 +46,7 @@ final class AdminMenuController extends AdminController
     #[AdminPost('')]
     #[Permission('system:menu:create', title: '新增菜单', group: '系统管理')]
     #[OperationLog(module: 'system', action: 'admin_menu_create', remark: '新增菜单')]
-    public function store(): array
+    public function create(): array
     {
         return ApiResponse::success($this->menus->create($this->request->all()));
     }
@@ -62,7 +62,7 @@ final class AdminMenuController extends AdminController
     #[AdminDelete('{id}')]
     #[Permission('system:menu:delete', title: '删除菜单', group: '系统管理')]
     #[OperationLog(module: 'system', action: 'admin_menu_delete', remark: '删除菜单')]
-    public function destroy(int $id): array
+    public function delete(int $id): array
     {
         $this->menus->delete($id);
 

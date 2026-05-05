@@ -28,7 +28,7 @@ final class AdminUserController extends AdminController
 
     #[AdminGet('')]
     #[Permission('system:user:list', title: '管理员用户列表', group: '系统管理')]
-    public function index(): array
+    public function list(): array
     {
         return ApiResponse::success($this->users->paginate(
             max(1, (int) $this->request->input('page', 1)),
@@ -40,7 +40,7 @@ final class AdminUserController extends AdminController
 
     #[AdminGet('{id}')]
     #[Permission('system:user:detail', title: '管理员用户详情', group: '系统管理')]
-    public function show(int $id): array
+    public function detail(int $id): array
     {
         return ApiResponse::success($this->users->detail($id));
     }
@@ -48,7 +48,7 @@ final class AdminUserController extends AdminController
     #[AdminPost('')]
     #[Permission('system:user:create', title: '新增管理员用户', group: '系统管理')]
     #[OperationLog(module: 'system', action: 'admin_user_create', remark: '新增管理员用户')]
-    public function store(): array
+    public function create(): array
     {
         return ApiResponse::success($this->users->create($this->request->all()));
     }
@@ -64,7 +64,7 @@ final class AdminUserController extends AdminController
     #[AdminDelete('{id}')]
     #[Permission('system:user:delete', title: '删除管理员用户', group: '系统管理')]
     #[OperationLog(module: 'system', action: 'admin_user_delete', remark: '删除管理员用户')]
-    public function destroy(int $id): array
+    public function delete(int $id): array
     {
         $this->users->delete($id);
 
@@ -73,7 +73,7 @@ final class AdminUserController extends AdminController
 
     #[AdminGet('role-options')]
     #[Permission('system:role:list', title: '角色选项', group: '系统管理')]
-    public function roleOptions(): array
+    public function listRoleOptions(): array
     {
         return ApiResponse::success($this->users->roleOptions());
     }
