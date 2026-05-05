@@ -68,13 +68,16 @@ $enabledPluginSourcePaths = static function (): array {
     return array_values(array_unique($paths));
 };
 
+$appEnv = getenv('APP_ENV') ?: ($_ENV['APP_ENV'] ?? $_SERVER['APP_ENV'] ?? '');
+
 return [
     'scan' => [
-        'paths' => [
+        'paths' => array_values(array_filter([
             BASE_PATH . '/app',
+            $appEnv === 'testing' ? BASE_PATH . '/test/Support/Controller' : null,
             BASE_PATH . '/../packages/kernel/src',
             ...$enabledPluginSourcePaths(),
-        ],
+        ])),
         'ignore_annotations' => [
             'mixin',
         ],

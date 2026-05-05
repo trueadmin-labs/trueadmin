@@ -13,13 +13,13 @@ final class OpenApiDocumentBuilder
     public function build(): array
     {
         $metadata = $this->scanner->scan();
-        $permissions = $this->indexByAction($metadata['permissions'] ?? []);
+        $permissionRules = $this->indexByAction($metadata['permissionRules'] ?? []);
         $openapi = $this->indexByAction($metadata['openapi'] ?? []);
         $paths = [];
 
         foreach ($metadata['routes'] ?? [] as $route) {
             $action = (string) $route['action'];
-            $permission = $permissions[$action] ?? null;
+            $permissionRule = $permissionRules[$action] ?? null;
             $spec = $openapi[$action] ?? null;
             $path = $this->normalizePath((string) $route['path']);
 
@@ -29,7 +29,7 @@ final class OpenApiDocumentBuilder
                     continue;
                 }
 
-                $paths[$path][$verb] = $this->operation($route, $permission, $spec);
+                $paths[$path][$verb] = $this->operation($route, $permissionRule, $spec);
             }
         }
 
@@ -58,16 +58,16 @@ final class OpenApiDocumentBuilder
         ];
     }
 
-    private function operation(array $route, ?array $permission, ?array $spec): array
+    private function operation(array $route, ?array $permissionRule, ?array $spec): array
     {
         $summary = (string) ($spec['summary'] ?? '');
         if ($summary === '') {
-            $summary = (string) ($permission['title'] ?? $route['name'] ?? $route['action']);
+            $summary = (string) ($permissionRule['title'] ?? $route['name'] ?? $route['action']);
         }
 
         $tags = $spec['tags'] ?? [];
-        if ($tags === [] && isset($permission['group']) && $permission['group'] !== '') {
-            $tags = [(string) $permission['group']];
+        if ($tags === [] && isset($permissionRule['group']) && $permissionRule['group'] !== '') {
+            $tags = [(string) $permissionRule['group']];
         }
 
         $operation = [
@@ -82,12 +82,14 @@ final class OpenApiDocumentBuilder
             ],
             'x-trueadmin' => [
                 'action' => $route['action'],
-                'permission' => $permission['code'] ?? null,
-                'public' => (bool) ($permission['public'] ?? false),
+                'permission' => $permissionRule['code'] ?? null,
+                'permissionMode' => $permissionRule['mode'] ?? null,
+                'permissions' => $permissionRule['codes'] ?? [],
+                'public' => (bool) ($permissionRule['public'] ?? false),
             ],
         ];
 
-        if (! (bool) ($permission['public'] ?? false) && str_starts_with((string) $route['path'], '/api/admin')) {
+        if (! (bool) ($permissionRule['public'] ?? false) && str_starts_with((string) $route['path'], '/api/admin')) {
             $operation['security'] = $spec['security'] ?? [['bearerAuth' => []]];
         }
 

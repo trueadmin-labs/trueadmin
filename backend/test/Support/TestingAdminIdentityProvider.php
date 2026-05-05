@@ -13,20 +13,35 @@ final class TestingAdminIdentityProvider implements AdminIdentityProviderInterfa
 {
     public function findCredentialByUsername(string $username): ?AdminCredential
     {
-        if ($username !== 'admin') {
+        $user = $this->users()[$username] ?? null;
+        if ($user === null) {
             return null;
         }
 
-        return new AdminCredential($this->admin(), Password::make('trueadmin'));
+        return new AdminCredential($user, Password::make('trueadmin'));
     }
 
     public function findAuthUserById(int $id): ?AuthUser
     {
-        return $id === 1 ? $this->admin() : null;
+        foreach ($this->users() as $user) {
+            if ($user->id === $id) {
+                return $user;
+            }
+        }
+
+        return null;
     }
 
-    private function admin(): AuthUser
+    /**
+     * @return array<string, AuthUser>
+     */
+    private function users(): array
     {
-        return new AuthUser(1, 'admin', 'TrueAdmin', ['super-admin'], ['*']);
+        return [
+            'admin' => new AuthUser(1, 'admin', 'TrueAdmin', ['super-admin'], ['*']),
+            'permission-any-a' => new AuthUser(2, 'permission-any-a', 'Permission Any A', ['tester'], ['testing:permission:any-a']),
+            'permission-all-a' => new AuthUser(3, 'permission-all-a', 'Permission All A', ['tester'], ['testing:permission:all-a']),
+            'permission-all-ab' => new AuthUser(4, 'permission-all-ab', 'Permission All AB', ['tester'], ['testing:permission:all-a', 'testing:permission:all-b']),
+        ];
     }
 }

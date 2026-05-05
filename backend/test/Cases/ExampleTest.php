@@ -215,13 +215,58 @@ class ExampleTest extends TestCase
         $this->assertSame('3.1.0', $openapi['openapi']);
         $this->assertArrayHasKey('/api/admin/system/users', $openapi['paths']);
         $this->assertSame('system:user:list', $openapi['paths']['/api/admin/system/users']['get']['x-trueadmin']['permission']);
+        $this->assertSame('single', $openapi['paths']['/api/admin/system/users']['get']['x-trueadmin']['permissionMode']);
+        $this->assertSame(['system:user:list'], $openapi['paths']['/api/admin/system/users']['get']['x-trueadmin']['permissions']);
+
+        $this->assertSame('anyOf', $openapi['paths']['/api/admin/testing/permission-rules/any']['get']['x-trueadmin']['permissionMode']);
+        $this->assertSame([
+            'testing:permission:any-a',
+            'testing:permission:any-b',
+        ], $openapi['paths']['/api/admin/testing/permission-rules/any']['get']['x-trueadmin']['permissions']);
+        $this->assertSame(1, \Hyperf\DbConnection\Db::table('admin_menus')
+            ->where('permission', 'testing:permission:any-a')
+            ->count());
+        $this->assertSame(0, \Hyperf\DbConnection\Db::table('admin_menus')
+            ->where('permission', 'testing:permission:any-a OR testing:permission:any-b')
+            ->count());
+    }
+
+    public function testPermissionRulesSupportAnyOfAndAllOf()
+    {
+        $anyA = $this->loginAs('permission-any-a');
+        $anyAHeaders = ['Authorization' => 'Bearer ' . $anyA['data']['accessToken']];
+
+        $any = $this->get('/api/admin/testing/permission-rules/any', [], $anyAHeaders);
+        $this->assertSame('SUCCESS', $any['code']);
+        $this->assertSame('anyOf', $any['data']['mode']);
+
+        $allDenied = $this->get('/api/admin/testing/permission-rules/all', [], $anyAHeaders);
+        $this->assertSame('KERNEL.PERMISSION.FORBIDDEN', $allDenied['code']);
+
+        $allA = $this->loginAs('permission-all-a');
+        $allADenied = $this->get('/api/admin/testing/permission-rules/all', [], [
+            'Authorization' => 'Bearer ' . $allA['data']['accessToken'],
+        ]);
+        $this->assertSame('KERNEL.PERMISSION.FORBIDDEN', $allADenied['code']);
+
+        $allAB = $this->loginAs('permission-all-ab');
+        $all = $this->get('/api/admin/testing/permission-rules/all', [], [
+            'Authorization' => 'Bearer ' . $allAB['data']['accessToken'],
+        ]);
+        $this->assertSame('SUCCESS', $all['code']);
+        $this->assertSame('allOf', $all['data']['mode']);
     }
 
 
     private function loginAsAdmin()
     {
+        return $this->loginAs('admin');
+    }
+
+    private function loginAs(string $username)
+    {
         $login = $this->json('/api/admin/auth/login', [
-            'username' => 'admin',
+            'username' => $username,
             'password' => 'trueadmin',
         ]);
 

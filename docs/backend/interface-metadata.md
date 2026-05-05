@@ -112,6 +112,42 @@ final class ProductController extends AdminController
 - 权限注解用于生成权限默认清单和接口权限元数据。
 - 运行时角色授权以数据库为准。
 
+权限注册和权限校验是两层概念：数据库只注册原子权限点，接口校验可以使用权限规则。
+
+```php
+#[Permission('system:user:update', title: '编辑用户')]
+public function update(): array
+{
+}
+
+#[Permission(anyOf: ['system:user:update', 'system:user:manage'], title: '重置密码')]
+public function resetPassword(): array
+{
+}
+
+#[Permission(allOf: ['system:role:update', 'system:role:authorize'], title: '保存并授权')]
+public function saveAndAuthorize(): array
+{
+}
+```
+
+规则含义：
+
+- `code`：单权限，等价于必须拥有这个原子权限点。
+- `anyOf`：拥有任意一个原子权限点即可访问。
+- `allOf`：必须同时拥有全部原子权限点才能访问。
+- `code`、`anyOf`、`allOf` 三者只能使用一个；复杂业务授权交给 Policy 或 Service。
+- 同一个类或方法只允许声明一个 `#[Permission]`，不要通过重复注解表达多权限。
+- `anyOf/allOf` 本身不会注册成数据库权限点，也不会生成 `A OR B` 这种组合权限。
+- `anyOf/allOf` 引用的每个权限码必须已经被菜单、按钮或单权限 `#[Permission('code')]` 定义为原子权限点，否则元数据扫描直接报错。
+
+元数据输出会同时提供两类数据：
+
+```text
+permissions      原子权限点清单，用于注册和角色授权。
+permissionRules  接口权限规则，用于运行时校验、OpenAPI 和 AI 理解。
+```
+
 ### 菜单按钮元数据
 
 ```php

@@ -23,6 +23,7 @@ final class InterfaceMetadataScanner
             'routes' => $this->routes->routes(),
             'menus' => $this->menus(),
             'permissions' => $this->permissions(),
+            'permissionRules' => $this->permissionRules(),
             'menuButtons' => $this->menuButtons(),
             'openapi' => $this->openapi(),
         ];
@@ -59,17 +60,21 @@ final class InterfaceMetadataScanner
     {
         $permissions = [];
         $routes = $this->routeIndex();
+        $definedCodes = $this->definedPermissionCodes();
 
-        foreach ([
-            ...array_map(
-                static fn (string $class, Permission $annotation): array => ['class' => $class, 'annotation' => $annotation],
-                array_keys(AnnotationCollector::getClassesByAnnotation(Permission::class)),
-                array_values(AnnotationCollector::getClassesByAnnotation(Permission::class)),
-            ),
-            ...AnnotationCollector::getMethodsByAnnotation(Permission::class),
-        ] as $item) {
+        foreach ($this->permissionItems() as $item) {
             $annotation = $item['annotation'];
             if (! $annotation instanceof Permission) {
+                continue;
+            }
+
+            foreach ($annotation->codes() as $code) {
+                if (! isset($definedCodes[$code])) {
+                    throw new \RuntimeException(sprintf('Permission [%s] is referenced by a rule but is not defined as an atomic permission.', $code));
+                }
+            }
+
+            if ($annotation->mode() !== 'single') {
                 continue;
             }
 
@@ -92,6 +97,84 @@ final class InterfaceMetadataScanner
         }
 
         return array_values($permissions);
+    }
+
+    private function permissionRules(): array
+    {
+        $rules = [];
+        $routes = $this->routeIndex();
+
+        foreach ($this->permissionItems() as $item) {
+            $annotation = $item['annotation'];
+            if (! $annotation instanceof Permission) {
+                continue;
+            }
+
+            $class = (string) $item['class'];
+            $method = isset($item['method']) ? (string) $item['method'] : null;
+            $action = $method === null ? null : $class . '@' . $method;
+            $menu = AnnotationCollector::getClassAnnotation($class, Menu::class);
+
+            $rules[] = [
+                'class' => $class,
+                'method' => $method,
+                'action' => $action,
+                'route' => $action === null ? null : ($routes[$action] ?? null),
+                'menu' => $menu instanceof Menu ? $menu->code : '',
+                'code' => $annotation->mode() === 'single' ? $annotation->code : null,
+                'mode' => $annotation->mode(),
+                'codes' => $annotation->codes(),
+                'title' => $annotation->title,
+                'group' => $annotation->group,
+                'public' => $annotation->public,
+            ];
+        }
+
+        return $rules;
+    }
+
+    private function definedPermissionCodes(): array
+    {
+        $codes = [];
+
+        foreach (AnnotationCollector::getClassesByAnnotation(Menu::class) as $annotation) {
+            if ($annotation instanceof Menu && $annotation->permission !== '') {
+                $codes[$annotation->permission] = true;
+            }
+        }
+
+        foreach (AnnotationCollector::getMethodsByAnnotation(MenuButton::class) as $item) {
+            $annotation = $item['annotation'];
+            if (! $annotation instanceof MenuButton) {
+                continue;
+            }
+
+            $code = $annotation->permission !== '' ? $annotation->permission : $annotation->code;
+            if ($code !== '') {
+                $codes[$code] = true;
+            }
+        }
+
+        foreach ($this->permissionItems() as $item) {
+            $annotation = $item['annotation'];
+            if ($annotation instanceof Permission && $annotation->mode() === 'single') {
+                $codes[$annotation->code] = true;
+            }
+        }
+
+        return $codes;
+    }
+
+    private function permissionItems(): array
+    {
+        return [
+            ...array_map(
+                static fn (string $class, Permission $annotation): array => ['class' => $class, 'annotation' => $annotation],
+                array_keys(AnnotationCollector::getClassesByAnnotation(Permission::class)),
+                array_values(AnnotationCollector::getClassesByAnnotation(Permission::class)),
+            ),
+            ...AnnotationCollector::getMethodsByAnnotation(Permission::class),
+        ];
     }
 
     private function menuButtons(): array

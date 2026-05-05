@@ -12,6 +12,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use TrueAdmin\Kernel\Constant\ErrorCode;
+use TrueAdmin\Kernel\Context\Actor;
 use TrueAdmin\Kernel\Context\ActorContext;
 use TrueAdmin\Kernel\Exception\BusinessException;
 use TrueAdmin\Kernel\Http\Attribute\Permission;
@@ -30,11 +31,45 @@ final class PermissionMiddleware implements MiddlewareInterface
         }
 
         $actor = ActorContext::principal();
-        if ($actor === null || ! $this->permissions->can($actor, $permission->code)) {
-            throw new BusinessException(ErrorCode::FORBIDDEN, 403, ['permission' => $permission->code]);
+        if ($actor === null || ! $this->allows($actor, $permission)) {
+            throw new BusinessException(ErrorCode::FORBIDDEN, 403, [
+                'permission' => implode(',', $permission->codes()),
+                'mode' => $permission->mode(),
+            ]);
         }
 
         return $handler->handle($request);
+    }
+
+    private function allows(Actor $actor, Permission $permission): bool
+    {
+        return match ($permission->mode()) {
+            'anyOf' => $this->allowsAny($actor, $permission->codes()),
+            'allOf' => $this->allowsAll($actor, $permission->codes()),
+            default => $this->permissions->can($actor, $permission->code),
+        };
+    }
+
+    private function allowsAny(Actor $actor, array $permissions): bool
+    {
+        foreach ($permissions as $permission) {
+            if ($this->permissions->can($actor, $permission)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function allowsAll(Actor $actor, array $permissions): bool
+    {
+        foreach ($permissions as $permission) {
+            if (! $this->permissions->can($actor, $permission)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private function permissionFromRoute(ServerRequestInterface $request): ?Permission
