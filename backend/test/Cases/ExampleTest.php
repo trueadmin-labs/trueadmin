@@ -113,11 +113,68 @@ class ExampleTest extends TestCase
         $login = $this->loginAsAdmin();
         $headers = ['Authorization' => 'Bearer ' . $login['data']['accessToken']];
 
-        $menus = $this->get('/api/v1/admin/system/menus', [], $headers);
+        $menus = $this->get('/api/v1/admin/system/menu-tree', [], $headers);
         $this->assertSame('SUCCESS', $menus['code']);
 
         $permissions = $this->get('/api/v1/admin/system/permissions', [], $headers);
         $this->assertSame('SUCCESS', $permissions['code']);
+    }
+
+    public function testSystemManagementCrudEntrances()
+    {
+        $login = $this->loginAsAdmin();
+        $headers = ['Authorization' => 'Bearer ' . $login['data']['accessToken']];
+        $suffix = str_replace('.', '', uniqid('', true));
+
+        $menu = $this->json('/api/v1/admin/system/menus', [
+            'name' => '测试菜单' . $suffix,
+            'path' => '/tests/' . $suffix,
+            'permission' => 'test:' . $suffix . ':list',
+            'type' => 'menu',
+            'sort' => 99,
+            'status' => 'enabled',
+        ], $headers);
+        $this->assertSame('SUCCESS', $menu['code']);
+        $this->assertSame('测试菜单' . $suffix, $menu['data']['name']);
+
+        $role = $this->json('/api/v1/admin/system/roles', [
+            'code' => 'test-role-' . $suffix,
+            'name' => '测试角色' . $suffix,
+            'status' => 'enabled',
+            'menuIds' => [$menu['data']['id']],
+        ], $headers);
+        $this->assertSame('SUCCESS', $role['code']);
+        $this->assertContains($menu['data']['id'], $role['data']['menuIds']);
+
+        $user = $this->json('/api/v1/admin/system/users', [
+            'username' => 'test-user-' . $suffix,
+            'password' => 'trueadmin',
+            'nickname' => '测试用户' . $suffix,
+            'status' => 'enabled',
+            'roleIds' => [$role['data']['id']],
+        ], $headers);
+        $this->assertSame('SUCCESS', $user['code']);
+        $this->assertSame('test-user-' . $suffix, $user['data']['username']);
+        $this->assertContains($role['data']['id'], $user['data']['roleIds']);
+
+        $users = $this->get('/api/v1/admin/system/users', ['keyword' => 'test-user-' . $suffix], $headers);
+        $this->assertSame('SUCCESS', $users['code']);
+        $this->assertGreaterThanOrEqual(1, $users['data']['total']);
+
+        $roleAuthorize = $this->json('/api/v1/admin/system/roles/' . $role['data']['id'] . '/menus', [
+            'menuIds' => [],
+        ], $headers);
+        $this->assertSame('SUCCESS', $roleAuthorize['code']);
+        $this->assertSame([], $roleAuthorize['data']['menuIds']);
+
+        $deleteUser = $this->delete('/api/v1/admin/system/users/' . $user['data']['id'], [], $headers);
+        $this->assertSame('SUCCESS', $deleteUser['code']);
+
+        $deleteRole = $this->delete('/api/v1/admin/system/roles/' . $role['data']['id'], [], $headers);
+        $this->assertSame('SUCCESS', $deleteRole['code']);
+
+        $deleteMenu = $this->delete('/api/v1/admin/system/menus/' . $menu['data']['id'], [], $headers);
+        $this->assertSame('SUCCESS', $deleteMenu['code']);
     }
 
     private function loginAsAdmin()

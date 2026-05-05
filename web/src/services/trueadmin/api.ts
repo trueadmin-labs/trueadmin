@@ -40,6 +40,7 @@ export type AdminMenu = {
   permission: string;
   sort: number;
   status: string;
+  children?: AdminMenu[];
 };
 
 async function unwrap<T>(promise: Promise<ApiResponse<T>>): Promise<T> {
@@ -86,7 +87,7 @@ export async function outLogin(options?: Record<string, unknown>) {
 
 export async function adminMenus(options?: Record<string, unknown>) {
   return unwrap(
-    request<ApiResponse<AdminMenu[]>>('/api/v1/admin/system/menus', {
+    request<ApiResponse<AdminMenu[]>>('/api/v1/admin/system/menu-tree', {
       method: 'GET',
       ...(options || {}),
     }),

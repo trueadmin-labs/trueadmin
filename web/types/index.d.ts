@@ -31,5 +31,6 @@ declare namespace API {
     permission: string;
     sort: number;
     status: string;
+    children?: AdminMenu[];
   };
 }

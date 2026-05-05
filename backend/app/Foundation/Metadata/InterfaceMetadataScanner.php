@@ -28,24 +28,27 @@ final class InterfaceMetadataScanner
 
     private function permissions(): array
     {
-        return array_values(array_map(
-            static fn (array $item): array => [
+        $permissions = [];
+        foreach ([
+            ...array_map(
+                static fn (string $class, Permission $annotation): array => ['class' => $class, 'annotation' => $annotation],
+                array_keys(AnnotationCollector::getClassesByAnnotation(Permission::class)),
+                array_values(AnnotationCollector::getClassesByAnnotation(Permission::class)),
+            ),
+            ...AnnotationCollector::getMethodsByAnnotation(Permission::class),
+        ] as $item) {
+            $code = $item['annotation']->code;
+            $permissions[$code] ??= [
                 'class' => $item['class'],
                 'method' => $item['method'] ?? null,
-                'code' => $item['annotation']->code,
+                'code' => $code,
                 'title' => $item['annotation']->title,
                 'group' => $item['annotation']->group,
                 'public' => $item['annotation']->public,
-            ],
-            [
-                ...array_map(
-                    static fn (string $class, Permission $annotation): array => ['class' => $class, 'annotation' => $annotation],
-                    array_keys(AnnotationCollector::getClassesByAnnotation(Permission::class)),
-                    array_values(AnnotationCollector::getClassesByAnnotation(Permission::class)),
-                ),
-                ...AnnotationCollector::getMethodsByAnnotation(Permission::class),
-            ],
-        ));
+            ];
+        }
+
+        return array_values($permissions);
     }
 
     private function menuButtons(): array

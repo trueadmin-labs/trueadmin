@@ -30,7 +30,7 @@ final class AdminPermissionService implements AdminPermissionProviderInterface
 
     public function menuTree(): array
     {
-        return $this->menus->allEnabled();
+        return $this->menus->enabledTree();
     }
 
     public function permissionCodes(): array
