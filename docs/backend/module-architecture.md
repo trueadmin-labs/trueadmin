@@ -181,6 +181,7 @@ backend/app/Foundation/Crud/AbstractCrudController.php
 backend/app/Foundation/Service/AbstractService.php
 backend/app/Foundation/Repository/AbstractRepository.php
 backend/app/Foundation/Database/Model.php
+backend/app/Foundation/Tree/TreeHelper.php
 packages/kernel/src/Context/Actor.php
 packages/kernel/src/Context/ActorContext.php
 ```

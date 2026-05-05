@@ -5,15 +5,19 @@ declare(strict_types=1);
 namespace App\Module\System\Service;
 
 use App\Foundation\Query\AdminQuery;
+use App\Foundation\Service\AbstractService;
+use App\Foundation\Tree\TreeHelper;
 use App\Module\System\Model\AdminDepartment;
 use App\Module\System\Repository\AdminDepartmentRepository;
 use TrueAdmin\Kernel\Constant\ErrorCode;
 use TrueAdmin\Kernel\Exception\BusinessException;
 
-final class AdminDepartmentManagementService
+final class AdminDepartmentManagementService extends AbstractService
 {
-    public function __construct(private readonly AdminDepartmentRepository $departments)
-    {
+    public function __construct(
+        private readonly AdminDepartmentRepository $departments,
+        private readonly TreeHelper $tree,
+    ) {
     }
 
     public function tree(AdminQuery $query): array
@@ -29,17 +33,15 @@ final class AdminDepartmentManagementService
     public function create(array $payload): array
     {
         $code = (string) $payload['code'];
-        if ($this->departments->findByCode($code) !== null) {
-            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'code', 'reason' => 'duplicated']);
-        }
+        $this->assertUnique($this->departments->findByCode($code) !== null, 'code');
 
         $parent = $this->parentDepartment((int) ($payload['parentId'] ?? $payload['parent_id'] ?? 0));
         $department = $this->departments->create([
             'parent_id' => $parent === null ? 0 : (int) $parent->getAttribute('id'),
             'code' => $code,
             'name' => (string) $payload['name'],
-            'level' => $this->departmentLevel($parent),
-            'path' => $this->departmentPath($parent),
+            'level' => $this->tree->level($parent),
+            'path' => $this->tree->path($parent),
             'sort' => (int) ($payload['sort'] ?? 0),
             'status' => (string) ($payload['status'] ?? 'enabled'),
         ]);
@@ -52,9 +54,7 @@ final class AdminDepartmentManagementService
         $department = $this->mustFind($id);
         $code = (string) $payload['code'];
         $exists = $this->departments->findByCode($code);
-        if ($exists !== null && (int) $exists->getAttribute('id') !== $id) {
-            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'code', 'reason' => 'duplicated']);
-        }
+        $this->assertUnique($exists !== null && (int) $exists->getAttribute('id') !== $id, 'code');
 
         $parentId = array_key_exists('parentId', $payload) || array_key_exists('parent_id', $payload)
             ? (int) ($payload['parentId'] ?? $payload['parent_id'])
@@ -65,8 +65,8 @@ final class AdminDepartmentManagementService
             'parent_id' => $parent === null ? 0 : (int) $parent->getAttribute('id'),
             'code' => $code,
             'name' => (string) $payload['name'],
-            'level' => $this->departmentLevel($parent),
-            'path' => $this->departmentPath($parent),
+            'level' => $this->tree->level($parent),
+            'path' => $this->tree->path($parent),
             'sort' => (int) ($payload['sort'] ?? $department->getAttribute('sort')),
             'status' => (string) ($payload['status'] ?? $department->getAttribute('status')),
         ]);
@@ -91,7 +91,7 @@ final class AdminDepartmentManagementService
     {
         $department = $this->departments->find($id);
         if ($department === null) {
-            throw new BusinessException(ErrorCode::NOT_FOUND, 404, ['resource' => 'admin_department', 'id' => $id]);
+            throw $this->notFound('admin_department', $id);
         }
 
         return $department;
@@ -108,26 +108,11 @@ final class AdminDepartmentManagementService
             throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'parentId', 'reason' => 'missing_parent_department']);
         }
         if ($currentDepartmentId !== null) {
-            if ($parentId === $currentDepartmentId || $this->departments->isDescendant($parent, $currentDepartmentId)) {
+            if ($parentId === $currentDepartmentId || $this->tree->isDescendant($parent, $currentDepartmentId)) {
                 throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'parentId', 'reason' => 'cannot_move_department_to_self_or_descendant']);
             }
         }
 
         return $parent;
     }
-
-    private function departmentLevel(?AdminDepartment $parent): int
-    {
-        return $parent === null ? 1 : (int) $parent->getAttribute('level') + 1;
-    }
-
-    private function departmentPath(?AdminDepartment $parent): string
-    {
-        if ($parent === null) {
-            return '';
-        }
-
-        return (string) $parent->getAttribute('path') . (int) $parent->getAttribute('id') . ',';
-    }
-
 }

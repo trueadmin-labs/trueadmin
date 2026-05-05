@@ -12,6 +12,8 @@ use Hyperf\DbConnection\Db;
 
 final class AdminUserRepository extends AbstractRepository
 {
+    protected ?string $modelClass = AdminUser::class;
+
     protected array $keywordFields = ['username', 'nickname'];
 
     protected array $filterable = [
@@ -90,7 +92,10 @@ final class AdminUserRepository extends AbstractRepository
 
     public function findById(int $id): ?AdminUser
     {
-        return AdminUser::query()->where('id', $id)->first();
+        /** @var null|AdminUser $user */
+        $user = $this->findModelById($id);
+
+        return $user;
     }
 
     public function existsUsername(string $username, ?int $exceptId = null): bool
@@ -105,15 +110,18 @@ final class AdminUserRepository extends AbstractRepository
 
     public function create(array $data): AdminUser
     {
-        return AdminUser::query()->create($data);
+        /** @var AdminUser $user */
+        $user = $this->createModel($data);
+
+        return $user;
     }
 
     public function update(AdminUser $user, array $data): AdminUser
     {
-        $user->fill($data);
-        $user->save();
+        /** @var AdminUser $user */
+        $user = $this->updateModel($user, $data);
 
-        return $user->refresh();
+        return $user;
     }
 
     public function delete(AdminUser $user): void
@@ -121,7 +129,7 @@ final class AdminUserRepository extends AbstractRepository
         $userId = (int) $user->getAttribute('id');
         Db::table('admin_user_departments')->where('user_id', $userId)->delete();
         Db::table('admin_role_user')->where('user_id', $userId)->delete();
-        $user->delete();
+        $this->deleteModel($user);
     }
 
     /**
@@ -130,11 +138,7 @@ final class AdminUserRepository extends AbstractRepository
     public function syncRoles(AdminUser $user, array $roleIds): void
     {
         $userId = (int) $user->getAttribute('id');
-        Db::table('admin_role_user')->where('user_id', $userId)->delete();
-
-        foreach (array_values(array_unique($roleIds)) as $roleId) {
-            Db::table('admin_role_user')->insert(['user_id' => $userId, 'role_id' => $roleId]);
-        }
+        $this->syncPivot('admin_role_user', 'user_id', $userId, 'role_id', $roleIds);
     }
 
     /**
@@ -142,12 +146,7 @@ final class AdminUserRepository extends AbstractRepository
      */
     public function roleIds(AdminUser $user): array
     {
-        return Db::table('admin_role_user')
-            ->where('user_id', (int) $user->getAttribute('id'))
-            ->pluck('role_id')
-            ->map(static fn ($id): int => (int) $id)
-            ->values()
-            ->all();
+        return $this->pivotIds('admin_role_user', 'user_id', (int) $user->getAttribute('id'), 'role_id');
     }
 
     /**
@@ -156,15 +155,14 @@ final class AdminUserRepository extends AbstractRepository
     public function syncDepartments(AdminUser $user, array $deptIds, ?int $primaryDeptId): void
     {
         $userId = (int) $user->getAttribute('id');
-        Db::table('admin_user_departments')->where('user_id', $userId)->delete();
-
-        foreach (array_values(array_unique($deptIds)) as $deptId) {
-            Db::table('admin_user_departments')->insert([
-                'user_id' => $userId,
-                'dept_id' => $deptId,
-                'is_primary' => $primaryDeptId !== null && $deptId === $primaryDeptId,
-            ]);
-        }
+        $this->syncPivot(
+            'admin_user_departments',
+            'user_id',
+            $userId,
+            'dept_id',
+            $deptIds,
+            static fn (int $deptId): array => ['is_primary' => $primaryDeptId !== null && $deptId === $primaryDeptId],
+        );
     }
 
     /**
@@ -172,12 +170,7 @@ final class AdminUserRepository extends AbstractRepository
      */
     public function departmentIds(AdminUser $user): array
     {
-        return Db::table('admin_user_departments')
-            ->where('user_id', (int) $user->getAttribute('id'))
-            ->pluck('dept_id')
-            ->map(static fn ($id): int => (int) $id)
-            ->values()
-            ->all();
+        return $this->pivotIds('admin_user_departments', 'user_id', (int) $user->getAttribute('id'), 'dept_id');
     }
 
     public function toArray(AdminUser $user): array

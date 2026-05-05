@@ -129,6 +129,7 @@ class ExampleTest extends TestCase
         $this->assertSame('SUCCESS', $deptB['code']);
         $this->assertSame($deptA['data']['id'], $deptB['data']['parentId']);
         $this->assertSame(2, $deptB['data']['level']);
+        $this->assertSame(',' . $deptA['data']['id'] . ',', $deptB['data']['path']);
 
         $departments = $this->get('/api/admin/system/departments', ['keyword' => 'test-dept-a-' . $suffix], $headers);
         $this->assertSame('SUCCESS', $departments['code']);
@@ -190,6 +191,7 @@ class ExampleTest extends TestCase
         $this->assertSame('SUCCESS', $childRole['code']);
         $this->assertSame($role['data']['id'], $childRole['data']['parentId']);
         $this->assertSame(3, $childRole['data']['level']);
+        $this->assertSame(rtrim((string) $role['data']['path'], ',') . ',' . $role['data']['id'] . ',', $childRole['data']['path']);
 
         $user = $this->json('/api/admin/system/users', [
             'username' => 'test-user-' . $suffix,

@@ -6,17 +6,20 @@ namespace App\Module\System\Service;
 
 use App\Foundation\Pagination\PageResult;
 use App\Foundation\Query\AdminQuery;
+use App\Foundation\Service\AbstractService;
+use App\Foundation\Tree\TreeHelper;
 use App\Module\System\Model\AdminRole;
 use App\Module\System\Repository\AdminMenuRepository;
 use App\Module\System\Repository\AdminRoleRepository;
 use TrueAdmin\Kernel\Constant\ErrorCode;
 use TrueAdmin\Kernel\Exception\BusinessException;
 
-final class AdminRoleManagementService
+final class AdminRoleManagementService extends AbstractService
 {
     public function __construct(
         private readonly AdminRoleRepository $roles,
         private readonly AdminMenuRepository $menus,
+        private readonly TreeHelper $tree,
     ) {
     }
 
@@ -34,9 +37,7 @@ final class AdminRoleManagementService
     public function create(array $payload): array
     {
         $code = (string) $payload['code'];
-        if ($this->roles->findByCode($code) !== null) {
-            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'code', 'reason' => 'duplicated']);
-        }
+        $this->assertUnique($this->roles->findByCode($code) !== null, 'code');
         $parent = $this->parentRole((int) ($payload['parentId'] ?? $payload['parent_id'] ?? 0));
         $menuIds = $this->menuIds($payload['menuIds'] ?? []);
         $this->assertWithinParentMenuScope($parent, $menuIds);
@@ -45,8 +46,8 @@ final class AdminRoleManagementService
             'parent_id' => $parent === null ? 0 : (int) $parent->getAttribute('id'),
             'code' => $code,
             'name' => (string) $payload['name'],
-            'level' => $this->roleLevel($parent),
-            'path' => $this->rolePath($parent),
+            'level' => $this->tree->level($parent),
+            'path' => $this->tree->path($parent),
             'sort' => (int) ($payload['sort'] ?? 0),
             'status' => (string) ($payload['status'] ?? 'enabled'),
         ]);
@@ -61,9 +62,7 @@ final class AdminRoleManagementService
         $role = $this->mustFind($id);
         $code = (string) $payload['code'];
         $exists = $this->roles->findByCode($code);
-        if ($exists !== null && (int) $exists->getAttribute('id') !== $id) {
-            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'code', 'reason' => 'duplicated']);
-        }
+        $this->assertUnique($exists !== null && (int) $exists->getAttribute('id') !== $id, 'code');
         $parentId = array_key_exists('parentId', $payload) || array_key_exists('parent_id', $payload)
             ? (int) ($payload['parentId'] ?? $payload['parent_id'])
             : (int) $role->getAttribute('parent_id');
@@ -75,8 +74,8 @@ final class AdminRoleManagementService
             'parent_id' => $parent === null ? 0 : (int) $parent->getAttribute('id'),
             'code' => $code,
             'name' => (string) $payload['name'],
-            'level' => $this->roleLevel($parent),
-            'path' => $this->rolePath($parent),
+            'level' => $this->tree->level($parent),
+            'path' => $this->tree->path($parent),
             'sort' => (int) ($payload['sort'] ?? $role->getAttribute('sort')),
             'status' => (string) ($payload['status'] ?? $role->getAttribute('status')),
         ]);
@@ -115,12 +114,7 @@ final class AdminRoleManagementService
     private function menuIds(mixed $value): array
     {
         $menuIds = is_array($value) ? array_values(array_unique(array_map('intval', $value))) : [];
-        $existingIds = $this->menus->existingIds($menuIds);
-        sort($menuIds);
-        sort($existingIds);
-        if ($menuIds !== $existingIds) {
-            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'menuIds', 'reason' => 'contains_missing_menu']);
-        }
+        $this->assertExistingIds($menuIds, $this->menus->existingIds($menuIds), 'menuIds', 'contains_missing_menu');
 
         return $menuIds;
     }
@@ -136,26 +130,12 @@ final class AdminRoleManagementService
             throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'parentId', 'reason' => 'missing_parent_role']);
         }
         if ($currentRoleId !== null) {
-            if ($parentId === $currentRoleId || $this->roles->isDescendant($parent, $currentRoleId)) {
+            if ($parentId === $currentRoleId || $this->tree->isDescendant($parent, $currentRoleId)) {
                 throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'parentId', 'reason' => 'cannot_move_role_to_self_or_descendant']);
             }
         }
 
         return $parent;
-    }
-
-    private function roleLevel(?AdminRole $parent): int
-    {
-        return $parent === null ? 1 : (int) $parent->getAttribute('level') + 1;
-    }
-
-    private function rolePath(?AdminRole $parent): string
-    {
-        if ($parent === null) {
-            return '';
-        }
-
-        return (string) $parent->getAttribute('path') . (int) $parent->getAttribute('id') . ',';
     }
 
     private function assertWithinParentMenuScope(?AdminRole $parent, array $menuIds): void
@@ -182,7 +162,7 @@ final class AdminRoleManagementService
     {
         $role = $this->roles->find($id);
         if ($role === null) {
-            throw new BusinessException(ErrorCode::NOT_FOUND, 404, ['resource' => 'admin_role', 'id' => $id]);
+            throw $this->notFound('admin_role', $id);
         }
 
         return $role;

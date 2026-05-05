@@ -6,6 +6,7 @@ namespace App\Module\System\Service;
 
 use App\Foundation\Pagination\PageResult;
 use App\Foundation\Query\AdminQuery;
+use App\Foundation\Service\AbstractService;
 use App\Foundation\Support\Password;
 use App\Module\System\Model\AdminUser;
 use App\Module\System\Repository\AdminDepartmentRepository;
@@ -14,7 +15,7 @@ use App\Module\System\Repository\AdminUserRepository;
 use TrueAdmin\Kernel\Constant\ErrorCode;
 use TrueAdmin\Kernel\Exception\BusinessException;
 
-final class AdminUserManagementService
+final class AdminUserManagementService extends AbstractService
 {
     public function __construct(
         private readonly AdminUserRepository $users,
@@ -36,9 +37,7 @@ final class AdminUserManagementService
     public function create(array $payload): array
     {
         $username = (string) $payload['username'];
-        if ($this->users->existsUsername($username)) {
-            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'username', 'reason' => 'duplicated']);
-        }
+        $this->assertUnique($this->users->existsUsername($username), 'username');
 
         $departmentIds = $this->departmentIds($this->departmentInput($payload));
         $primaryDeptId = $this->primaryDeptId($payload['primaryDeptId'] ?? $payload['deptId'] ?? null, $departmentIds);
@@ -61,9 +60,7 @@ final class AdminUserManagementService
     {
         $user = $this->mustFind($id);
         $username = (string) $payload['username'];
-        if ($this->users->existsUsername($username, $id)) {
-            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'username', 'reason' => 'duplicated']);
-        }
+        $this->assertUnique($this->users->existsUsername($username, $id), 'username');
 
         $hasDepartmentPayload = array_key_exists('deptIds', $payload) || array_key_exists('primaryDeptId', $payload) || array_key_exists('deptId', $payload);
         $departmentIds = $hasDepartmentPayload ? $this->departmentIds($this->departmentInput($payload)) : $this->users->departmentIds($user);
@@ -118,7 +115,7 @@ final class AdminUserManagementService
     {
         $user = $this->users->findById($id);
         if ($user === null) {
-            throw new BusinessException(ErrorCode::NOT_FOUND, 404, ['resource' => 'admin_user', 'id' => $id]);
+            throw $this->notFound('admin_user', $id);
         }
 
         return $user;
@@ -134,12 +131,7 @@ final class AdminUserManagementService
         }
 
         $roleIds = array_values(array_unique(array_map('intval', $value)));
-        $existingIds = $this->roles->existingIds($roleIds);
-        sort($roleIds);
-        sort($existingIds);
-        if ($roleIds !== $existingIds) {
-            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'roleIds', 'reason' => 'contains_missing_role']);
-        }
+        $this->assertExistingIds($roleIds, $this->roles->existingIds($roleIds), 'roleIds', 'contains_missing_role');
 
         return $roleIds;
     }
@@ -166,12 +158,7 @@ final class AdminUserManagementService
         }
 
         $departmentIds = array_values(array_unique(array_filter(array_map('intval', $value), static fn (int $id): bool => $id > 0)));
-        $existingIds = $this->departments->existingIds($departmentIds);
-        sort($departmentIds);
-        sort($existingIds);
-        if ($departmentIds !== $existingIds) {
-            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'deptIds', 'reason' => 'contains_missing_department']);
-        }
+        $this->assertExistingIds($departmentIds, $this->departments->existingIds($departmentIds), 'deptIds', 'contains_missing_department');
 
         return $departmentIds;
     }

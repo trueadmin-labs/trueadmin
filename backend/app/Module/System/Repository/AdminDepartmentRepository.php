@@ -6,11 +6,14 @@ namespace App\Module\System\Repository;
 
 use App\Foundation\Query\AdminQuery;
 use App\Foundation\Repository\AbstractRepository;
+use App\Foundation\Tree\TreeHelper;
 use App\Module\System\Model\AdminDepartment;
 use Hyperf\DbConnection\Db;
 
 final class AdminDepartmentRepository extends AbstractRepository
 {
+    protected ?string $modelClass = AdminDepartment::class;
+
     protected array $keywordFields = ['code', 'name'];
 
     protected array $filterable = [
@@ -26,6 +29,10 @@ final class AdminDepartmentRepository extends AbstractRepository
 
     protected array $defaultSort = ['level' => 'asc', 'sort' => 'asc', 'id' => 'asc'];
 
+    public function __construct(private readonly TreeHelper $tree)
+    {
+    }
+
     public function all(AdminQuery $adminQuery): array
     {
         return $this->listQuery(
@@ -37,7 +44,10 @@ final class AdminDepartmentRepository extends AbstractRepository
 
     public function find(int $id): ?AdminDepartment
     {
-        return AdminDepartment::query()->where('id', $id)->first();
+        /** @var null|AdminDepartment $department */
+        $department = $this->findModelById($id);
+
+        return $department;
     }
 
     public function findByCode(string $code): ?AdminDepartment
@@ -47,20 +57,23 @@ final class AdminDepartmentRepository extends AbstractRepository
 
     public function create(array $data): AdminDepartment
     {
-        return AdminDepartment::query()->create($data);
+        /** @var AdminDepartment $department */
+        $department = $this->createModel($data);
+
+        return $department;
     }
 
     public function update(AdminDepartment $department, array $data): AdminDepartment
     {
-        $department->fill($data);
-        $department->save();
+        /** @var AdminDepartment $department */
+        $department = $this->updateModel($department, $data);
 
-        return $department->refresh();
+        return $department;
     }
 
     public function delete(AdminDepartment $department): void
     {
-        $department->delete();
+        $this->deleteModel($department);
     }
 
     public function childCount(int $id): int
@@ -78,25 +91,13 @@ final class AdminDepartmentRepository extends AbstractRepository
         return (int) Db::table('admin_users')->where('primary_dept_id', $id)->count();
     }
 
-    public function isDescendant(AdminDepartment $department, int $ancestorId): bool
-    {
-        $path = (string) $department->getAttribute('path');
-
-        return str_contains($path, ',' . $ancestorId . ',');
-    }
-
     /**
      * @param list<int> $ids
      * @return list<int>
      */
     public function existingIds(array $ids): array
     {
-        return AdminDepartment::query()
-            ->whereIn('id', array_values(array_unique(array_map('intval', $ids))))
-            ->pluck('id')
-            ->map(static fn ($id): int => (int) $id)
-            ->values()
-            ->all();
+        return $this->existingModelIds(array_values(array_unique(array_map('intval', $ids))));
     }
 
     public function toArray(AdminDepartment $department): array
@@ -116,37 +117,6 @@ final class AdminDepartmentRepository extends AbstractRepository
 
     public function tree(AdminQuery $adminQuery): array
     {
-        $departments = $this->all($adminQuery);
-        $nodes = [];
-        foreach ($departments as $department) {
-            $department['children'] = [];
-            $nodes[$department['id']] = $department;
-        }
-
-        $tree = [];
-        foreach ($nodes as &$node) {
-            $parentId = (int) $node['parentId'];
-            if ($parentId > 0 && isset($nodes[$parentId])) {
-                $nodes[$parentId]['children'][] = &$node;
-                continue;
-            }
-
-            $tree[] = &$node;
-        }
-        unset($node);
-
-        return $this->withoutEmptyChildren($tree);
-    }
-
-    private function withoutEmptyChildren(array $departments): array
-    {
-        return array_map(function (array $department): array {
-            $department['children'] = $this->withoutEmptyChildren($department['children']);
-            if ($department['children'] === []) {
-                unset($department['children']);
-            }
-
-            return $department;
-        }, $departments);
+        return $this->tree->build($this->all($adminQuery));
     }
 }

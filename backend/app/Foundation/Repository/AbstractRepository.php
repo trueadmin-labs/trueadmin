@@ -6,9 +6,14 @@ namespace App\Foundation\Repository;
 
 use App\Foundation\Pagination\PageResult;
 use App\Foundation\Query\AdminQuery;
+use Hyperf\DbConnection\Model\Model;
+use Hyperf\DbConnection\Db;
+use RuntimeException;
 
 abstract class AbstractRepository
 {
+    protected ?string $modelClass = null;
+
     /**
      * @var list<string>
      */
@@ -28,6 +33,84 @@ abstract class AbstractRepository
      * @var array<string, string>
      */
     protected array $defaultSort = ['id' => 'desc'];
+
+    protected function query(): mixed
+    {
+        $modelClass = $this->modelClass();
+
+        return $modelClass::query();
+    }
+
+    protected function findModelById(int|string $id): ?Model
+    {
+        return $this->query()->where('id', $id)->first();
+    }
+
+    protected function existsModelById(int|string $id): bool
+    {
+        return $this->query()->where('id', $id)->exists();
+    }
+
+    protected function createModel(array $data): Model
+    {
+        return $this->query()->create($data);
+    }
+
+    protected function updateModel(Model $model, array $data): Model
+    {
+        $model->fill($data);
+        $model->save();
+
+        return $model->refresh();
+    }
+
+    protected function deleteModel(Model $model): void
+    {
+        $model->delete();
+    }
+
+    /**
+     * @param list<int|string> $ids
+     * @return list<int>
+     */
+    protected function existingModelIds(array $ids, string $field = 'id'): array
+    {
+        return $this->query()
+            ->whereIn($field, array_values(array_unique($ids)))
+            ->pluck($field)
+            ->map(static fn ($id): int => (int) $id)
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @param list<int> $relatedIds
+     */
+    protected function syncPivot(string $table, string $ownerColumn, int $ownerId, string $relatedColumn, array $relatedIds, ?callable $extra = null): void
+    {
+        Db::table($table)->where($ownerColumn, $ownerId)->delete();
+
+        foreach (array_values(array_unique($relatedIds)) as $relatedId) {
+            $row = [$ownerColumn => $ownerId, $relatedColumn => $relatedId];
+            if ($extra !== null) {
+                $row = [...$row, ...$extra($relatedId)];
+            }
+            Db::table($table)->insert($row);
+        }
+    }
+
+    /**
+     * @return list<int>
+     */
+    protected function pivotIds(string $table, string $ownerColumn, int $ownerId, string $relatedColumn): array
+    {
+        return Db::table($table)
+            ->where($ownerColumn, $ownerId)
+            ->pluck($relatedColumn)
+            ->map(static fn ($id): int => (int) $id)
+            ->values()
+            ->all();
+    }
 
     protected function pageQuery(mixed $query, AdminQuery $adminQuery, callable $mapper): PageResult
     {
@@ -129,5 +212,14 @@ abstract class AbstractRepository
         }
 
         return in_array($operator, $allowed, true);
+    }
+
+    private function modelClass(): string
+    {
+        if ($this->modelClass === null || $this->modelClass === '') {
+            throw new RuntimeException(static::class . ' must define $modelClass before using model helpers.');
+        }
+
+        return $this->modelClass;
     }
 }

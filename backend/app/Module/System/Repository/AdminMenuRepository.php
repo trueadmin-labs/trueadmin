@@ -6,11 +6,14 @@ namespace App\Module\System\Repository;
 
 use App\Foundation\Query\AdminQuery;
 use App\Foundation\Repository\AbstractRepository;
+use App\Foundation\Tree\TreeHelper;
 use App\Module\System\Model\AdminMenu;
 use Hyperf\DbConnection\Db;
 
 final class AdminMenuRepository extends AbstractRepository
 {
+    protected ?string $modelClass = AdminMenu::class;
+
     protected array $keywordFields = ['code', 'name', 'path', 'permission'];
 
     protected array $filterable = [
@@ -28,6 +31,10 @@ final class AdminMenuRepository extends AbstractRepository
 
     protected array $defaultSort = ['sort' => 'asc', 'id' => 'asc'];
 
+    public function __construct(private readonly TreeHelper $tree)
+    {
+    }
+
     public function all(AdminQuery $adminQuery): array
     {
         return $this->listQuery(
@@ -39,27 +46,33 @@ final class AdminMenuRepository extends AbstractRepository
 
     public function find(int $id): ?AdminMenu
     {
-        return AdminMenu::query()->where('id', $id)->first();
+        /** @var null|AdminMenu $menu */
+        $menu = $this->findModelById($id);
+
+        return $menu;
     }
 
     public function create(array $data): AdminMenu
     {
-        return AdminMenu::query()->create($data);
+        /** @var AdminMenu $menu */
+        $menu = $this->createModel($data);
+
+        return $menu;
     }
 
     public function update(AdminMenu $menu, array $data): AdminMenu
     {
-        $menu->fill($data);
-        $menu->save();
+        /** @var AdminMenu $menu */
+        $menu = $this->updateModel($menu, $data);
 
-        return $menu->refresh();
+        return $menu;
     }
 
     public function delete(AdminMenu $menu): void
     {
         $menuId = (int) $menu->getAttribute('id');
         Db::table('admin_role_menu')->where('menu_id', $menuId)->delete();
-        $menu->delete();
+        $this->deleteModel($menu);
     }
 
     /**
@@ -67,12 +80,7 @@ final class AdminMenuRepository extends AbstractRepository
      */
     public function existingIds(array $ids): array
     {
-        return AdminMenu::query()
-            ->whereIn('id', array_values(array_unique(array_map('intval', $ids))))
-            ->pluck('id')
-            ->map(static fn ($id): int => (int) $id)
-            ->values()
-            ->all();
+        return $this->existingModelIds(array_values(array_unique(array_map('intval', $ids))));
     }
 
     public function toArray(AdminMenu $menu): array
@@ -104,7 +112,6 @@ final class AdminMenuRepository extends AbstractRepository
             ->all();
     }
 
-
     public function enabledTree(): array
     {
         return $this->tree($this->allEnabled());
@@ -127,36 +134,6 @@ final class AdminMenuRepository extends AbstractRepository
 
     private function tree(array $menus): array
     {
-        $nodes = [];
-        foreach ($menus as $menu) {
-            $menu['children'] = [];
-            $nodes[$menu['id']] = $menu;
-        }
-
-        $tree = [];
-        foreach ($nodes as $id => &$node) {
-            $parentId = (int) $node['parentId'];
-            if ($parentId > 0 && isset($nodes[$parentId])) {
-                $nodes[$parentId]['children'][] = &$node;
-                continue;
-            }
-
-            $tree[] = &$node;
-        }
-        unset($node);
-
-        return $this->withoutEmptyChildren($tree);
-    }
-
-    private function withoutEmptyChildren(array $menus): array
-    {
-        return array_map(function (array $menu): array {
-            $menu['children'] = $this->withoutEmptyChildren($menu['children']);
-            if ($menu['children'] === []) {
-                unset($menu['children']);
-            }
-
-            return $menu;
-        }, $menus);
+        return $this->tree->build($menus);
     }
 }

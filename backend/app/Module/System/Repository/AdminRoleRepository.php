@@ -12,6 +12,8 @@ use Hyperf\DbConnection\Db;
 
 final class AdminRoleRepository extends AbstractRepository
 {
+    protected ?string $modelClass = AdminRole::class;
+
     protected array $keywordFields = ['code', 'name'];
 
     protected array $filterable = [
@@ -38,7 +40,10 @@ final class AdminRoleRepository extends AbstractRepository
 
     public function find(int $id): ?AdminRole
     {
-        return AdminRole::query()->where('id', $id)->first();
+        /** @var null|AdminRole $role */
+        $role = $this->findModelById($id);
+
+        return $role;
     }
 
     public function findByCode(string $code): ?AdminRole
@@ -48,15 +53,18 @@ final class AdminRoleRepository extends AbstractRepository
 
     public function create(array $data): AdminRole
     {
-        return AdminRole::query()->create($data);
+        /** @var AdminRole $role */
+        $role = $this->createModel($data);
+
+        return $role;
     }
 
     public function update(AdminRole $role, array $data): AdminRole
     {
-        $role->fill($data);
-        $role->save();
+        /** @var AdminRole $role */
+        $role = $this->updateModel($role, $data);
 
-        return $role->refresh();
+        return $role;
     }
 
     public function delete(AdminRole $role): void
@@ -65,7 +73,7 @@ final class AdminRoleRepository extends AbstractRepository
         AdminRole::query()->where('parent_id', $roleId)->update(['parent_id' => 0, 'level' => 1, 'path' => '']);
         Db::table('admin_role_menu')->where('role_id', $roleId)->delete();
         Db::table('admin_role_user')->where('role_id', $roleId)->delete();
-        $role->delete();
+        $this->deleteModel($role);
     }
 
     /**
@@ -74,11 +82,7 @@ final class AdminRoleRepository extends AbstractRepository
     public function syncMenus(AdminRole $role, array $menuIds): void
     {
         $roleId = (int) $role->getAttribute('id');
-        Db::table('admin_role_menu')->where('role_id', $roleId)->delete();
-
-        foreach (array_values(array_unique($menuIds)) as $menuId) {
-            Db::table('admin_role_menu')->insert(['role_id' => $roleId, 'menu_id' => $menuId]);
-        }
+        $this->syncPivot('admin_role_menu', 'role_id', $roleId, 'menu_id', $menuIds);
     }
 
     /**
@@ -86,12 +90,7 @@ final class AdminRoleRepository extends AbstractRepository
      */
     public function menuIds(AdminRole $role): array
     {
-        return Db::table('admin_role_menu')
-            ->where('role_id', (int) $role->getAttribute('id'))
-            ->pluck('menu_id')
-            ->map(static fn ($id): int => (int) $id)
-            ->values()
-            ->all();
+        return $this->pivotIds('admin_role_menu', 'role_id', (int) $role->getAttribute('id'), 'menu_id');
     }
 
     public function childCount(int $roleId): int
@@ -99,25 +98,12 @@ final class AdminRoleRepository extends AbstractRepository
         return (int) AdminRole::query()->where('parent_id', $roleId)->count();
     }
 
-    public function isDescendant(AdminRole $role, int $ancestorId): bool
-    {
-        $path = (string) $role->getAttribute('path');
-
-        return str_contains($path, ',' . $ancestorId . ',');
-    }
-
-
     /**
      * @return list<int>
      */
     public function existingIds(array $ids): array
     {
-        return AdminRole::query()
-            ->whereIn('id', array_values(array_unique(array_map('intval', $ids))))
-            ->pluck('id')
-            ->map(static fn ($id): int => (int) $id)
-            ->values()
-            ->all();
+        return $this->existingModelIds(array_values(array_unique(array_map('intval', $ids))));
     }
 
     /**

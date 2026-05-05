@@ -207,11 +207,27 @@ Service 负责业务编排。
 
 复杂业务 Service 可以绕开 CRUD 基类，自行编排多个 Repository、事件、策略和外部服务。
 
+`AbstractService` 不承载隐式 CRUD 流程，第一版只提供高频、低业务含义的辅助能力，例如：
+
+- `assertUnique()`：统一重复校验的错误结构。
+- `assertExistingIds()`：统一批量 ID 存在性校验。
+- `notFound()`：统一资源不存在异常。
+
+业务创建、更新、删除流程仍应在具体 Service 中显式表达。这样既减少重复，也避免 FastAdmin 式控制器黑箱和 MineAdmin 式薄代理 Service 过度扩散。
+
 ### 5.3 Repository 层
 
 Repository 负责数据访问。
 
 普通 Repository 可以继承 `backend/app/Foundation` 提供的轻量 `AbstractRepository`。
+
+`AbstractRepository` 是标准 CRUD 的底层工具层，不负责业务判断。第一版提供：
+
+- `query()`、`findModelById()`、`existsModelById()`。
+- `createModel()`、`updateModel()`、`deleteModel()`。
+- `existingModelIds()`。
+- `syncPivot()`、`pivotIds()`。
+- `pageQuery()`、`listQuery()`、`handleSearch()`。
 
 后台管理列表统一使用 `AdminQueryRequest -> AdminQuery -> AbstractRepository::handleSearch()` 这一条链路，避免每个列表接口各自解析分页、关键字、筛选和排序。
 
@@ -232,6 +248,8 @@ order=desc
 搜索条件优先通过 `handleSearch()` 扩展。简单场景只需要配置 `$keywordFields`、`$filterable`、`$sortable`、`$defaultSort`；复杂场景可以在具体 Repository 覆盖 `handleSearch()`，但仍应保留字段白名单和业务语义清晰的查询封装。
 
 Repository 不应该处理 HTTP 语义。
+
+树结构统一使用 `backend/app/Foundation/Tree/TreeHelper.php` 处理 `level`、`path`、祖先判断和数组树构建。部门、菜单、角色这类树形资源可以复用该 helper，但树结构不进入所有 CRUD 的默认流程。
 
 ### 5.4 Model 层
 
