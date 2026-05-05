@@ -36,66 +36,83 @@ final class SystemSeeder extends Seeder
         Db::table('admin_role_user')->updateOrInsert(['user_id' => $userId, 'role_id' => $roleId]);
 
         $systemMenuId = $this->upsertMenu([
+            'code' => 'system',
             'name' => '系统管理',
             'path' => '/system',
+            'component' => '',
+            'icon' => 'setting',
             'permission' => '',
             'type' => 'directory',
             'sort' => 10,
         ], 0, $now);
         $userMenuId = $this->upsertMenu([
+            'code' => 'system.users',
             'name' => '用户管理',
             'path' => '/system/users',
+            'component' => './system/users',
+            'icon' => '',
             'permission' => 'system:user:list',
             'type' => 'menu',
             'sort' => 20,
         ], $systemMenuId, $now);
         $roleMenuId = $this->upsertMenu([
+            'code' => 'system.roles',
             'name' => '角色管理',
             'path' => '/system/roles',
+            'component' => './system/roles',
+            'icon' => '',
             'permission' => 'system:role:list',
             'type' => 'menu',
             'sort' => 30,
         ], $systemMenuId, $now);
         $menuMenuId = $this->upsertMenu([
+            'code' => 'system.menus',
             'name' => '菜单管理',
             'path' => '/system/menus',
+            'component' => './system/menus',
+            'icon' => '',
             'permission' => 'system:menu:list',
             'type' => 'menu',
             'sort' => 40,
         ], $systemMenuId, $now);
         $this->upsertMenu([
+            'code' => 'products',
             'name' => '商品管理',
             'path' => '/products',
+            'component' => './products',
+            'icon' => 'appstore',
             'permission' => 'product:list',
             'type' => 'menu',
             'sort' => 50,
         ], 0, $now);
 
         foreach ([
-            ['parentId' => $userMenuId, 'name' => '用户详情', 'permission' => 'system:user:detail', 'sort' => 21],
-            ['parentId' => $userMenuId, 'name' => '新增用户', 'permission' => 'system:user:create', 'sort' => 22],
-            ['parentId' => $userMenuId, 'name' => '编辑用户', 'permission' => 'system:user:update', 'sort' => 23],
-            ['parentId' => $userMenuId, 'name' => '删除用户', 'permission' => 'system:user:delete', 'sort' => 24],
-            ['parentId' => $roleMenuId, 'name' => '角色详情', 'permission' => 'system:role:detail', 'sort' => 31],
-            ['parentId' => $roleMenuId, 'name' => '新增角色', 'permission' => 'system:role:create', 'sort' => 32],
-            ['parentId' => $roleMenuId, 'name' => '编辑角色', 'permission' => 'system:role:update', 'sort' => 33],
-            ['parentId' => $roleMenuId, 'name' => '删除角色', 'permission' => 'system:role:delete', 'sort' => 34],
-            ['parentId' => $roleMenuId, 'name' => '角色授权', 'permission' => 'system:role:authorize', 'sort' => 35],
-            ['parentId' => $menuMenuId, 'name' => '菜单详情', 'permission' => 'system:menu:detail', 'sort' => 41],
-            ['parentId' => $menuMenuId, 'name' => '新增菜单', 'permission' => 'system:menu:create', 'sort' => 42],
-            ['parentId' => $menuMenuId, 'name' => '编辑菜单', 'permission' => 'system:menu:update', 'sort' => 43],
-            ['parentId' => $menuMenuId, 'name' => '删除菜单', 'permission' => 'system:menu:delete', 'sort' => 44],
-            ['parentId' => $menuMenuId, 'name' => '权限点列表', 'permission' => 'system:permission:list', 'sort' => 45],
+            ['parentId' => $userMenuId, 'code' => 'system.user.detail', 'name' => '用户详情', 'permission' => 'system:user:detail', 'sort' => 21],
+            ['parentId' => $userMenuId, 'code' => 'system.user.create', 'name' => '新增用户', 'permission' => 'system:user:create', 'sort' => 22],
+            ['parentId' => $userMenuId, 'code' => 'system.user.update', 'name' => '编辑用户', 'permission' => 'system:user:update', 'sort' => 23],
+            ['parentId' => $userMenuId, 'code' => 'system.user.delete', 'name' => '删除用户', 'permission' => 'system:user:delete', 'sort' => 24],
+            ['parentId' => $roleMenuId, 'code' => 'system.role.detail', 'name' => '角色详情', 'permission' => 'system:role:detail', 'sort' => 31],
+            ['parentId' => $roleMenuId, 'code' => 'system.role.create', 'name' => '新增角色', 'permission' => 'system:role:create', 'sort' => 32],
+            ['parentId' => $roleMenuId, 'code' => 'system.role.update', 'name' => '编辑角色', 'permission' => 'system:role:update', 'sort' => 33],
+            ['parentId' => $roleMenuId, 'code' => 'system.role.delete', 'name' => '删除角色', 'permission' => 'system:role:delete', 'sort' => 34],
+            ['parentId' => $roleMenuId, 'code' => 'system.role.authorize', 'name' => '角色授权', 'permission' => 'system:role:authorize', 'sort' => 35],
+            ['parentId' => $menuMenuId, 'code' => 'system.menu.detail', 'name' => '菜单详情', 'permission' => 'system:menu:detail', 'sort' => 41],
+            ['parentId' => $menuMenuId, 'code' => 'system.menu.create', 'name' => '新增菜单', 'permission' => 'system:menu:create', 'sort' => 42],
+            ['parentId' => $menuMenuId, 'code' => 'system.menu.update', 'name' => '编辑菜单', 'permission' => 'system:menu:update', 'sort' => 43],
+            ['parentId' => $menuMenuId, 'code' => 'system.menu.delete', 'name' => '删除菜单', 'permission' => 'system:menu:delete', 'sort' => 44],
+            ['parentId' => $menuMenuId, 'code' => 'system.permission.list', 'name' => '权限点列表', 'permission' => 'system:permission:list', 'sort' => 45],
         ] as $button) {
             $this->upsertMenu([
+                'code' => $button['code'],
                 'name' => $button['name'],
                 'path' => '',
+                'component' => '',
+                'icon' => '',
                 'permission' => $button['permission'],
                 'type' => 'button',
                 'sort' => $button['sort'],
             ], $button['parentId'], $now);
         }
-
         $menuIds = Db::table('admin_menus')->pluck('id')->all();
         foreach ($menuIds as $menuId) {
             Db::table('admin_role_menu')->updateOrInsert(['role_id' => $roleId, 'menu_id' => (int) $menuId]);
@@ -105,14 +122,10 @@ final class SystemSeeder extends Seeder
     private function upsertMenu(array $menu, int $parentId, string $now): int
     {
         Db::table('admin_menus')->updateOrInsert(
-            ['permission' => $menu['permission'], 'path' => $menu['path'], 'name' => $menu['name']],
+            ['code' => $menu['code']],
             [...$menu, 'parent_id' => $parentId, 'status' => 'enabled', 'updated_at' => $now, 'created_at' => $now]
         );
 
-        return (int) Db::table('admin_menus')
-            ->where('permission', $menu['permission'])
-            ->where('path', $menu['path'])
-            ->where('name', $menu['name'])
-            ->value('id');
+        return (int) Db::table('admin_menus')->where('code', $menu['code'])->value('id');
     }
 }

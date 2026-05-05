@@ -4,15 +4,16 @@ declare(strict_types=1);
 
 namespace App\Foundation\Http\Controller;
 
+use App\Foundation\Metadata\OpenApiDocumentBuilder;
+
 final class OpenApiController extends OpenController
 {
+    public function __construct(private readonly OpenApiDocumentBuilder $builder)
+    {
+    }
+
     public function document(): array
     {
-        return json_decode(
-            file_get_contents(BASE_PATH . '/docs/openapi/openapi.json') ?: '{}',
-            true,
-            512,
-            JSON_THROW_ON_ERROR
-        );
+        return $this->builder->build();
     }
 }

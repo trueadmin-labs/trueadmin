@@ -6,7 +6,8 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import React from 'react';
 import { AvatarDropdown, Footer, LangDropdown } from '@/components';
-import { currentUser as queryCurrentUser } from '@/services/trueadmin/api';
+import { adminMenus, currentUser as queryCurrentUser } from '@/services/trueadmin/api';
+import { backendMenusToProMenus } from '@/services/trueadmin/menu';
 import { clearAccessToken } from '@/services/trueadmin/storage';
 import defaultSettings from '../config/defaultSettings';
 import { errorConfig } from './requestErrorConfig';
@@ -86,6 +87,16 @@ export const layout: RunTimeLayoutConfig = ({
           `${loginPath}?redirect=${encodeURIComponent(location.pathname + location.search + location.hash)}`,
         );
       }
+    },
+    menu: {
+      request: async () => {
+        if (!initialState?.currentUser || history.location.pathname === loginPath) {
+          return [];
+        }
+
+        const menus = await adminMenus({ skipErrorHandler: true });
+        return backendMenusToProMenus(menus);
+      },
     },
     links: [],
     menuHeaderRender: undefined,

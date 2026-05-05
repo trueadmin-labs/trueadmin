@@ -2,12 +2,14 @@ import { PlusOutlined } from '@ant-design/icons';
 import { PageContainer, ProTable } from '@ant-design/pro-components';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { Button, Form, Input, InputNumber, Modal, Popconfirm, Select, Tag, message } from 'antd';
+import { useModel } from '@umijs/max';
 import React, { useRef, useState } from 'react';
 import {
   adminMenuList,
   createAdminMenu,
   deleteAdminMenu,
   updateAdminMenu,
+  hasPermission,
 } from '@/services/trueadmin';
 import type { AdminMenu, AdminMenuPayload } from '@/services/trueadmin';
 
@@ -58,6 +60,11 @@ const MenusPage: React.FC = () => {
   const [editing, setEditing] = useState<AdminMenu | null>(null);
   const [allMenus, setAllMenus] = useState<AdminMenu[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const { initialState } = useModel('@@initialState');
+  const permissions = initialState?.currentUser?.permissions;
+  const canCreate = hasPermission(permissions, 'system:menu:create');
+  const canUpdate = hasPermission(permissions, 'system:menu:update');
+  const canDelete = hasPermission(permissions, 'system:menu:delete');
 
   const openCreate = (parent?: AdminMenu) => {
     setEditing(null);
@@ -76,8 +83,11 @@ const MenusPage: React.FC = () => {
     form.setFieldsValue({
       parentId: record.parentId,
       type: record.type,
+      code: record.code,
       name: record.name,
       path: record.path,
+      component: record.component,
+      icon: record.icon,
       permission: record.permission,
       sort: record.sort,
       status: record.status,
@@ -89,9 +99,12 @@ const MenusPage: React.FC = () => {
     const values = await form.validateFields();
     const payload: AdminMenuPayload = {
       parentId: values.parentId || 0,
+      code: values.code || '',
       type: values.type,
       name: values.name,
       path: values.path || '',
+      component: values.component || '',
+      icon: values.icon || '',
       permission: values.permission || '',
       sort: values.sort || 0,
       status: values.status,
@@ -120,6 +133,14 @@ const MenusPage: React.FC = () => {
       width: 220,
     },
     {
+      title: '编码',
+      dataIndex: 'code',
+      copyable: true,
+      ellipsis: true,
+      search: false,
+      width: 180,
+    },
+    {
       title: '类型',
       dataIndex: 'type',
       valueType: 'select',
@@ -136,6 +157,19 @@ const MenusPage: React.FC = () => {
       copyable: true,
       ellipsis: true,
       search: false,
+    },
+    {
+      title: '组件',
+      dataIndex: 'component',
+      copyable: true,
+      ellipsis: true,
+      search: false,
+    },
+    {
+      title: '图标',
+      dataIndex: 'icon',
+      search: false,
+      width: 100,
     },
     {
       title: '权限码',
@@ -165,27 +199,33 @@ const MenusPage: React.FC = () => {
       valueType: 'option',
       width: 220,
       render: (_, record) => [
-        <Button key="child" type="link" onClick={() => openCreate(record)}>
-          新增子级
-        </Button>,
-        <Button key="edit" type="link" onClick={() => openEdit(record)}>
-          编辑
-        </Button>,
-        <Popconfirm
-          key="delete"
-          title="删除菜单"
-          description={`确认删除 ${record.name} 吗？`}
-          onConfirm={async () => {
-            await deleteAdminMenu(record.id);
-            message.success('菜单已删除');
-            actionRef.current?.reload();
-          }}
-        >
-          <Button danger type="link">
-            删除
+        canCreate ? (
+          <Button key="child" type="link" onClick={() => openCreate(record)}>
+            新增子级
           </Button>
-        </Popconfirm>,
-      ],
+        ) : null,
+        canUpdate ? (
+          <Button key="edit" type="link" onClick={() => openEdit(record)}>
+            编辑
+          </Button>
+        ) : null,
+        canDelete ? (
+          <Popconfirm
+            key="delete"
+            title="删除菜单"
+            description={`确认删除 ${record.name} 吗？`}
+            onConfirm={async () => {
+              await deleteAdminMenu(record.id);
+              message.success('菜单已删除');
+              actionRef.current?.reload();
+            }}
+          >
+            <Button danger type="link">
+              删除
+            </Button>
+          </Popconfirm>
+        ) : null,
+      ].filter(Boolean),
     },
   ];
 
@@ -205,11 +245,15 @@ const MenusPage: React.FC = () => {
         }}
         pagination={false}
         search={{ labelWidth: 88 }}
-        toolBarRender={() => [
-          <Button key="create" icon={<PlusOutlined />} type="primary" onClick={() => openCreate()}>
-            新建菜单
-          </Button>,
-        ]}
+        toolBarRender={() =>
+          canCreate
+            ? [
+                <Button key="create" icon={<PlusOutlined />} type="primary" onClick={() => openCreate()}>
+                  新建菜单
+                </Button>,
+              ]
+            : []
+        }
       />
 
       <Modal
@@ -239,8 +283,17 @@ const MenusPage: React.FC = () => {
           <Form.Item label="名称" name="name" rules={[{ required: true, message: '请输入名称' }]}>
             <Input placeholder="例如 用户管理" />
           </Form.Item>
+          <Form.Item label="编码" name="code">
+            <Input placeholder="例如 system.users，用于元数据同步和前端 key" />
+          </Form.Item>
           <Form.Item label="路由路径" name="path">
             <Input placeholder="例如 /system/users，按钮可留空" />
+          </Form.Item>
+          <Form.Item label="组件路径" name="component">
+            <Input placeholder="例如 ./system/users，按钮可留空" />
+          </Form.Item>
+          <Form.Item label="图标" name="icon">
+            <Input placeholder="例如 setting、appstore" />
           </Form.Item>
           <Form.Item label="权限码" name="permission">
             <Input placeholder="例如 system:user:list" />

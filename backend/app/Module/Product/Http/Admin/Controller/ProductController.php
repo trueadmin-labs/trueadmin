@@ -12,9 +12,11 @@ use App\Module\Product\Service\ProductQueryService;
 use App\Module\System\Http\Admin\Middleware\PermissionMiddleware;
 use TrueAdmin\Kernel\Http\Attribute\AdminController as AdminRouteController;
 use TrueAdmin\Kernel\Http\Attribute\AdminGet;
+use TrueAdmin\Kernel\Http\Attribute\Menu;
 use TrueAdmin\Kernel\Http\Attribute\Permission;
 use TrueAdmin\Kernel\OperationLog\Attribute\OperationLog;
 
+#[Menu(code: 'products', title: '商品管理', path: '/products', permission: 'product:list', icon: 'appstore', component: './products', sort: 50)]
 #[AdminRouteController(middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
 final class ProductController extends AdminController
 {

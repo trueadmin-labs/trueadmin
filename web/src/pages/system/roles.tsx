@@ -3,6 +3,7 @@ import { PageContainer, ProTable } from '@ant-design/pro-components';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { Button, Form, Input, Modal, Popconfirm, Select, Space, Tag, Tree, message } from 'antd';
 import type { TreeDataNode } from 'antd';
+import { useModel } from '@umijs/max';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   adminMenus,
@@ -12,6 +13,7 @@ import {
   createAdminRole,
   deleteAdminRole,
   updateAdminRole,
+  hasPermission,
 } from '@/services/trueadmin';
 import type { AdminMenu, AdminRole, AdminRolePayload } from '@/services/trueadmin';
 
@@ -39,6 +41,12 @@ const RolesPage: React.FC = () => {
   const [menuTree, setMenuTree] = useState<AdminMenu[]>([]);
   const [checkedMenuIds, setCheckedMenuIds] = useState<number[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const { initialState } = useModel('@@initialState');
+  const permissions = initialState?.currentUser?.permissions;
+  const canCreate = hasPermission(permissions, 'system:role:create');
+  const canUpdate = hasPermission(permissions, 'system:role:update');
+  const canDelete = hasPermission(permissions, 'system:role:delete');
+  const canAuthorize = hasPermission(permissions, 'system:role:authorize');
 
   const loadMenus = async () => {
     setMenuTree(await adminMenus());
@@ -125,28 +133,34 @@ const RolesPage: React.FC = () => {
       valueType: 'option',
       width: 220,
       render: (_, record) => [
-        <Button key="auth" type="link" onClick={() => openAuthorize(record)}>
-          授权
-        </Button>,
-        <Button key="edit" type="link" onClick={() => openEdit(record)}>
-          编辑
-        </Button>,
-        <Popconfirm
-          key="delete"
-          title="删除角色"
-          description={`确认删除 ${record.name} 吗？`}
-          disabled={record.code === 'super-admin'}
-          onConfirm={async () => {
-            await deleteAdminRole(record.id);
-            message.success('角色已删除');
-            actionRef.current?.reload();
-          }}
-        >
-          <Button danger disabled={record.code === 'super-admin'} type="link">
-            删除
+        canAuthorize ? (
+          <Button key="auth" type="link" onClick={() => openAuthorize(record)}>
+            授权
           </Button>
-        </Popconfirm>,
-      ],
+        ) : null,
+        canUpdate ? (
+          <Button key="edit" type="link" onClick={() => openEdit(record)}>
+            编辑
+          </Button>
+        ) : null,
+        canDelete ? (
+          <Popconfirm
+            key="delete"
+            title="删除角色"
+            description={`确认删除 ${record.name} 吗？`}
+            disabled={record.code === 'super-admin'}
+            onConfirm={async () => {
+              await deleteAdminRole(record.id);
+              message.success('角色已删除');
+              actionRef.current?.reload();
+            }}
+          >
+            <Button danger disabled={record.code === 'super-admin'} type="link">
+              删除
+            </Button>
+          </Popconfirm>
+        ) : null,
+      ].filter(Boolean),
     },
   ];
 
@@ -168,11 +182,15 @@ const RolesPage: React.FC = () => {
         }}
         pagination={{ defaultPageSize: 10 }}
         search={{ labelWidth: 88 }}
-        toolBarRender={() => [
-          <Button key="create" icon={<PlusOutlined />} type="primary" onClick={openCreate}>
-            新建角色
-          </Button>,
-        ]}
+        toolBarRender={() =>
+          canCreate
+            ? [
+                <Button key="create" icon={<PlusOutlined />} type="primary" onClick={openCreate}>
+                  新建角色
+                </Button>,
+              ]
+            : []
+        }
       />
 
       <Modal

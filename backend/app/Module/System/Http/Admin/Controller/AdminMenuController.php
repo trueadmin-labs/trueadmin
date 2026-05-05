@@ -14,9 +14,11 @@ use TrueAdmin\Kernel\Http\Attribute\AdminDelete;
 use TrueAdmin\Kernel\Http\Attribute\AdminGet;
 use TrueAdmin\Kernel\Http\Attribute\AdminPost;
 use TrueAdmin\Kernel\Http\Attribute\AdminPut;
+use TrueAdmin\Kernel\Http\Attribute\Menu;
 use TrueAdmin\Kernel\Http\Attribute\Permission;
 use TrueAdmin\Kernel\OperationLog\Attribute\OperationLog;
 
+#[Menu(code: 'system.menus', title: '菜单管理', path: '/system/menus', parent: 'system', permission: 'system:menu:list', component: './system/menus', sort: 40)]
 #[AdminRouteController(prefix: 'system/menus', middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
 final class AdminMenuController extends AdminController
 {

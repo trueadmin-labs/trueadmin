@@ -110,6 +110,15 @@ class ExampleTest extends TestCase
 
     public function testSystemPermissionEntrances()
     {
+        $roleId = (int) \Hyperf\DbConnection\Db::table('admin_roles')->where('code', 'super-admin')->value('id');
+        $menuIds = \Hyperf\DbConnection\Db::table('admin_menus')->pluck('id')->all();
+        foreach ($menuIds as $menuId) {
+            \Hyperf\DbConnection\Db::table('admin_role_menu')->updateOrInsert([
+                'role_id' => $roleId,
+                'menu_id' => (int) $menuId,
+            ]);
+        }
+
         $login = $this->loginAsAdmin();
         $headers = ['Authorization' => 'Bearer ' . $login['data']['accessToken']];
 
@@ -176,6 +185,38 @@ class ExampleTest extends TestCase
         $deleteMenu = $this->delete('/api/v1/admin/system/menus/' . $menu['data']['id'], [], $headers);
         $this->assertSame('SUCCESS', $deleteMenu['code']);
     }
+
+
+    public function testMetadataSyncAndOpenApiDocument()
+    {
+        $sync = \Hyperf\Context\ApplicationContext::getContainer()
+            ->get(\App\Foundation\Metadata\MetadataSynchronizer::class)
+            ->sync();
+
+        $this->assertSame(5, $sync['menus']);
+        $this->assertGreaterThanOrEqual(10, $sync['permissions']);
+
+        $roleId = (int) \Hyperf\DbConnection\Db::table('admin_roles')->where('code', 'super-admin')->value('id');
+        $menuIds = \Hyperf\DbConnection\Db::table('admin_menus')->pluck('id')->all();
+        foreach ($menuIds as $menuId) {
+            \Hyperf\DbConnection\Db::table('admin_role_menu')->updateOrInsert([
+                'role_id' => $roleId,
+                'menu_id' => (int) $menuId,
+            ]);
+        }
+
+        $this->assertSame(1, \Hyperf\DbConnection\Db::table('admin_menus')->where('code', 'system')->count());
+        $this->assertSame(1, \Hyperf\DbConnection\Db::table('admin_menus')->where('code', 'system.users')->count());
+        $this->assertSame('system:user:create', \Hyperf\DbConnection\Db::table('admin_menus')
+            ->where('code', 'system:user:create')
+            ->value('permission'));
+
+        $openapi = $this->get('/api/v1/open/openapi.json');
+        $this->assertSame('3.1.0', $openapi['openapi']);
+        $this->assertArrayHasKey('/api/v1/admin/system/users', $openapi['paths']);
+        $this->assertSame('system:user:list', $openapi['paths']['/api/v1/admin/system/users']['get']['x-trueadmin']['permission']);
+    }
+
 
     private function loginAsAdmin()
     {

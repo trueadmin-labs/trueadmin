@@ -14,18 +14,23 @@ return new class extends Migration {
             $table->string('code', 64)->unique();
             $table->string('name', 64);
             $table->string('status', 32)->default('enabled');
+            $table->timestamp('metadata_synced_at')->nullable();
             $table->datetimes();
         });
 
         Schema::create('admin_menus', function (Blueprint $table): void {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('parent_id')->default(0);
+            $table->string('code', 128)->default('');
             $table->string('type', 32)->default('menu');
             $table->string('name', 64);
             $table->string('path', 255)->default('');
+            $table->string('component', 255)->default('');
+            $table->string('icon', 64)->default('');
             $table->string('permission', 128)->default('');
             $table->integer('sort')->default(0);
             $table->string('status', 32)->default('enabled');
+            $table->timestamp('metadata_synced_at')->nullable();
             $table->datetimes();
         });
 

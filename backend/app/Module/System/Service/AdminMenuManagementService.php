@@ -73,9 +73,12 @@ final class AdminMenuManagementService
 
         return [
             'parent_id' => (int) ($payload['parentId'] ?? $payload['parent_id'] ?? 0),
+            'code' => trim((string) ($payload['code'] ?? '')),
             'type' => $type,
             'name' => $name,
             'path' => trim((string) ($payload['path'] ?? '')),
+            'component' => trim((string) ($payload['component'] ?? '')),
+            'icon' => trim((string) ($payload['icon'] ?? '')),
             'permission' => trim((string) ($payload['permission'] ?? '')),
             'sort' => (int) ($payload['sort'] ?? 0),
             'status' => $status,

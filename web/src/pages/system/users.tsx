@@ -2,6 +2,7 @@ import { PlusOutlined } from '@ant-design/icons';
 import { PageContainer, ProTable } from '@ant-design/pro-components';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { Button, Form, Input, Modal, Popconfirm, Select, Space, Tag, message } from 'antd';
+import { useModel } from '@umijs/max';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   adminRoleOptions,
@@ -9,6 +10,7 @@ import {
   createAdminUser,
   deleteAdminUser,
   updateAdminUser,
+  hasPermission,
 } from '@/services/trueadmin';
 import type { AdminRole, AdminUser, AdminUserPayload } from '@/services/trueadmin';
 
@@ -28,6 +30,11 @@ const UsersPage: React.FC = () => {
   const [editing, setEditing] = useState<AdminUser | null>(null);
   const [roleOptions, setRoleOptions] = useState<AdminRole[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const { initialState } = useModel('@@initialState');
+  const permissions = initialState?.currentUser?.permissions;
+  const canCreate = hasPermission(permissions, 'system:user:create');
+  const canUpdate = hasPermission(permissions, 'system:user:update');
+  const canDelete = hasPermission(permissions, 'system:user:delete');
 
   const loadRoleOptions = async () => {
     const roles = await adminRoleOptions();
@@ -133,25 +140,29 @@ const UsersPage: React.FC = () => {
       valueType: 'option',
       width: 160,
       render: (_, record) => [
-        <Button key="edit" type="link" onClick={() => openEdit(record)}>
-          编辑
-        </Button>,
-        <Popconfirm
-          key="delete"
-          title="删除管理员"
-          description={`确认删除 ${record.username} 吗？`}
-          disabled={record.id === 1}
-          onConfirm={async () => {
-            await deleteAdminUser(record.id);
-            message.success('管理员已删除');
-            actionRef.current?.reload();
-          }}
-        >
-          <Button danger disabled={record.id === 1} type="link">
-            删除
+        canUpdate ? (
+          <Button key="edit" type="link" onClick={() => openEdit(record)}>
+            编辑
           </Button>
-        </Popconfirm>,
-      ],
+        ) : null,
+        canDelete ? (
+          <Popconfirm
+            key="delete"
+            title="删除管理员"
+            description={`确认删除 ${record.username} 吗？`}
+            disabled={record.id === 1}
+            onConfirm={async () => {
+              await deleteAdminUser(record.id);
+              message.success('管理员已删除');
+              actionRef.current?.reload();
+            }}
+          >
+            <Button danger disabled={record.id === 1} type="link">
+              删除
+            </Button>
+          </Popconfirm>
+        ) : null,
+      ].filter(Boolean),
     },
   ];
 
@@ -177,11 +188,15 @@ const UsersPage: React.FC = () => {
         }}
         pagination={{ defaultPageSize: 10 }}
         search={{ labelWidth: 88 }}
-        toolBarRender={() => [
-          <Button key="create" icon={<PlusOutlined />} type="primary" onClick={openCreate}>
-            新建管理员
-          </Button>,
-        ]}
+        toolBarRender={() =>
+          canCreate
+            ? [
+                <Button key="create" icon={<PlusOutlined />} type="primary" onClick={openCreate}>
+                  新建管理员
+                </Button>,
+              ]
+            : []
+        }
       />
 
       <Modal

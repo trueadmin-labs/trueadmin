@@ -12,11 +12,15 @@ final class AdminMenu extends Model
 
     protected array $fillable = [
         'parent_id',
+        'code',
         'type',
         'name',
         'path',
+        'component',
+        'icon',
         'permission',
         'sort',
         'status',
+        'metadata_synced_at',
     ];
 }
