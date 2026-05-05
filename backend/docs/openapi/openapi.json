@@ -86,6 +86,342 @@
                 ]
             }
         },
+        "/api/admin/system/client-users": {
+            "post": {
+                "operationId": "App_Module_System_Http_Admin_Controller_ClientUserController_create",
+                "summary": "新增用户端账号",
+                "description": "",
+                "tags": [
+                    "系统管理"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\ClientUserController@create",
+                    "permission": "system:client-user:create",
+                    "permissionMode": "single",
+                    "permissions": [
+                        "system:client-user:create"
+                    ],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "get": {
+                "operationId": "App_Module_System_Http_Admin_Controller_ClientUserController_list",
+                "summary": "用户端账号列表",
+                "description": "",
+                "tags": [
+                    "系统管理"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\ClientUserController@list",
+                    "permission": "system:client-user:list",
+                    "permissionMode": "single",
+                    "permissions": [
+                        "system:client-user:list"
+                    ],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/system/client-users/{id}": {
+            "delete": {
+                "operationId": "App_Module_System_Http_Admin_Controller_ClientUserController_delete",
+                "summary": "删除用户端账号",
+                "description": "",
+                "tags": [
+                    "系统管理"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\ClientUserController@delete",
+                    "permission": "system:client-user:delete",
+                    "permissionMode": "single",
+                    "permissions": [
+                        "system:client-user:delete"
+                    ],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "get": {
+                "operationId": "App_Module_System_Http_Admin_Controller_ClientUserController_detail",
+                "summary": "用户端账号详情",
+                "description": "",
+                "tags": [
+                    "系统管理"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\ClientUserController@detail",
+                    "permission": "system:client-user:detail",
+                    "permissionMode": "single",
+                    "permissions": [
+                        "system:client-user:detail"
+                    ],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "operationId": "App_Module_System_Http_Admin_Controller_ClientUserController_update",
+                "summary": "编辑用户端账号",
+                "description": "",
+                "tags": [
+                    "系统管理"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\ClientUserController@update",
+                    "permission": "system:client-user:update",
+                    "permissionMode": "single",
+                    "permissions": [
+                        "system:client-user:update"
+                    ],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/system/client-users/{id}/disable": {
+            "put": {
+                "operationId": "App_Module_System_Http_Admin_Controller_ClientUserController_disable",
+                "summary": "禁用用户端账号",
+                "description": "",
+                "tags": [
+                    "系统管理"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\ClientUserController@disable",
+                    "permission": "system:client-user:status",
+                    "permissionMode": "single",
+                    "permissions": [
+                        "system:client-user:status"
+                    ],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/system/client-users/{id}/enable": {
+            "put": {
+                "operationId": "App_Module_System_Http_Admin_Controller_ClientUserController_enable",
+                "summary": "启用用户端账号",
+                "description": "",
+                "tags": [
+                    "系统管理"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\ClientUserController@enable",
+                    "permission": "system:client-user:status",
+                    "permissionMode": "single",
+                    "permissions": [
+                        "system:client-user:status"
+                    ],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/system/departments": {
+            "post": {
+                "operationId": "App_Module_System_Http_Admin_Controller_AdminDepartmentController_create",
+                "summary": "新增部门",
+                "description": "",
+                "tags": [
+                    "系统管理"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\AdminDepartmentController@create",
+                    "permission": "system:department:create",
+                    "permissionMode": "single",
+                    "permissions": [
+                        "system:department:create"
+                    ],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "get": {
+                "operationId": "App_Module_System_Http_Admin_Controller_AdminDepartmentController_list",
+                "summary": "部门列表",
+                "description": "",
+                "tags": [
+                    "系统管理"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\AdminDepartmentController@list",
+                    "permission": "system:department:list",
+                    "permissionMode": "single",
+                    "permissions": [
+                        "system:department:list"
+                    ],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/system/departments/{id}": {
+            "delete": {
+                "operationId": "App_Module_System_Http_Admin_Controller_AdminDepartmentController_delete",
+                "summary": "删除部门",
+                "description": "",
+                "tags": [
+                    "系统管理"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\AdminDepartmentController@delete",
+                    "permission": "system:department:delete",
+                    "permissionMode": "single",
+                    "permissions": [
+                        "system:department:delete"
+                    ],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "get": {
+                "operationId": "App_Module_System_Http_Admin_Controller_AdminDepartmentController_detail",
+                "summary": "部门详情",
+                "description": "",
+                "tags": [
+                    "系统管理"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\AdminDepartmentController@detail",
+                    "permission": "system:department:detail",
+                    "permissionMode": "single",
+                    "permissions": [
+                        "system:department:detail"
+                    ],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "operationId": "App_Module_System_Http_Admin_Controller_AdminDepartmentController_update",
+                "summary": "编辑部门",
+                "description": "",
+                "tags": [
+                    "系统管理"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\AdminDepartmentController@update",
+                    "permission": "system:department:update",
+                    "permissionMode": "single",
+                    "permissions": [
+                        "system:department:update"
+                    ],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/admin/system/menu-tree": {
             "get": {
                 "operationId": "App_Module_System_Http_Admin_Controller_PermissionController_listMenuTree",

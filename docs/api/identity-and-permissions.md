@@ -8,13 +8,13 @@ TrueAdmin 默认采用三套身份边界：
 
 ```text
 admin_*   后台管理身份和权限体系
-client_*  未来用户端身份和业务用户体系的推荐表名前缀
+client_*  用户端基础账号和未来用户端业务体系
 open_*    外部开放平台应用和调用体系
 ```
 
 后台用户和用户端用户不共用一张表。
 
-第一版只内置后台管理身份体系。`client_*` 是未来用户端业务模块落表时的命名约定，不代表第一版存在内置 `Module/User` 或内置 `client_users` 表。
+第一版内置 `client_users`，它属于 `Module/System` 的系统基础账号资源，不创建泛化 `Module/User`。`Module/Auth` 不拥有用户表，只负责 Admin、Client、Open 的登录、Token、当前身份等认证流程。
 
 ## 后台身份体系
 
@@ -86,13 +86,13 @@ aud = admin
 推荐表名前缀：
 
 ```text
-client_users
-client_profiles
-client_identities
-client_sessions
+client_users              第一版内置，归属 Module/System
+client_profiles           未来按业务需要归属 Member/Customer 等模块
+client_identities         未来第三方身份绑定，可归属 Auth 或业务身份模块
+client_sessions           未来会话或设备管理，可归属 Auth
 ```
 
-这些表应由真实业务模块按需维护，例如 `Member` 或 `Customer`，而不是放入泛化的 `User` 模块。用户端登录、刷新 Token、获取当前身份这类认证入口归属 `Module/Auth/Http/Client`；会员资料、客户资料、订单等业务接口归属对应业务模块的 `Http/Client`。
+`client_users` 只表示用户端基础认证主体，适合存放账号、手机号、邮箱、密码、状态、注册渠道、最后登录时间和轻量展示字段。它不承载会员等级、积分余额、客户画像、业务标签等扩展资料。用户端登录、刷新 Token、获取当前身份这类认证入口归属 `Module/Auth/Http/Client`；会员资料、客户资料、订单等业务接口归属对应业务模块的 `Http/Client`。
 
 用户端默认只做：
 
@@ -204,13 +204,15 @@ admin_departments
 admin_positions
 ```
 
-用户端第一版只预留架构边界和命名规范，不创建基础身份表。项目真正需要 App、小程序、H5 或会员端时，再按业务语义新增模块并在该模块内维护身份表，例如：
+用户端第一版内置最小基础账号表：
 
 ```text
-Module/Member/Model/Member.php
-Module/Member/Database/Migrations/*_create_client_users_table.php
-Module/Auth/Http/Client/Controller/V1/PassportController.php
+Module/System/Model/ClientUser.php
+Module/System/Database/Migrations/*_create_client_users_table.php
+Module/System/Http/Admin/Controller/ClientUserController.php
 ```
+
+项目真正需要 App、小程序、H5 或会员端业务资料时，再按业务语义新增模块，例如 `Member` 或 `Customer`，并通过 `client_user_id` 关联 `client_users`。
 
 开放平台先预留设计，不急于落表。
 

@@ -51,7 +51,7 @@ GET /api/v1/client/auth/me
 GET /api/v1/client/orders
 ```
 
-第一版只预留 Client API 分区，不内置通用 `User` 模块，也不内置用户端身份表。项目需要用户端能力时，再按业务语义新增 `Member`、`Customer`、`Order` 或其他更贴切的模块。不要为了一个用户端接口创建泛化的 `Module/User`。
+第一版内置 `client_users` 作为用户端基础认证主体，归属 `Module/System`，后台账号管理接口位于 `/api/admin/system/client-users`。Client 登录、刷新 Token、获取当前身份等认证流程归属 `Module/Auth/Http/Client`。项目需要会员、客户、订单等业务能力时，再按业务语义新增 `Member`、`Customer`、`Order` 或其他更贴切的模块。不要为了一个用户端接口创建泛化的 `Module/User`。
 
 ## Open API
 

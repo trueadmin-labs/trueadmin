@@ -232,11 +232,53 @@ class ExampleTest extends TestCase
         $this->assertSame('SUCCESS', $users['code']);
         $this->assertGreaterThanOrEqual(1, $users['data']['total']);
 
+        $clientUser = $this->json('/api/admin/system/client-users', [
+            'username' => 'client-' . $suffix,
+            'phone' => '138' . substr(str_pad((string) crc32($suffix), 8, '0', STR_PAD_LEFT), 0, 8),
+            'email' => 'client-' . $suffix . '@example.test',
+            'password' => 'trueadmin',
+            'nickname' => '用户端账号' . $suffix,
+            'status' => 'enabled',
+            'registerChannel' => 'admin',
+        ], $headers);
+        $this->assertSame('SUCCESS', $clientUser['code']);
+        $this->assertSame('client-' . $suffix, $clientUser['data']['username']);
+        $this->assertSame('admin', $clientUser['data']['registerChannel']);
+
+        $clientUsers = $this->get('/api/admin/system/client-users', ['keyword' => 'client-' . $suffix], $headers);
+        $this->assertSame('SUCCESS', $clientUsers['code']);
+        $this->assertGreaterThanOrEqual(1, $clientUsers['data']['total']);
+
+        $clientUserDetail = $this->get('/api/admin/system/client-users/' . $clientUser['data']['id'], [], $headers);
+        $this->assertSame('SUCCESS', $clientUserDetail['code']);
+        $this->assertSame($clientUser['data']['id'], $clientUserDetail['data']['id']);
+
+        $disabledClientUser = $this->put('/api/admin/system/client-users/' . $clientUser['data']['id'] . '/disable', [], $headers);
+        $this->assertSame('SUCCESS', $disabledClientUser['code']);
+        $this->assertSame('disabled', $disabledClientUser['data']['status']);
+
+        $enabledClientUser = $this->put('/api/admin/system/client-users/' . $clientUser['data']['id'] . '/enable', [], $headers);
+        $this->assertSame('SUCCESS', $enabledClientUser['code']);
+        $this->assertSame('enabled', $enabledClientUser['data']['status']);
+
+        $updatedClientUser = $this->put('/api/admin/system/client-users/' . $clientUser['data']['id'], [
+            'username' => 'client-' . $suffix,
+            'phone' => $clientUser['data']['phone'],
+            'email' => $clientUser['data']['email'],
+            'nickname' => '用户端账号更新' . $suffix,
+            'status' => 'enabled',
+        ], $headers);
+        $this->assertSame('SUCCESS', $updatedClientUser['code']);
+        $this->assertSame('用户端账号更新' . $suffix, $updatedClientUser['data']['nickname']);
+
         $roleAuthorize = $this->json('/api/admin/system/roles/' . $role['data']['id'] . '/menus', [
             'menuIds' => [],
         ], $headers);
         $this->assertSame('SUCCESS', $roleAuthorize['code']);
         $this->assertSame([], $roleAuthorize['data']['menuIds']);
+
+        $deleteClientUser = $this->delete('/api/admin/system/client-users/' . $clientUser['data']['id'], [], $headers);
+        $this->assertSame('SUCCESS', $deleteClientUser['code']);
 
         $deleteUser = $this->delete('/api/admin/system/users/' . $user['data']['id'], [], $headers);
         $this->assertSame('SUCCESS', $deleteUser['code']);
@@ -272,6 +314,11 @@ class ExampleTest extends TestCase
             'admin.user.create',
             'admin.user.update',
             'admin.user.delete',
+            'client.user.create',
+            'client.user.update',
+            'client.user.enable',
+            'client.user.disable',
+            'client.user.delete',
         ];
         $actions = \Hyperf\DbConnection\Db::table('admin_operation_logs')
             ->where('id', '>', $operationLogStartId)
@@ -294,6 +341,11 @@ class ExampleTest extends TestCase
                 'admin_user_create',
                 'admin_user_update',
                 'admin_user_delete',
+                'client_user_create',
+                'client_user_update',
+                'client_user_enable',
+                'client_user_disable',
+                'client_user_delete',
             ])
             ->count());
         $this->assertGreaterThanOrEqual(1, \Hyperf\DbConnection\Db::table('admin_operation_logs')
@@ -309,7 +361,7 @@ class ExampleTest extends TestCase
             ->get(\App\Foundation\Metadata\MetadataSynchronizer::class)
             ->sync();
 
-        $this->assertSame(5, $sync['menus']);
+        $this->assertSame(6, $sync['menus']);
         $this->assertGreaterThanOrEqual(10, $sync['permissions']);
 
         $roleId = (int) \Hyperf\DbConnection\Db::table('admin_roles')->where('code', 'super-admin')->value('id');
@@ -324,6 +376,7 @@ class ExampleTest extends TestCase
         $this->assertSame(1, \Hyperf\DbConnection\Db::table('admin_menus')->where('code', 'system')->count());
         $this->assertSame(1, \Hyperf\DbConnection\Db::table('admin_menus')->where('code', 'system.departments')->count());
         $this->assertSame(1, \Hyperf\DbConnection\Db::table('admin_menus')->where('code', 'system.users')->count());
+        $this->assertSame(1, \Hyperf\DbConnection\Db::table('admin_menus')->where('code', 'system.client-users')->count());
         $this->assertSame('system:user:create', \Hyperf\DbConnection\Db::table('admin_menus')
             ->where('code', 'system:user:create')
             ->value('permission'));
@@ -331,7 +384,9 @@ class ExampleTest extends TestCase
         $openapi = $this->get('/api/v1/open/openapi.json');
         $this->assertSame('3.1.0', $openapi['openapi']);
         $this->assertArrayHasKey('/api/admin/system/users', $openapi['paths']);
+        $this->assertArrayHasKey('/api/admin/system/client-users', $openapi['paths']);
         $this->assertSame('system:user:list', $openapi['paths']['/api/admin/system/users']['get']['x-trueadmin']['permission']);
+        $this->assertSame('system:client-user:list', $openapi['paths']['/api/admin/system/client-users']['get']['x-trueadmin']['permission']);
         $this->assertSame('single', $openapi['paths']['/api/admin/system/users']['get']['x-trueadmin']['permissionMode']);
         $this->assertSame(['system:user:list'], $openapi['paths']['/api/admin/system/users']['get']['x-trueadmin']['permissions']);
 

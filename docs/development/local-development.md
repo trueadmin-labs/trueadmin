@@ -76,7 +76,7 @@ username: admin
 password: trueadmin
 ```
 
-默认管理员由 System 模块 Seeder 写入数据库。开发环境首次初始化推荐执行 `php bin/hyperf.php migrate:fresh --seed`；正常升级执行 `php bin/hyperf.php migrate --seed`；模块 Seeder 目录已在启动期注册，只补数据可以直接执行 `php bin/hyperf.php db:seed --force`。
+默认管理员由 System 模块 Seeder 写入数据库。System Seeder 同时会调用 MetadataSynchronizer，把 Controller Attribute 中声明的菜单、按钮权限和接口权限同步到数据库，并授权给 `super-admin`。开发环境首次初始化推荐执行 `php bin/hyperf.php migrate:fresh --seed`；正常升级执行 `php bin/hyperf.php migrate --seed`；模块 Seeder 目录已在启动期注册，只补数据可以直接执行 `php bin/hyperf.php db:seed --force`。
 
 第一阶段已预留 API 分区：
 

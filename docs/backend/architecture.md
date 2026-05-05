@@ -762,13 +762,14 @@ admin_users
 admin_roles
 admin_menus
 admin_operation_logs
-member_users
+client_users
+member_profiles
 products
 workflow_definitions
 message_notifications
 ```
 
-后台用户和用户端用户默认分表。第一版不内置用户端身份模块，项目需要时再按业务语义新增 `Member`、`Customer` 或其他模块；用户端认证入口归属 `Module/Auth/Http/Client`，不要新增泛化 `Module/User`。
+后台用户和用户端用户默认分表。第一版内置 `client_users` 作为用户端基础认证主体，归属 `Module/System`；项目需要会员、客户等业务资料时再按业务语义新增 `Member`、`Customer` 或其他模块，通过 `client_user_id` 关联基础账号。用户端认证入口归属 `Module/Auth/Http/Client`，不要新增泛化 `Module/User`。
 
 第一版已提供 System 的模块迁移示例。业务模块迁移按相同规范放入对应模块目录。
 

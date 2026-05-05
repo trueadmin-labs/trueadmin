@@ -8,7 +8,7 @@ TrueAdmin 后端采用 `kernel + app/Foundation + app/Infrastructure + app/Modul
 
 模块划分优先按业务域和能力域，不按调用端划分。一个模块可以同时提供后台端、用户端和开放平台端能力：后台入口放 `Http/Admin`，用户端入口放 `Http/Client`，开放平台入口放 `Http/Open`。
 
-不要因为出现用户端接口就创建通用 `Module/User`。用户端登录、刷新 Token、获取当前身份这类认证能力归属 `Module/Auth`；用户端会员、客户、订单、内容等业务能力，应按真实业务语义归属 `Module/Member`、`Module/Customer`、`Module/Order` 或其他更贴切的模块。
+不要因为出现用户端接口就创建通用 `Module/User`。第一版内置的 `client_users` 是系统基础账号资源，归属 `Module/System`；用户端登录、刷新 Token、获取当前身份这类认证流程归属 `Module/Auth`；用户端会员、客户、订单、内容等业务能力，应按真实业务语义归属 `Module/Member`、`Module/Customer`、`Module/Order` 或其他更贴切的模块。
 
 ## 目录基准
 
@@ -22,6 +22,9 @@ backend/app/Module/
     Http/Open/Controller/V1/         # 未来开放平台认证入口
     Service/
   System/
+    Database/Migrations/
+    Http/Admin/Controller/
+    Http/Admin/Request/
     Library/DataPermission/
     Model/
     Repository/
@@ -121,9 +124,9 @@ backend/app/Module/System/Listener/Logstash/WriteOperationLogListener.php
 
 `Auth` 承载认证能力，包括后台登录态、JWT，以及未来用户端和开放平台的认证入口。它不承载会员、客户、订单等业务资料管理。
 
-`System` 承载后台系统域和系统级通用能力，例如管理员用户、角色、菜单、权限、部门、数据权限、配置、字典、基础日志、全局设置。
+`System` 是 TrueAdmin 第一版内置基础能力模块，承载管理员账号、用户端基础账号、角色、菜单、权限、部门、数据权限、配置、字典、基础日志、全局设置等系统自带资源。
 
-第一版不内置通用 `User` 模块，也不内置用户端身份表。项目需要用户端身份或会员能力时，再按业务语义新增 `Member`、`Customer` 或其他更贴切的模块；该模块可以维护自己的 Model、Repository、Service 和 `Http/Client` 业务接口，而登录入口仍由 `Auth/Http/Client` 承担。
+第一版内置 `client_users`，但它只表示用户端基础认证主体，不承载会员等级、积分余额、客户画像、业务标签等扩展资料。项目需要会员或客户能力时，再按业务语义新增 `Member`、`Customer` 或其他更贴切的模块；该模块可以通过 `client_user_id` 关联基础账号，并维护自己的 Model、Repository、Service 和 `Http/Client` 业务接口。登录入口仍由 `Auth/Http/Client` 承担。
 
 业务模块，例如 `Order`、`Workflow`、`Message`，后续按同一目录规范新增，不作为第一版内置模块。
 

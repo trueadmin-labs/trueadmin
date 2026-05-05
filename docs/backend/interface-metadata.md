@@ -212,6 +212,8 @@ admin_menus / admin_permissions / admin_role_*
 
 当前已提供 `InterfaceMetadataScanner`、`MetadataSynchronizer` 和 `OpenApiDocumentBuilder`，用于扫描 Controller Attribute，输出统一接口元数据，同步菜单/按钮权限默认元数据，并生成 OpenAPI 文档。
 
+菜单、按钮权限和接口权限的默认元数据来源只能是 Controller Attribute。Seeder 可以在初始化时调用 `MetadataSynchronizer` 触发同步，但不应该手写菜单清单，避免注解和 Seeder 形成两套来源。
+
 可用命令：
 
 ```bash
