@@ -1,6 +1,6 @@
 import { request } from '@umijs/max';
-import type { ApiResponse, PageResult } from '@/foundation/request/types';
-import { unwrap } from '@/foundation/request/types';
+import type { ApiResponse, PageResult } from '@/core/request/types';
+import { unwrap } from '@/core/request/types';
 import type { AdminRole, AdminRolePayload } from '../types';
 
 export async function adminRolePage(

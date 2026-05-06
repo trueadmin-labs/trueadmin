@@ -1,6 +1,6 @@
 import { request } from '@umijs/max';
-import type { ApiResponse, PageResult } from '@/foundation/request/types';
-import { unwrap } from '@/foundation/request/types';
+import type { ApiResponse, PageResult } from '@/core/request/types';
+import { unwrap } from '@/core/request/types';
 import type { ClientUser, ClientUserPayload } from '../types';
 
 export async function clientUserPage(

@@ -6,9 +6,9 @@ import { createStyles } from 'antd-style';
 import { useModuleLocale } from '@/locales/useModuleLocale';
 import React, { useState } from 'react';
 import { flushSync } from 'react-dom';
-import { Footer } from '@/foundation/layout/components';
+import { Footer } from '@/core/layout';
 import { login } from '@/modules/auth/services';
-import { setAccessToken } from '@/foundation/auth/token';
+import { setAccessToken } from '@/core/auth/token';
 import Settings from '@root/config/defaultSettings';
 
 const useStyles = createStyles(({ token, css }) => ({

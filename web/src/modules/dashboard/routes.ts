@@ -1,4 +1,4 @@
-import type { TrueAdminRoute } from '@/foundation/router/types';
+import type { TrueAdminRoute } from '@/core/router/types';
 
 const routes: TrueAdminRoute[] = [
   {

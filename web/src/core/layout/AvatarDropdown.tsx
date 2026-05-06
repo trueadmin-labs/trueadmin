@@ -5,8 +5,8 @@ import { Spin } from 'antd';
 import React from 'react';
 import { flushSync } from 'react-dom';
 import { outLogin } from '@/modules/auth/services';
-import { clearAccessToken } from '@/foundation/auth/token';
-import HeaderDropdown from '../HeaderDropdown';
+import { clearAccessToken } from '@/core/auth/token';
+import HeaderDropdown from './HeaderDropdown';
 
 export type GlobalHeaderRightProps = {
   children?: React.ReactNode;

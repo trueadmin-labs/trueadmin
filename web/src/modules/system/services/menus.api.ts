@@ -1,6 +1,6 @@
 import { request } from '@umijs/max';
-import type { ApiResponse } from '@/foundation/request/types';
-import { unwrap } from '@/foundation/request/types';
+import type { ApiResponse } from '@/core/request/types';
+import { unwrap } from '@/core/request/types';
 import type { AdminMenu, AdminMenuPayload } from '../types';
 
 export async function adminMenus(options?: Record<string, unknown>) {

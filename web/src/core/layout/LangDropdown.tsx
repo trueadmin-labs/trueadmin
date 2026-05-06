@@ -4,7 +4,7 @@ import type { MenuProps } from 'antd';
 import { Button } from 'antd';
 import { createStyles } from 'antd-style';
 import React, { useMemo } from 'react';
-import HeaderDropdown from '../HeaderDropdown';
+import HeaderDropdown from './HeaderDropdown';
 
 export const localeLabelMap: Record<string, { emoji: string; label: string }> =
   {

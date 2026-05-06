@@ -1,6 +1,6 @@
 import { existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import type { TrueAdminRoute } from '../src/foundation/router/types';
+import type { TrueAdminRoute } from '../src/core/router/types';
 
 function loadModuleRoutes(): TrueAdminRoute[] {
   const modulesRoot = join(__dirname, '..', 'src', 'modules');
@@ -30,7 +30,7 @@ export default [
     redirect: '/dashboard',
   },
   {
-    component: '@/foundation/exception/pages/NotFound',
+    component: '@/core/exception/NotFound',
     path: '*',
   },
 ];
