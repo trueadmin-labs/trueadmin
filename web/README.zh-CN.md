@@ -33,17 +33,21 @@ src/
     layout/components/    布局级组件
     exception/pages/      403、404、500
     locale/framework/     框架级语言包
+    router/               路由类型与模块路由聚合生成物
   modules/
     auth/
       pages/Login/
+      routes.ts
       services/auth.api.ts
       locales/zh-CN.ts
       locales/en-US.ts
       types.ts
     dashboard/
       pages/Dashboard/
+      routes.ts
       locales/
     system/
+      routes.ts
       pages/Users/
       pages/Roles/
       pages/Menus/
@@ -62,12 +66,15 @@ src/
 
 多语言规则：模块业务 key 放在 `src/modules/<module>/locales/<locale>.ts`，框架级 key 放在 `src/foundation/locale/framework`。`src/locales` 整个目录是 Umi 插件入口生成物，不纳入 git；`src/foundation/locale/moduleLocaleRegistry.generated.ts` 也是生成物。新增模块时只需要新增模块自己的语言文件，进入模块页面后通过 `loadModuleLocale()` 按需加载模块语言。
 
+路由规则：模块路由放在 `src/modules/<module>/routes.ts`，由模块自己维护页面路径、菜单名、图标和重定向。`scripts/generate-routes.mjs` 会扫描模块路由并生成 `src/foundation/router/moduleRoutes.generated.ts`；`config/routes.ts` 只负责聚合模块路由、根路径跳转和 404。新增模块时不修改 `config/routes.ts`。
+
 不保留官方模板中的 `src/pages` 示例目录、PWA 入口和模板服务代码。新增页面必须落在 `src/modules/<module>/pages` 或 `src/foundation/exception/pages`。
 
 ## 常用命令
 
 ```bash
 pnpm install
+pnpm runtime:generate
 pnpm dev
 pnpm tsc
 pnpm build

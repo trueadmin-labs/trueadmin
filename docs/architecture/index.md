@@ -51,16 +51,20 @@ web/src/
     layout/components/     布局级组件
     exception/pages/       403、404、500 等框架异常页
     locale/framework/      框架级语言包
+    router/                路由类型与模块路由聚合生成物
   modules/
     auth/                  登录、退出、当前用户等认证能力
       pages/
+      routes.ts
       services/
       locales/
       types.ts
     dashboard/             控制台
       pages/
+      routes.ts
       locales/
     system/                系统管理模块
+      routes.ts
       pages/
       services/
       types/
@@ -77,9 +81,10 @@ web/src/
 - 手写接口放在 `modules/<module>/services/*.api.ts`。
 - 模块 DTO 和页面类型放在 `modules/<module>/types`。
 - 模块多语言放在 `modules/<module>/locales/<locale>.ts`；`scripts/generate-locales.mjs` 会生成 Umi 框架语言入口和 `moduleLocaleRegistry.generated.ts`。模块语言通过 `loadModuleLocale()` 按需加载，不进入首屏语言包。
+- 模块路由放在 `modules/<module>/routes.ts`；`scripts/generate-routes.mjs` 会生成 `foundation/router/moduleRoutes.generated.ts`。`config/routes.ts` 只保留模块路由聚合、根路径跳转和 404，不写业务模块页面。
 - 模块内私有组件和 Hooks 放在 `modules/<module>/components`、`modules/<module>/hooks`。
 - 跨模块框架能力放入 `foundation`，不要从一个业务模块直接 import 另一个业务模块的页面或私有组件。
-- `config/routes.ts` 仍作为 Umi 路由入口，但页面组件应指向 `@/modules/...` 或 `@/foundation/...`。
+- `config/routes.ts` 仍作为 Umi 路由入口，但具体业务路由必须来自模块 `routes.ts`，页面组件应指向 `@/modules/...` 或 `@/foundation/...`。
 - 不新增根级 `src/pages` 业务页面；官方模板示例页不得作为业务目录继续扩展。
 - 后端菜单负责运行时展示，前端路由负责可渲染页面；后端下发的菜单路径如果没有对应页面，必须进入 404，而不是空白页。
 
