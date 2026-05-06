@@ -40,6 +40,16 @@ export default [
         component: './system/roles',
       },
       {
+        path: '/system/departments',
+        name: 'system.departments',
+        component: './system/departments',
+      },
+      {
+        path: '/system/client-users',
+        name: 'system.client-users',
+        component: './system/client-users',
+      },
+      {
         path: '/system/menus',
         name: 'system.menus',
         component: './system/menus',
@@ -52,7 +62,6 @@ export default [
   },
   {
     component: './exception/404',
-    layout: false,
-    path: './*',
+    path: '*',
   },
 ];

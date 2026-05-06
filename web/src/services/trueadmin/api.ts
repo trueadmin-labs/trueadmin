@@ -67,7 +67,9 @@ export type AdminUser = {
   username: string;
   nickname: string;
   status: 'enabled' | 'disabled' | string;
-  deptId: number | null;
+  primaryDeptId?: number | null;
+  deptIds?: number[];
+  deptId?: number | null;
   roles: string[];
   roleIds: number[];
   createdAt: string;
@@ -81,6 +83,54 @@ export type AdminUserPayload = {
   status?: string;
   roleIds?: number[];
   deptId?: number | null;
+  deptIds?: number[];
+  primaryDeptId?: number | null;
+};
+
+export type AdminDepartment = {
+  id: number;
+  parentId: number;
+  parent_id: number;
+  code: string;
+  name: string;
+  level: number;
+  path: string;
+  sort: number;
+  status: 'enabled' | 'disabled' | string;
+  children?: AdminDepartment[];
+};
+
+export type AdminDepartmentPayload = {
+  parentId?: number;
+  code: string;
+  name: string;
+  sort?: number;
+  status?: string;
+};
+
+export type ClientUser = {
+  id: number;
+  username: string;
+  phone: string;
+  email: string;
+  nickname: string;
+  avatar: string;
+  status: 'enabled' | 'disabled' | string;
+  registerChannel: string;
+  lastLoginAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ClientUserPayload = {
+  username?: string;
+  phone?: string;
+  email?: string;
+  password?: string;
+  nickname?: string;
+  avatar?: string;
+  status?: string;
+  registerChannel?: string;
 };
 
 export type AdminRolePayload = {
@@ -349,6 +399,134 @@ export async function deleteAdminMenu(
   return unwrap(
     request<ApiResponse<null>>(`/api/admin/system/menus/${id}`, {
       method: 'DELETE',
+      ...(options || {}),
+    }),
+  );
+}
+
+export async function adminDepartmentList(
+  params?: Record<string, unknown>,
+  options?: Record<string, unknown>,
+) {
+  return unwrap(
+    request<ApiResponse<AdminDepartment[]>>('/api/admin/system/departments', {
+      method: 'GET',
+      params,
+      ...(options || {}),
+    }),
+  );
+}
+
+export async function createAdminDepartment(
+  data: AdminDepartmentPayload,
+  options?: Record<string, unknown>,
+) {
+  return unwrap(
+    request<ApiResponse<AdminDepartment>>('/api/admin/system/departments', {
+      method: 'POST',
+      data,
+      ...(options || {}),
+    }),
+  );
+}
+
+export async function updateAdminDepartment(
+  id: number,
+  data: AdminDepartmentPayload,
+  options?: Record<string, unknown>,
+) {
+  return unwrap(
+    request<ApiResponse<AdminDepartment>>(`/api/admin/system/departments/${id}`, {
+      method: 'PUT',
+      data,
+      ...(options || {}),
+    }),
+  );
+}
+
+export async function deleteAdminDepartment(
+  id: number,
+  options?: Record<string, unknown>,
+) {
+  return unwrap(
+    request<ApiResponse<null>>(`/api/admin/system/departments/${id}`, {
+      method: 'DELETE',
+      ...(options || {}),
+    }),
+  );
+}
+
+export async function clientUserPage(
+  params: Record<string, unknown>,
+  options?: Record<string, unknown>,
+) {
+  return unwrap(
+    request<ApiResponse<PageResult<ClientUser>>>('/api/admin/system/client-users', {
+      method: 'GET',
+      params,
+      ...(options || {}),
+    }),
+  );
+}
+
+export async function createClientUser(
+  data: ClientUserPayload,
+  options?: Record<string, unknown>,
+) {
+  return unwrap(
+    request<ApiResponse<ClientUser>>('/api/admin/system/client-users', {
+      method: 'POST',
+      data,
+      ...(options || {}),
+    }),
+  );
+}
+
+export async function updateClientUser(
+  id: number,
+  data: ClientUserPayload,
+  options?: Record<string, unknown>,
+) {
+  return unwrap(
+    request<ApiResponse<ClientUser>>(`/api/admin/system/client-users/${id}`, {
+      method: 'PUT',
+      data,
+      ...(options || {}),
+    }),
+  );
+}
+
+export async function deleteClientUser(
+  id: number,
+  options?: Record<string, unknown>,
+) {
+  return unwrap(
+    request<ApiResponse<null>>(`/api/admin/system/client-users/${id}`, {
+      method: 'DELETE',
+      ...(options || {}),
+    }),
+  );
+}
+
+export async function enableClientUser(
+  id: number,
+  options?: Record<string, unknown>,
+) {
+  return unwrap(
+    request<ApiResponse<ClientUser>>(`/api/admin/system/client-users/${id}/enable`, {
+      method: 'PUT',
+      ...(options || {}),
+    }),
+  );
+}
+
+export async function disableClientUser(
+  id: number,
+  options?: Record<string, unknown>,
+) {
+  return unwrap(
+    request<ApiResponse<ClientUser>>(`/api/admin/system/client-users/${id}/disable`, {
+      method: 'PUT',
       ...(options || {}),
     }),
   );
