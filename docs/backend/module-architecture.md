@@ -80,6 +80,27 @@ Service 校验：父部门不能是自己或子孙、主部门必须属于用户
 
 这能避免 Controller 变厚，也能避免 Service 混入大量 HTTP 输入细节。AI 新增模块时，应优先生成 Request，再让 Controller 传入 `$request->validated()` 给 Service。
 
+## 事务边界
+
+第一版采用显式事务，不使用事务注解和基类封装。需要事务时，在模块用例 Service 的公开写方法中直接调用 `Hyperf\DbConnection\Db::transaction()`。
+
+规则：
+
+- Controller、Command、Consumer、Crontab 默认不开事务。
+- Repository 禁止开事务。
+- 用例 Service 负责多表写入、状态流转、授权关系和跨 Repository 编排的事务边界。
+- Service 调 Service 时，外层用例 Service 控制事务，内层 Service 不重复开事务。
+- 只读查询不使用事务。
+- 操作日志、登录日志、通知等旁路副作用不要作为主事务成功的前置条件。
+
+这种写法牺牲了一点“自动化”，但换来清晰的事务范围。AI 生成代码时，应优先让事务块包住完整业务用例，而不是在每个 Service 或 Repository 方法里随手开启事务。
+
+## try/catch 边界
+
+默认不要用 `try/catch` 包住业务主流程。明显需要中断业务的错误必须继续向上抛出；如果捕获后只记录日志却继续返回成功，会破坏调用方对业务结果的判断。
+
+允许捕获并降级的场景主要是旁路副作用，例如操作日志、登录日志、通知、埋点、搜索索引同步。这类代码捕获异常后必须写 warning 日志。强一致业务步骤，例如授权关系写入、库存扣减、订单状态流转、部门角色树调整，不能吞异常；如需补充日志，捕获后必须重新抛出。
+
 ## 为什么这样设计
 
 纯 MineAdmin 全局分层适合单项目后台，但 TrueAdmin 是脚手架和未来开源框架，需要更清晰的模块上下文。

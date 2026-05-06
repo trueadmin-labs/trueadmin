@@ -214,6 +214,104 @@ Service 负责业务编排。
 
 业务创建、更新、删除流程仍应在具体 Service 中显式表达。这样既减少重复，也避免 FastAdmin 式控制器黑箱和 MineAdmin 式薄代理 Service 过度扩散。
 
+### 5.2.1 事务边界
+
+第一版事务边界采用显式写法：直接在用例 Service 的公开写入口调用 `Db::transaction()`。暂不提供 `#[Transactional]` 注解，也不在 `AbstractService` 中封装事务方法，避免事务范围被 AOP 或基类隐藏，方便 AI 和开发者阅读调用链。
+
+事务归属规则：
+
+- Controller、Command、Consumer、Crontab 默认不启动事务，只负责入口编排和调用用例 Service。
+- Repository 禁止启动事务，只负责查询和持久化动作。
+- `XxxManagementService`、`XxxUseCase` 这类用例 Service 的公开写方法可以作为事务边界。
+- Service 内部私有方法不单独开启事务。
+- Service 调 Service 时，默认由最外层用例 Service 控制事务，内层 Service 不重复开启事务。
+- 只读 `list`、`detail`、`tree` 不开启事务。
+- 单表简单写入可以不开事务；涉及多表写入、授权关系、状态流转、跨 Repository 编排时必须显式开启事务。
+
+推荐写法：
+
+```php
+use Hyperf\DbConnection\Db;
+
+public function create(array $payload): array
+{
+    return Db::transaction(function () use ($payload): array {
+        $user = $this->users->create($this->payloadForCreate($payload));
+        $this->users->syncRoles((int) $user->getAttribute('id'), $payload['roleIds']);
+        $this->users->syncDepartments((int) $user->getAttribute('id'), $payload['deptIds']);
+
+        return $this->detail((int) $user->getAttribute('id'));
+    });
+}
+```
+
+不推荐写法：
+
+```php
+public function create(array $payload): array
+{
+    return Db::transaction(function () use ($payload): array {
+        // roleService、deptService 内部如果也开启事务，边界会变得难以判断。
+        $this->roleService->assign($payload);
+        $this->deptService->assign($payload);
+
+        return $this->detail($payload['id']);
+    });
+}
+```
+
+如果一个能力既要被单独调用，又要被外层用例组合调用，优先拆成“公开用例方法 + 私有实际执行方法”：公开方法负责事务，私有方法只做业务步骤。跨模块复杂编排时，应新增更高层用例 Service，例如 `OrderCheckoutService`，由它统一控制事务，而不是让多个模块 Service 各自开启事务。
+
+事件和事务要分清楚：强一致副作用应在事务内显式完成；操作日志、登录日志、通知、搜索索引等旁路副作用不要阻塞主事务。未来如果需要可靠异步副作用，优先考虑 Outbox，而不是在 Listener 中硬依赖主流程。
+
+### 5.2.2 try/catch 使用边界
+
+`try/catch` 不是默认模板。第一版默认让异常向上抛出，由全局异常处理器转换为统一响应；只有明确允许降级的旁路副作用才可以捕获异常并继续主流程。
+
+规则：
+
+- 会影响业务一致性的错误不能被吞掉，例如创建订单失败、扣库存失败、角色授权失败、部门关系写入失败。
+- 如果捕获的是关键业务异常，必须重新抛出原异常或转换为 `BusinessException` 后抛出，不能只写日志后继续。
+- 操作日志、登录日志、通知投递、埋点、搜索索引同步等旁路副作用可以 `try/catch`，但必须写 warning 日志，不能静默。
+- `catch (Throwable $exception)` 只能用于边界层或旁路 Listener；业务 Service 中应优先捕获明确异常类型。
+- 不要用 `try/catch` 包住大段业务流程来“防止报错”。如果主流程失败，应该失败得清楚。
+
+推荐写法：
+
+```php
+try {
+    $this->logs->create($payload);
+} catch (Throwable $exception) {
+    $this->logger->warning('operation.log.persist_failed', [
+        'message' => $exception->getMessage(),
+        'action' => $payload['action'] ?? '',
+    ]);
+}
+```
+
+不推荐写法：
+
+```php
+try {
+    $order = $this->orders->create($payload);
+    $this->stocks->decrease($order);
+} catch (Throwable $exception) {
+    // 错误被吞掉后，调用方会误以为订单创建成功。
+    $this->logger->error($exception->getMessage());
+}
+```
+
+如果确实需要在关键流程中补充上下文日志，必须重新抛出：
+
+```php
+try {
+    return $this->createOrder($payload);
+} catch (Throwable $exception) {
+    $this->logger->error('order.create_failed', ['message' => $exception->getMessage()]);
+    throw $exception;
+}
+```
+
 ### 5.3 Repository 层
 
 Repository 负责数据访问。
@@ -768,6 +866,8 @@ products
 workflow_definitions
 message_notifications
 ```
+
+第一版只保留已经形成完整闭环的系统表。`admin_operation_logs` 已由 `#[OperationLog]`、AOP、事件和 `Module/System` Listener 写入；`admin_login_logs` 已由后台登录事件和 `Module/System` Listener 写入。`system_dicts`、`system_configs`、`client_login_logs`、`client_operation_logs` 暂不预留，等对应能力进入产品闭环时再按模块补齐。
 
 后台用户和用户端用户默认分表。第一版内置 `client_users` 作为用户端基础认证主体，归属 `Module/System`；项目需要会员、客户等业务资料时再按业务语义新增 `Member`、`Customer` 或其他模块，通过 `client_user_id` 关联基础账号。用户端认证入口归属 `Module/Auth/Http/Client`，不要新增泛化 `Module/User`。
 

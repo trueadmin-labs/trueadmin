@@ -11,6 +11,7 @@ use App\Foundation\Tree\TreeHelper;
 use App\Module\System\Model\AdminRole;
 use App\Module\System\Repository\AdminMenuRepository;
 use App\Module\System\Repository\AdminRoleRepository;
+use Hyperf\DbConnection\Db;
 use TrueAdmin\Kernel\Constant\ErrorCode;
 use TrueAdmin\Kernel\Exception\BusinessException;
 
@@ -36,79 +37,87 @@ final class AdminRoleManagementService extends AbstractService
 
     public function create(array $payload): array
     {
-        $code = (string) $payload['code'];
-        $this->assertUnique($this->roles->findByCode($code) !== null, 'code');
-        $parent = $this->parentRole((int) ($payload['parentId'] ?? $payload['parent_id'] ?? 0));
-        $menuIds = $this->menuIds($payload['menuIds'] ?? []);
-        $this->assertWithinParentMenuScope($parent, $menuIds);
+        return Db::transaction(function () use ($payload): array {
+            $code = (string) $payload['code'];
+            $this->assertUnique($this->roles->findByCode($code) !== null, 'code');
+            $parent = $this->parentRole((int) ($payload['parentId'] ?? $payload['parent_id'] ?? 0));
+            $menuIds = $this->menuIds($payload['menuIds'] ?? []);
+            $this->assertWithinParentMenuScope($parent, $menuIds);
 
-        $role = $this->roles->create([
-            'parent_id' => $parent === null ? 0 : (int) $parent->getAttribute('id'),
-            'code' => $code,
-            'name' => (string) $payload['name'],
-            'level' => $this->tree->level($parent),
-            'path' => $this->tree->path($parent),
-            'sort' => (int) ($payload['sort'] ?? 0),
-            'status' => (string) ($payload['status'] ?? 'enabled'),
-        ]);
+            $role = $this->roles->create([
+                'parent_id' => $parent === null ? 0 : (int) $parent->getAttribute('id'),
+                'code' => $code,
+                'name' => (string) $payload['name'],
+                'level' => $this->tree->level($parent),
+                'path' => $this->tree->path($parent),
+                'sort' => (int) ($payload['sort'] ?? 0),
+                'status' => (string) ($payload['status'] ?? 'enabled'),
+            ]);
 
-        $this->roles->syncMenus($role, $menuIds);
+            $this->roles->syncMenus($role, $menuIds);
 
-        return $this->detail((int) $role->getAttribute('id'));
+            return $this->detail((int) $role->getAttribute('id'));
+        });
     }
 
     public function update(int $id, array $payload): array
     {
-        $role = $this->mustFind($id);
-        $code = (string) $payload['code'];
-        $exists = $this->roles->findByCode($code);
-        $this->assertUnique($exists !== null && (int) $exists->getAttribute('id') !== $id, 'code');
-        $parentId = array_key_exists('parentId', $payload) || array_key_exists('parent_id', $payload)
-            ? (int) ($payload['parentId'] ?? $payload['parent_id'])
-            : (int) $role->getAttribute('parent_id');
-        $parent = $this->parentRole($parentId, $id);
-        $menuIds = array_key_exists('menuIds', $payload) ? $this->menuIds($payload['menuIds']) : $this->roles->menuIds($role);
-        $this->assertWithinParentMenuScope($parent, $menuIds);
+        return Db::transaction(function () use ($id, $payload): array {
+            $role = $this->mustFind($id);
+            $code = (string) $payload['code'];
+            $exists = $this->roles->findByCode($code);
+            $this->assertUnique($exists !== null && (int) $exists->getAttribute('id') !== $id, 'code');
+            $parentId = array_key_exists('parentId', $payload) || array_key_exists('parent_id', $payload)
+                ? (int) ($payload['parentId'] ?? $payload['parent_id'])
+                : (int) $role->getAttribute('parent_id');
+            $parent = $this->parentRole($parentId, $id);
+            $menuIds = array_key_exists('menuIds', $payload) ? $this->menuIds($payload['menuIds']) : $this->roles->menuIds($role);
+            $this->assertWithinParentMenuScope($parent, $menuIds);
 
-        $role = $this->roles->update($role, [
-            'parent_id' => $parent === null ? 0 : (int) $parent->getAttribute('id'),
-            'code' => $code,
-            'name' => (string) $payload['name'],
-            'level' => $this->tree->level($parent),
-            'path' => $this->tree->path($parent),
-            'sort' => (int) ($payload['sort'] ?? $role->getAttribute('sort')),
-            'status' => (string) ($payload['status'] ?? $role->getAttribute('status')),
-        ]);
+            $role = $this->roles->update($role, [
+                'parent_id' => $parent === null ? 0 : (int) $parent->getAttribute('id'),
+                'code' => $code,
+                'name' => (string) $payload['name'],
+                'level' => $this->tree->level($parent),
+                'path' => $this->tree->path($parent),
+                'sort' => (int) ($payload['sort'] ?? $role->getAttribute('sort')),
+                'status' => (string) ($payload['status'] ?? $role->getAttribute('status')),
+            ]);
 
-        if (array_key_exists('menuIds', $payload)) {
-            $this->roles->syncMenus($role, $menuIds);
-        }
+            if (array_key_exists('menuIds', $payload)) {
+                $this->roles->syncMenus($role, $menuIds);
+            }
 
-        return $this->detail((int) $role->getAttribute('id'));
+            return $this->detail((int) $role->getAttribute('id'));
+        });
     }
 
     public function delete(int $id): void
     {
-        $role = $this->mustFind($id);
-        if ((string) $role->getAttribute('code') === 'super-admin') {
-            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['reason' => 'cannot_delete_builtin_role']);
-        }
-        if ($this->roles->childCount($id) > 0) {
-            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['reason' => 'cannot_delete_role_with_children']);
-        }
+        Db::transaction(function () use ($id): void {
+            $role = $this->mustFind($id);
+            if ((string) $role->getAttribute('code') === 'super-admin') {
+                throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['reason' => 'cannot_delete_builtin_role']);
+            }
+            if ($this->roles->childCount($id) > 0) {
+                throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['reason' => 'cannot_delete_role_with_children']);
+            }
 
-        $this->roles->delete($role);
+            $this->roles->delete($role);
+        });
     }
 
     public function authorizeMenus(int $id, array $menuIds): array
     {
-        $role = $this->mustFind($id);
-        $menuIds = $this->menuIds($menuIds);
-        $parent = $this->parentRole((int) $role->getAttribute('parent_id'));
-        $this->assertWithinParentMenuScope($parent, $menuIds);
-        $this->roles->syncMenus($role, $menuIds);
+        return Db::transaction(function () use ($id, $menuIds): array {
+            $role = $this->mustFind($id);
+            $menuIds = $this->menuIds($menuIds);
+            $parent = $this->parentRole((int) $role->getAttribute('parent_id'));
+            $this->assertWithinParentMenuScope($parent, $menuIds);
+            $this->roles->syncMenus($role, $menuIds);
 
-        return $this->detail($id);
+            return $this->detail($id);
+        });
     }
 
     private function menuIds(mixed $value): array

@@ -38,6 +38,10 @@ class ExampleTest extends TestCase
 
         $this->assertSame('SUCCESS', $me['code']);
         $this->assertSame('admin', $me['data']['username']);
+        $this->assertGreaterThanOrEqual(1, \Hyperf\DbConnection\Db::table('admin_login_logs')
+            ->where('username', 'admin')
+            ->where('status', 'success')
+            ->count());
     }
 
     public function testAdminLoginFailureUsesStringErrorCode()
@@ -50,6 +54,11 @@ class ExampleTest extends TestCase
         $this->assertSame('SYSTEM.AUTH.INVALID_CREDENTIALS', $login['code']);
         $this->assertSame('用户名或密码错误', $login['message']);
         $this->assertNull($login['data']);
+        $this->assertGreaterThanOrEqual(1, \Hyperf\DbConnection\Db::table('admin_login_logs')
+            ->where('username', 'admin')
+            ->where('status', 'failed')
+            ->where('reason', 'invalid_credentials')
+            ->count());
     }
 
     public function testAdminLoginFailureUsesRequestLocale()

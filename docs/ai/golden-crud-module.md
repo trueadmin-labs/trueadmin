@@ -118,6 +118,10 @@ Service 负责业务流程和不变量。
 
 不要把业务流程隐藏进通用 `CrudService` 黑盒。TrueAdmin 第一版更偏向“可读显式流程 + 少量 helper”。
 
+事务规则：第一版不使用 `#[Transactional]`，也不通过 `AbstractService` 隐式封装事务。标准 CRUD 如果只是单表简单写入，可以不开事务；如果涉及多表写入、授权关系、状态流转或多个 Repository 协作，应在 Service 的公开写方法中直接使用 `Hyperf\DbConnection\Db::transaction()`。Controller、Request、Repository 不开启事务，Service 调 Service 时由最外层用例 Service 控制事务。
+
+`try/catch` 规则：不要为了“防止报错”包住 CRUD 主流程。资源创建、更新、删除、授权、状态变更失败时应让异常向上抛出。只有操作日志、通知等旁路副作用可以捕获异常并记录 warning；关键业务捕获异常后必须重新抛出。
+
 ### Repository
 
 Repository 负责数据访问和查询协议。

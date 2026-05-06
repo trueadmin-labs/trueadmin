@@ -82,7 +82,7 @@ final class AdminUserController
 }
 ```
 
-这个设计让日志写入和业务方法解耦。当前 `Module/System` 已通过 Listener 写入 `admin_operation_logs` 表，后续也可以扩展为写消息队列、审计仓库或日志平台，业务代码不用变。
+这个设计让日志写入和业务方法解耦。当前 `Module/System` 已通过 Listener 写入 `admin_operation_logs` 表，记录的是后台侧操作审计；例如管理员维护 `client_users` 时产生的 `client.user.*` 动作仍然属于后台操作审计。后台登录日志由 `Module/Auth` 发布登录事件、`Module/System` 监听写入 `admin_login_logs`。第一版不预留 `client_operation_logs`、`client_login_logs` 空表，等用户端真实写操作审计或登录审计形成事件、监听器、查询接口和后台页面闭环时再加入。后续也可以扩展为写消息队列、审计仓库或日志平台，业务代码不用变。
 
 ## 监听器
 
@@ -110,6 +110,15 @@ final class WriteOperationLogListener implements ListenerInterface
 ```
 
 业务代码只发布事件，不直接调用监听器。
+
+监听器是否捕获异常取决于事件副作用类型，不要默认 `try/catch`：
+
+- 强一致监听器不捕获异常，或捕获后必须重新抛出，让主流程中断。例如库存扣减、授权关系同步、必须成功的数据修正。
+- 旁路监听器可以捕获异常并降级，例如操作日志、登录日志、通知投递、埋点、搜索索引同步。
+- 旁路监听器捕获异常后必须写 warning 日志，不能静默失败。
+- 如果一个监听器失败会影响业务正确性，就不应该使用“捕获后继续”的写法。
+
+当前 `WriteOperationLogListener`、`WriteAdminLoginLogListener` 属于旁路监听器，允许捕获异常并记录 warning；未来订单、库存、权限同步等关键业务监听器默认应让异常抛出。
 
 ## 放置规则
 

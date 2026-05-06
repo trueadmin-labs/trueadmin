@@ -30,30 +30,14 @@ return new class extends Migration {
             $table->string('ip', 64)->default('');
             $table->string('user_agent', 512)->default('');
             $table->string('status', 32)->default('success');
+            $table->string('reason', 128)->default('');
             $table->datetimes();
         });
 
-        Schema::create('system_dicts', function (Blueprint $table): void {
-            $table->bigIncrements('id');
-            $table->string('code', 64)->unique();
-            $table->string('name', 64);
-            $table->string('status', 32)->default('enabled');
-            $table->datetimes();
-        });
-
-        Schema::create('system_configs', function (Blueprint $table): void {
-            $table->bigIncrements('id');
-            $table->string('key', 128)->unique();
-            $table->text('value')->nullable();
-            $table->string('remark', 255)->default('');
-            $table->datetimes();
-        });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('system_configs');
-        Schema::dropIfExists('system_dicts');
         Schema::dropIfExists('admin_login_logs');
         Schema::dropIfExists('admin_operation_logs');
     }

@@ -12,6 +12,7 @@ use App\Module\System\Model\AdminUser;
 use App\Module\System\Repository\AdminDepartmentRepository;
 use App\Module\System\Repository\AdminRoleRepository;
 use App\Module\System\Repository\AdminUserRepository;
+use Hyperf\DbConnection\Db;
 use TrueAdmin\Kernel\Constant\ErrorCode;
 use TrueAdmin\Kernel\Exception\BusinessException;
 
@@ -36,71 +37,77 @@ final class AdminUserManagementService extends AbstractService
 
     public function create(array $payload): array
     {
-        $username = (string) $payload['username'];
-        $this->assertUnique($this->users->existsUsername($username), 'username');
+        return Db::transaction(function () use ($payload): array {
+            $username = (string) $payload['username'];
+            $this->assertUnique($this->users->existsUsername($username), 'username');
 
-        $departmentIds = $this->departmentIds($this->departmentInput($payload));
-        $primaryDeptId = $this->primaryDeptId($payload['primaryDeptId'] ?? $payload['deptId'] ?? null, $departmentIds);
+            $departmentIds = $this->departmentIds($this->departmentInput($payload));
+            $primaryDeptId = $this->primaryDeptId($payload['primaryDeptId'] ?? $payload['deptId'] ?? null, $departmentIds);
 
-        $user = $this->users->create([
-            'username' => $username,
-            'password' => Password::make((string) $payload['password']),
-            'nickname' => (string) ($payload['nickname'] ?: $username),
-            'status' => (string) $payload['status'],
-            'primary_dept_id' => $primaryDeptId,
-        ]);
+            $user = $this->users->create([
+                'username' => $username,
+                'password' => Password::make((string) $payload['password']),
+                'nickname' => (string) ($payload['nickname'] ?: $username),
+                'status' => (string) $payload['status'],
+                'primary_dept_id' => $primaryDeptId,
+            ]);
 
-        $this->users->syncRoles($user, $this->roleIds($payload['roleIds'] ?? []));
-        $this->users->syncDepartments($user, $departmentIds, $primaryDeptId);
+            $this->users->syncRoles($user, $this->roleIds($payload['roleIds'] ?? []));
+            $this->users->syncDepartments($user, $departmentIds, $primaryDeptId);
 
-        return $this->detail((int) $user->getAttribute('id'));
+            return $this->detail((int) $user->getAttribute('id'));
+        });
     }
 
     public function update(int $id, array $payload): array
     {
-        $user = $this->mustFind($id);
-        $username = (string) $payload['username'];
-        $this->assertUnique($this->users->existsUsername($username, $id), 'username');
+        return Db::transaction(function () use ($id, $payload): array {
+            $user = $this->mustFind($id);
+            $username = (string) $payload['username'];
+            $this->assertUnique($this->users->existsUsername($username, $id), 'username');
 
-        $hasDepartmentPayload = array_key_exists('deptIds', $payload) || array_key_exists('primaryDeptId', $payload) || array_key_exists('deptId', $payload);
-        $departmentIds = $hasDepartmentPayload ? $this->departmentIds($this->departmentInput($payload)) : $this->users->departmentIds($user);
-        $primaryDeptId = $hasDepartmentPayload
-            ? $this->primaryDeptId($payload['primaryDeptId'] ?? $payload['deptId'] ?? null, $departmentIds)
-            : ($user->getAttribute('primary_dept_id') === null ? null : (int) $user->getAttribute('primary_dept_id'));
+            $hasDepartmentPayload = array_key_exists('deptIds', $payload) || array_key_exists('primaryDeptId', $payload) || array_key_exists('deptId', $payload);
+            $departmentIds = $hasDepartmentPayload ? $this->departmentIds($this->departmentInput($payload)) : $this->users->departmentIds($user);
+            $primaryDeptId = $hasDepartmentPayload
+                ? $this->primaryDeptId($payload['primaryDeptId'] ?? $payload['deptId'] ?? null, $departmentIds)
+                : ($user->getAttribute('primary_dept_id') === null ? null : (int) $user->getAttribute('primary_dept_id'));
 
-        $data = [
-            'username' => $username,
-            'nickname' => array_key_exists('nickname', $payload) && $payload['nickname'] !== ''
-                ? (string) $payload['nickname']
-                : (string) $user->getAttribute('nickname'),
-            'status' => (string) ($payload['status'] ?? $user->getAttribute('status')),
-            'primary_dept_id' => $primaryDeptId,
-        ];
+            $data = [
+                'username' => $username,
+                'nickname' => array_key_exists('nickname', $payload) && $payload['nickname'] !== ''
+                    ? (string) $payload['nickname']
+                    : (string) $user->getAttribute('nickname'),
+                'status' => (string) ($payload['status'] ?? $user->getAttribute('status')),
+                'primary_dept_id' => $primaryDeptId,
+            ];
 
-        $password = trim((string) ($payload['password'] ?? ''));
-        if ($password !== '') {
-            $data['password'] = Password::make($password);
-        }
+            $password = trim((string) ($payload['password'] ?? ''));
+            if ($password !== '') {
+                $data['password'] = Password::make($password);
+            }
 
-        $user = $this->users->update($user, $data);
-        if (array_key_exists('roleIds', $payload)) {
-            $this->users->syncRoles($user, $this->roleIds($payload['roleIds']));
-        }
-        if ($hasDepartmentPayload) {
-            $this->users->syncDepartments($user, $departmentIds, $primaryDeptId);
-        }
+            $user = $this->users->update($user, $data);
+            if (array_key_exists('roleIds', $payload)) {
+                $this->users->syncRoles($user, $this->roleIds($payload['roleIds']));
+            }
+            if ($hasDepartmentPayload) {
+                $this->users->syncDepartments($user, $departmentIds, $primaryDeptId);
+            }
 
-        return $this->detail((int) $user->getAttribute('id'));
+            return $this->detail((int) $user->getAttribute('id'));
+        });
     }
 
     public function delete(int $id): void
     {
-        $user = $this->mustFind($id);
-        if ((int) $user->getAttribute('id') === 1) {
-            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['reason' => 'cannot_delete_builtin_admin']);
-        }
+        Db::transaction(function () use ($id): void {
+            $user = $this->mustFind($id);
+            if ((int) $user->getAttribute('id') === 1) {
+                throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['reason' => 'cannot_delete_builtin_admin']);
+            }
 
-        $this->users->delete($user);
+            $this->users->delete($user);
+        });
     }
 
     /**

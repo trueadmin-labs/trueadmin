@@ -37,7 +37,12 @@ final class PassportController extends AdminController
             ]);
         }
 
-        return ApiResponse::success($this->passportService->login($username, $password));
+        return ApiResponse::success($this->passportService->login(
+            $username,
+            $password,
+            $this->request->getServerParams()['remote_addr'] ?? '',
+            $this->request->getHeaderLine('User-Agent'),
+        ));
     }
 
     #[AdminPost('logout', middleware: [AdminAuthMiddleware::class])]

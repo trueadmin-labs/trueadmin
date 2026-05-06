@@ -39,9 +39,10 @@ admin_positions
 admin_roles
 admin_menus
 admin_operation_logs
-system_dicts
-system_configs
+admin_login_logs
 ```
+
+第一版只保留已经形成完整闭环的系统表。`admin_operation_logs` 由 `#[OperationLog]`、AOP、事件和 Listener 写入；`admin_login_logs` 由后台登录事件和 Listener 写入。`system_dicts`、`system_configs`、用户端登录日志等能力不做空表预留，等对应的模型、仓储、接口、事件和后台页面一起设计时再加入，避免脚手架提前背负未使用概念。
 
 后台管理员按多部门设计，不使用单一 `dept_id` 表达全部部门关系。推荐结构：
 
