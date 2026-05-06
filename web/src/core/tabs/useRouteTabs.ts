@@ -31,22 +31,41 @@ const createStoredTab = (descriptor: TabDescriptor): AppTab => ({
   pinnedAt: descriptor.pinned || descriptor.home ? Date.now() : undefined,
 });
 
-const mapStoredTab = (tab: AppTab, descriptors: Map<string, TabDescriptor>) => {
+const mapStoredTab = (
+  tab: AppTab,
+  descriptors: Map<string, TabDescriptor>,
+  homeDescriptor?: TabDescriptor,
+) => {
+  const isCurrentHome = homeDescriptor?.key === tab.key;
   const descriptor = descriptors.get(tab.key);
-  if (!descriptor && !tab.home) {
-    return undefined;
+  if (!descriptor && !isCurrentHome) {
+    return tab.home ? undefined : tab;
   }
+
+  const nextHomeState = {
+    home: isCurrentHome,
+    pinned: isCurrentHome ? true : tab.home ? false : tab.pinned,
+    pinnedAt: isCurrentHome ? (tab.pinnedAt ?? tab.openedAt) : tab.home ? undefined : tab.pinnedAt,
+  };
 
   if (!descriptor) {
-    return tab;
+    return { ...tab, ...nextHomeState };
   }
 
-  if (tab.path === descriptor.path && tab.title === descriptor.title && tab.icon) {
+  if (
+    tab.path === descriptor.path &&
+    tab.title === descriptor.title &&
+    tab.icon &&
+    tab.home === nextHomeState.home &&
+    tab.pinned === nextHomeState.pinned &&
+    tab.pinnedAt === nextHomeState.pinnedAt
+  ) {
     return tab;
   }
 
   return {
     ...tab,
+    ...nextHomeState,
     path: descriptor.path,
     title: descriptor.title,
     icon: tab.icon ?? descriptor.icon,
@@ -77,7 +96,9 @@ export function useRouteTabs({
   const setActiveKey = useTabsStore((state) => state.setActiveKey);
 
   useEffect(() => {
-    const nextTabs = tabs.map((tab) => mapStoredTab(tab, descriptors)).filter(Boolean) as AppTab[];
+    const nextTabs = tabs
+      .map((tab) => mapStoredTab(tab, descriptors, homeDescriptor))
+      .filter(Boolean) as AppTab[];
 
     if (homeDescriptor && !nextTabs.some((tab) => tab.key === homeDescriptor.key)) {
       nextTabs.unshift(createStoredTab(homeDescriptor));

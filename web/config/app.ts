@@ -4,5 +4,5 @@ export const appConfig = {
   name: env.appName,
   logo: '/logo.svg',
   defaultLocale: 'zh-CN',
-  defaultHome: '/system/users',
+  defaultHome: '/workbench',
 };

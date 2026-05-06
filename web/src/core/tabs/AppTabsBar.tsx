@@ -25,12 +25,21 @@ import {
 import { CSS as DndCSS } from '@dnd-kit/utilities';
 import type { MenuProps } from 'antd';
 import { Button, Dropdown, Tooltip } from 'antd';
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import {
+  type CSSProperties,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { useTabsStore } from './tabsStore';
 import type { AppTab, TabCloseScope } from './types';
 
-const CLOSE_ANIMATION_MS = 150;
+const CLOSE_ANIMATION_MS = 220;
+const ENTER_ANIMATION_MS = 180;
 const TAB_MOVE_ANIMATION_MS = 180;
 
 const getGroup = (tab?: AppTab) => (tab?.pinned ? 'pinned' : 'normal');
@@ -39,6 +48,17 @@ type PendingDropAnimation = {
   key: string;
   deltaX: number;
   deltaY: number;
+};
+
+type PendingClose = {
+  key: string;
+  path: string;
+  scope?: TabCloseScope;
+};
+
+type ClosingTabState = {
+  width: number;
+  closing: boolean;
 };
 
 const restrictToHorizontalAxis: Modifier = ({ transform }) => ({
@@ -55,42 +75,67 @@ const sameGroupCollisionDetection: CollisionDetection = (args) => {
   return closestCenter({ ...args, droppableContainers });
 };
 
-function useTabActions(activeKey?: string) {
-  const navigate = useNavigate();
+const normalizePath = (path: string) => path.replace(/\/+$/, '') || '/';
+
+const isSamePath = (left: string, right: string) => normalizePath(left) === normalizePath(right);
+
+const getNextTabAfterClose = (tabs: AppTab[], key: string) => {
+  const index = tabs.findIndex((tab) => tab.key === key);
+  const candidates = tabs.filter((tab) => tab.key !== key);
+
+  if (index < 0) {
+    return candidates[0];
+  }
+
+  return (
+    candidates[index] ??
+    candidates[index - 1] ??
+    candidates.find((tab) => tab.home) ??
+    candidates[0]
+  );
+};
+
+const keepTabsByCloseScope = (tabs: AppTab[], targetKey: string, scope: TabCloseScope) => {
+  const targetIndex = tabs.findIndex((tab) => tab.key === targetKey);
+
+  return tabs.filter((tab, index) => {
+    if (tab.pinned) {
+      return true;
+    }
+
+    if (scope === 'all') {
+      return false;
+    }
+
+    if (scope === 'others') {
+      return tab.key === targetKey;
+    }
+
+    if (scope === 'left') {
+      return targetIndex < 0 || index >= targetIndex;
+    }
+
+    if (scope === 'right') {
+      return targetIndex < 0 || index <= targetIndex;
+    }
+
+    return tab.key !== targetKey;
+  });
+};
+
+function useTabActions({
+  activeKey,
+  onClose,
+  onCloseByScope,
+}: {
+  activeKey?: string;
+  onClose: (key: string) => void;
+  onCloseByScope: (key: string, scope: TabCloseScope) => void;
+}) {
   const tabs = useTabsStore((state) => state.tabs);
   const refreshTab = useTabsStore((state) => state.refreshTab);
-  const closeTab = useTabsStore((state) => state.closeTab);
-  const closeTabs = useTabsStore((state) => state.closeTabs);
   const pinTab = useTabsStore((state) => state.pinTab);
   const unpinTab = useTabsStore((state) => state.unpinTab);
-  const [closingKeys, setClosingKeys] = useState<string[]>([]);
-
-  const navigateToKey = (key?: string) => {
-    const nextTab = useTabsStore.getState().tabs.find((tab) => tab.key === key);
-    if (nextTab) {
-      navigate(nextTab.path);
-    }
-  };
-
-  const closeWithAnimation = (key: string) => {
-    const tab = useTabsStore.getState().tabs.find((item) => item.key === key);
-    if (!tab || tab.pinned || closingKeys.includes(key)) {
-      return;
-    }
-
-    setClosingKeys((keys) => [...keys, key]);
-    window.setTimeout(() => {
-      const nextKey = closeTab(key);
-      navigateToKey(nextKey);
-      setClosingKeys((keys) => keys.filter((item) => item !== key));
-    }, CLOSE_ANIMATION_MS);
-  };
-
-  const closeByScope = (key: string, scope: TabCloseScope) => {
-    const nextKey = closeTabs(key, scope);
-    navigateToKey(nextKey);
-  };
-
   const getMenuItems = (key: string): MenuProps['items'] => {
     const stateTabs = useTabsStore.getState().tabs;
     const target = stateTabs.find((tab) => tab.key === key);
@@ -132,38 +177,36 @@ function useTabActions(activeKey?: string) {
         icon: <CloseOutlined />,
         label: '关闭当前',
         disabled: target?.pinned,
-        onClick: () => currentKey && closeWithAnimation(currentKey),
+        onClick: () => currentKey && onClose(currentKey),
       },
       {
         key: 'close-left',
         label: '关闭左侧',
         disabled: !hasLeftClosable,
-        onClick: () => currentKey && closeByScope(currentKey, 'left'),
+        onClick: () => currentKey && onCloseByScope(currentKey, 'left'),
       },
       {
         key: 'close-right',
         label: '关闭右侧',
         disabled: !hasRightClosable,
-        onClick: () => currentKey && closeByScope(currentKey, 'right'),
+        onClick: () => currentKey && onCloseByScope(currentKey, 'right'),
       },
       {
         key: 'close-others',
         label: '关闭其它',
         disabled: !hasOtherClosable,
-        onClick: () => currentKey && closeByScope(currentKey, 'others'),
+        onClick: () => currentKey && onCloseByScope(currentKey, 'others'),
       },
       {
         key: 'close-all',
         label: '关闭全部',
         disabled: normalTabs.length === 0,
-        onClick: () => currentKey && closeByScope(currentKey, 'all'),
+        onClick: () => currentKey && onCloseByScope(currentKey, 'all'),
       },
     ];
   };
 
   return {
-    closingKeys,
-    closeWithAnimation,
     getMenuItems,
     refreshTab,
     tabs,
@@ -255,14 +298,16 @@ function playDropBackAnimation(
 
 function SortableTab({
   active,
-  closing,
+  entering,
+  closingState,
   tab,
   menuItems,
   onActivate,
   onClose,
 }: {
   active: boolean;
-  closing: boolean;
+  entering: boolean;
+  closingState?: ClosingTabState;
   tab: AppTab;
   menuItems: MenuProps['items'];
   onActivate: (tab: AppTab) => void;
@@ -273,10 +318,20 @@ function SortableTab({
     disabled: tab.home,
     data: { group: getGroup(tab) },
   });
+  const stateTransition = [
+    transition,
+    'background-color 0.18s cubic-bezier(0.2, 0, 0, 1)',
+    'border-color 0.18s cubic-bezier(0.2, 0, 0, 1)',
+    'box-shadow 0.18s cubic-bezier(0.2, 0, 0, 1)',
+    'color 0.18s cubic-bezier(0.2, 0, 0, 1)',
+  ]
+    .filter(Boolean)
+    .join(', ');
   const style = {
     transform: DndCSS.Transform.toString(transform),
-    transition,
-  };
+    transition: closingState ? undefined : stateTransition,
+    '--trueadmin-tabs-closing-width': closingState ? `${closingState.width}px` : undefined,
+  } as CSSProperties;
 
   return (
     <Dropdown menu={{ items: menuItems }} trigger={['contextMenu']}>
@@ -284,7 +339,9 @@ function SortableTab({
         ref={setNodeRef}
         className="trueadmin-tabs-item"
         data-active={active}
-        data-closing={closing}
+        data-entering={entering}
+        data-closing={closingState?.closing ?? false}
+        data-closing-ready={Boolean(closingState)}
         data-dragging={isDragging}
         data-pinned={tab.pinned}
         data-tab-key={tab.key}
@@ -329,14 +386,16 @@ function SortableTab({
 
 function SortableTabGroup({
   activeKey,
-  closingKeys,
+  closingTabs,
+  enteringKeys,
   tabs,
   getMenuItems,
   onActivate,
   onClose,
 }: {
   activeKey?: string;
-  closingKeys: string[];
+  closingTabs: Record<string, ClosingTabState>;
+  enteringKeys: string[];
   tabs: AppTab[];
   getMenuItems: (key: string) => MenuProps['items'];
   onActivate: (tab: AppTab) => void;
@@ -348,7 +407,8 @@ function SortableTabGroup({
         <SortableTab
           key={tab.key}
           active={tab.key === activeKey}
-          closing={closingKeys.includes(tab.key)}
+          entering={enteringKeys.includes(tab.key)}
+          closingState={closingTabs[tab.key]}
           tab={tab}
           menuItems={getMenuItems(tab.key)}
           onActivate={onActivate}
@@ -363,10 +423,16 @@ export function AppTabsBar({ activeKey }: { activeKey?: string }) {
   const navigate = useNavigate();
   const location = useLocation();
   const tabs = useTabsStore((state) => state.tabs);
+  const closeTab = useTabsStore((state) => state.closeTab);
+  const closeTabs = useTabsStore((state) => state.closeTabs);
   const reorderTabs = useTabsStore((state) => state.reorderTabs);
   const scrollRef = useRef<HTMLUListElement>(null);
   const pendingDropAnimationRef = useRef<PendingDropAnimation | undefined>(undefined);
-  const { closingKeys, closeWithAnimation, getMenuItems } = useTabActions(activeKey);
+  const pendingCloseRef = useRef<PendingClose | undefined>(undefined);
+  const closeAnimationTimersRef = useRef(new Map<string, number | undefined>());
+  const seenTabKeysRef = useRef<Set<string> | undefined>(undefined);
+  const [closingTabs, setClosingTabs] = useState<Record<string, ClosingTabState>>({});
+  const [enteringKeys, setEnteringKeys] = useState<string[]>([]);
   const pinnedTabs = useMemo(() => tabs.filter((tab) => tab.pinned), [tabs]);
   const normalTabs = useMemo(() => tabs.filter((tab) => !tab.pinned), [tabs]);
   const tabLayoutKey = useMemo(
@@ -383,6 +449,119 @@ export function AppTabsBar({ activeKey }: { activeKey?: string }) {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
+  const getTabNode = useCallback(
+    (key: string) =>
+      scrollRef.current?.querySelector<HTMLElement>(`[data-tab-key="${window.CSS.escape(key)}"]`),
+    [],
+  );
+
+  const startCloseAnimation = useCallback(
+    (pending: PendingClose) => {
+      if (closeAnimationTimersRef.current.has(pending.key)) {
+        return;
+      }
+      closeAnimationTimersRef.current.set(pending.key, undefined);
+
+      const width = Math.ceil(getTabNode(pending.key)?.getBoundingClientRect().width ?? 0);
+      const initialWidth = width > 0 ? width : 88;
+
+      setClosingTabs((items) => ({
+        ...items,
+        [pending.key]: { width: initialWidth, closing: false },
+      }));
+
+      window.requestAnimationFrame(() => {
+        getTabNode(pending.key)?.getBoundingClientRect();
+        setClosingTabs((items) => ({
+          ...items,
+          [pending.key]: { width: initialWidth, closing: true },
+        }));
+
+        const timer = window.setTimeout(() => {
+          if (pending.scope) {
+            closeTabs(pending.key, pending.scope);
+          } else {
+            closeTab(pending.key);
+          }
+          closeAnimationTimersRef.current.delete(pending.key);
+          setClosingTabs((items) => {
+            const { [pending.key]: _removed, ...nextItems } = items;
+            return nextItems;
+          });
+        }, CLOSE_ANIMATION_MS);
+
+        closeAnimationTimersRef.current.set(pending.key, timer);
+      });
+    },
+    [closeTab, closeTabs, getTabNode],
+  );
+
+  const navigateToPath = useCallback(
+    (path?: string) => {
+      if (path && !isSamePath(location.pathname, path)) {
+        navigate(path);
+        return true;
+      }
+
+      return false;
+    },
+    [location.pathname, navigate],
+  );
+
+  const requestClose = useCallback(
+    (key: string) => {
+      const state = useTabsStore.getState();
+      const tab = state.tabs.find((item) => item.key === key);
+      if (!tab || tab.pinned || closingTabs[key]) {
+        return;
+      }
+
+      if (isSamePath(location.pathname, tab.path)) {
+        const nextTab = getNextTabAfterClose(state.tabs, key);
+        pendingCloseRef.current = { key, path: tab.path };
+
+        if (!navigateToPath(nextTab?.path)) {
+          pendingCloseRef.current = undefined;
+          startCloseAnimation({ key, path: tab.path });
+        }
+        return;
+      }
+
+      startCloseAnimation({ key, path: tab.path });
+    },
+    [closingTabs, location.pathname, navigateToPath, startCloseAnimation],
+  );
+
+  const requestCloseByScope = useCallback(
+    (key: string, scope: TabCloseScope) => {
+      const state = useTabsStore.getState();
+      const currentTab = state.tabs.find((tab) => isSamePath(location.pathname, tab.path));
+      const nextTabs = keepTabsByCloseScope(state.tabs, key, scope);
+      const shouldNavigateBeforeClose = Boolean(
+        currentTab && !nextTabs.some((tab) => tab.key === currentTab.key),
+      );
+      const nextTab = nextTabs.find((tab) => tab.key === key) ?? nextTabs[0];
+
+      if (shouldNavigateBeforeClose) {
+        pendingCloseRef.current = { key, path: currentTab?.path ?? '', scope };
+        if (!navigateToPath(nextTab?.path)) {
+          pendingCloseRef.current = undefined;
+          closeTabs(key, scope);
+        }
+        return;
+      }
+
+      closeTabs(key, scope);
+    },
+    [closeTabs, location.pathname, navigateToPath],
+  );
+
+  const { getMenuItems } = useTabActions({
+    activeKey,
+    onClose: requestClose,
+    onCloseByScope: requestCloseByScope,
+  });
+
   const takePendingDropAnimation = useCallback(() => {
     const pending = pendingDropAnimationRef.current;
     pendingDropAnimationRef.current = undefined;
@@ -390,6 +569,42 @@ export function AppTabsBar({ activeKey }: { activeKey?: string }) {
   }, []);
 
   useTabMoveAnimation(scrollRef, tabLayoutKey, takePendingDropAnimation);
+
+  useLayoutEffect(() => {
+    const nextKeys = new Set(tabs.map((tab) => tab.key));
+    const previousKeys = seenTabKeysRef.current;
+
+    if (!previousKeys) {
+      seenTabKeysRef.current = nextKeys;
+      return;
+    }
+
+    const newKeys = tabs
+      .map((tab) => tab.key)
+      .filter((key) => !previousKeys.has(key) && !closingTabs[key]);
+
+    seenTabKeysRef.current = nextKeys;
+    if (newKeys.length === 0) {
+      return;
+    }
+
+    setEnteringKeys((keys) => Array.from(new Set([...keys, ...newKeys])));
+    const timer = window.setTimeout(() => {
+      setEnteringKeys((keys) => keys.filter((key) => !newKeys.includes(key)));
+    }, ENTER_ANIMATION_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [closingTabs, tabs]);
+
+  useEffect(() => {
+    const pending = pendingCloseRef.current;
+    if (!pending || isSamePath(location.pathname, pending.path)) {
+      return;
+    }
+
+    pendingCloseRef.current = undefined;
+    startCloseAnimation(pending);
+  }, [location.pathname, startCloseAnimation]);
 
   useEffect(() => {
     const activeNode = scrollRef.current?.querySelector<HTMLElement>(
@@ -399,7 +614,7 @@ export function AppTabsBar({ activeKey }: { activeKey?: string }) {
   }, [activeKey, tabs.length]);
 
   const activateTab = (tab: AppTab) => {
-    if (location.pathname !== tab.path) {
+    if (!isSamePath(location.pathname, tab.path)) {
       navigate(tab.path);
     }
   };
@@ -449,22 +664,24 @@ export function AppTabsBar({ activeKey }: { activeKey?: string }) {
         <ul ref={scrollRef} className="trueadmin-tabs-scroll">
           <SortableTabGroup
             activeKey={activeKey}
-            closingKeys={closingKeys}
+            closingTabs={closingTabs}
+            enteringKeys={enteringKeys}
             tabs={pinnedTabs}
             getMenuItems={getMenuItems}
             onActivate={activateTab}
-            onClose={closeWithAnimation}
+            onClose={requestClose}
           />
           {pinnedTabs.length > 0 && normalTabs.length > 0 ? (
             <li className="trueadmin-tabs-group-divider" aria-hidden="true" />
           ) : null}
           <SortableTabGroup
             activeKey={activeKey}
-            closingKeys={closingKeys}
+            closingTabs={closingTabs}
+            enteringKeys={enteringKeys}
             tabs={normalTabs}
             getMenuItems={getMenuItems}
             onActivate={activateTab}
-            onClose={closeWithAnimation}
+            onClose={requestClose}
           />
         </ul>
       </DndContext>
