@@ -1005,7 +1005,7 @@ web/src/modules/<module>/locales
 web/src/locales
 ```
 
-`web` 本身就是后台管理端，目录内不再重复划分 `admin` / `client`。业务页面、手写 API、类型和多语言由各自模块维护；框架层能力放入 `foundation`；`src/locales` 整目录是由 `scripts/generate-locales.mjs` 自动生成的 Umi 国际化入口，不纳入 git；模块语言通过生成的 `moduleLocaleRegistry.generated.ts` 按需加载；未来插件可以按同样的前端模块结构注册页面、菜单和语言包。
+`web` 本身就是后台管理端，目录内不再重复划分 `admin` / `client`。业务页面、手写 API、类型、路由和多语言由各自模块维护；框架层能力放入 `foundation`；`config/routes.ts` 直接扫描 `src/modules/*/routes.ts`；`src/locales` 整目录是由 `scripts/generate-locales.mjs` 自动生成的 Umi 国际化薄入口，不纳入 git；模块语言通过 `import.meta.glob` 按需加载；未来插件可以按同样的前端模块结构注册页面、菜单和语言包。
 
 Web 端必须支持：
 

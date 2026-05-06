@@ -64,9 +64,9 @@ src/
 
 约定：业务模块自己维护页面、手写 API、类型、多语言、模块内组件和 Hooks；框架层能力才放入 `foundation`；OpenAPI 生成代码后续统一放入 `src/generated/openapi`，不和手写模块 API 混放。
 
-多语言规则：模块业务 key 放在 `src/modules/<module>/locales/<locale>.ts`，框架级 key 放在 `src/foundation/locale/framework`。`src/locales` 整个目录是 Umi 插件入口生成物，不纳入 git；`src/foundation/locale/moduleLocaleRegistry.generated.ts` 也是生成物。新增模块时只需要新增模块自己的语言文件，进入模块页面后通过 `loadModuleLocale()` 按需加载模块语言。
+多语言规则：模块业务 key 放在 `src/modules/<module>/locales/<locale>.ts`，框架级 key 放在 `src/foundation/locale/framework`。`src/locales` 整个目录只是 Umi locale 插件需要的薄入口生成物，不纳入 git；模块语言由 `loadModuleLocale()` 通过 `import.meta.glob` 直接扫描并按需加载。新增模块时只需要新增模块自己的语言文件。
 
-路由规则：模块路由放在 `src/modules/<module>/routes.ts`，由模块自己维护页面路径、菜单名、图标和重定向。`scripts/generate-routes.mjs` 会扫描模块路由并生成 `src/foundation/router/moduleRoutes.generated.ts`；`config/routes.ts` 只负责聚合模块路由、根路径跳转和 404。新增模块时不修改 `config/routes.ts`。
+路由规则：模块路由放在 `src/modules/<module>/routes.ts`，由模块自己维护页面路径、菜单名、图标和重定向。`config/routes.ts` 在 Umi 配置阶段直接扫描模块路由，只补根路径跳转和 404。新增模块时不修改 `config/routes.ts`，也不需要生成路由聚合文件。
 
 不保留官方模板中的 `src/pages` 示例目录、PWA 入口和模板服务代码。新增页面必须落在 `src/modules/<module>/pages` 或 `src/foundation/exception/pages`。
 
@@ -74,7 +74,6 @@ src/
 
 ```bash
 pnpm install
-pnpm runtime:generate
 pnpm dev
 pnpm tsc
 pnpm build

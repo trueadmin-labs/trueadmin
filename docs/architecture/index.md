@@ -80,8 +80,8 @@ web/src/
 - 页面组件放在 `modules/<module>/pages/<PageName>/index.tsx`。
 - 手写接口放在 `modules/<module>/services/*.api.ts`。
 - 模块 DTO 和页面类型放在 `modules/<module>/types`。
-- 模块多语言放在 `modules/<module>/locales/<locale>.ts`；`scripts/generate-locales.mjs` 会生成 Umi 框架语言入口和 `moduleLocaleRegistry.generated.ts`。模块语言通过 `loadModuleLocale()` 按需加载，不进入首屏语言包。
-- 模块路由放在 `modules/<module>/routes.ts`；`scripts/generate-routes.mjs` 会生成 `foundation/router/moduleRoutes.generated.ts`。`config/routes.ts` 只保留模块路由聚合、根路径跳转和 404，不写业务模块页面。
+- 模块多语言放在 `modules/<module>/locales/<locale>.ts`；`scripts/generate-locales.mjs` 只生成 Umi locale 插件需要的 `src/locales/<locale>.ts` 薄入口。模块语言通过 `loadModuleLocale()` 和 `import.meta.glob` 直接扫描、按需加载，不进入首屏语言包。
+- 模块路由放在 `modules/<module>/routes.ts`；`config/routes.ts` 在 Umi 配置阶段直接扫描模块路由，只保留模块路由装载、根路径跳转和 404，不写业务模块页面，也不生成路由聚合文件。
 - 模块内私有组件和 Hooks 放在 `modules/<module>/components`、`modules/<module>/hooks`。
 - 跨模块框架能力放入 `foundation`，不要从一个业务模块直接 import 另一个业务模块的页面或私有组件。
 - `config/routes.ts` 仍作为 Umi 路由入口，但具体业务路由必须来自模块 `routes.ts`，页面组件应指向 `@/modules/...` 或 `@/foundation/...`。

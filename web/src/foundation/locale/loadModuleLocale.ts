@@ -1,16 +1,31 @@
 import { addLocale, getLocale } from '@umijs/max';
-import type { ModuleLocaleName } from './moduleLocaleRegistry.generated';
-import { moduleLocaleLoaders } from './moduleLocaleRegistry.generated';
 
+export type ModuleLocaleName = string;
+type ModuleLocaleMessages = { default: Record<string, string> };
+type ModuleLocaleLoader = () => Promise<ModuleLocaleMessages>;
+
+const moduleLocaleLoaders = import.meta.glob<ModuleLocaleMessages>(
+  '../../modules/*/locales/*.ts',
+);
 const loadedModuleLocales = new Set<string>();
 
-export async function loadModuleLocale(moduleName: ModuleLocaleName): Promise<void> {
+function getModuleLocaleLoader(
+  moduleName: ModuleLocaleName,
+  locale: string,
+): ModuleLocaleLoader | undefined {
+  return moduleLocaleLoaders[
+    `../../modules/${moduleName}/locales/${locale}.ts`
+  ] as ModuleLocaleLoader | undefined;
+}
+
+export async function loadModuleLocale(
+  moduleName: ModuleLocaleName,
+): Promise<void> {
   const locale = getLocale();
   const cacheKey = `${moduleName}:${locale}`;
   if (loadedModuleLocales.has(cacheKey)) return;
 
-  const localeLoaders = moduleLocaleLoaders[moduleName];
-  const loader = localeLoaders?.[locale as keyof typeof localeLoaders];
+  const loader = getModuleLocaleLoader(moduleName, locale);
   if (!loader) return;
 
   const messages = await loader();
