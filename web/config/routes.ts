@@ -10,7 +10,7 @@ export default [
       {
         name: 'login',
         path: '/user/login',
-        component: './user/login',
+        component: '@/modules/auth/pages/Login',
       },
     ],
   },
@@ -18,7 +18,7 @@ export default [
     path: '/dashboard',
     name: 'dashboard',
     icon: 'dashboard',
-    component: './Dashboard',
+    component: '@/modules/dashboard/pages/Dashboard',
   },
   {
     path: '/system',
@@ -32,27 +32,27 @@ export default [
       {
         path: '/system/users',
         name: 'system.users',
-        component: './system/users',
+        component: '@/modules/system/pages/Users',
       },
       {
         path: '/system/roles',
         name: 'system.roles',
-        component: './system/roles',
+        component: '@/modules/system/pages/Roles',
       },
       {
         path: '/system/departments',
         name: 'system.departments',
-        component: './system/departments',
+        component: '@/modules/system/pages/Departments',
       },
       {
         path: '/system/client-users',
         name: 'system.client-users',
-        component: './system/client-users',
+        component: '@/modules/system/pages/ClientUsers',
       },
       {
         path: '/system/menus',
         name: 'system.menus',
-        component: './system/menus',
+        component: '@/modules/system/pages/Menus',
       },
     ],
   },
@@ -61,7 +61,7 @@ export default [
     redirect: '/dashboard',
   },
   {
-    component: './exception/404',
+    component: '@/foundation/exception/pages/NotFound',
     path: '*',
   },
 ];

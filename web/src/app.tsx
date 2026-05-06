@@ -5,10 +5,11 @@ import { history, Link } from '@umijs/max';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import React from 'react';
-import { AvatarDropdown, Footer, LangDropdown } from '@/components';
-import { adminMenus, currentUser as queryCurrentUser } from '@/services/trueadmin/api';
-import { backendMenusToProMenus } from '@/services/trueadmin/menu';
-import { clearAccessToken } from '@/services/trueadmin/storage';
+import { AvatarDropdown, Footer, LangDropdown } from '@/foundation/layout/components';
+import { currentUser as queryCurrentUser } from '@/modules/auth/services/auth.api';
+import { adminMenus } from '@/modules/system/services';
+import { backendMenusToProMenus } from '@/foundation/menu';
+import { clearAccessToken } from '@/foundation/auth/token';
 import defaultSettings from '../config/defaultSettings';
 import { errorConfig } from './requestErrorConfig';
 

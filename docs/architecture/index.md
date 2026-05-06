@@ -33,18 +33,52 @@ backend/app/Module     系统能力和业务模块
 
 ## Web 管理端
 
-Web 管理端使用 React + Umi Max + TypeScript + Ant Design Pro + Ant Design。第一阶段要建立登录、基础布局、动态菜单、权限路由、按钮权限、API 请求封装和标准 CRUD 页面约定。
+Web 管理端使用 React + Umi Max + TypeScript + Ant Design Pro + Ant Design。`web` 本身就是后台管理端，不再在目录内重复划分 `admin` / `client`。用户端、开放端如果需要独立前端，应使用新的应用目录，而不是混入 `web`。
 
-推荐结构：
+前端采用 `foundation + modules` 结构：业务模块自己维护页面、手写 API、类型、局部组件、Hooks 和多语言；框架层能力放入 `foundation`；Umi 运行时入口保留在框架约定位置；`src/locales` 只作为 Umi 国际化插件的薄入口。
 
 ```text
-web/src/app
-web/src/pages
-web/src/features
-web/src/shared
-web/src/services
-web/src/stores
+web/src/
+  app.tsx                  Umi 运行时配置、初始状态、布局菜单
+  access.ts                Umi 权限入口
+  requestErrorConfig.ts    全局请求错误处理
+  foundation/              TrueAdmin Web 框架层能力
+    auth/                  token、权限判断等
+    request/               API 响应和分页类型
+    menu/                  后端菜单到 ProLayout 菜单转换
+    layout/components/     布局级组件
+    exception/pages/       403、404、500 等框架异常页
+    locale/framework/      框架级语言包
+  modules/
+    auth/                  登录、退出、当前用户等认证能力
+      pages/
+      services/
+      locales/
+      types.ts
+    dashboard/             控制台
+      pages/
+      locales/
+    system/                系统管理模块
+      pages/
+      services/
+      types/
+      locales/
+      components/
+      hooks/
+  locales/                 Umi 国际化入口目录，整目录由 scripts/generate-locales.mjs 生成且不进 git
+  generated/openapi/       OpenAPI 生成代码预留
 ```
+
+前端模块边界规则：
+
+- 页面组件放在 `modules/<module>/pages/<PageName>/index.tsx`。
+- 手写接口放在 `modules/<module>/services/*.api.ts`。
+- 模块 DTO 和页面类型放在 `modules/<module>/types`。
+- 模块多语言放在 `modules/<module>/locales/<locale>.ts`；`scripts/generate-locales.mjs` 会生成 Umi 框架语言入口和 `moduleLocaleRegistry.generated.ts`。模块语言通过 `loadModuleLocale()` 按需加载，不进入首屏语言包。
+- 模块内私有组件和 Hooks 放在 `modules/<module>/components`、`modules/<module>/hooks`。
+- 跨模块框架能力放入 `foundation`，不要从一个业务模块直接 import 另一个业务模块的页面或私有组件。
+- `config/routes.ts` 仍作为 Umi 路由入口，但页面组件应指向 `@/modules/...` 或 `@/foundation/...`。
+- 后端菜单负责运行时展示，前端路由负责可渲染页面；后端下发的菜单路径如果没有对应页面，必须进入 404，而不是空白页。
 
 ## 移动端
 

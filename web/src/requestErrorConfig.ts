@@ -2,7 +2,7 @@ import type { RequestOptions } from '@@/plugin-request/request';
 import type { RequestConfig } from '@umijs/max';
 import { history } from '@umijs/max';
 import { message } from 'antd';
-import { clearAccessToken, getAccessToken } from '@/services/trueadmin/storage';
+import { clearAccessToken, getAccessToken } from '@/foundation/auth/token';
 
 interface ResponseStructure {
   code: string;

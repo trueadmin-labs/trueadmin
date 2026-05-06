@@ -190,19 +190,17 @@ export default defineConfig({
     { src: join(PUBLIC_PATH, 'scripts/loading.js'), async: true },
   ],
 
-  //================ pro 插件配置 =================
+  //================ TrueAdmin 插件配置 =================
   plugins: ['@umijs/max-plugin-openapi', '@umijs/request-record'],
 
   /**
    * @name openAPI 插件的配置
-   * @description 基于 openapi 的规范生成serve 和mock，能减少很多样板代码
-   * @doc https://pro.ant.design/zh-cn/docs/openapi/
+   * @description 基于 OpenAPI 规范生成服务代码，减少手写接口样板。
+   * @doc https://umijs.org/docs/max/openapi
    */
   openAPI: [
     {
       requestLibPath: "import { request } from '@umijs/max'",
-      // 或者使用在线的版本
-      // schemaPath: "https://gw.alipayobjects.com/os/antfincdn/M%24jrzTTYJN/oneapi.json"
       schemaPath:
         process.env.TRUEADMIN_OPENAPI_SCHEMA ||
         'http://127.0.0.1:9501/api/v1/open/openapi.json',

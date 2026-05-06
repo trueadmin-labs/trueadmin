@@ -4,7 +4,6 @@ import type { ProLayoutProps } from '@ant-design/pro-components';
  * @name
  */
 const Settings: ProLayoutProps & {
-  pwa?: boolean;
   logo?: string;
 } = {
   navTheme: 'light',
@@ -16,7 +15,6 @@ const Settings: ProLayoutProps & {
   fixSiderbar: true,
   colorWeak: false,
   title: 'TrueAdmin',
-  pwa: false,
   logo: '/logo.svg',
   iconfontUrl: '',
   token: {

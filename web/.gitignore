@@ -51,3 +51,7 @@ docs/superpowers
 # cloudflare wrangler
 .wrangler
 requestRecord.mock.js
+
+# generated locale entrypoints for Umi locale plugin
+/src/locales/
+/src/foundation/locale/*.generated.ts
