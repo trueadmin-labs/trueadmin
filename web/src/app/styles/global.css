@@ -102,217 +102,249 @@ body,
   padding-block-start: 16px;
 }
 
+.trueadmin-loading-container {
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+  min-height: var(--trueadmin-loading-placeholder-height, auto);
+}
+
+.trueadmin-loading-container.is-stage {
+  display: grid;
+}
+
+.trueadmin-loading-container.is-loading.is-reserving-height {
+  display: grid;
+  align-items: center;
+}
+
+.trueadmin-loading-container-content,
+.trueadmin-loading-container-layer,
+.trueadmin-loading-container-measure {
+  width: 100%;
+  max-width: 100%;
+}
+
+.trueadmin-loading-container.is-stage > .trueadmin-loading-container-layer {
+  grid-area: 1 / 1;
+}
+
+.trueadmin-loading-container.is-stage > .is-content-layer {
+  align-self: start;
+}
+
+.trueadmin-loading-container-mask .is-loading-layer {
+  display: grid;
+  height: 100%;
+  place-items: center;
+}
+
+.trueadmin-loading-container.is-stage.is-reserving-height .is-loading-layer {
+  position: absolute;
+  inset: 0;
+}
+
+.trueadmin-loading-container.is-stage .is-loading-layer {
+  display: grid;
+  place-items: center;
+}
+
+.trueadmin-loading-container-layer.is-spin {
+  justify-items: center;
+}
+
+.trueadmin-loading-container-spin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.trueadmin-loading-container-spin .ant-typography {
+  margin-bottom: 0;
+  font-size: 14px;
+}
+
+.trueadmin-loading-container-mask {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(1px);
+}
+
+.trueadmin-demo-loading-form .ant-form-item:last-child {
+  margin-bottom: 0;
+}
+
+.trueadmin-page-loading {
+  display: flex;
+  min-height: calc(100vh - 112px);
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.trueadmin-page-loading .ant-typography {
+  margin-bottom: 0;
+  font-size: 14px;
+}
+
+.trueadmin-page-loading .ant-spin {
+  line-height: 1;
+}
+
+.trueadmin-loading-container.is-dark .trueadmin-loading-container-spin,
+.trueadmin-loading-container.is-dark .trueadmin-loading-container-spin .ant-typography {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.trueadmin-loading-container.is-dark .trueadmin-loading-container-mask {
+  background: rgba(20, 20, 20, 0.72);
+}
+
 .trueadmin-error-modal-root .ant-modal-content {
   overflow: hidden;
-  border: 1px solid rgba(5, 5, 5, 0.04);
-  border-radius: 16px;
-  box-shadow:
-    0 24px 64px rgba(15, 23, 42, 0.18),
-    0 4px 16px rgba(15, 23, 42, 0.08);
+  border-radius: 8px;
 }
 
 .trueadmin-error-modal-root .ant-modal-header {
   margin-bottom: 0;
-  padding: 18px 20px 14px;
+  padding: 20px 24px 12px;
   border-bottom: 1px solid rgba(5, 5, 5, 0.06);
 }
 
 .trueadmin-error-modal-root .ant-modal-body {
-  padding: 18px 20px 4px;
+  padding: 20px 24px 4px;
 }
 
 .trueadmin-error-modal-root .ant-modal-footer {
   margin-top: 0;
-  padding: 14px 20px 20px;
+  padding: 12px 24px 20px;
 }
 
 .trueadmin-error-modal {
   width: 100%;
 }
 
-.trueadmin-error-modal-hero {
-  position: relative;
+.trueadmin-error-modal-summary-card {
   display: flex;
-  gap: 16px;
-  overflow: hidden;
-  padding: 20px;
-  border: 1px solid rgba(5, 5, 5, 0.06);
-  border-radius: 14px;
-  background: linear-gradient(180deg, #fafafa 0%, #fff 100%);
-}
-
-.trueadmin-error-modal-hero::after {
-  position: absolute;
-  inset: -80px -80px auto auto;
-  width: 180px;
-  height: 180px;
-  border-radius: 999px;
-  content: "";
-  opacity: 0.55;
-  pointer-events: none;
-}
-
-.trueadmin-error-modal-hero.is-error {
-  border-color: #ffd8d6;
-  background: linear-gradient(180deg, #fff7f6 0%, #fff 72%);
-}
-
-.trueadmin-error-modal-hero.is-error::after {
-  background: radial-gradient(circle, rgba(255, 77, 79, 0.16), transparent 68%);
-}
-
-.trueadmin-error-modal-hero.is-warning {
-  border-color: #ffe7ba;
-  background: linear-gradient(180deg, #fffaf0 0%, #fff 72%);
-}
-
-.trueadmin-error-modal-hero.is-warning::after {
-  background: radial-gradient(circle, rgba(250, 173, 20, 0.18), transparent 68%);
-}
-
-.trueadmin-error-modal-hero.is-info {
-  border-color: #bae0ff;
-  background: linear-gradient(180deg, #f0f7ff 0%, #fff 72%);
-}
-
-.trueadmin-error-modal-hero.is-info::after {
-  background: radial-gradient(circle, rgba(22, 119, 255, 0.16), transparent 68%);
+  gap: 12px;
 }
 
 .trueadmin-error-modal-icon {
-  position: relative;
-  z-index: 1;
   display: inline-grid;
   flex: 0 0 auto;
   place-items: center;
-  width: 42px;
-  height: 42px;
-  font-size: 24px;
-  border-radius: 999px;
-  background: #fff;
-  box-shadow:
-    0 8px 20px rgba(16, 24, 40, 0.1),
-    inset 0 0 0 1px rgba(5, 5, 5, 0.04);
+  width: 26px;
+  height: 26px;
+  margin-top: 1px;
+  font-size: 22px;
 }
 
-.trueadmin-error-modal-hero.is-error .trueadmin-error-modal-icon {
+.trueadmin-error-modal-summary-card.is-error .trueadmin-error-modal-icon {
   color: #ff4d4f;
 }
 
-.trueadmin-error-modal-hero.is-warning .trueadmin-error-modal-icon {
+.trueadmin-error-modal-summary-card.is-warning .trueadmin-error-modal-icon {
   color: #faad14;
 }
 
-.trueadmin-error-modal-hero.is-info .trueadmin-error-modal-icon {
+.trueadmin-error-modal-summary-card.is-info .trueadmin-error-modal-icon {
   color: #1677ff;
 }
 
 .trueadmin-error-modal-summary {
-  position: relative;
-  z-index: 1;
   min-width: 0;
   flex: 1;
 }
 
-.trueadmin-error-modal-title-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.trueadmin-error-modal-title-row .ant-tag {
-  margin-inline-end: 0;
-  margin-top: 3px;
-  border-radius: 999px;
-  font-weight: 500;
-  line-height: 22px;
-}
-
-.trueadmin-error-modal-summary .ant-typography {
-  margin-bottom: 0;
-}
-
 .trueadmin-error-modal-summary h4.ant-typography.trueadmin-error-modal-main-title {
-  margin: 2px 0 6px;
+  margin: 0 0 6px;
   color: rgba(0, 0, 0, 0.88);
-  font-size: 18px;
-  line-height: 1.35;
+  font-size: 16px;
+  line-height: 1.5;
 }
 
 .trueadmin-error-modal-message.ant-typography {
-  color: rgba(0, 0, 0, 0.56);
+  margin-bottom: 0;
+  color: rgba(0, 0, 0, 0.65);
   font-size: 14px;
   line-height: 1.6;
 }
 
-.trueadmin-error-modal-description {
-  margin-top: 12px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  color: rgba(0, 0, 0, 0.72);
-  line-height: 1.7;
-  background: rgba(255, 255, 255, 0.72);
-}
-
-.trueadmin-error-modal-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+.trueadmin-error-modal-action-list {
   margin-top: 16px;
-}
-
-.trueadmin-error-modal-panel {
-  min-width: 0;
-  padding: 15px 16px;
+  padding: 12px 16px;
   border: 1px solid rgba(5, 5, 5, 0.06);
-  border-radius: 12px;
-  background: linear-gradient(180deg, #fff 0%, #fbfcfe 100%);
-  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.03);
+  border-radius: 8px;
+  background: #fafafa;
 }
 
-.trueadmin-error-modal-panel h5.ant-typography {
+.trueadmin-error-modal-action-list h5.ant-typography {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 0 0 10px;
+  margin: 0 0 8px;
   color: rgba(0, 0, 0, 0.82);
   font-size: 14px;
 }
 
-.trueadmin-error-modal-panel h5.ant-typography .anticon {
-  color: #1677ff;
+.trueadmin-error-modal-action-list h5.ant-typography .anticon {
+  color: rgba(0, 0, 0, 0.45);
 }
 
-.trueadmin-error-modal-panel ul {
+.trueadmin-error-modal-action-list ul {
   margin: 0;
   padding-left: 18px;
   color: rgba(0, 0, 0, 0.72);
   line-height: 1.7;
 }
 
-.trueadmin-error-modal-panel li + li {
+.trueadmin-error-modal-action-list li + li {
   margin-top: 4px;
+}
+
+.trueadmin-error-modal-details.ant-collapse {
+  margin-top: 12px;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.trueadmin-error-modal-details.ant-collapse > .ant-collapse-item {
+  border-bottom: 0;
+}
+
+.trueadmin-error-modal-details.ant-collapse .ant-collapse-header {
+  padding: 4px 0;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 13px;
+}
+
+.trueadmin-error-modal-details.ant-collapse .ant-collapse-content-box {
+  padding: 4px 0 0;
 }
 
 .trueadmin-error-modal-diagnostics {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-  margin-top: 16px;
+  grid-template-columns: 1fr;
+  gap: 8px;
 }
 
 .trueadmin-error-modal-diagnostic-item {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
   min-width: 0;
-  padding: 11px 12px;
-  border: 1px solid rgba(5, 5, 5, 0.06);
-  border-radius: 11px;
-  background: #f8fafc;
 }
 
 .trueadmin-error-modal-diagnostic-item > span:first-child {
   display: block;
-  margin-bottom: 5px;
   color: rgba(0, 0, 0, 0.45);
   font-size: 12px;
 }
@@ -332,42 +364,11 @@ body,
 .trueadmin-error-modal-root.is-dark .ant-modal-content {
   border-color: rgba(255, 255, 255, 0.08);
   background: #141414;
-  box-shadow:
-    0 24px 64px rgba(0, 0, 0, 0.42),
-    0 4px 16px rgba(0, 0, 0, 0.24);
 }
 
 .trueadmin-error-modal-root.is-dark .ant-modal-header {
   border-bottom-color: rgba(255, 255, 255, 0.08);
   background: #141414;
-}
-
-.trueadmin-error-modal-root.is-dark .trueadmin-error-modal-hero {
-  border-color: rgba(255, 255, 255, 0.1);
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.055) 0%,
-    rgba(255, 255, 255, 0.02) 100%
-  );
-}
-
-.trueadmin-error-modal-root.is-dark .trueadmin-error-modal-hero.is-error {
-  border-color: rgba(255, 77, 79, 0.32);
-}
-
-.trueadmin-error-modal-root.is-dark .trueadmin-error-modal-hero.is-warning {
-  border-color: rgba(250, 173, 20, 0.34);
-}
-
-.trueadmin-error-modal-root.is-dark .trueadmin-error-modal-hero.is-info {
-  border-color: rgba(22, 119, 255, 0.32);
-}
-
-.trueadmin-error-modal-root.is-dark .trueadmin-error-modal-icon {
-  background: rgba(255, 255, 255, 0.08);
-  box-shadow:
-    0 8px 20px rgba(0, 0, 0, 0.22),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
 .trueadmin-error-modal-root.is-dark
@@ -377,33 +378,22 @@ body,
 }
 
 .trueadmin-error-modal-root.is-dark .trueadmin-error-modal-message.ant-typography,
-.trueadmin-error-modal-root.is-dark .trueadmin-error-modal-description,
-.trueadmin-error-modal-root.is-dark .trueadmin-error-modal-panel ul {
+.trueadmin-error-modal-root.is-dark .trueadmin-error-modal-action-list ul {
   color: rgba(255, 255, 255, 0.72);
 }
 
-.trueadmin-error-modal-root.is-dark .trueadmin-error-modal-description {
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.trueadmin-error-modal-root.is-dark .trueadmin-error-modal-panel {
+.trueadmin-error-modal-root.is-dark .trueadmin-error-modal-action-list {
   border-color: rgba(255, 255, 255, 0.08);
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.055) 0%,
-    rgba(255, 255, 255, 0.025) 100%
-  );
+  background: rgba(255, 255, 255, 0.04);
 }
 
-.trueadmin-error-modal-root.is-dark .trueadmin-error-modal-panel h5.ant-typography {
+.trueadmin-error-modal-root.is-dark .trueadmin-error-modal-action-list h5.ant-typography {
   color: rgba(255, 255, 255, 0.86);
 }
 
-.trueadmin-error-modal-root.is-dark .trueadmin-error-modal-diagnostic-item {
-  border-color: rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.045);
-}
-
+.trueadmin-error-modal-root.is-dark
+  .trueadmin-error-modal-details.ant-collapse
+  .ant-collapse-header,
 .trueadmin-error-modal-root.is-dark .trueadmin-error-modal-diagnostic-item > span:first-child {
   color: rgba(255, 255, 255, 0.45);
 }
@@ -417,19 +407,9 @@ body,
     max-width: calc(100vw - 24px);
   }
 
-  .trueadmin-error-modal-hero {
-    padding: 16px;
-  }
-
-  .trueadmin-error-modal-title-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
-  }
-
-  .trueadmin-error-modal-grid,
-  .trueadmin-error-modal-diagnostics {
+  .trueadmin-error-modal-diagnostic-item {
     grid-template-columns: 1fr;
+    gap: 2px;
   }
 }
 

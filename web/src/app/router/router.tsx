@@ -1,22 +1,22 @@
 import { appConfig } from '@config/index';
-import { Spin } from 'antd';
 import { lazy, Suspense } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router';
 import { AppLayout } from '@/app/layout/AppLayout';
 import { ModuleMissing } from '@/app/layout/ModuleMissing';
 import { frontendRoutes } from '@/core/module/registry';
+import { PageLoading } from '@/core/page/PageLoading';
 
 const LoginPage = lazy(() => import('@/app/pages/LoginPage'));
 const ForbiddenPage = lazy(() => import('@/app/pages/ForbiddenPage'));
 
-const withSuspense = (element: React.ReactNode) => (
-  <Suspense fallback={<Spin fullscreen description="正在进入页面" />}>{element}</Suspense>
+const withSuspense = (element: React.ReactNode, fullscreen = false) => (
+  <Suspense fallback={<PageLoading fullscreen={fullscreen} />}>{element}</Suspense>
 );
 
 export const router = createBrowserRouter([
   {
     path: '/login',
-    element: withSuspense(<LoginPage />),
+    element: withSuspense(<LoginPage />, true),
   },
   {
     path: '/',

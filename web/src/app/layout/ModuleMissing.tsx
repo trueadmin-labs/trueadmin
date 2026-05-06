@@ -1,9 +1,10 @@
 import { PageContainer } from '@ant-design/pro-components';
-import { Result, Spin } from 'antd';
+import { Result } from 'antd';
 import { useLocation } from 'react-router';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { useMenuTreeQuery } from '@/core/menu/hooks';
 import type { BackendMenu } from '@/core/menu/types';
+import { PageLoading } from '@/core/page/PageLoading';
 import { PageTransition } from '@/core/page/PageTransition';
 
 const normalizePath = (path: string) => path.replace(/\/+$/, '') || '/';
@@ -26,7 +27,7 @@ export function ModuleMissing() {
   const { data: menus, isLoading } = useMenuTreeQuery();
 
   if (isLoading) {
-    return <Spin fullscreen description={t('page.loading.status', '正在确认页面状态')} />;
+    return <PageLoading />;
   }
 
   const menuExists = hasMenuPath(menus, location.pathname);

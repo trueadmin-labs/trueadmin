@@ -4,6 +4,7 @@ import {
   FileUnknownOutlined,
   LockOutlined,
   SettingOutlined,
+  SyncOutlined,
   TeamOutlined,
   UserOutlined,
 } from '@ant-design/icons';
@@ -15,6 +16,7 @@ export const defaultIcons = {
   team: <TeamOutlined />,
   user: <UserOutlined />,
   lock: <LockOutlined />,
+  sync: <SyncOutlined />,
   app: <AppstoreOutlined />,
   fallback: <FileUnknownOutlined />,
 };

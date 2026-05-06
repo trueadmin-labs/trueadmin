@@ -9,6 +9,11 @@ export default defineModule({
       component: lazy(() => import('@/app/pages/PermissionExamplePage')),
       meta: { title: 'demo.permission.title', pageType: 'custom-page', auth: true },
     },
+    {
+      path: '/examples/loading',
+      component: lazy(() => import('./pages/LoadingExamplePage')),
+      meta: { title: 'demo.loading.title', pageType: 'custom-page', auth: true },
+    },
   ],
   menus: [
     {
@@ -31,6 +36,16 @@ export default defineModule({
           type: 'menu',
           status: 'enabled',
           sort: 10,
+        },
+        {
+          code: 'demo.loading',
+          title: 'Loading Demo',
+          i18n: 'menu.demo.loading',
+          path: '/examples/loading',
+          icon: 'sync',
+          type: 'menu',
+          status: 'enabled',
+          sort: 20,
         },
       ],
     },

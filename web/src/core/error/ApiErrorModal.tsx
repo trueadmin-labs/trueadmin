@@ -3,9 +3,8 @@ import {
   CloseCircleFilled,
   ExclamationCircleFilled,
   InfoCircleFilled,
-  QuestionCircleOutlined,
 } from '@ant-design/icons';
-import { Button, Modal, Space, Tag, Typography } from 'antd';
+import { Button, Collapse, Modal, Space, Typography } from 'antd';
 import { motion } from 'motion/react';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { resolveRenderableTrans } from '@/core/i18n/trans';
@@ -46,13 +45,10 @@ const toTraceId = (details: unknown): string | undefined => {
   return undefined;
 };
 
-const severityMeta: Record<
-  ErrorSeverity,
-  { className: string; color: string; icon: React.ReactNode }
-> = {
-  info: { className: 'is-info', color: 'blue', icon: <InfoCircleFilled /> },
-  warning: { className: 'is-warning', color: 'gold', icon: <ExclamationCircleFilled /> },
-  error: { className: 'is-error', color: 'red', icon: <CloseCircleFilled /> },
+const severityMeta: Record<ErrorSeverity, { className: string; icon: React.ReactNode }> = {
+  info: { className: 'is-info', icon: <InfoCircleFilled /> },
+  warning: { className: 'is-warning', icon: <ExclamationCircleFilled /> },
+  error: { className: 'is-error', icon: <CloseCircleFilled /> },
 };
 
 export type ApiErrorModalProps = {
@@ -74,20 +70,56 @@ export function ApiErrorModal({ error, open, onClose, afterOpenChange }: ApiErro
   const reason = toReasonText(error.details);
   const traceId = toTraceId(error.details);
   const context: ErrorRenderContext = { error, t, reason, traceId };
-  const title = resolveRenderableTrans(
-    explanation?.title,
-    context,
-    t,
-    error.message || t('error.default.requestFailed', '请求失败'),
-  );
+  const hasExplanation = Boolean(explanation);
+  const defaultMessage = t('error.default.requestFailed', '请求失败');
+  const title = resolveRenderableTrans(explanation?.title, context, t, defaultMessage);
   const severity = explanation?.severity || 'error';
   const description = resolveRenderableTrans(explanation?.description, context, t);
-  const causes =
-    explanation?.causes?.map((cause) => resolveRenderableTrans(cause, context, t)) ?? [];
   const suggestions =
     explanation?.suggestions?.map((suggestion) => resolveRenderableTrans(suggestion, context, t)) ??
     [];
+  const visibleSuggestions = suggestions.slice(0, 2);
   const meta = severityMeta[severity];
+  const primaryMessage = hasExplanation ? description : error.message || defaultMessage;
+
+  const detailItems = [
+    {
+      key: 'code',
+      label: t('error.modal.code', '错误码'),
+      content: (
+        <Typography.Text copyable className="trueadmin-error-modal-code-text">
+          {error.code}
+        </Typography.Text>
+      ),
+    },
+    ...(error.status
+      ? [
+          {
+            key: 'status',
+            label: t('error.modal.httpStatus', 'HTTP 状态'),
+            content: <Typography.Text>{error.status}</Typography.Text>,
+          },
+        ]
+      : []),
+    ...(reason
+      ? [
+          {
+            key: 'reason',
+            label: t('error.modal.apiReason', '接口原因'),
+            content: <Typography.Text>{reason}</Typography.Text>,
+          },
+        ]
+      : []),
+    ...(traceId
+      ? [
+          {
+            key: 'traceId',
+            label: t('error.modal.traceId', 'Trace ID'),
+            content: <Typography.Text copyable>{traceId}</Typography.Text>,
+          },
+        ]
+      : []),
+  ];
 
   return (
     <Modal
@@ -107,91 +139,66 @@ export function ApiErrorModal({ error, open, onClose, afterOpenChange }: ApiErro
           </Button>
         </Space>
       }
-      width={680}
+      width={560}
       className={`trueadmin-error-modal-root${darkMode ? ' is-dark' : ''}`}
     >
       <motion.div
         className="trueadmin-error-modal"
-        initial={{ opacity: 0, y: 10, scale: 0.985 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
       >
-        <section className={`trueadmin-error-modal-hero ${meta.className}`}>
+        <section className={`trueadmin-error-modal-summary-card ${meta.className}`}>
           <span className="trueadmin-error-modal-icon">{meta.icon}</span>
           <div className="trueadmin-error-modal-summary">
-            <div className="trueadmin-error-modal-title-row">
-              <Typography.Title level={4} className="trueadmin-error-modal-main-title">
-                {title}
-              </Typography.Title>
-              <Tag color={meta.color}>{t(`error.modal.severity.${severity}`, severity)}</Tag>
-            </div>
-            <Typography.Paragraph type="secondary" className="trueadmin-error-modal-message">
-              {error.message}
-            </Typography.Paragraph>
-            {description ? (
-              <div className="trueadmin-error-modal-description">{description}</div>
+            <Typography.Title level={4} className="trueadmin-error-modal-main-title">
+              {title}
+            </Typography.Title>
+            {primaryMessage ? (
+              <Typography.Paragraph className="trueadmin-error-modal-message">
+                {primaryMessage}
+              </Typography.Paragraph>
             ) : null}
           </div>
         </section>
 
-        <div className="trueadmin-error-modal-grid">
-          {(causes.length > 0 || reason) && (
-            <section className="trueadmin-error-modal-panel">
-              <Typography.Title level={5}>
-                <QuestionCircleOutlined />
-                <span>{t('error.modal.causes', '可能原因')}</span>
-              </Typography.Title>
-              <ul>
-                {causes.map((cause, index) => (
-                  <li key={String(index)}>{cause}</li>
-                ))}
-                {reason && (
-                  <li>
-                    {t('error.modal.apiReason', '接口原因：')}
-                    {reason}
-                  </li>
-                )}
-              </ul>
-            </section>
-          )}
-
-          {suggestions.length > 0 ? (
-            <section className="trueadmin-error-modal-panel">
-              <Typography.Title level={5}>
-                <CheckCircleOutlined />
-                <span>{t('error.modal.suggestions', '建议处理')}</span>
-              </Typography.Title>
-              <ul>
-                {suggestions.map((suggestion, index) => (
-                  <li key={String(index)}>{suggestion}</li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
-        </div>
+        {visibleSuggestions.length > 0 ? (
+          <section className="trueadmin-error-modal-action-list">
+            <Typography.Title level={5}>
+              <CheckCircleOutlined />
+              <span>{t('error.modal.suggestions', '建议处理')}</span>
+            </Typography.Title>
+            <ul>
+              {visibleSuggestions.map((suggestion, index) => (
+                <li key={String(index)}>{suggestion}</li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
 
         {explanation?.extra?.(context)}
 
-        <section className="trueadmin-error-modal-diagnostics">
-          <div className="trueadmin-error-modal-diagnostic-item">
-            <span>{t('error.modal.code', '错误码')}</span>
-            <Typography.Text copyable className="trueadmin-error-modal-code-text">
-              {error.code}
-            </Typography.Text>
-          </div>
-          {error.status ? (
-            <div className="trueadmin-error-modal-diagnostic-item">
-              <span>{t('error.modal.httpStatus', 'HTTP 状态')}</span>
-              <Typography.Text>{error.status}</Typography.Text>
-            </div>
-          ) : null}
-          {traceId ? (
-            <div className="trueadmin-error-modal-diagnostic-item">
-              <span>{t('error.modal.traceId', 'Trace ID')}</span>
-              <Typography.Text copyable>{traceId}</Typography.Text>
-            </div>
-          ) : null}
-        </section>
+        <Collapse
+          ghost
+          size="small"
+          className="trueadmin-error-modal-details"
+          items={[
+            {
+              key: 'details',
+              label: t('error.modal.details', '错误详情'),
+              children: (
+                <section className="trueadmin-error-modal-diagnostics">
+                  {detailItems.map((item) => (
+                    <div className="trueadmin-error-modal-diagnostic-item" key={item.key}>
+                      <span>{item.label}</span>
+                      {item.content}
+                    </div>
+                  ))}
+                </section>
+              ),
+            },
+          ]}
+        />
       </motion.div>
     </Modal>
   );
