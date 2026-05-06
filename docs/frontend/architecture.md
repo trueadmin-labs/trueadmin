@@ -229,7 +229,7 @@ const showModal = (nextPayload: Payload) => {
 
 - `parentPath` 命中后端或前端菜单节点时，菜单会追加到该节点的 `children`。
 - 没有 `parentPath` 或未命中时，菜单追加到根级底部。
-- 同级菜单按 `sort` 升序排列；未设置 `sort` 的菜单排在已设置排序的菜单之后。
+- 同级菜单按 `sort` 升序排列；未设置 `sort` 时默认为 `0`。
 - `devOnly: true` 的菜单仅在 dev/test 模式显示，但路由仍可注册，方便直接访问调试页。
 
 示例：

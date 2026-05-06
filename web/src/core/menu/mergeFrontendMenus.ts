@@ -9,10 +9,7 @@ const isFrontendMenuEnabled = (menu: FrontendMenu): boolean =>
 const normalizePath = (path: string) => path.replace(/\/+$/, '') || '/';
 
 const sortMenus = <T extends { sort?: number }>(menus: T[]): T[] =>
-  [...menus].sort(
-    (left, right) =>
-      (left.sort ?? Number.MAX_SAFE_INTEGER) - (right.sort ?? Number.MAX_SAFE_INTEGER),
-  );
+  [...menus].sort((left, right) => (left.sort ?? 0) - (right.sort ?? 0));
 
 const toBackendMenu = (menu: FrontendMenu): BackendMenu => {
   const { parentPath: _parentPath, devOnly: _devOnly, children, ...rest } = menu;
