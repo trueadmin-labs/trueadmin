@@ -2,6 +2,9 @@ export default {
   'menu.demo': 'Demo',
   'menu.demo.permission': 'Permission Demo',
   'menu.demo.loading': 'Loading Demo',
+  'menu.demo.multilevel': 'Multi-level Menu',
+  'menu.demo.multilevel.second': 'Second Level',
+  'menu.demo.multilevel.third': 'Third Level',
   'demo.permission.title': 'Permission Demo',
   'demo.permission.alert.message': 'This page verifies permission display layers',
   'demo.permission.alert.description':
@@ -26,6 +29,20 @@ export default {
   'demo.permission.apiForbidden.message':
     'The current account does not have permission to perform this action.',
   'demo.loading.title': 'Loading Demo',
+  'demo.multilevel.title': 'Multi-level Menu Demo',
+  'demo.multilevel.structure.title': 'Menu hierarchy',
+  'demo.multilevel.structure.tag': 'Level 3',
+  'demo.multilevel.structure.description':
+    'This page verifies multi-level expansion, selection, and breadcrumb behavior for frontend menus in classic, mixed, and columns layouts.',
+  'demo.multilevel.structure.level1': 'Level 1',
+  'demo.multilevel.structure.level2': 'Level 2',
+  'demo.multilevel.structure.level3': 'Level 3',
+  'demo.multilevel.expected.title': 'Expected behavior',
+  'demo.multilevel.expected.classic': 'Classic: the left menu tree expands to the current page.',
+  'demo.multilevel.expected.mixed':
+    'Mixed: Demo is selected in the top menu and the left sider shows nested child menus.',
+  'demo.multilevel.expected.columns':
+    'Columns: Demo is selected in the icon rail and the sub panel shows nested menus.',
   'demo.loading.strategy.title': 'Container loading strategy',
   'demo.loading.strategy.beforeCode':
     'Route transitions use page loading. Details, edit pages, drawers, and local content should use',

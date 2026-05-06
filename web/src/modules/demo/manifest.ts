@@ -14,6 +14,11 @@ export default defineModule({
       component: lazy(() => import('./pages/LoadingExamplePage')),
       meta: { title: 'demo.loading.title', pageType: 'custom-page', auth: true },
     },
+    {
+      path: '/examples/multilevel/second/third',
+      component: lazy(() => import('./pages/MultiLevelMenuPage')),
+      meta: { title: 'demo.multilevel.title', pageType: 'custom-page', auth: true },
+    },
   ],
   menus: [
     {
@@ -46,6 +51,40 @@ export default defineModule({
           type: 'menu',
           status: 'enabled',
           sort: 20,
+        },
+        {
+          code: 'demo.multilevel',
+          title: 'Multi-level Menu',
+          i18n: 'menu.demo.multilevel',
+          path: '/examples/multilevel',
+          icon: 'app',
+          type: 'directory',
+          status: 'enabled',
+          sort: 30,
+          children: [
+            {
+              code: 'demo.multilevel.second',
+              title: 'Second Level',
+              i18n: 'menu.demo.multilevel.second',
+              path: '/examples/multilevel/second',
+              icon: 'app',
+              type: 'directory',
+              status: 'enabled',
+              sort: 10,
+              children: [
+                {
+                  code: 'demo.multilevel.second.third',
+                  title: 'Third Level',
+                  i18n: 'menu.demo.multilevel.third',
+                  path: '/examples/multilevel/second/third',
+                  icon: 'app',
+                  type: 'menu',
+                  status: 'enabled',
+                  sort: 10,
+                },
+              ],
+            },
+          ],
         },
       ],
     },

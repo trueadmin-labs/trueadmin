@@ -2,6 +2,9 @@ export default {
   'menu.demo': '开发示例',
   'menu.demo.permission': '权限展示',
   'menu.demo.loading': '加载态展示',
+  'menu.demo.multilevel': '多级菜单',
+  'menu.demo.multilevel.second': '二级菜单',
+  'menu.demo.multilevel.third': '三级菜单',
   'demo.permission.title': '权限展示示例',
   'demo.permission.alert.message': '这个页面用于确认权限展示分层',
   'demo.permission.alert.description':
@@ -25,6 +28,18 @@ export default {
   'demo.permission.apiLevel.trigger': '模拟接口 403 错误弹窗',
   'demo.permission.apiForbidden.message': '当前账号没有执行该操作所需的权限。',
   'demo.loading.title': '加载态示例',
+  'demo.multilevel.title': '多级菜单示例',
+  'demo.multilevel.structure.title': '菜单层级',
+  'demo.multilevel.structure.tag': '三级',
+  'demo.multilevel.structure.description':
+    '这个页面用于验证前端注册菜单在 classic、mixed、columns 布局下的多级展开、选中和面包屑表现。',
+  'demo.multilevel.structure.level1': '一级',
+  'demo.multilevel.structure.level2': '二级',
+  'demo.multilevel.structure.level3': '三级',
+  'demo.multilevel.expected.title': '预期表现',
+  'demo.multilevel.expected.classic': 'Classic：左侧完整菜单树展开到当前页面。',
+  'demo.multilevel.expected.mixed': 'Mixed：顶部选中开发示例，左侧展示多级子菜单。',
+  'demo.multilevel.expected.columns': 'Columns：左侧图标栏选中开发示例，二级面板展示多级菜单。',
   'demo.loading.strategy.title': '容器级加载策略',
   'demo.loading.strategy.beforeCode':
     '路由切换使用页面级加载；详情页、编辑页、抽屉和局部内容建议使用',
