@@ -2,6 +2,7 @@ import { layoutConfig } from '@config/index';
 import {
   createContext,
   type ReactNode,
+  type RefObject,
   useContext,
   useEffect,
   useMemo,
@@ -10,20 +11,41 @@ import {
 } from 'react';
 
 type WorkspaceViewportValue = {
+  viewportHeight: number;
+  footerHeight: number;
+  availableHeight: number;
   contentHeight: number;
   tableScrollY: number;
-  containerRef: React.RefObject<HTMLDivElement | null>;
+  containerRef: RefObject<HTMLDivElement | null>;
+  footerRef: RefObject<HTMLDivElement | null>;
 };
 
+const HEADER_HEIGHT = 56;
+const TABS_HEIGHT = 40;
+const PAGE_VERTICAL_PADDING = 48;
 const WorkspaceViewportContext = createContext<WorkspaceViewportValue | null>(null);
 
-export function WorkspaceViewportProvider({ children }: { children: ReactNode }) {
+type WorkspaceViewportProviderProps = {
+  children: ReactNode;
+  showFooter?: boolean;
+  showTabs?: boolean;
+  className?: string;
+};
+
+export function WorkspaceViewportProvider({
+  children,
+  showFooter = true,
+  showTabs = false,
+  className,
+}: WorkspaceViewportProviderProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [contentHeight, setContentHeight] = useState(640);
+  const footerRef = useRef<HTMLDivElement>(null);
+  const [viewportHeight, setViewportHeight] = useState(640);
+  const [footerHeight, setFooterHeight] = useState(0);
 
   useEffect(() => {
-    const element = containerRef.current;
-    if (!element) {
+    const contentElement = containerRef.current;
+    if (!contentElement) {
       return undefined;
     }
 
@@ -31,13 +53,16 @@ export function WorkspaceViewportProvider({ children }: { children: ReactNode })
     const measure = () => {
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
-        const rect = element.getBoundingClientRect();
-        setContentHeight(Math.max(320, window.innerHeight - rect.top - 24));
+        setViewportHeight(Math.max(320, contentElement.getBoundingClientRect().height));
+        setFooterHeight(showFooter ? (footerRef.current?.getBoundingClientRect().height ?? 0) : 0);
       });
     };
 
     const observer = new ResizeObserver(measure);
-    observer.observe(element);
+    observer.observe(contentElement);
+    if (footerRef.current) {
+      observer.observe(footerRef.current);
+    }
     window.addEventListener('resize', measure);
     window.addEventListener('orientationchange', measure);
     measure();
@@ -48,23 +73,36 @@ export function WorkspaceViewportProvider({ children }: { children: ReactNode })
       window.removeEventListener('resize', measure);
       window.removeEventListener('orientationchange', measure);
     };
-  }, []);
+  }, [showFooter]);
+
+  const availableHeight = Math.max(
+    320,
+    viewportHeight -
+      HEADER_HEIGHT -
+      (showTabs ? TABS_HEIGHT : 0) -
+      footerHeight -
+      PAGE_VERTICAL_PADDING,
+  );
 
   const value = useMemo<WorkspaceViewportValue>(
     () => ({
-      contentHeight,
+      viewportHeight,
+      footerHeight,
+      availableHeight,
+      contentHeight: availableHeight,
       tableScrollY: Math.max(
         layoutConfig.workspace.minTableHeight,
-        contentHeight - layoutConfig.workspace.tableBottomReserve - 230,
+        availableHeight - layoutConfig.workspace.tableBottomReserve - 230,
       ),
       containerRef,
+      footerRef,
     }),
-    [contentHeight],
+    [availableHeight, footerHeight, viewportHeight],
   );
 
   return (
     <WorkspaceViewportContext.Provider value={value}>
-      <div ref={containerRef} className="trueadmin-workspace-viewport">
+      <div ref={containerRef} className={className ?? 'trueadmin-workspace-viewport'}>
         {children}
       </div>
     </WorkspaceViewportContext.Provider>

@@ -18,6 +18,7 @@ const antdLocales = {
 
 export function AppProviders({ children }: { children: ReactNode }) {
   const darkMode = useLayoutStore((state) => state.darkMode);
+  const primaryColor = useLayoutStore((state) => state.primaryColor);
   const locale = useLocaleStore((state) => state.locale);
 
   return (
@@ -28,6 +29,10 @@ export function AppProviders({ children }: { children: ReactNode }) {
         theme={{
           ...themeConfig,
           algorithm: darkMode ? theme.darkAlgorithm : theme.defaultAlgorithm,
+          token: {
+            ...themeConfig.token,
+            colorPrimary: primaryColor,
+          },
         }}
       >
         <StyleProvider hashPriority="high">

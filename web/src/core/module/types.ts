@@ -4,6 +4,14 @@ import type { BackendMenu } from '@/core/menu/types';
 
 export type RouteComponent = LazyExoticComponent<ComponentType> | ComponentType;
 
+export type RouteLayoutMeta = {
+  showFooter?: boolean;
+  showTabs?: boolean;
+  showBreadcrumb?: boolean;
+  contentPadding?: boolean;
+  fullscreen?: boolean;
+};
+
 export type FrontendRoute = {
   path: string;
   component: RouteComponent;
@@ -18,6 +26,7 @@ export type FrontendRoute = {
       | 'custom-page';
     icon?: string;
     auth?: boolean;
+    layout?: RouteLayoutMeta;
   };
 };
 

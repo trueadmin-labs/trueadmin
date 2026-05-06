@@ -1,12 +1,17 @@
-import { PageContainer, type PageContainerProps } from '@ant-design/pro-components';
 import { Result } from 'antd';
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
-import { WorkspaceViewportProvider } from '@/core/layout/WorkspaceViewport';
+import { useLocation } from 'react-router';
+import { getRouteLayoutMeta } from '@/core/layout/routeLayoutMeta';
 import { PageTransition } from './PageTransition';
 
-export type TrueAdminPageProps = PageContainerProps & {
+export type TrueAdminPageProps = {
   children: ReactNode;
+  title?: ReactNode;
+  extra?: ReactNode;
+  className?: string;
+  style?: CSSProperties;
+  contentPadding?: boolean;
 };
 
 function PageErrorFallback() {
@@ -15,14 +20,21 @@ function PageErrorFallback() {
   );
 }
 
-export function TrueAdminPage({ children, ...props }: TrueAdminPageProps) {
+export function TrueAdminPage({ children, className, style, contentPadding }: TrueAdminPageProps) {
+  const location = useLocation();
+  const routeLayout = getRouteLayoutMeta(location.pathname);
+  const shouldUsePadding = contentPadding ?? routeLayout.contentPadding ?? true;
+  const classes = ['trueadmin-page', shouldUsePadding ? 'has-padding' : '', className]
+    .filter(Boolean)
+    .join(' ');
+
   return (
     <ErrorBoundary fallback={<PageErrorFallback />}>
-      <WorkspaceViewportProvider>
-        <PageTransition>
-          <PageContainer {...props}>{children}</PageContainer>
-        </PageTransition>
-      </WorkspaceViewportProvider>
+      <PageTransition>
+        <main className={classes} style={style}>
+          {children}
+        </main>
+      </PageTransition>
     </ErrorBoundary>
   );
 }

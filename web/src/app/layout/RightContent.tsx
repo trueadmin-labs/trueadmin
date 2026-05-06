@@ -13,6 +13,7 @@ import { queryClient } from '@/core/query/client';
 import { useLayoutStore } from '@/core/store/layoutStore';
 import { type Locale, useLocaleStore } from '@/core/store/localeStore';
 import { tokenStorage } from '@/shared/utils/storage';
+import { LayoutSettingsDrawer } from './LayoutSettingsDrawer';
 
 const localeItems: MenuProps['items'] = [
   { key: 'zh-CN', label: '简体中文' },
@@ -53,6 +54,7 @@ export function useHeaderActions() {
       icon={darkMode ? <SunOutlined /> : <MoonOutlined />}
       onClick={toggleDarkMode}
     />,
+    <LayoutSettingsDrawer key="settings" />,
     <Dropdown
       key="user"
       menu={{

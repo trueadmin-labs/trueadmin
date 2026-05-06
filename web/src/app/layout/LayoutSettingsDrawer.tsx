@@ -1,0 +1,153 @@
+import {
+  BgColorsOutlined,
+  CheckOutlined,
+  LayoutOutlined,
+  MenuFoldOutlined,
+  MoonOutlined,
+  SettingOutlined,
+} from '@ant-design/icons';
+import { Button, Divider, Drawer, Flex, Segmented, Space, Switch, Tooltip, Typography } from 'antd';
+import { useState } from 'react';
+import { type LayoutMode, useLayoutStore } from '@/core/store/layoutStore';
+
+const colorPresets = [
+  { label: '拂晓蓝', value: '#1677ff' },
+  { label: '薄暮', value: '#f5222d' },
+  { label: '火山', value: '#fa541c' },
+  { label: '日暮', value: '#faad14' },
+  { label: '极光绿', value: '#52c41a' },
+  { label: '明青', value: '#13c2c2' },
+  { label: '酱紫', value: '#722ed1' },
+];
+
+const layoutOptions: Array<{
+  label: string;
+  value: LayoutMode;
+  disabled?: boolean;
+}> = [
+  { label: 'Classic', value: 'classic' },
+  { label: 'Mixed', value: 'mixed', disabled: true },
+  { label: 'Columns', value: 'columns', disabled: true },
+];
+
+function SettingSection({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="trueadmin-settings-section">
+      <div className="trueadmin-settings-section-title">
+        {icon}
+        <span>{title}</span>
+      </div>
+      {children}
+    </section>
+  );
+}
+
+export function LayoutSettingsDrawer() {
+  const [open, setOpen] = useState(false);
+  const layoutMode = useLayoutStore((state) => state.layoutMode);
+  const setLayoutMode = useLayoutStore((state) => state.setLayoutMode);
+  const collapsed = useLayoutStore((state) => state.collapsed);
+  const setCollapsed = useLayoutStore((state) => state.setCollapsed);
+  const darkMode = useLayoutStore((state) => state.darkMode);
+  const setDarkMode = useLayoutStore((state) => state.setDarkMode);
+  const showFooter = useLayoutStore((state) => state.showFooter);
+  const setShowFooter = useLayoutStore((state) => state.setShowFooter);
+  const showTabs = useLayoutStore((state) => state.showTabs);
+  const setShowTabs = useLayoutStore((state) => state.setShowTabs);
+  const showBreadcrumb = useLayoutStore((state) => state.showBreadcrumb);
+  const setShowBreadcrumb = useLayoutStore((state) => state.setShowBreadcrumb);
+  const primaryColor = useLayoutStore((state) => state.primaryColor);
+  const setPrimaryColor = useLayoutStore((state) => state.setPrimaryColor);
+
+  return (
+    <>
+      <Tooltip title="布局设置">
+        <Button type="text" icon={<SettingOutlined />} onClick={() => setOpen(true)} />
+      </Tooltip>
+      <Drawer
+        className={`trueadmin-settings-drawer${darkMode ? ' is-dark' : ''}`}
+        title="布局设置"
+        width={360}
+        open={open}
+        onClose={() => setOpen(false)}
+      >
+        <Space direction="vertical" size={20} className="trueadmin-settings-content">
+          <SettingSection title="主题" icon={<BgColorsOutlined />}>
+            <div className="trueadmin-settings-color-grid">
+              {colorPresets.map((color) => (
+                <Tooltip title={color.label} key={color.value}>
+                  <button
+                    className="trueadmin-settings-color-swatch"
+                    type="button"
+                    aria-label={color.label}
+                    aria-pressed={primaryColor === color.value}
+                    style={{ backgroundColor: color.value }}
+                    onClick={() => setPrimaryColor(color.value)}
+                  >
+                    {primaryColor === color.value ? <CheckOutlined /> : null}
+                  </button>
+                </Tooltip>
+              ))}
+            </div>
+            <Flex className="trueadmin-settings-row" align="center" justify="space-between">
+              <span>暗黑模式</span>
+              <Switch checked={darkMode} onChange={setDarkMode} />
+            </Flex>
+          </SettingSection>
+
+          <Divider className="trueadmin-settings-divider" />
+
+          <SettingSection title="布局" icon={<LayoutOutlined />}>
+            <Segmented
+              block
+              value={layoutMode}
+              options={layoutOptions}
+              onChange={(value) => setLayoutMode(value as LayoutMode)}
+            />
+            <Typography.Paragraph type="secondary" className="trueadmin-settings-hint">
+              Mixed 和 Columns 已预留，第一阶段仅 Classic 生效。
+            </Typography.Paragraph>
+          </SettingSection>
+
+          <Divider className="trueadmin-settings-divider" />
+
+          <SettingSection title="显示" icon={<MenuFoldOutlined />}>
+            <Space direction="vertical" size={12} className="trueadmin-settings-content">
+              <Flex className="trueadmin-settings-row" align="center" justify="space-between">
+                <span>折叠菜单</span>
+                <Switch checked={collapsed} onChange={setCollapsed} />
+              </Flex>
+              <Flex className="trueadmin-settings-row" align="center" justify="space-between">
+                <span>面包屑</span>
+                <Switch checked={showBreadcrumb} onChange={setShowBreadcrumb} />
+              </Flex>
+              <Flex className="trueadmin-settings-row" align="center" justify="space-between">
+                <span>页脚</span>
+                <Switch checked={showFooter} onChange={setShowFooter} />
+              </Flex>
+              <Flex className="trueadmin-settings-row" align="center" justify="space-between">
+                <span>标签栏</span>
+                <Switch checked={showTabs} onChange={setShowTabs} />
+              </Flex>
+            </Space>
+          </SettingSection>
+
+          <Divider className="trueadmin-settings-divider" />
+
+          <div className="trueadmin-settings-summary">
+            <MoonOutlined />
+            <span>{darkMode ? '当前为暗黑主题' : '当前为亮色主题'}</span>
+          </div>
+        </Space>
+      </Drawer>
+    </>
+  );
+}
