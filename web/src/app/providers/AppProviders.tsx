@@ -24,6 +24,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <ConfigProvider
         locale={antdLocales[locale]}
+        modal={{ centered: true }}
         theme={{
           ...themeConfig,
           algorithm: darkMode ? theme.darkAlgorithm : theme.defaultAlgorithm,
