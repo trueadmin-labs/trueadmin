@@ -33,7 +33,9 @@ backend/app/Module     系统能力和业务模块
 
 ## Web 管理端
 
-Web 管理端使用 React + Umi Max + TypeScript + Ant Design Pro + Ant Design。`web` 本身就是后台管理端，不再在目录内重复划分 `admin` / `client`。用户端、开放端如果需要独立前端，应使用新的应用目录，而不是混入 `web`。
+Web 管理端使用 React 19 + Umi Max 4 + TypeScript 6 + Ant Design Pro Components 3 + Ant Design 6。`web` 本身就是后台管理端，不再在目录内重复划分 `admin` / `client`。用户端、开放端如果需要独立前端，应使用新的应用目录，而不是混入 `web`。
+
+官方 Ant Design Pro v6 模板是技术栈和配置参考，不作为目录覆盖来源。模板中的 Welcome/Admin/table-list/chatbot/PWA/service-worker、示例 Mock、多语言样例和官网链接都属于演示资产，不进入 TrueAdmin Web 主干。TrueAdmin Web 的主干以模块化后台产品为目标，优先保持稳定、清爽、AI 易读的结构。
 
 前端采用 `foundation + modules` 结构：业务模块自己维护页面、手写 API、类型、局部组件、Hooks 和多语言；框架层能力放入 `foundation`；Umi 运行时入口保留在框架约定位置；`src/locales` 只作为 Umi 国际化插件的薄入口。
 
@@ -78,6 +80,7 @@ web/src/
 - 模块内私有组件和 Hooks 放在 `modules/<module>/components`、`modules/<module>/hooks`。
 - 跨模块框架能力放入 `foundation`，不要从一个业务模块直接 import 另一个业务模块的页面或私有组件。
 - `config/routes.ts` 仍作为 Umi 路由入口，但页面组件应指向 `@/modules/...` 或 `@/foundation/...`。
+- 不新增根级 `src/pages` 业务页面；官方模板示例页不得作为业务目录继续扩展。
 - 后端菜单负责运行时展示，前端路由负责可渲染页面；后端下发的菜单路径如果没有对应页面，必须进入 404，而不是空白页。
 
 ## 移动端
