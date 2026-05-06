@@ -4,12 +4,7 @@
   color-scheme: light;
   font-family:
     "Alibaba PuHuiTi 3.0", "HarmonyOS Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
-  background: #f5f7fb;
-  --trueadmin-page-bg: #f5f7fb;
-  --trueadmin-card-bg: #ffffff;
-  --trueadmin-border: #edf0f5;
   --trueadmin-text-subtle: #667085;
-  --trueadmin-shadow-card: 0 1px 2px rgba(16, 24, 40, 0.04), 0 8px 24px rgba(16, 24, 40, 0.04);
 }
 
 html,
@@ -21,7 +16,6 @@ body,
 
 body {
   overflow: hidden;
-  background: var(--trueadmin-page-bg);
 }
 
 * {
@@ -66,10 +60,10 @@ body {
   color: #fff;
   font-size: 16px;
   font-weight: 700;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
   border-radius: 8px;
-  background: linear-gradient(135deg, #1677ff 0%, #1455d9 100%);
-  box-shadow: 0 8px 18px rgba(22, 119, 255, 0.22);
+  background: #1677ff;
+  box-shadow: none;
 }
 
 .trueadmin-brand-text {
@@ -108,51 +102,12 @@ body {
   min-height: calc(100vh - 96px);
 }
 
-.ant-pro-layout .ant-layout-header,
-.ant-pro-layout .ant-pro-global-header {
-  border-bottom: 1px solid var(--trueadmin-border);
-  box-shadow: none;
-}
-
-.ant-pro-layout .ant-pro-sider,
-.ant-pro-layout .ant-layout-sider {
-  border-right: 1px solid var(--trueadmin-border);
-  box-shadow: none;
-}
-
-.ant-pro-layout .ant-pro-layout-container {
-  background: var(--trueadmin-page-bg);
-}
-
 .ant-pro-page-container {
   min-height: calc(100vh - 64px);
 }
 
 .ant-pro-page-container-children-container {
   padding-block-start: 16px;
-}
-
-.ant-pro-card,
-.ant-card,
-.ant-pro-table-search,
-.ant-pro-table .ant-pro-card {
-  border-color: var(--trueadmin-border);
-  border-radius: 12px;
-  box-shadow: var(--trueadmin-shadow-card);
-}
-
-.ant-table-wrapper .ant-table-thead > tr > th {
-  color: rgba(0, 0, 0, 0.68);
-  font-weight: 600;
-  background: #fafafa;
-}
-
-.ant-table-wrapper .ant-table-tbody > tr > td {
-  border-bottom-color: #f0f2f5;
-}
-
-.ant-table-wrapper .ant-table-tbody > tr:hover > td {
-  background: #f7fbff;
 }
 
 .trueadmin-error-modal-root .ant-modal-content {

@@ -9,11 +9,4 @@ export const themeConfig: ThemeConfig = {
     borderRadius: 8,
     wireframe: false,
   },
-  components: {
-    Layout: {
-      bodyBg: '#f5f7fb',
-      headerBg: '#ffffff',
-      siderBg: '#ffffff',
-    },
-  },
 };
