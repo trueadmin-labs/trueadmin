@@ -12,6 +12,15 @@ export type RouteLayoutMeta = {
   fullscreen?: boolean;
 };
 
+export type RouteTabMeta = {
+  enabled?: boolean;
+  title?: string;
+  closable?: boolean;
+  icon?: string;
+  keyMode?: 'pathname' | 'fullPath';
+  key?: string;
+};
+
 export type FrontendRoute = {
   path: string;
   component: RouteComponent;
@@ -27,6 +36,7 @@ export type FrontendRoute = {
     icon?: string;
     auth?: boolean;
     layout?: RouteLayoutMeta;
+    tab?: RouteTabMeta;
   };
 };
 

@@ -12,6 +12,8 @@ import { useMenuTreeQuery } from '@/core/menu/hooks';
 import { mergeFrontendMenus } from '@/core/menu/mergeFrontendMenus';
 import type { BackendMenu } from '@/core/menu/types';
 import { type LayoutMode, useLayoutStore } from '@/core/store/layoutStore';
+import { AppTabsBar } from '@/core/tabs/AppTabsBar';
+import { useRouteTabs } from '@/core/tabs/useRouteTabs';
 import { useHeaderActions } from './RightContent';
 
 const { Sider, Header } = Layout;
@@ -316,10 +318,6 @@ function AppHeaderBar({
   );
 }
 
-function AppTabsPlaceholder() {
-  return <div className="trueadmin-shell-tabs" aria-hidden="true" />;
-}
-
 function SiderCollapseTrigger() {
   const collapsed = useLayoutStore((state) => state.collapsed);
   const setCollapsed = useLayoutStore((state) => state.setCollapsed);
@@ -356,10 +354,20 @@ function AppFooter() {
   );
 }
 
-function AppContentFrame({ showFooter, showTabs }: { showFooter: boolean; showTabs: boolean }) {
+function AppContentFrame({
+  activeTabKey,
+  outletKey,
+  showFooter,
+  showTabs,
+}: {
+  activeTabKey?: string;
+  outletKey: string;
+  showFooter: boolean;
+  showTabs: boolean;
+}) {
   return (
     <>
-      {showTabs ? <AppTabsPlaceholder /> : null}
+      {showTabs ? <AppTabsBar activeKey={activeTabKey} /> : null}
       <WorkspaceViewportProvider
         showFooter={showFooter}
         showTabs={showTabs}
@@ -367,7 +375,7 @@ function AppContentFrame({ showFooter, showTabs }: { showFooter: boolean; showTa
       >
         <div className="trueadmin-shell-content-column" data-tabs-visible={showTabs}>
           <div className="trueadmin-shell-page-slot">
-            <Outlet />
+            <Outlet key={outletKey} />
           </div>
           {showFooter ? <AppFooter /> : null}
         </div>
@@ -383,6 +391,8 @@ function ClassicLayout({
   menuMatch,
   showFooter,
   showTabs,
+  activeTabKey,
+  outletKey,
 }: {
   collapsed: boolean;
   darkMode: boolean;
@@ -390,6 +400,8 @@ function ClassicLayout({
   menuMatch: MenuMatch | null;
   showFooter: boolean;
   showTabs: boolean;
+  activeTabKey?: string;
+  outletKey: string;
 }) {
   return (
     <>
@@ -417,7 +429,12 @@ function ClassicLayout({
           rootMenus={runtimeMenus}
           activeRootKey={resolveActiveRoot(runtimeMenus, menuMatch)?.key}
         />
-        <AppContentFrame showFooter={showFooter} showTabs={showTabs} />
+        <AppContentFrame
+          activeTabKey={activeTabKey}
+          outletKey={outletKey}
+          showFooter={showFooter}
+          showTabs={showTabs}
+        />
       </Layout>
     </>
   );
@@ -432,6 +449,8 @@ function MixedLayout({
   sideOpenKeys,
   showFooter,
   showTabs,
+  activeTabKey,
+  outletKey,
 }: {
   collapsed: boolean;
   darkMode: boolean;
@@ -441,6 +460,8 @@ function MixedLayout({
   sideOpenKeys: string[];
   showFooter: boolean;
   showTabs: boolean;
+  activeTabKey?: string;
+  outletKey: string;
 }) {
   const sideMenus = activeRoot?.children?.length
     ? activeRoot.children
@@ -474,7 +495,12 @@ function MixedLayout({
           </SiderFrame>
         </Sider>
         <Layout className="trueadmin-shell-main">
-          <AppContentFrame showFooter={showFooter} showTabs={showTabs} />
+          <AppContentFrame
+            activeTabKey={activeTabKey}
+            outletKey={outletKey}
+            showFooter={showFooter}
+            showTabs={showTabs}
+          />
         </Layout>
       </Layout>
     </>
@@ -490,6 +516,8 @@ function ColumnsLayout({
   sideOpenKeys,
   showFooter,
   showTabs,
+  activeTabKey,
+  outletKey,
 }: {
   collapsed: boolean;
   darkMode: boolean;
@@ -499,6 +527,8 @@ function ColumnsLayout({
   sideOpenKeys: string[];
   showFooter: boolean;
   showTabs: boolean;
+  activeTabKey?: string;
+  outletKey: string;
 }) {
   const sideMenus = activeRoot?.children?.length
     ? activeRoot.children
@@ -547,7 +577,12 @@ function ColumnsLayout({
           rootMenus={runtimeMenus}
           activeRootKey={activeRoot?.key}
         />
-        <AppContentFrame showFooter={showFooter} showTabs={showTabs} />
+        <AppContentFrame
+          activeTabKey={activeTabKey}
+          outletKey={outletKey}
+          showFooter={showFooter}
+          showTabs={showTabs}
+        />
       </Layout>
     </>
   );
@@ -572,6 +607,12 @@ export function AppLayout() {
   const effectiveShowTabs = routeLayout.fullscreen ? false : (routeLayout.showTabs ?? showTabs);
   const activeRoot = resolveActiveRoot(runtimeMenus, menuMatch);
   const sideOpenKeys = getSideOpenKeys(menuMatch, activeRoot?.key);
+  const { activeKey: activeTabKey, activeTab } = useRouteTabs({
+    menus: runtimeMenus,
+    pathname: location.pathname,
+    t,
+  });
+  const outletKey = activeTab ? `${activeTab.key}:${activeTab.refreshKey}` : location.pathname;
   const shellClassName = [
     'trueadmin-shell',
     darkMode ? 'is-dark' : 'is-light',
@@ -607,6 +648,8 @@ export function AppLayout() {
           sideOpenKeys={sideOpenKeys}
           showFooter={effectiveShowFooter}
           showTabs={effectiveShowTabs}
+          activeTabKey={activeTabKey}
+          outletKey={outletKey}
         />
       ) : layoutMode === 'columns' ? (
         <ColumnsLayout
@@ -618,6 +661,8 @@ export function AppLayout() {
           sideOpenKeys={sideOpenKeys}
           showFooter={effectiveShowFooter}
           showTabs={effectiveShowTabs}
+          activeTabKey={activeTabKey}
+          outletKey={outletKey}
         />
       ) : (
         <ClassicLayout
@@ -627,6 +672,8 @@ export function AppLayout() {
           menuMatch={menuMatch}
           showFooter={effectiveShowFooter}
           showTabs={effectiveShowTabs}
+          activeTabKey={activeTabKey}
+          outletKey={outletKey}
         />
       )}
     </Layout>
