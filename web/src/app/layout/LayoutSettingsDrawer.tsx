@@ -26,8 +26,8 @@ const layoutOptions: Array<{
   disabled?: boolean;
 }> = [
   { label: 'Classic', value: 'classic' },
-  { label: 'Mixed', value: 'mixed', disabled: true },
-  { label: 'Columns', value: 'columns', disabled: true },
+  { label: 'Mixed', value: 'mixed' },
+  { label: 'Columns', value: 'columns' },
 ];
 
 function SettingSection({
@@ -113,7 +113,7 @@ export function LayoutSettingsDrawer() {
               onChange={(value) => setLayoutMode(value as LayoutMode)}
             />
             <Typography.Paragraph type="secondary" className="trueadmin-settings-hint">
-              Mixed 和 Columns 已预留，第一阶段仅 Classic 生效。
+              三种布局均可切换，适配不同菜单组织方式。
             </Typography.Paragraph>
           </SettingSection>
 

@@ -133,7 +133,8 @@ body,
   backdrop-filter: blur(8px);
 }
 
-.trueadmin-shell.is-collapsed .trueadmin-shell-brand {
+.trueadmin-shell-brand[data-collapsed="true"],
+.trueadmin-shell-brand[data-compact="true"] {
   justify-content: center;
   padding-inline: 0;
 }
@@ -160,6 +161,7 @@ body,
 
 .trueadmin-shell-menu-scroll {
   height: 100%;
+  min-height: 0;
   padding-top: var(--trueadmin-header-height);
   overflow: auto;
   background: inherit;
@@ -209,7 +211,7 @@ body,
 .trueadmin-shell-header.ant-layout-header {
   position: absolute;
   inset: 0 0 auto 0;
-  z-index: 10;
+  z-index: 30;
   display: flex;
   height: var(--trueadmin-header-height);
   align-items: center;
@@ -242,6 +244,18 @@ body,
   gap: 2px;
 }
 
+.trueadmin-shell-header-divider {
+  width: 1px;
+  height: 18px;
+  flex: 0 0 auto;
+  margin-inline: 12px 10px;
+  background: var(--trueadmin-shell-border);
+}
+
+.trueadmin-shell.is-dark .trueadmin-shell-header-divider {
+  background: var(--trueadmin-shell-dark-border);
+}
+
 .trueadmin-shell-breadcrumb {
   min-width: 0;
   overflow: hidden;
@@ -270,6 +284,252 @@ body,
 
 .trueadmin-shell-header-actions .ant-avatar {
   flex: 0 0 auto;
+}
+
+.trueadmin-shell-mixed-body {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--trueadmin-shell-bg);
+}
+
+.trueadmin-shell-sider-frame .trueadmin-shell-menu-scroll {
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.trueadmin-shell.is-mixed .trueadmin-shell-sider-sub.ant-layout-sider {
+  height: 100%;
+}
+
+.trueadmin-shell-sider .ant-layout-sider-children {
+  position: relative;
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.trueadmin-shell-sider-frame {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.trueadmin-shell.is-mixed .trueadmin-shell-main.ant-layout {
+  height: 100%;
+}
+
+.trueadmin-shell-sider-trigger {
+  z-index: 5;
+  display: flex;
+  height: 48px;
+  flex: 0 0 48px;
+  align-items: center;
+  justify-content: flex-end;
+  padding-inline: 16px;
+  border-top: 1px solid var(--trueadmin-shell-border);
+  background: var(--trueadmin-shell-panel-bg);
+  backdrop-filter: blur(8px);
+}
+
+.trueadmin-shell.is-collapsed .trueadmin-shell-sider-trigger {
+  justify-content: center;
+  padding-inline: 0;
+}
+
+.trueadmin-shell.is-dark .trueadmin-shell-sider-trigger {
+  border-top-color: var(--trueadmin-shell-dark-border);
+  background: var(--trueadmin-shell-dark-header-bg);
+}
+
+.trueadmin-shell-sider-sub .trueadmin-shell-menu-scroll {
+  padding-top: 0;
+}
+
+.trueadmin-shell.is-mixed .trueadmin-shell-sider-sub .trueadmin-shell-menu-scroll {
+  padding-top: var(--trueadmin-header-height);
+}
+
+.trueadmin-shell.is-mixed .trueadmin-shell-sider-sub,
+.trueadmin-shell.is-columns .trueadmin-shell-column-sub {
+  z-index: 18;
+}
+
+.trueadmin-shell.is-mixed .trueadmin-shell-sider-sub::after,
+.trueadmin-shell.is-columns .trueadmin-shell-column-sub::after {
+  inset-block: 0;
+}
+
+.trueadmin-shell-column-rail.ant-layout-sider {
+  position: relative;
+  z-index: 21;
+  height: 100vh;
+  overflow: hidden;
+  background: #fff;
+}
+
+.trueadmin-shell-column-rail.ant-layout-sider::after {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  z-index: 3;
+  width: 1px;
+  background: var(--trueadmin-shell-border);
+  content: "";
+  pointer-events: none;
+}
+
+.trueadmin-shell.is-dark .trueadmin-shell-column-rail.ant-layout-sider {
+  background: var(--trueadmin-shell-dark-sider-bg);
+}
+
+.trueadmin-shell-column-root-scroll {
+  height: 100%;
+  padding-top: var(--trueadmin-header-height);
+  overflow: auto;
+}
+
+.trueadmin-shell-header[data-layout-mode="mixed"] .trueadmin-shell-header-left {
+  flex: 1;
+}
+
+.trueadmin-shell-header[data-layout-mode="mixed"] .trueadmin-shell-brand {
+  position: static;
+  width: 192px;
+  flex: 0 0 192px;
+  justify-content: flex-start;
+  padding-inline: 0;
+  border-bottom: 0;
+  background: transparent;
+  backdrop-filter: none;
+}
+
+.trueadmin-shell-header[data-layout-mode="mixed"] .trueadmin-shell-breadcrumb {
+  flex: 0 1 auto;
+}
+
+.trueadmin-shell-root-menu.ant-menu {
+  border: 0;
+  background: transparent;
+}
+
+.trueadmin-shell-root-menu.is-top {
+  min-width: 0;
+  flex: 1 1 auto;
+  height: var(--trueadmin-header-height);
+  line-height: var(--trueadmin-header-height);
+}
+
+.trueadmin-shell-root-menu.is-top.ant-menu-horizontal {
+  border-bottom: 0;
+}
+
+.trueadmin-shell-root-menu.is-top .ant-menu-item,
+.trueadmin-shell-root-menu.is-top .ant-menu-submenu-title {
+  display: inline-flex;
+  align-items: center;
+}
+
+.trueadmin-shell-column-root-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-block: 8px;
+}
+
+.trueadmin-shell-column-root-item {
+  display: inline-flex;
+  width: 48px;
+  height: 44px;
+  margin-inline: 8px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 6px;
+  color: rgba(0, 0, 0, 0.65);
+  background: transparent;
+  cursor: pointer;
+  transition:
+    color 0.2s,
+    background-color 0.2s;
+}
+
+.trueadmin-shell-column-root-item:hover {
+  color: rgba(0, 0, 0, 0.88);
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.trueadmin-shell-column-root-item[data-selected="true"] {
+  color: #1677ff;
+  background: rgba(22, 119, 255, 0.1);
+}
+
+.trueadmin-shell-column-root-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.trueadmin-shell.is-dark .trueadmin-shell-column-root-item {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.trueadmin-shell.is-dark .trueadmin-shell-column-root-item:hover {
+  color: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.trueadmin-shell.is-dark .trueadmin-shell-column-root-item[data-selected="true"] {
+  color: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.trueadmin-shell-column-sub-title {
+  display: flex;
+  height: 34px;
+  flex: 0 0 34px;
+  align-items: flex-end;
+  padding: 0 14px 6px;
+  overflow: hidden;
+  color: rgba(0, 0, 0, 0.56);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trueadmin-shell-column-sub .trueadmin-shell-sider-frame {
+  height: auto;
+  flex: 1 1 auto;
+}
+
+.trueadmin-shell.is-collapsed .trueadmin-shell-column-sub-title {
+  display: none;
+}
+
+.trueadmin-shell.is-dark .trueadmin-shell-column-sub-title {
+  color: rgba(255, 255, 255, 0.56);
+}
+
+.trueadmin-shell.is-dark .trueadmin-shell-root-menu.ant-menu-dark,
+.trueadmin-shell.is-dark .trueadmin-shell-root-menu.ant-menu-dark > .ant-menu {
+  background: transparent;
+}
+
+.trueadmin-shell.is-dark .trueadmin-shell-root-menu.ant-menu-dark .ant-menu-item-selected {
+  color: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.trueadmin-shell.is-dark
+  .trueadmin-shell-root-menu.ant-menu-dark
+  .ant-menu-item:not(.ant-menu-item-selected):hover {
+  color: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .trueadmin-shell.is-dark .trueadmin-shell-collapse-button.ant-btn,
@@ -313,6 +573,18 @@ body,
 
 .trueadmin-shell.is-dark .trueadmin-shell-tabs {
   background: var(--trueadmin-shell-dark-header-bg);
+}
+
+.trueadmin-shell.is-mixed .trueadmin-shell-tabs {
+  inset-block-start: var(--trueadmin-header-height);
+}
+
+.trueadmin-shell.is-mixed .trueadmin-shell-content-column {
+  padding-top: var(--trueadmin-header-height);
+}
+
+.trueadmin-shell.is-mixed .trueadmin-shell-content-column[data-tabs-visible="true"] {
+  padding-top: calc(var(--trueadmin-header-height) + var(--trueadmin-tabs-height));
 }
 
 .trueadmin-shell-page-slot {
