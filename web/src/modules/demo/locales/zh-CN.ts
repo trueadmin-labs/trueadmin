@@ -42,6 +42,18 @@ export default {
     '抽屉打开后再请求详情时，只应该让抽屉内容区域进入加载态，不要阻塞页面其它区域。',
   'demo.loading.drawer.detailTitle': '详情抽屉',
   'demo.loading.drawer.tip': '正在加载抽屉数据',
+  'demo.loading.modal.title': '弹窗内加载',
+  'demo.loading.modal.open': '打开弹窗',
+  'demo.loading.modal.description':
+    '弹窗 body 固定高度，内容区域内部滚动；加载动画基于固定视窗居中展示。',
+  'demo.loading.modal.detailTitle': '弹窗详情',
+  'demo.loading.modal.tip': '正在加载弹窗内容',
+  'demo.loading.modal.reload': '刷新内容',
+  'demo.loading.modal.close': '关闭',
+  'demo.loading.modal.auditRecord': '处理记录',
+  'demo.loading.modal.auditShort': '已完成基础字段同步。',
+  'demo.loading.modal.auditLong':
+    '本次返回了更长的处理记录，用来确认固定高度弹窗内的内容区域可以独立滚动。',
   'demo.loading.form.title': '编辑表单加载',
   'demo.loading.form.configName': '配置名称',
   'demo.loading.form.owner': '负责人',

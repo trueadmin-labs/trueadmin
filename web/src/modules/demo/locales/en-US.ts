@@ -44,6 +44,18 @@ export default {
     'When a drawer fetches details after opening, only the drawer content should enter loading state.',
   'demo.loading.drawer.detailTitle': 'Detail drawer',
   'demo.loading.drawer.tip': 'Loading drawer data',
+  'demo.loading.modal.title': 'Modal loading',
+  'demo.loading.modal.open': 'Open modal',
+  'demo.loading.modal.description':
+    'The modal body keeps a fixed height while content scrolls inside it. The spinner is centered against the fixed viewport.',
+  'demo.loading.modal.detailTitle': 'Modal details',
+  'demo.loading.modal.tip': 'Loading modal content',
+  'demo.loading.modal.reload': 'Refresh content',
+  'demo.loading.modal.close': 'Close',
+  'demo.loading.modal.auditRecord': 'Audit record',
+  'demo.loading.modal.auditShort': 'Basic fields have been synchronized.',
+  'demo.loading.modal.auditLong':
+    'This response includes longer audit records so the fixed-height modal content area can be checked for independent scrolling.',
   'demo.loading.form.title': 'Edit form loading',
   'demo.loading.form.configName': 'Config name',
   'demo.loading.form.owner': 'Owner',

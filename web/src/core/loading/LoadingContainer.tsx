@@ -7,11 +7,15 @@ import { useLayoutStore } from '@/core/store/layoutStore';
 
 export type LoadingContainerMode = 'spin' | 'none';
 
+export type LoadingContainerLayout = 'content' | 'viewport';
+
 export type LoadingContainerProps = {
   loading?: boolean;
   children: ReactNode;
   tip?: ReactNode;
   initialLoadingHeight?: number | string;
+  viewportHeight?: number | string;
+  layout?: LoadingContainerLayout;
   mode?: LoadingContainerMode;
   fallback?: ReactNode;
   keepChildren?: boolean;
@@ -39,6 +43,8 @@ export function LoadingContainer({
   children,
   tip,
   initialLoadingHeight,
+  viewportHeight,
+  layout = 'content',
   mode = 'spin',
   fallback,
   keepChildren = false,
@@ -59,9 +65,12 @@ export function LoadingContainer({
   const loadingHeight = initialLoadingHeight;
   const loadingHeightValue = loadingHeight === undefined ? undefined : toSizeValue(loadingHeight);
   const loadingHeightPixels = loadingHeight === undefined ? undefined : toPixelValue(loadingHeight);
+  const viewportHeightValue =
+    viewportHeight === undefined ? undefined : toSizeValue(viewportHeight);
+  const isViewportLayout = layout === 'viewport';
   const isLoadingVisible = loading && mode !== 'none';
-  const shouldReserveHeight = reserveHeight ?? true;
-  const shouldAnimateHeight = animateHeight && shouldReserveHeight;
+  const shouldReserveHeight = isViewportLayout ? false : (reserveHeight ?? true);
+  const shouldAnimateHeight = !isViewportLayout && animateHeight && shouldReserveHeight;
 
   useLayoutEffect(() => {
     const contentElement = contentRef.current;
@@ -111,6 +120,7 @@ export function LoadingContainer({
   const rootStateClassName = [
     rootClassName,
     isLoadingVisible ? 'is-loading' : '',
+    isViewportLayout ? 'is-viewport' : 'is-content-height',
     isHeightReserved ? 'is-reserving-height' : '',
   ]
     .filter(Boolean)
@@ -120,8 +130,9 @@ export function LoadingContainer({
     '--trueadmin-loading-placeholder-height': shouldUseLoadingHeight
       ? loadingHeightValue
       : undefined,
+    '--trueadmin-loading-viewport-height': viewportHeightValue,
   } as CSSProperties;
-  const stableStyle = shouldReserveHeight ? rootStyle : style;
+  const stableStyle = isViewportLayout || shouldReserveHeight ? rootStyle : style;
   const loadingNode = fallback ?? (
     <div className="trueadmin-loading-container-spin">
       <Spin />
@@ -134,6 +145,7 @@ export function LoadingContainer({
       initial={false}
       animate={{ opacity: isLoadingVisible ? 1 : 0 }}
       transition={transition}
+      style={{ pointerEvents: isLoadingVisible ? 'auto' : 'none' }}
     >
       {loadingNode}
     </motion.div>

@@ -1,5 +1,16 @@
 import { ReloadOutlined } from '@ant-design/icons';
-import { Button, Card, Descriptions, Drawer, Form, Input, Space, Switch, Typography } from 'antd';
+import {
+  Button,
+  Card,
+  Descriptions,
+  Drawer,
+  Form,
+  Input,
+  Modal,
+  Space,
+  Switch,
+  Typography,
+} from 'antd';
 import { useEffect, useState } from 'react';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { LoadingContainer } from '@/core/loading/LoadingContainer';
@@ -90,6 +101,39 @@ function ProfileDescriptions({
   );
 }
 
+function ModalProfileContent({
+  profile,
+  version,
+  t,
+}: {
+  profile: DemoProfile;
+  version: number;
+  t: (key?: string, fallback?: string) => string;
+}) {
+  const recordCount = version % 2 === 0 ? 4 : 9;
+
+  return (
+    <Space direction="vertical" size={12} style={{ width: '100%' }}>
+      <ProfileDescriptions profile={profile} t={t} />
+      <Descriptions size="small" column={1} bordered>
+        {Array.from({ length: recordCount }).map((_, index) => (
+          <Descriptions.Item
+            key={index}
+            label={`${t('demo.loading.modal.auditRecord', '处理记录')} ${index + 1}`}
+          >
+            {version % 2 === 0
+              ? t('demo.loading.modal.auditShort', '已完成基础字段同步。')
+              : t(
+                  'demo.loading.modal.auditLong',
+                  '本次返回了更长的处理记录，用来确认固定高度弹窗内的内容区域可以独立滚动。',
+                )}
+          </Descriptions.Item>
+        ))}
+      </Descriptions>
+    </Space>
+  );
+}
+
 export default function LoadingExamplePage() {
   const { t } = useI18n();
   const [version, setVersion] = useState(1);
@@ -99,6 +143,10 @@ export default function LoadingExamplePage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerLoading, setDrawerLoading] = useState(false);
   const [drawerProfile, setDrawerProfile] = useState<DemoProfile | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalLoading, setModalLoading] = useState(false);
+  const [modalVersion, setModalVersion] = useState(2);
+  const [modalProfile, setModalProfile] = useState<DemoProfile | null>(null);
   const [keepChildren, setKeepChildren] = useState(true);
   const [disableLoading, setDisableLoading] = useState(false);
 
@@ -135,6 +183,24 @@ export default function LoadingExamplePage() {
       setDrawerProfile(createProfile(version + 10, t));
       setDrawerLoading(false);
     });
+  };
+
+  const loadModalProfile = async (nextVersion: number) => {
+    setModalLoading(true);
+    await wait(800);
+    setModalVersion(nextVersion);
+    setModalProfile(createProfile(nextVersion, t));
+    setModalLoading(false);
+  };
+
+  const openModal = () => {
+    setModalOpen(true);
+    setModalProfile(null);
+    void loadModalProfile(modalVersion);
+  };
+
+  const reloadModalProfile = () => {
+    void loadModalProfile(modalVersion + 1);
   };
 
   const effectiveLoading = disableLoading ? false : detailLoading || refreshing;
@@ -201,6 +267,23 @@ export default function LoadingExamplePage() {
           </Paragraph>
         </Card>
 
+        <Card
+          title={t('demo.loading.modal.title', '弹窗内加载')}
+          size="small"
+          extra={
+            <Button type="primary" onClick={openModal}>
+              {t('demo.loading.modal.open', '打开弹窗')}
+            </Button>
+          }
+        >
+          <Paragraph>
+            {t(
+              'demo.loading.modal.description',
+              '弹窗 body 固定高度，内容区域内部滚动；加载动画基于固定视窗居中展示。',
+            )}
+          </Paragraph>
+        </Card>
+
         <Card title={t('demo.loading.form.title', '编辑表单加载')} size="small">
           <LoadingContainer loading={effectiveLoading} initialLoadingHeight={220}>
             <Form className="trueadmin-demo-loading-form" layout="vertical" disabled={!profile}>
@@ -214,6 +297,39 @@ export default function LoadingExamplePage() {
           </LoadingContainer>
         </Card>
       </Space>
+
+      <Modal
+        title={t('demo.loading.modal.detailTitle', '弹窗详情')}
+        open={modalOpen}
+        onCancel={() => setModalOpen(false)}
+        width={520}
+        footer={[
+          <Button
+            key="reload"
+            icon={<ReloadOutlined />}
+            loading={modalLoading}
+            onClick={reloadModalProfile}
+          >
+            {t('demo.loading.modal.reload', '刷新内容')}
+          </Button>,
+          <Button key="close" type="primary" onClick={() => setModalOpen(false)}>
+            {t('demo.loading.modal.close', '关闭')}
+          </Button>,
+        ]}
+      >
+        <LoadingContainer
+          loading={modalLoading}
+          layout="viewport"
+          viewportHeight={320}
+          tip={t('demo.loading.modal.tip', '正在加载弹窗内容')}
+        >
+          <div className="trueadmin-demo-modal-loading-content">
+            {modalProfile ? (
+              <ModalProfileContent profile={modalProfile} version={modalVersion} t={t} />
+            ) : null}
+          </div>
+        </LoadingContainer>
+      </Modal>
 
       <Drawer
         title={t('demo.loading.drawer.detailTitle', '详情抽屉')}
