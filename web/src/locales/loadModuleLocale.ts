@@ -5,7 +5,7 @@ type ModuleLocaleMessages = { default: Record<string, string> };
 type ModuleLocaleLoader = () => Promise<ModuleLocaleMessages>;
 
 const moduleLocaleLoaders = import.meta.glob<ModuleLocaleMessages>(
-  '../../modules/*/locales/*.ts',
+  '../modules/*/locales/*.ts',
 );
 const loadedModuleLocales = new Set<string>();
 
@@ -14,7 +14,7 @@ function getModuleLocaleLoader(
   locale: string,
 ): ModuleLocaleLoader | undefined {
   return moduleLocaleLoaders[
-    `../../modules/${moduleName}/locales/${locale}.ts`
+    `../modules/${moduleName}/locales/${locale}.ts`
   ] as ModuleLocaleLoader | undefined;
 }
 

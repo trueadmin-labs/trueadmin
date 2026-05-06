@@ -3,7 +3,7 @@ import { LoginForm, ProFormCheckbox, ProFormText } from '@ant-design/pro-compone
 import { Helmet, SelectLang, useIntl, useModel } from '@umijs/max';
 import { Alert, App } from 'antd';
 import { createStyles } from 'antd-style';
-import { useModuleLocale } from '@/foundation/locale/useModuleLocale';
+import { useModuleLocale } from '@/locales/useModuleLocale';
 import React, { useState } from 'react';
 import { flushSync } from 'react-dom';
 import { Footer } from '@/foundation/layout/components';

@@ -32,8 +32,7 @@ src/
     menu/                 后端菜单转换
     layout/components/    布局级组件
     exception/pages/      403、404、500
-    locale/framework/     框架级语言包
-    router/               路由类型与模块路由聚合生成物
+    router/               路由类型
   modules/
     auth/
       pages/Login/
@@ -58,13 +57,16 @@ src/
       locales/
       components/
       hooks/
-  locales/                Umi 国际化入口目录，整目录自动生成且不进 git
+  locales/                Umi 国际化源码目录，纳入 git
+    framework/            框架级语言包
+    loadModuleLocale.ts   模块语言按需加载
+    useModuleLocale.ts    模块语言加载 Hook
   generated/openapi/      OpenAPI 生成代码预留
 ```
 
 约定：业务模块自己维护页面、手写 API、类型、多语言、模块内组件和 Hooks；框架层能力才放入 `foundation`；OpenAPI 生成代码后续统一放入 `src/generated/openapi`，不和手写模块 API 混放。
 
-多语言规则：模块业务 key 放在 `src/modules/<module>/locales/<locale>.ts`，框架级 key 放在 `src/foundation/locale/framework`。`src/locales` 整个目录只是 Umi locale 插件需要的薄入口生成物，不纳入 git；模块语言由 `loadModuleLocale()` 通过 `import.meta.glob` 直接扫描并按需加载。新增模块时只需要新增模块自己的语言文件。
+多语言规则：`src/locales` 是 Umi 约定的国际化源码目录，整体纳入 git；框架级 key 放在 `src/locales/framework`，入口文件是 `src/locales/zh-CN.ts`、`src/locales/en-US.ts`。模块业务 key 仍放在 `src/modules/<module>/locales/<locale>.ts`，由 `src/locales/loadModuleLocale.ts` 通过 `import.meta.glob` 直接扫描并按需加载。新增模块时只需要新增模块自己的语言文件。
 
 路由规则：模块路由放在 `src/modules/<module>/routes.ts`，由模块自己维护页面路径、菜单名、图标和重定向。`config/routes.ts` 在 Umi 配置阶段直接扫描模块路由，只补根路径跳转和 404。新增模块时不修改 `config/routes.ts`，也不需要生成路由聚合文件。
 

@@ -1,7 +1,7 @@
 import { PageContainer, ProCard, StatisticCard } from '@ant-design/pro-components';
 import { useModel } from '@umijs/max';
 import { Col, Row, Typography } from 'antd';
-import { useModuleLocale } from '@/foundation/locale/useModuleLocale';
+import { useModuleLocale } from '@/locales/useModuleLocale';
 import React from 'react';
 
 const Dashboard: React.FC = () => {

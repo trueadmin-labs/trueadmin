@@ -5,7 +5,7 @@ import { Button, Form, Input, Modal, Popconfirm, Select, Space, Tag, Tree, messa
 import type { TreeDataNode } from 'antd';
 import { useModel } from '@umijs/max';
 import { hasPermission } from '@/foundation/auth/permissions';
-import { useModuleLocale } from '@/foundation/locale/useModuleLocale';
+import { useModuleLocale } from '@/locales/useModuleLocale';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   adminMenus,
