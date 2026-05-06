@@ -45,12 +45,41 @@ TrueAdmin 默认优先使用 PostgreSQL，后端通过 Hyperf 官方扩展包 `h
 
 ## 后续补充
 
-当后端和 Web 应用初始化后，本文件应继续补充：
+当 Web 应用初始化后，本文件应继续补充实际启动命令和常见问题：
 
 - Web 启动命令。
 - 移动端启动命令。
-- 数据迁移命令。
 - 常见问题。
+
+## Web 管理端
+
+当前 `web/` 目录处于清空待初始化状态。实现前必须先阅读 [前端架构](../frontend/index.md)，按自研模块化底座初始化，不直接使用 Ant Design Pro v6 官方工程作为项目底座。
+
+前端包管理器固定为 pnpm，只提交 `pnpm-lock.yaml`，禁止提交 `package-lock.json` 和 `yarn.lock`。
+
+前端命令必须显式指定 Vite mode，推荐脚本：
+
+```json
+{
+  "dev": "vite --mode development",
+  "dev:test": "vite --mode test",
+  "build": "vite build --mode production",
+  "build:test": "vite build --mode test",
+  "preview": "vite preview --host 0.0.0.0 --port 8000",
+  "lint": "biome lint",
+  "format": "biome check --write",
+  "typecheck": "tsc --noEmit",
+  "check": "pnpm lint && pnpm typecheck && pnpm build"
+}
+```
+
+前端 env 遵循 Vite 官方优先级：
+
+```text
+.env.[mode].local > .env.[mode] > .env.local > .env
+```
+
+业务代码禁止直接读取 `import.meta.env`，必须通过 `web/config` 读取结构化配置。
 
 ## 后端启动
 

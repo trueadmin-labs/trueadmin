@@ -13,8 +13,9 @@ Before changing files, read these documents in order:
 3. `README.md`
 4. `docs/architecture/index.md`
 5. `docs/backend/index.md`
-6. `docs/api/index.md`
-7. `docs/ai/ai-development-guide.md`
+6. `docs/frontend/index.md`
+7. `docs/api/index.md`
+8. `docs/ai/ai-development-guide.md`
 
 ## Current Goal
 
@@ -23,13 +24,13 @@ Build TrueAdmin into an open-source enterprise admin scaffold inspired by the fu
 Confirmed stack:
 
 - Backend: PHP + Hyperf + PostgreSQL + Redis + JWT + OpenAPI/Swagger.
-- Web: React + Umi Max + TypeScript + Ant Design Pro + Ant Design.
+- Web: Vite + React + TypeScript + React Router + Ant Design 6 + ProComponents 3 + TanStack Query + alova + Zustand.
 - Mobile: uni-app + Vue 3 + TypeScript + Wot UI.
 - Architecture: Monorepo with modular monolith backend.
 
 ## Current Repository State
 
-The repository contains the Monorepo foundation, a runnable Hyperf backend scaffold, backend module examples, kernel primitives, local infrastructure configuration, OpenAPI entry files, and structured documentation. Web and Mobile application code are still reserved for later phases.
+The repository contains the Monorepo foundation, a runnable Hyperf backend scaffold, backend module examples, kernel primitives, local infrastructure configuration, OpenAPI entry files, and structured documentation. Web is currently cleared and must be initialized according to docs/frontend before implementation. Mobile application code is still reserved for later phases.
 
 Initial commit:
 

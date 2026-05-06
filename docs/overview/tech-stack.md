@@ -19,14 +19,20 @@ PostgreSQL 适合组织权限、流程、审计和复杂查询场景。Redis 用
 
 ## Web 管理端
 
-Web 管理端使用 React + Umi Max + TypeScript + Ant Design Pro + Ant Design。
+Web 管理端使用 Vite + React + TypeScript + React Router + Ant Design 6 + ProComponents 3 + TanStack Query + alova + Zustand + MSW + Tailwind v4 + antd-style。
 
 选择理由：
 
-- Ant Design 对企业后台场景支持成熟。
-- React 生态适合构建复杂管理界面。
-- Umi Max 和 Ant Design Pro 提供成熟的后台布局、路由、权限、请求、国际化和 OpenAPI 生成能力。
-- TypeScript 能提升接口契约和 AI 生成代码的稳定性。
+- Vite 保持前端工程轻量、直接，便于人和 AI 理解模块化底座。
+- Ant Design 6 和 ProComponents 3 承载企业后台组件、ProLayout、PageContainer 和 CRUD 基础组件能力。
+- React Router 负责前端页面路由，后端 menu-tree 负责菜单运行时展示。
+- TanStack Query 管理服务端状态缓存，alova 负责 HTTP 方法、响应解包和错误转换。
+- Zustand 管理纯前端 UI 状态和本地偏好，不承载服务端数据缓存。
+- MSW 只保留最小开发 Mock，默认优先真实后端。
+- Tailwind v4 用于布局、间距和响应式，antd-style 用于消费 Ant Design token 的框架样式。
+- TypeScript 能提升接口契约、模块 manifest 和 AI 生成代码的稳定性。
+
+Ant Design Pro v6 是布局、主题和交互参考，不作为 Web 工程底座；MineAdmin 是模块化、插件化、菜单权限和 CRUD 工作流参考。前端详细规范见 [前端架构](../frontend/index.md)。
 
 ## 移动端
 

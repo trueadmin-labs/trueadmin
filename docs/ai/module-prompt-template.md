@@ -10,6 +10,7 @@
 - docs/README.md
 - docs/architecture/index.md
 - docs/backend/index.md
+- docs/frontend/index.md（如果本次涉及 Web）
 - docs/api/api-conventions.md
 - docs/ai/ai-development-guide.md
 - docs/ai/golden-crud-module.md（如果本次是标准后台 CRUD）
@@ -20,7 +21,7 @@
 
 技术范围：
 - 后端：Hyperf
-- Web：React + Umi Max + Ant Design Pro + Ant Design
+- Web：Vite + React + React Router + Ant Design 6 + ProComponents 3 + TanStack Query + alova + Zustand
 - 移动端：本次是否涉及
 
 主要实体：

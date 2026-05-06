@@ -16,7 +16,7 @@ TrueAdmin 是一个面向 AI 协作开发的企业级后台管理脚手架。它
 ## 技术栈
 
 - 后端：PHP、Hyperf、PostgreSQL、MySQL 兼容、Redis、JWT、OpenAPI。
-- Web 管理端：React、Umi Max、TypeScript、Ant Design Pro、Ant Design。
+- Web 管理端：Vite、React、TypeScript、React Router、Ant Design 6、ProComponents 3、TanStack Query、alova、Zustand、MSW、Tailwind v4、antd-style。
 - 移动端：uni-app、Vue 3、TypeScript、Wot UI。
 - 本地基础设施：Docker Compose、PostgreSQL、Redis。
 - 接口风格：RESTful API + OpenAPI/Swagger。
@@ -38,7 +38,7 @@ TrueAdmin 是一个面向 AI 协作开发的企业级后台管理脚手架。它
 ```text
 Monorepo
 Hyperf backend
-React + Umi Max admin web
+Vite + React modular admin web
 uni-app mobile
 packages/kernel
 backend/app/Foundation

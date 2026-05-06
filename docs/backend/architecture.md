@@ -987,33 +987,16 @@ sync permissions
 
 ## 18. Web 管理端架构
 
-Web 管理端技术栈：
+Web 管理端采用自研模块化前端底座，复用 Ant Design 6 和 ProComponents 3 的成熟后台组件能力。Ant Design Pro v6 作为布局、主题和交互体验参考，不作为工程底座；MineAdmin 作为模块化、插件化、菜单权限、CRUD 工作流和后台工作区体验参考。
 
-```text
-React + Umi Max + TypeScript + Ant Design Pro + Ant Design
-```
+后端与前端的边界如下：
 
-建议目录：
-
-```text
-web/src/app.tsx
-web/src/core
-web/src/modules/<module>/pages
-web/src/modules/<module>/services
-web/src/modules/<module>/types
-web/src/modules/<module>/locales
-web/src/locales
-```
-
-`web` 本身就是后台管理端，目录内不再重复划分 `admin` / `client`。业务页面、手写 API、类型、路由和模块多语言由各自模块维护；应用核心能力放入 `core`；`config/routes.ts` 直接扫描 `src/modules/*/routes.ts`；`src/locales` 是纳入 git 的 Umi 国际化源码目录，负责框架语言包和模块语言按需加载运行时；模块语言通过 `import.meta.glob` 按需加载；未来插件可以按同样的前端模块结构注册页面、菜单和语言包。
-
-Web 端必须支持：
-
-- 动态菜单。
-- 动态路由。
-- 按钮权限。
-- OpenAPI 类型生成。
-- 标准 CRUD 页面生成。
+- 后端负责菜单、权限、按钮、接口元数据的注册和运行时配置。
+- 前端 manifest 负责 `path -> component`、locales、图标和前端扩展能力。
+- 后端 menu-tree 下发 `path`、`i18n`、fallback `title` 和 icon key，前端根据 path 匹配页面组件。
+- 权限点由后端注册和校验，前端只消费 `/api/admin/auth/me` 返回的 permissions 控制按钮显示。
+- 错误 message 由后端按 `Accept-Language` 返回，前端默认展示 message 并保留按 code 特殊处理能力。
+Web 管理端的完整架构、目录、配置、模块、插件、CRUD、布局、WorkspaceViewport、国际化、Mock、测试和第一版落地范围见 [前端架构](../frontend/index.md)。
 
 ## 19. 移动端架构
 
