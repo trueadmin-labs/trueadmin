@@ -11,13 +11,14 @@ import { useState } from 'react';
 import { type LayoutMode, useLayoutStore } from '@/core/store/layoutStore';
 
 const colorPresets = [
-  { label: '拂晓蓝', value: '#1677ff' },
-  { label: '薄暮', value: '#f5222d' },
-  { label: '火山', value: '#fa541c' },
-  { label: '日暮', value: '#faad14' },
-  { label: '极光绿', value: '#52c41a' },
-  { label: '明青', value: '#13c2c2' },
-  { label: '酱紫', value: '#722ed1' },
+  { label: '商务蓝', value: '#2f54eb' },
+  { label: '深海蓝', value: '#1d39c4' },
+  { label: '典雅黑', value: '#334155' },
+  { label: '湖泊青', value: '#08979c' },
+  { label: '松石绿', value: '#237804' },
+  { label: '冷杉绿', value: '#0f766e' },
+  { label: '沉稳靛', value: '#4338ca' },
+  { label: '石墨紫', value: '#531dab' },
 ];
 
 const layoutOptions: Array<{

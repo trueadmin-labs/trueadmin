@@ -187,8 +187,8 @@ body,
 }
 
 .trueadmin-shell.is-dark .trueadmin-shell-menu-scroll .ant-menu-dark .ant-menu-item-selected {
-  color: rgba(255, 255, 255, 0.95);
-  background: rgba(255, 255, 255, 0.04);
+  color: var(--trueadmin-color-primary-text, rgba(255, 255, 255, 0.95));
+  background: var(--trueadmin-color-primary-bg, rgba(255, 255, 255, 0.04));
 }
 
 .trueadmin-shell.is-dark
@@ -196,8 +196,8 @@ body,
   .ant-menu-dark
   .ant-menu-item:not(.ant-menu-item-selected):hover,
 .trueadmin-shell.is-dark .trueadmin-shell-menu-scroll .ant-menu-dark .ant-menu-submenu-title:hover {
-  color: rgba(255, 255, 255, 0.95);
-  background: rgba(255, 255, 255, 0.03);
+  color: var(--trueadmin-color-primary-text-hover, rgba(255, 255, 255, 0.95));
+  background: var(--trueadmin-color-primary-bg-hover, rgba(255, 255, 255, 0.03));
 }
 
 .trueadmin-shell-main.ant-layout {
@@ -521,15 +521,15 @@ body,
 }
 
 .trueadmin-shell.is-dark .trueadmin-shell-root-menu.ant-menu-dark .ant-menu-item-selected {
-  color: rgba(255, 255, 255, 0.95);
-  background: rgba(255, 255, 255, 0.04);
+  color: var(--trueadmin-color-primary-text, rgba(255, 255, 255, 0.95));
+  background: var(--trueadmin-color-primary-bg, rgba(255, 255, 255, 0.04));
 }
 
 .trueadmin-shell.is-dark
   .trueadmin-shell-root-menu.ant-menu-dark
   .ant-menu-item:not(.ant-menu-item-selected):hover {
-  color: rgba(255, 255, 255, 0.95);
-  background: rgba(255, 255, 255, 0.03);
+  color: var(--trueadmin-color-primary-text-hover, rgba(255, 255, 255, 0.95));
+  background: var(--trueadmin-color-primary-bg-hover, rgba(255, 255, 255, 0.03));
 }
 
 .trueadmin-shell.is-dark .trueadmin-shell-collapse-button.ant-btn,
@@ -1395,10 +1395,13 @@ body,
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  color: #1677ff;
+  color: var(--trueadmin-color-primary, #1677ff);
   font-size: 10px;
   line-height: 1;
-  background: rgba(22, 119, 255, 0.1);
+  background-color: var(--trueadmin-color-primary-bg, rgba(22, 119, 255, 0.1));
+  transition:
+    background-color 0.18s cubic-bezier(0.2, 0, 0, 1),
+    color 0.18s cubic-bezier(0.2, 0, 0, 1);
   pointer-events: none;
 }
 
