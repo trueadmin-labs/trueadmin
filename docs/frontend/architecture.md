@@ -173,6 +173,38 @@ CRUD 组件支持按 `resource` 推导常见权限，例如 `system.user.create`
 
 前端默认展示后端 `message`，也可以按 `code` 做特殊交互。
 
+## 弹窗生命周期
+
+所有基于 Ant Design `Modal`、`Drawer` 或 ProComponents `ModalForm`、`DrawerForm` 的弹层，都必须把 `open` 状态和业务数据状态分离。关闭弹窗时只允许先把 `open` 设置为 `false`，等待组件关闭动画完成后，再在 `afterOpenChange(false)`、`afterOpenChange` 等动画结束回调中清理业务数据。
+
+禁止使用 `{open && <Modal />}` 或关闭时立即 `setPayload(null)` 导致弹窗组件被 React 直接卸载。提前卸载会跳过 Ant Design 内置的 `zoom/fade` leave 动画，表现为弹窗打开有动画、关闭瞬间消失。
+
+推荐模式：
+
+```tsx
+const [open, setOpen] = useState(false);
+const [payload, setPayload] = useState<Payload | null>(null);
+
+const showModal = (nextPayload: Payload) => {
+  setPayload(nextPayload);
+  setOpen(true);
+};
+
+<Modal
+  open={open}
+  onCancel={() => setOpen(false)}
+  afterOpenChange={(nextOpen) => {
+    if (!nextOpen) {
+      setPayload(null);
+    }
+  }}
+>
+  {payload ? <ModalContent payload={payload} /> : null}
+</Modal>;
+```
+
+如果需要关闭后销毁复杂内容，优先使用 Ant Design 的 `destroyOnHidden`，让 Ant Design 在隐藏完成后销毁子内容，不要由外层条件渲染提前卸载整个弹窗。错误弹窗、表单弹窗、详情弹窗、确认弹窗和模块自定义弹窗都必须遵守这一规则。
+
 ## 布局、页面和工作区
 
 布局采用 Ant Design Pro 基础布局 + 可插拔工作区增强。默认基础能力包括 ProLayout、RightContent、AvatarDropdown、Footer、SettingDrawer 和 PageContainer。可选工作区增强包括 RouteTabs、KeepAlive、PageRefresh、Fullscreen 和 Breadcrumb 增强。第一版默认不实现 KeepAlive，不默认开启 RouteTabs。

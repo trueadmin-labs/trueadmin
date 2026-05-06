@@ -1,0 +1,96 @@
+import { requestConfig } from '@config/index';
+import { createAlova } from 'alova';
+import { ApiError } from '@/core/error/ApiError';
+import { useLocaleStore } from '@/core/store/localeStore';
+import type { ApiEnvelope } from './types';
+
+const isSuccessCode = (code: string | number): boolean =>
+  code === 0 || code === '0' || code === 'SUCCESS' || code === 'KERNEL.SUCCESS';
+
+export const http = createAlova({
+  baseURL: requestConfig.baseURL,
+  timeout: requestConfig.timeout,
+  requestAdapter: (elements) => {
+    const controller = new AbortController();
+    const headers = new Headers(elements.headers as HeadersInit | undefined);
+    const locale = useLocaleStore.getState().locale;
+
+    headers.set('Accept-Language', locale);
+    headers.set('X-Page-Path', window.location.pathname);
+
+    const token = localStorage.getItem('trueadmin.accessToken');
+    if (token && !headers.has('Authorization')) {
+      headers.set('Authorization', ['Bearer', token].join(' '));
+    }
+
+    if (!(elements.data instanceof FormData) && !headers.has('Content-Type')) {
+      headers.set('Content-Type', 'application/json');
+    }
+
+    const body =
+      elements.data instanceof FormData
+        ? elements.data
+        : JSON.stringify(elements.data ?? undefined);
+
+    const response = () =>
+      fetch(elements.url, {
+        method: elements.type,
+        headers,
+        body: ['GET', 'HEAD'].includes(elements.type) ? undefined : body,
+        credentials: 'include',
+        signal: controller.signal,
+      });
+
+    return {
+      response,
+      headers: async () => (await response()).headers,
+      abort: () => controller.abort(),
+    };
+  },
+  responded: {
+    onSuccess: async (response: Response, method) => {
+      const contentType = response.headers.get('content-type') ?? '';
+      const payload = contentType.includes('application/json')
+        ? await response.json()
+        : await response.text();
+
+      if (!response.ok) {
+        const message =
+          typeof payload === 'object' && payload !== null && 'message' in payload
+            ? String(payload.message)
+            : response.statusText;
+        const code =
+          typeof payload === 'object' && payload !== null && 'code' in payload
+            ? String(payload.code)
+            : `HTTP.${response.status}`;
+        throw new ApiError(code, message, response.status, payload);
+      }
+
+      const envelope = payload as ApiEnvelope<unknown>;
+      if (
+        typeof envelope === 'object' &&
+        envelope !== null &&
+        'code' in envelope &&
+        !isSuccessCode(envelope.code)
+      ) {
+        throw new ApiError(
+          String(envelope.code),
+          envelope.message || '请求失败',
+          response.status,
+          envelope,
+        );
+      }
+
+      if (method.meta?.raw) {
+        return payload;
+      }
+
+      return typeof envelope === 'object' && envelope !== null && 'data' in envelope
+        ? envelope.data
+        : payload;
+    },
+    onError: (error) => {
+      throw error;
+    },
+  },
+});

@@ -1,0 +1,55 @@
+{
+  "name": "@trueadmin/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.10.0",
+  "scripts": {
+    "dev": "vite --mode development --host 0.0.0.0",
+    "dev:test": "vite --mode test --host 0.0.0.0",
+    "build": "tsc -b && vite build --mode production",
+    "build:test": "tsc -b && vite build --mode test",
+    "preview": "vite preview --host 0.0.0.0",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "typecheck": "tsc -b --pretty false",
+    "check": "pnpm lint && pnpm typecheck && pnpm build",
+    "test:run": "vitest run"
+  },
+  "dependencies": {
+    "@ant-design/icons": "latest",
+    "@ant-design/pro-components": "3.1.12-0",
+    "@tanstack/react-query": "latest",
+    "alova": "latest",
+    "antd": "latest",
+    "antd-style": "latest",
+    "dayjs": "latest",
+    "motion": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-error-boundary": "^6.1.1",
+    "react-router": "latest",
+    "zustand": "latest"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "latest",
+    "@tailwindcss/vite": "latest",
+    "@testing-library/jest-dom": "latest",
+    "@testing-library/react": "latest",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "@vitejs/plugin-react": "latest",
+    "jsdom": "latest",
+    "msw": "latest",
+    "tailwindcss": "latest",
+    "typescript": "latest",
+    "vite": "latest",
+    "vitest": "latest"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
+  }
+}

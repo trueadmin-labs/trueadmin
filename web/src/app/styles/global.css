@@ -1,0 +1,553 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+  font-family:
+    "Alibaba PuHuiTi 3.0", "HarmonyOS Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #f5f7fb;
+  --trueadmin-page-bg: #f5f7fb;
+  --trueadmin-card-bg: #ffffff;
+  --trueadmin-border: #edf0f5;
+  --trueadmin-text-subtle: #667085;
+  --trueadmin-shadow-card: 0 1px 2px rgba(16, 24, 40, 0.04), 0 8px 24px rgba(16, 24, 40, 0.04);
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow: hidden;
+  background: var(--trueadmin-page-bg);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(145, 158, 171, 0.42) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(145, 158, 171, 0.35);
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 115, 129, 0.45);
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.trueadmin-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  font-weight: 600;
+}
+
+.trueadmin-brand-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #1677ff 0%, #1455d9 100%);
+  box-shadow: 0 8px 18px rgba(22, 119, 255, 0.22);
+}
+
+.trueadmin-brand-text {
+  color: rgba(0, 0, 0, 0.88);
+  font-size: 16px;
+  letter-spacing: -0.01em;
+}
+
+.trueadmin-menu-button {
+  display: inline-flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  background: transparent;
+  cursor: pointer;
+}
+
+.trueadmin-avatar-dropdown {
+  height: 40px;
+  cursor: pointer;
+  padding: 0 10px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.trueadmin-avatar-dropdown:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.trueadmin-workspace-viewport {
+  min-height: calc(100vh - 96px);
+}
+
+.ant-pro-layout .ant-layout-header,
+.ant-pro-layout .ant-pro-global-header {
+  border-bottom: 1px solid var(--trueadmin-border);
+  box-shadow: none;
+}
+
+.ant-pro-layout .ant-pro-sider,
+.ant-pro-layout .ant-layout-sider {
+  border-right: 1px solid var(--trueadmin-border);
+  box-shadow: none;
+}
+
+.ant-pro-layout .ant-pro-layout-container {
+  background: var(--trueadmin-page-bg);
+}
+
+.ant-pro-page-container {
+  min-height: calc(100vh - 64px);
+}
+
+.ant-pro-page-container-children-container {
+  padding-block-start: 16px;
+}
+
+.ant-pro-card,
+.ant-card,
+.ant-pro-table-search,
+.ant-pro-table .ant-pro-card {
+  border-color: var(--trueadmin-border);
+  border-radius: 12px;
+  box-shadow: var(--trueadmin-shadow-card);
+}
+
+.ant-table-wrapper .ant-table-thead > tr > th {
+  color: rgba(0, 0, 0, 0.68);
+  font-weight: 600;
+  background: #fafafa;
+}
+
+.ant-table-wrapper .ant-table-tbody > tr > td {
+  border-bottom-color: #f0f2f5;
+}
+
+.ant-table-wrapper .ant-table-tbody > tr:hover > td {
+  background: #f7fbff;
+}
+
+.trueadmin-error-modal-root .ant-modal-content {
+  overflow: hidden;
+  border: 1px solid rgba(5, 5, 5, 0.04);
+  border-radius: 16px;
+  box-shadow:
+    0 24px 64px rgba(15, 23, 42, 0.18),
+    0 4px 16px rgba(15, 23, 42, 0.08);
+}
+
+.trueadmin-error-modal-root .ant-modal-header {
+  margin-bottom: 0;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid rgba(5, 5, 5, 0.06);
+}
+
+.trueadmin-error-modal-root .ant-modal-body {
+  padding: 18px 20px 4px;
+}
+
+.trueadmin-error-modal-root .ant-modal-footer {
+  margin-top: 0;
+  padding: 14px 20px 20px;
+}
+
+.trueadmin-error-modal {
+  width: 100%;
+}
+
+.trueadmin-error-modal-hero {
+  position: relative;
+  display: flex;
+  gap: 16px;
+  overflow: hidden;
+  padding: 20px;
+  border: 1px solid rgba(5, 5, 5, 0.06);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #fafafa 0%, #fff 100%);
+}
+
+.trueadmin-error-modal-hero::after {
+  position: absolute;
+  inset: -80px -80px auto auto;
+  width: 180px;
+  height: 180px;
+  border-radius: 999px;
+  content: "";
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.trueadmin-error-modal-hero.is-error {
+  border-color: #ffd8d6;
+  background: linear-gradient(180deg, #fff7f6 0%, #fff 72%);
+}
+
+.trueadmin-error-modal-hero.is-error::after {
+  background: radial-gradient(circle, rgba(255, 77, 79, 0.16), transparent 68%);
+}
+
+.trueadmin-error-modal-hero.is-warning {
+  border-color: #ffe7ba;
+  background: linear-gradient(180deg, #fffaf0 0%, #fff 72%);
+}
+
+.trueadmin-error-modal-hero.is-warning::after {
+  background: radial-gradient(circle, rgba(250, 173, 20, 0.18), transparent 68%);
+}
+
+.trueadmin-error-modal-hero.is-info {
+  border-color: #bae0ff;
+  background: linear-gradient(180deg, #f0f7ff 0%, #fff 72%);
+}
+
+.trueadmin-error-modal-hero.is-info::after {
+  background: radial-gradient(circle, rgba(22, 119, 255, 0.16), transparent 68%);
+}
+
+.trueadmin-error-modal-icon {
+  position: relative;
+  z-index: 1;
+  display: inline-grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  font-size: 24px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow:
+    0 8px 20px rgba(16, 24, 40, 0.1),
+    inset 0 0 0 1px rgba(5, 5, 5, 0.04);
+}
+
+.trueadmin-error-modal-hero.is-error .trueadmin-error-modal-icon {
+  color: #ff4d4f;
+}
+
+.trueadmin-error-modal-hero.is-warning .trueadmin-error-modal-icon {
+  color: #faad14;
+}
+
+.trueadmin-error-modal-hero.is-info .trueadmin-error-modal-icon {
+  color: #1677ff;
+}
+
+.trueadmin-error-modal-summary {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  flex: 1;
+}
+
+.trueadmin-error-modal-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.trueadmin-error-modal-title-row .ant-tag {
+  margin-inline-end: 0;
+  margin-top: 3px;
+  border-radius: 999px;
+  font-weight: 500;
+  line-height: 22px;
+}
+
+.trueadmin-error-modal-summary .ant-typography {
+  margin-bottom: 0;
+}
+
+.trueadmin-error-modal-summary h4.ant-typography.trueadmin-error-modal-main-title {
+  margin: 2px 0 6px;
+  color: rgba(0, 0, 0, 0.88);
+  font-size: 18px;
+  line-height: 1.35;
+}
+
+.trueadmin-error-modal-message.ant-typography {
+  color: rgba(0, 0, 0, 0.56);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.trueadmin-error-modal-description {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: rgba(0, 0, 0, 0.72);
+  line-height: 1.7;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.trueadmin-error-modal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.trueadmin-error-modal-panel {
+  min-width: 0;
+  padding: 15px 16px;
+  border: 1px solid rgba(5, 5, 5, 0.06);
+  border-radius: 12px;
+  background: linear-gradient(180deg, #fff 0%, #fbfcfe 100%);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.03);
+}
+
+.trueadmin-error-modal-panel h5.ant-typography {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+  color: rgba(0, 0, 0, 0.82);
+  font-size: 14px;
+}
+
+.trueadmin-error-modal-panel h5.ant-typography .anticon {
+  color: #1677ff;
+}
+
+.trueadmin-error-modal-panel ul {
+  margin: 0;
+  padding-left: 18px;
+  color: rgba(0, 0, 0, 0.72);
+  line-height: 1.7;
+}
+
+.trueadmin-error-modal-panel li + li {
+  margin-top: 4px;
+}
+
+.trueadmin-error-modal-diagnostics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.trueadmin-error-modal-diagnostic-item {
+  min-width: 0;
+  padding: 11px 12px;
+  border: 1px solid rgba(5, 5, 5, 0.06);
+  border-radius: 11px;
+  background: #f8fafc;
+}
+
+.trueadmin-error-modal-diagnostic-item > span:first-child {
+  display: block;
+  margin-bottom: 5px;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 12px;
+}
+
+.trueadmin-error-modal-diagnostic-item .ant-typography {
+  max-width: 100%;
+  margin-bottom: 0;
+  color: rgba(0, 0, 0, 0.76);
+  font-size: 12px;
+}
+
+.trueadmin-error-modal-code-text {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  word-break: break-all;
+}
+
+.trueadmin-error-modal-root.is-dark .ant-modal-content {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: #141414;
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.42),
+    0 4px 16px rgba(0, 0, 0, 0.24);
+}
+
+.trueadmin-error-modal-root.is-dark .ant-modal-header {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+  background: #141414;
+}
+
+.trueadmin-error-modal-root.is-dark .trueadmin-error-modal-hero {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.055) 0%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+}
+
+.trueadmin-error-modal-root.is-dark .trueadmin-error-modal-hero.is-error {
+  border-color: rgba(255, 77, 79, 0.32);
+}
+
+.trueadmin-error-modal-root.is-dark .trueadmin-error-modal-hero.is-warning {
+  border-color: rgba(250, 173, 20, 0.34);
+}
+
+.trueadmin-error-modal-root.is-dark .trueadmin-error-modal-hero.is-info {
+  border-color: rgba(22, 119, 255, 0.32);
+}
+
+.trueadmin-error-modal-root.is-dark .trueadmin-error-modal-icon {
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.22),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.trueadmin-error-modal-root.is-dark
+  .trueadmin-error-modal-summary
+  h4.ant-typography.trueadmin-error-modal-main-title {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.trueadmin-error-modal-root.is-dark .trueadmin-error-modal-message.ant-typography,
+.trueadmin-error-modal-root.is-dark .trueadmin-error-modal-description,
+.trueadmin-error-modal-root.is-dark .trueadmin-error-modal-panel ul {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.trueadmin-error-modal-root.is-dark .trueadmin-error-modal-description {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.trueadmin-error-modal-root.is-dark .trueadmin-error-modal-panel {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.055) 0%,
+    rgba(255, 255, 255, 0.025) 100%
+  );
+}
+
+.trueadmin-error-modal-root.is-dark .trueadmin-error-modal-panel h5.ant-typography {
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.trueadmin-error-modal-root.is-dark .trueadmin-error-modal-diagnostic-item {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.trueadmin-error-modal-root.is-dark .trueadmin-error-modal-diagnostic-item > span:first-child {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.trueadmin-error-modal-root.is-dark .trueadmin-error-modal-diagnostic-item .ant-typography {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+@media (max-width: 640px) {
+  .trueadmin-error-modal-root.ant-modal {
+    max-width: calc(100vw - 24px);
+  }
+
+  .trueadmin-error-modal-hero {
+    padding: 16px;
+  }
+
+  .trueadmin-error-modal-title-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .trueadmin-error-modal-grid,
+  .trueadmin-error-modal-diagnostics {
+    grid-template-columns: 1fr;
+  }
+}
+
+.trueadmin-login-page {
+  position: relative;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 8% 12%, rgba(22, 119, 255, 0.1), transparent 28%),
+    radial-gradient(circle at 92% 14%, rgba(47, 84, 235, 0.08), transparent 26%),
+    linear-gradient(180deg, #f7f9fc 0%, #eef3fa 100%);
+}
+
+.trueadmin-login-page::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background-image:
+    linear-gradient(rgba(22, 119, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(22, 119, 255, 0.045) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.75), transparent 78%);
+  pointer-events: none;
+}
+
+.trueadmin-login-card {
+  position: relative;
+  z-index: 1;
+  width: min(420px, calc(100vw - 32px));
+}
+
+.trueadmin-login-card .ant-card {
+  overflow: hidden;
+  border: 1px solid rgba(230, 235, 245, 0.92);
+  border-radius: 16px;
+  box-shadow: 0 16px 48px rgba(15, 23, 42, 0.1);
+}
+
+.trueadmin-login-card .ant-card-body {
+  padding: 34px 34px 28px;
+}
+
+.trueadmin-login-card .ant-pro-form-login-container {
+  padding: 0;
+}
+
+.trueadmin-login-card .ant-pro-form-login-header {
+  margin-bottom: 24px;
+}
+
+.trueadmin-login-card .ant-pro-form-login-title {
+  color: rgba(0, 0, 0, 0.88);
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.trueadmin-login-card .ant-pro-form-login-desc {
+  color: var(--trueadmin-text-subtle);
+}
+
+.trueadmin-login-hint {
+  text-align: center;
+  margin-top: -8px;
+  margin-bottom: 18px;
+}
