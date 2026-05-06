@@ -2,6 +2,7 @@ import {
   AppstoreOutlined,
   DashboardOutlined,
   FileUnknownOutlined,
+  LockOutlined,
   SettingOutlined,
   TeamOutlined,
   UserOutlined,
@@ -13,6 +14,7 @@ export const defaultIcons = {
   system: <SettingOutlined />,
   team: <TeamOutlined />,
   user: <UserOutlined />,
+  lock: <LockOutlined />,
   app: <AppstoreOutlined />,
   fallback: <FileUnknownOutlined />,
 };

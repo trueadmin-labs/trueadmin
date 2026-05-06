@@ -16,3 +16,4 @@ export const pluginManifests = Object.values(pluginLoaders).map((module) => modu
 export const enabledManifests = [...moduleManifests, ...pluginManifests];
 
 export const frontendRoutes = enabledManifests.flatMap((manifest) => manifest.routes ?? []);
+export const frontendMenus = enabledManifests.flatMap((manifest) => manifest.menus ?? []);

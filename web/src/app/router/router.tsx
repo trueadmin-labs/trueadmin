@@ -7,6 +7,7 @@ import { ModuleMissing } from '@/app/layout/ModuleMissing';
 import { frontendRoutes } from '@/core/module/registry';
 
 const LoginPage = lazy(() => import('@/app/pages/LoginPage'));
+const ForbiddenPage = lazy(() => import('@/app/pages/ForbiddenPage'));
 
 const withSuspense = (element: React.ReactNode) => (
   <Suspense fallback={<Spin fullscreen description="正在进入页面" />}>{element}</Suspense>
@@ -22,6 +23,7 @@ export const router = createBrowserRouter([
     element: <AppLayout />,
     children: [
       { index: true, element: <Navigate to={appConfig.defaultHome} replace /> },
+      { path: '403', element: withSuspense(<ForbiddenPage />) },
       ...frontendRoutes.map((route) => {
         const Component = route.component;
         return {

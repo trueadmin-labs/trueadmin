@@ -46,6 +46,15 @@ export const coreMessages: Record<Locale, Record<string, string>> = {
     'error.builtin.unknown.description': '系统遇到了未识别的异常。',
     'error.builtin.unknown.suggestion.retry': '刷新页面后重试',
     'error.builtin.unknown.suggestion.contactAdmin': '如果仍然失败，请联系管理员并提供错误码',
+    'page.loading.status': '正在确认页面状态',
+    'page.notFound.title': '404',
+    'page.notFound.description': '页面不存在。',
+    'page.moduleMissing.title': '页面未安装',
+    'page.moduleMissing.description':
+      '当前路径 {{path}} 已由后端菜单下发，但前端模块还没有提供对应页面。',
+    'permission.forbidden.title': '无权访问',
+    'permission.forbidden.description': '当前账号没有访问此内容的权限。',
+    'permission.forbidden.pageDescription': '当前账号没有访问此页面的权限。',
   },
   'en-US': {
     'error.modal.title': 'Action not completed',
@@ -102,5 +111,16 @@ export const coreMessages: Record<Locale, Record<string, string>> = {
     'error.builtin.unknown.suggestion.retry': 'Refresh the page and try again.',
     'error.builtin.unknown.suggestion.contactAdmin':
       'If it still fails, contact an administrator with the error code.',
+    'page.loading.status': 'Checking page status',
+    'page.notFound.title': '404',
+    'page.notFound.description': 'Page not found.',
+    'page.moduleMissing.title': 'Page not installed',
+    'page.moduleMissing.description':
+      'The current path {{path}} was delivered by the backend menu, but no frontend module provides this page yet.',
+    'permission.forbidden.title': 'Access denied',
+    'permission.forbidden.description':
+      'Your account does not have permission to access this content.',
+    'permission.forbidden.pageDescription':
+      'Your account does not have permission to access this page.',
   },
 };

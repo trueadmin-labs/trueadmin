@@ -5,9 +5,10 @@ import { Outlet, useLocation, useNavigate } from 'react-router';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { IconRenderer } from '@/core/icon/IconRenderer';
 import { useMenuTreeQuery } from '@/core/menu/hooks';
+import { mergeFrontendMenus } from '@/core/menu/mergeFrontendMenus';
 import type { BackendMenu } from '@/core/menu/types';
 import { useLayoutStore } from '@/core/store/layoutStore';
-import { RightContent } from './RightContent';
+import { useHeaderActions } from './RightContent';
 
 const toMenuData = (
   menus: BackendMenu[] | undefined,
@@ -31,6 +32,8 @@ export function AppLayout() {
   const setCollapsed = useLayoutStore((state) => state.setCollapsed);
   const darkMode = useLayoutStore((state) => state.darkMode);
   const { data: menus, isLoading, error } = useMenuTreeQuery();
+  const headerActions = useHeaderActions();
+  const mergedMenus = mergeFrontendMenus(menus);
 
   if (isLoading) {
     return <Spin fullscreen description="正在加载工作台" />;
@@ -63,7 +66,7 @@ export function AppLayout() {
       collapsed={collapsed}
       onCollapse={setCollapsed}
       location={{ pathname: location.pathname }}
-      menuDataRender={() => toMenuData(menus, t)}
+      menuDataRender={() => toMenuData(mergedMenus, t)}
       menuItemRender={(item, dom) => (
         <button
           className="trueadmin-menu-button"
@@ -76,7 +79,7 @@ export function AppLayout() {
           {dom}
         </button>
       )}
-      actionsRender={() => [<RightContent key="right-content" />]}
+      actionsRender={() => headerActions}
     >
       <Outlet />
     </ProLayout>

@@ -205,6 +205,52 @@ const showModal = (nextPayload: Payload) => {
 
 如果需要关闭后销毁复杂内容，优先使用 Ant Design 的 `destroyOnHidden`，让 Ant Design 在隐藏完成后销毁子内容，不要由外层条件渲染提前卸载整个弹窗。错误弹窗、表单弹窗、详情弹窗、确认弹窗和模块自定义弹窗都必须遵守这一规则。
 
+## 权限展示分层
+
+权限相关展示分为页面级、局部组件级和接口级三层，不要混用。
+
+页面级无权限使用标准 403 页面。当前 `/403` 路由提供全页 `ForbiddenPage`，适合路由守卫或后端菜单确认当前用户不可进入某个页面时使用。
+
+局部组件级无权限使用 `Permission`。按钮和表格操作默认无权限时不渲染；抽屉、详情区、卡片内容等需要占位说明的场景使用 `fallback="block"`：
+
+```tsx
+<Permission code="system.department.view" fallback="block">
+  <DepartmentDrawerContent />
+</Permission>
+```
+
+接口级无权限继续走全局错误弹窗。当前用户打开组件后接口返回 `403` 或 `KERNEL.AUTH.FORBIDDEN`，说明后端权限兜底触发、权限状态变化或前端权限判断不完整，应由错误弹窗解释原因和建议，不要静默替换成页面 403。
+
+## 前端固定路由和菜单
+
+模块可以通过 `manifest.routes` 注册前端固定路由，通过 `manifest.menus` 注册前端菜单。前端菜单会与后端菜单树合并，适合开发示例、前端工具页、调试页和不由后端业务菜单控制的固定入口。
+
+合并规则：
+
+- `parentPath` 命中后端或前端菜单节点时，菜单会追加到该节点的 `children`。
+- 没有 `parentPath` 或未命中时，菜单追加到根级底部。
+- 同级菜单按 `sort` 升序排列；未设置 `sort` 的菜单排在已设置排序的菜单之后。
+- `devOnly: true` 的菜单仅在 dev/test 模式显示，但路由仍可注册，方便直接访问调试页。
+
+示例：
+
+```ts
+export default defineModule({
+  id: 'demo',
+  routes: [{ path: '/examples/permission', component: PermissionExamplePage }],
+  menus: [
+    {
+      code: 'demo.permission',
+      title: 'Permission Demo',
+      path: '/examples/permission',
+      parentPath: '/examples',
+      sort: 10,
+      devOnly: true,
+    },
+  ],
+});
+```
+
 ## 布局、页面和工作区
 
 布局采用 Ant Design Pro 基础布局 + 可插拔工作区增强。默认基础能力包括 ProLayout、RightContent、AvatarDropdown、Footer、SettingDrawer 和 PageContainer。可选工作区增强包括 RouteTabs、KeepAlive、PageRefresh、Fullscreen 和 Breadcrumb 增强。第一版默认不实现 KeepAlive，不默认开启 RouteTabs。

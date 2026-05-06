@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { ForbiddenBlock } from './ForbiddenBlock';
 import { useCurrentUserQuery } from './hooks';
 
 export type PermissionMode = 'and' | 'or';
@@ -6,7 +7,8 @@ export type PermissionMode = 'and' | 'or';
 type PermissionProps = {
   code?: string | string[];
   mode?: PermissionMode;
-  fallback?: ReactNode;
+  deny?: boolean;
+  fallback?: ReactNode | 'block';
   children: ReactNode;
 };
 
@@ -28,7 +30,21 @@ export const hasPermission = (
     : codes.some((item) => permissions?.includes(item));
 };
 
-export function Permission({ code, mode = 'or', fallback = null, children }: PermissionProps) {
+export function Permission({
+  code,
+  mode = 'or',
+  deny = false,
+  fallback = null,
+  children,
+}: PermissionProps) {
   const { data } = useCurrentUserQuery();
-  return hasPermission(data?.permissions, code, mode) ? children : fallback;
+  if (!deny && hasPermission(data?.permissions, code, mode)) {
+    return children;
+  }
+
+  if (fallback === 'block') {
+    return <ForbiddenBlock />;
+  }
+
+  return fallback;
 }

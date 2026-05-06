@@ -14,10 +14,6 @@ body,
   margin: 0;
 }
 
-body {
-  overflow: hidden;
-}
-
 * {
   scrollbar-width: thin;
   scrollbar-color: rgba(145, 158, 171, 0.42) transparent;
@@ -86,20 +82,16 @@ body {
   cursor: pointer;
 }
 
-.trueadmin-avatar-dropdown {
-  height: 40px;
-  cursor: pointer;
-  padding: 0 10px;
-  border-radius: 8px;
-  transition: background-color 0.2s ease;
-}
-
-.trueadmin-avatar-dropdown:hover {
-  background: rgba(0, 0, 0, 0.04);
-}
-
 .trueadmin-workspace-viewport {
   min-height: calc(100vh - 96px);
+}
+
+.trueadmin-forbidden-block {
+  padding: 32px 16px;
+}
+
+.trueadmin-example-stack {
+  width: min(100%, 920px);
 }
 
 .ant-pro-page-container {
