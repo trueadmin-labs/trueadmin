@@ -7,6 +7,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { IconRenderer } from '@/core/icon/IconRenderer';
 import { getRouteLayoutMeta } from '@/core/layout/routeLayoutMeta';
+import { WorkspaceScrollRestoration } from '@/core/layout/WorkspaceScrollRestoration';
 import { useWorkspaceViewport, WorkspaceViewportProvider } from '@/core/layout/WorkspaceViewport';
 import { useMenuTreeQuery } from '@/core/menu/hooks';
 import { mergeFrontendMenus } from '@/core/menu/mergeFrontendMenus';
@@ -354,14 +355,42 @@ function AppFooter() {
   );
 }
 
+function WorkspaceContent({
+  outletKey,
+  scrollKey,
+  showFooter,
+  showTabs,
+}: {
+  outletKey: string;
+  scrollKey: string;
+  showFooter: boolean;
+  showTabs: boolean;
+}) {
+  const { containerRef } = useWorkspaceViewport();
+
+  return (
+    <>
+      <WorkspaceScrollRestoration containerRef={containerRef} scrollKey={scrollKey} />
+      <div className="trueadmin-shell-content-column" data-tabs-visible={showTabs}>
+        <div className="trueadmin-shell-page-slot">
+          <Outlet key={outletKey} />
+        </div>
+        {showFooter ? <AppFooter /> : null}
+      </div>
+    </>
+  );
+}
+
 function AppContentFrame({
   activeTabKey,
   outletKey,
+  scrollKey,
   showFooter,
   showTabs,
 }: {
   activeTabKey?: string;
   outletKey: string;
+  scrollKey: string;
   showFooter: boolean;
   showTabs: boolean;
 }) {
@@ -373,12 +402,12 @@ function AppContentFrame({
         showTabs={showTabs}
         className="trueadmin-shell-content-scroll"
       >
-        <div className="trueadmin-shell-content-column" data-tabs-visible={showTabs}>
-          <div className="trueadmin-shell-page-slot">
-            <Outlet key={outletKey} />
-          </div>
-          {showFooter ? <AppFooter /> : null}
-        </div>
+        <WorkspaceContent
+          outletKey={outletKey}
+          scrollKey={scrollKey}
+          showFooter={showFooter}
+          showTabs={showTabs}
+        />
       </WorkspaceViewportProvider>
     </>
   );
@@ -393,6 +422,7 @@ function ClassicLayout({
   showTabs,
   activeTabKey,
   outletKey,
+  scrollKey,
 }: {
   collapsed: boolean;
   darkMode: boolean;
@@ -402,6 +432,7 @@ function ClassicLayout({
   showTabs: boolean;
   activeTabKey?: string;
   outletKey: string;
+  scrollKey: string;
 }) {
   return (
     <>
@@ -432,6 +463,7 @@ function ClassicLayout({
         <AppContentFrame
           activeTabKey={activeTabKey}
           outletKey={outletKey}
+          scrollKey={scrollKey}
           showFooter={showFooter}
           showTabs={showTabs}
         />
@@ -451,6 +483,7 @@ function MixedLayout({
   showTabs,
   activeTabKey,
   outletKey,
+  scrollKey,
 }: {
   collapsed: boolean;
   darkMode: boolean;
@@ -462,6 +495,7 @@ function MixedLayout({
   showTabs: boolean;
   activeTabKey?: string;
   outletKey: string;
+  scrollKey: string;
 }) {
   const sideMenus = activeRoot?.children?.length
     ? activeRoot.children
@@ -498,6 +532,7 @@ function MixedLayout({
           <AppContentFrame
             activeTabKey={activeTabKey}
             outletKey={outletKey}
+            scrollKey={scrollKey}
             showFooter={showFooter}
             showTabs={showTabs}
           />
@@ -518,6 +553,7 @@ function ColumnsLayout({
   showTabs,
   activeTabKey,
   outletKey,
+  scrollKey,
 }: {
   collapsed: boolean;
   darkMode: boolean;
@@ -529,6 +565,7 @@ function ColumnsLayout({
   showTabs: boolean;
   activeTabKey?: string;
   outletKey: string;
+  scrollKey: string;
 }) {
   const sideMenus = activeRoot?.children?.length
     ? activeRoot.children
@@ -580,6 +617,7 @@ function ColumnsLayout({
         <AppContentFrame
           activeTabKey={activeTabKey}
           outletKey={outletKey}
+          scrollKey={scrollKey}
           showFooter={showFooter}
           showTabs={showTabs}
         />
@@ -613,6 +651,7 @@ export function AppLayout() {
     t,
   });
   const outletKey = activeTab ? `${activeTab.key}:${activeTab.refreshKey}` : location.pathname;
+  const scrollKey = activeTabKey ?? `${location.pathname}${location.search}`;
   const shellClassName = [
     'trueadmin-shell',
     darkMode ? 'is-dark' : 'is-light',
@@ -650,6 +689,7 @@ export function AppLayout() {
           showTabs={effectiveShowTabs}
           activeTabKey={activeTabKey}
           outletKey={outletKey}
+          scrollKey={scrollKey}
         />
       ) : layoutMode === 'columns' ? (
         <ColumnsLayout
@@ -663,6 +703,7 @@ export function AppLayout() {
           showTabs={effectiveShowTabs}
           activeTabKey={activeTabKey}
           outletKey={outletKey}
+          scrollKey={scrollKey}
         />
       ) : (
         <ClassicLayout
@@ -674,6 +715,7 @@ export function AppLayout() {
           showTabs={effectiveShowTabs}
           activeTabKey={activeTabKey}
           outletKey={outletKey}
+          scrollKey={scrollKey}
         />
       )}
     </Layout>

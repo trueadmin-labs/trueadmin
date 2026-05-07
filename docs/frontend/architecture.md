@@ -257,7 +257,7 @@ export default defineModule({
 
 框架提供 WorkspaceViewport 尺寸系统，统一支撑内容高度、表格 scrollY、内容区全屏、弹窗全屏、Drawer/Form 滚动区域。WorkspaceViewport 必须响应 window resize、orientation change、侧栏折叠、Header 固定切换、RouteTabs 开关、PageContainer header 高度变化、ProTable search 展开收起、Toolbar 高度变化、Footer 显示隐藏、SettingDrawer 改布局配置、内容区全屏和弹窗全屏。实现策略为 ResizeObserver + requestAnimationFrame + Context。标准 CRUD 默认消费 `tableScrollY`，避免整个页面滚动，移动端回退自然滚动。
 
-前端定义标准 Page Types：`crud-page`、`form-page`、`detail-page`、`dashboard-page`、`split-page`、`custom-page`。标准页面推荐/默认使用 TrueAdminPage 包装，但允许复杂页面逃逸。`TrueAdminCrudPage` 内部默认集成 `TrueAdminPage type="crud-page"`。
+前端定义标准 Page Types：`crud-page`、`form-page`、`detail-page`、`dashboard-page`、`split-page`、`custom-page`。标准页面推荐/默认使用 TrueAdminPage 包装，但允许复杂页面逃逸。页面容器规范见 `docs/frontend/page-container.md`。`TrueAdminCrudPage` 内部默认集成 `TrueAdminPage`。
 
 ## CRUD 架构
 

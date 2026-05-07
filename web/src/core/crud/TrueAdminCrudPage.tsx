@@ -109,7 +109,13 @@ export function TrueAdminCrudPage<
   extra,
 }: TrueAdminCrudPageProps<TRecord, TCreate, TUpdate>) {
   return (
-    <TrueAdminPage title={title} extra={extra}>
+    <TrueAdminPage
+      title={title}
+      extra={extra}
+      layout="workspace"
+      className="trueadmin-crud-page"
+      bodyClassName="trueadmin-crud-page-body"
+    >
       <TrueAdminCrudTable resource={resource} rowKey={rowKey} columns={columns} service={service} />
     </TrueAdminPage>
   );

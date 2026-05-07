@@ -5,10 +5,11 @@
 ## 阅读路径
 
 1. [前端总体架构](architecture.md)
-2. [总体架构](../architecture/index.md)
-3. [技术栈说明](../overview/tech-stack.md)
-4. [API 规范](../api/index.md)
-5. [AI 开发指南](../ai/ai-development-guide.md)
+2. [页面容器规范](page-container.md)
+3. [总体架构](../architecture/index.md)
+4. [技术栈说明](../overview/tech-stack.md)
+5. [API 规范](../api/index.md)
+6. [AI 开发指南](../ai/ai-development-guide.md)
 
 ## 核心结论
 

@@ -35,6 +35,11 @@ import {
   useState,
 } from 'react';
 import { useLocation, useNavigate } from 'react-router';
+import {
+  removeWorkspaceScroll,
+  removeWorkspaceScrollExcept,
+  requestWorkspaceScrollTop,
+} from '@/core/layout/workspaceScrollStore';
 import { useTabsStore } from './tabsStore';
 import type { AppTab, TabCloseScope } from './types';
 
@@ -304,6 +309,7 @@ function SortableTab({
   menuItems,
   onActivate,
   onClose,
+  onScrollTop,
 }: {
   active: boolean;
   entering: boolean;
@@ -312,6 +318,7 @@ function SortableTab({
   menuItems: MenuProps['items'];
   onActivate: (tab: AppTab) => void;
   onClose: (key: string) => void;
+  onScrollTop: (tab: AppTab) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: tab.key,
@@ -356,7 +363,16 @@ function SortableTab({
           }
         }}
       >
-        <button className="trueadmin-tabs-button" type="button" onClick={() => onActivate(tab)}>
+        <button
+          className="trueadmin-tabs-button"
+          type="button"
+          onClick={() => onActivate(tab)}
+          onDoubleClick={() => {
+            if (active) {
+              onScrollTop(tab);
+            }
+          }}
+        >
           {tab.pinned ? (
             <span className="trueadmin-tabs-pin-slot" aria-hidden="true">
               <PushpinFilled />
@@ -392,6 +408,7 @@ function SortableTabGroup({
   getMenuItems,
   onActivate,
   onClose,
+  onScrollTop,
 }: {
   activeKey?: string;
   closingTabs: Record<string, ClosingTabState>;
@@ -400,6 +417,7 @@ function SortableTabGroup({
   getMenuItems: (key: string) => MenuProps['items'];
   onActivate: (tab: AppTab) => void;
   onClose: (key: string) => void;
+  onScrollTop: (tab: AppTab) => void;
 }) {
   return (
     <SortableContext items={tabs.map((tab) => tab.key)} strategy={horizontalListSortingStrategy}>
@@ -413,6 +431,7 @@ function SortableTabGroup({
           menuItems={getMenuItems(tab.key)}
           onActivate={onActivate}
           onClose={onClose}
+          onScrollTop={onScrollTop}
         />
       ))}
     </SortableContext>
@@ -479,9 +498,19 @@ export function AppTabsBar({ activeKey }: { activeKey?: string }) {
 
         const timer = window.setTimeout(() => {
           if (pending.scope) {
+            const beforeCloseTabs = useTabsStore.getState().tabs;
             closeTabs(pending.key, pending.scope);
+            const remainingKeys = useTabsStore.getState().tabs.map((tab) => tab.key);
+            removeWorkspaceScrollExcept(remainingKeys);
+            for (const tab of beforeCloseTabs) {
+              if (!remainingKeys.includes(tab.key)) {
+                removeWorkspaceScroll(tab.path);
+              }
+            }
           } else {
             closeTab(pending.key);
+            removeWorkspaceScroll(pending.key);
+            removeWorkspaceScroll(pending.path);
           }
           closeAnimationTimersRef.current.delete(pending.key);
           setClosingTabs((items) => {
@@ -546,12 +575,28 @@ export function AppTabsBar({ activeKey }: { activeKey?: string }) {
         pendingCloseRef.current = { key, path: currentTab?.path ?? '', scope };
         if (!navigateToPath(nextTab?.path)) {
           pendingCloseRef.current = undefined;
+          const beforeCloseTabs = useTabsStore.getState().tabs;
           closeTabs(key, scope);
+          const remainingKeys = useTabsStore.getState().tabs.map((tab) => tab.key);
+          removeWorkspaceScrollExcept(remainingKeys);
+          for (const tab of beforeCloseTabs) {
+            if (!remainingKeys.includes(tab.key)) {
+              removeWorkspaceScroll(tab.path);
+            }
+          }
         }
         return;
       }
 
+      const beforeCloseTabs = useTabsStore.getState().tabs;
       closeTabs(key, scope);
+      const remainingKeys = useTabsStore.getState().tabs.map((tab) => tab.key);
+      removeWorkspaceScrollExcept(remainingKeys);
+      for (const tab of beforeCloseTabs) {
+        if (!remainingKeys.includes(tab.key)) {
+          removeWorkspaceScroll(tab.path);
+        }
+      }
     },
     [closeTabs, location.pathname, navigateToPath],
   );
@@ -619,6 +664,12 @@ export function AppTabsBar({ activeKey }: { activeKey?: string }) {
     }
   };
 
+  const scrollActiveTabToTop = (tab: AppTab) => {
+    if (tab.key === activeKey) {
+      requestWorkspaceScrollTop(tab.key);
+    }
+  };
+
   const handleDragEnd = ({ active, delta, over }: DragEndEvent) => {
     const activeKey = String(active.id);
     const playBack = () => playDropBackAnimation(scrollRef, activeKey, delta.x);
@@ -670,6 +721,7 @@ export function AppTabsBar({ activeKey }: { activeKey?: string }) {
             getMenuItems={getMenuItems}
             onActivate={activateTab}
             onClose={requestClose}
+            onScrollTop={scrollActiveTabToTop}
           />
           {pinnedTabs.length > 0 && normalTabs.length > 0 ? (
             <li className="trueadmin-tabs-group-divider" aria-hidden="true" />
@@ -682,6 +734,7 @@ export function AppTabsBar({ activeKey }: { activeKey?: string }) {
             getMenuItems={getMenuItems}
             onActivate={activateTab}
             onClose={requestClose}
+            onScrollTop={scrollActiveTabToTop}
           />
         </ul>
       </DndContext>

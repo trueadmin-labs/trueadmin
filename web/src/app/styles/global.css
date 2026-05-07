@@ -592,8 +592,19 @@ body,
 }
 
 .trueadmin-shell-page-slot {
-  flex: 1 0 auto;
+  display: flex;
   min-width: 0;
+  flex: 1 0 auto;
+  flex-direction: column;
+}
+
+.trueadmin-page-transition {
+  min-width: 0;
+}
+
+.trueadmin-page-transition.is-workspace {
+  min-height: 0;
+  flex: 0 0 auto;
 }
 
 .trueadmin-shell-footer {
@@ -612,11 +623,226 @@ body,
 }
 
 .trueadmin-page {
+  box-sizing: border-box;
+  display: flex;
   min-width: 0;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .trueadmin-page.has-padding {
   padding: 24px;
+}
+
+.trueadmin-page.is-full-height {
+  min-height: 100%;
+}
+
+.trueadmin-page.is-workspace {
+  height: var(--trueadmin-page-workspace-height, auto);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.trueadmin-page.is-workspace.has-padding {
+  padding: 24px;
+}
+
+.trueadmin-page-body {
+  min-width: 0;
+}
+
+.trueadmin-page-body.is-fill {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+.trueadmin-page.is-workspace .trueadmin-page-body.is-fill {
+  overflow: hidden;
+}
+
+.trueadmin-page-header {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.trueadmin-page-header-main {
+  min-width: 0;
+}
+
+.trueadmin-page-header-main .ant-typography {
+  margin-bottom: 0;
+}
+
+.trueadmin-page-header-main h4.ant-typography {
+  margin-top: 0;
+  margin-bottom: 4px;
+  font-size: 20px;
+  line-height: 1.4;
+}
+
+.trueadmin-page-header-extra {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.trueadmin-page-section {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.trueadmin-page-section.has-padding {
+  padding: 16px;
+}
+
+.trueadmin-page-section.has-horizontal-padding {
+  padding-inline: 16px;
+}
+
+.trueadmin-page-section.has-vertical-padding {
+  padding-block: 16px;
+}
+
+.trueadmin-page-section.is-surface {
+  border: 1px solid var(--trueadmin-shell-border);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.trueadmin-page-section.is-full-height {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+.trueadmin-page-section-header {
+  display: flex;
+  min-width: 0;
+  flex: 0 0 auto;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.trueadmin-page-section-header-main {
+  min-width: 0;
+}
+
+.trueadmin-page-section-header-main .ant-typography {
+  margin-bottom: 0;
+}
+
+.trueadmin-page-section-header-main h5.ant-typography {
+  margin-top: 0;
+  margin-bottom: 2px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.trueadmin-page-section-header-extra {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.trueadmin-page-section-body {
+  min-width: 0;
+}
+
+.trueadmin-page-section-body.is-fill {
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.trueadmin-split-page {
+  display: grid;
+  width: 100%;
+  height: var(--trueadmin-split-height);
+  min-height: 0;
+  grid-template-columns: minmax(180px, var(--trueadmin-split-left-width)) minmax(0, 1fr);
+  gap: var(--trueadmin-split-gap);
+  overflow: hidden;
+}
+
+.trueadmin-split-page-left,
+.trueadmin-split-page-right {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.trueadmin-split-page-panel-body {
+  overflow: auto;
+}
+
+.trueadmin-crud-page-body {
+  overflow: hidden;
+}
+
+.trueadmin-crud-page-body .ant-pro-table,
+.trueadmin-crud-page-body .ant-pro-card,
+.trueadmin-crud-page-body .ant-pro-card-body {
+  min-height: 0;
+}
+
+.trueadmin-crud-page-body .ant-pro-table {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+.trueadmin-split-page-left .ant-list-item {
+  border-radius: 6px;
+  padding-inline: 10px;
+}
+
+.trueadmin-split-page-left .ant-list-item.is-active {
+  background: var(--trueadmin-color-primary-bg, rgba(22, 119, 255, 0.08));
+}
+
+.trueadmin-split-page-left .ant-list-item.is-active .ant-typography {
+  color: var(--trueadmin-color-primary-text, #1677ff);
+  font-weight: 500;
+}
+
+.trueadmin-shell.is-dark .trueadmin-page-section.is-surface {
+  border-color: var(--trueadmin-shell-dark-border);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+@media (max-width: 992px) {
+  .trueadmin-split-page {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .trueadmin-page.has-padding,
+  .trueadmin-page.is-workspace.has-padding {
+    padding: 16px;
+  }
+
+  .trueadmin-page-header,
+  .trueadmin-page-section-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .trueadmin-page-header-extra,
+  .trueadmin-page-section-header-extra {
+    justify-content: flex-start;
+  }
 }
 
 .trueadmin-menu-button {

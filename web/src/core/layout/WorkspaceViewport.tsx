@@ -13,6 +13,7 @@ import {
 type WorkspaceViewportValue = {
   viewportHeight: number;
   footerHeight: number;
+  pageHeight: number;
   availableHeight: number;
   contentHeight: number;
   tableScrollY: number;
@@ -75,19 +76,17 @@ export function WorkspaceViewportProvider({
     };
   }, [showFooter]);
 
-  const availableHeight = Math.max(
+  const pageHeight = Math.max(
     320,
-    viewportHeight -
-      HEADER_HEIGHT -
-      (showTabs ? TABS_HEIGHT : 0) -
-      footerHeight -
-      PAGE_VERTICAL_PADDING,
+    viewportHeight - HEADER_HEIGHT - (showTabs ? TABS_HEIGHT : 0) - footerHeight,
   );
+  const availableHeight = Math.max(320, pageHeight - PAGE_VERTICAL_PADDING);
 
   const value = useMemo<WorkspaceViewportValue>(
     () => ({
       viewportHeight,
       footerHeight,
+      pageHeight,
       availableHeight,
       contentHeight: availableHeight,
       tableScrollY: Math.max(
@@ -97,7 +96,7 @@ export function WorkspaceViewportProvider({
       containerRef,
       footerRef,
     }),
-    [availableHeight, footerHeight, viewportHeight],
+    [availableHeight, footerHeight, pageHeight, viewportHeight],
   );
 
   return (
@@ -109,8 +108,10 @@ export function WorkspaceViewportProvider({
   );
 }
 
+export const useOptionalWorkspaceViewport = () => useContext(WorkspaceViewportContext);
+
 export const useWorkspaceViewport = () => {
-  const value = useContext(WorkspaceViewportContext);
+  const value = useOptionalWorkspaceViewport();
   if (value === null) {
     throw new Error('useWorkspaceViewport must be used within WorkspaceViewportProvider');
   }

@@ -1,17 +1,32 @@
-import { Result } from 'antd';
+import { Result, Typography } from 'antd';
 import type { CSSProperties, ReactNode } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useLocation } from 'react-router';
 import { getRouteLayoutMeta } from '@/core/layout/routeLayoutMeta';
+import { useOptionalWorkspaceViewport } from '@/core/layout/WorkspaceViewport';
+import { LoadingContainer } from '@/core/loading/LoadingContainer';
 import { PageTransition } from './PageTransition';
+
+export type TrueAdminPageLayout = 'natural' | 'workspace';
 
 export type TrueAdminPageProps = {
   children: ReactNode;
   title?: ReactNode;
+  description?: ReactNode;
   extra?: ReactNode;
+  header?: ReactNode;
+  showHeader?: boolean;
+  loading?: boolean;
+  loadingTip?: ReactNode;
+  initialLoadingHeight?: number | string;
+  keepLoadingChildren?: boolean;
   className?: string;
+  bodyClassName?: string;
   style?: CSSProperties;
+  bodyStyle?: CSSProperties;
   contentPadding?: boolean;
+  layout?: TrueAdminPageLayout;
+  fullHeight?: boolean;
 };
 
 function PageErrorFallback() {
@@ -20,19 +35,95 @@ function PageErrorFallback() {
   );
 }
 
-export function TrueAdminPage({ children, className, style, contentPadding }: TrueAdminPageProps) {
+function PageHeader({
+  description,
+  extra,
+  title,
+}: Pick<TrueAdminPageProps, 'description' | 'extra' | 'title'>) {
+  if (!title && !description && !extra) {
+    return null;
+  }
+
+  return (
+    <div className="trueadmin-page-header">
+      <div className="trueadmin-page-header-main">
+        {title ? <Typography.Title level={4}>{title}</Typography.Title> : null}
+        {description ? (
+          <Typography.Paragraph type="secondary">{description}</Typography.Paragraph>
+        ) : null}
+      </div>
+      {extra ? <div className="trueadmin-page-header-extra">{extra}</div> : null}
+    </div>
+  );
+}
+
+export function TrueAdminPage({
+  children,
+  className,
+  style,
+  contentPadding,
+  layout = 'natural',
+  title,
+  description,
+  extra,
+  header,
+  showHeader = false,
+  loading,
+  loadingTip,
+  initialLoadingHeight,
+  keepLoadingChildren = true,
+  bodyClassName,
+  bodyStyle,
+  fullHeight = false,
+}: TrueAdminPageProps) {
   const location = useLocation();
+  const viewport = useOptionalWorkspaceViewport();
   const routeLayout = getRouteLayoutMeta(location.pathname);
   const shouldUsePadding = contentPadding ?? routeLayout.contentPadding ?? true;
-  const classes = ['trueadmin-page', shouldUsePadding ? 'has-padding' : '', className]
+  const isWorkspaceLayout = layout === 'workspace';
+  const shouldFillBody = fullHeight || isWorkspaceLayout;
+  const classes = [
+    'trueadmin-page',
+    shouldUsePadding ? 'has-padding' : '',
+    fullHeight ? 'is-full-height' : '',
+    isWorkspaceLayout ? 'is-workspace' : '',
+    className,
+  ]
     .filter(Boolean)
     .join(' ');
+  const bodyClasses = ['trueadmin-page-body', shouldFillBody ? 'is-fill' : '', bodyClassName]
+    .filter(Boolean)
+    .join(' ');
+  const headerNode =
+    header ??
+    (showHeader ? <PageHeader title={title} description={description} extra={extra} /> : null);
+  const pageStyle = {
+    ...style,
+    '--trueadmin-page-workspace-height':
+      isWorkspaceLayout && viewport ? `${String(viewport.pageHeight)}px` : undefined,
+  } as CSSProperties;
 
   return (
     <ErrorBoundary fallback={<PageErrorFallback />}>
-      <PageTransition>
-        <main className={classes} style={style}>
-          {children}
+      <PageTransition className={isWorkspaceLayout ? 'is-workspace' : undefined}>
+        <main className={classes} style={pageStyle}>
+          {headerNode}
+          {loading === undefined ? (
+            <div className={bodyClasses} style={bodyStyle}>
+              {children}
+            </div>
+          ) : (
+            <LoadingContainer
+              loading={loading}
+              tip={loadingTip}
+              initialLoadingHeight={initialLoadingHeight}
+              keepChildren={keepLoadingChildren}
+              className={bodyClasses}
+              style={bodyStyle}
+            >
+              {children}
+            </LoadingContainer>
+          )}
         </main>
       </PageTransition>
     </ErrorBoundary>
