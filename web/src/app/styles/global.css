@@ -1243,20 +1243,9 @@ body,
   width: 100%;
 }
 
-.trueadmin-shell.is-dark .trueadmin-crud-import-modal-header {
-  display: flex;
-  min-height: 32px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.trueadmin-crud-import-modal-header .ant-typography {
-  flex: 1 1 auto;
-}
-
-.trueadmin-crud-filter-panel {
-  background: rgba(255, 255, 255, 0.04);
+.trueadmin-shell.is-dark .trueadmin-crud-filter-panel {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .trueadmin-shell.is-dark .trueadmin-crud-filter-actions::before {
@@ -2522,4 +2511,124 @@ body,
 
 .trueadmin-shell.is-dark .trueadmin-tabs-close:not(:disabled):hover {
   background: rgba(255, 255, 255, 0.1);
+}
+
+.trueadmin-complex-form {
+  min-width: 0;
+}
+
+.trueadmin-complex-form-stack {
+  width: 100%;
+}
+
+.trueadmin-complex-form .ant-card {
+  border-radius: 8px;
+}
+
+.trueadmin-complex-form .ant-card-head {
+  min-height: 44px;
+}
+
+.trueadmin-complex-form .ant-form-item {
+  margin-bottom: 12px;
+}
+
+.trueadmin-complex-form-side {
+  position: sticky;
+  top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.trueadmin-complex-form-amount-row {
+  display: flex;
+  min-height: 30px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.trueadmin-complex-form-amount-row .ant-typography {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.88);
+  font-variant-numeric: tabular-nums;
+}
+
+.trueadmin-complex-form-amount-row.is-negative .ant-typography {
+  color: #cf1322;
+}
+
+.trueadmin-complex-form-amount-row.is-total {
+  min-height: 40px;
+  color: rgba(0, 0, 0, 0.88);
+  font-weight: 600;
+}
+
+.trueadmin-complex-form-amount-row.is-total .ant-typography,
+.trueadmin-complex-form-amount-row.is-balance .ant-typography {
+  color: var(--trueadmin-color-primary, #1677ff);
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.trueadmin-shell.is-dark .trueadmin-complex-form-amount-row {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.trueadmin-shell.is-dark .trueadmin-complex-form-amount-row .ant-typography {
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.trueadmin-shell.is-dark .trueadmin-complex-form-amount-row.is-negative .ant-typography {
+  color: #ff7875;
+}
+
+.trueadmin-shell.is-dark .trueadmin-complex-form-amount-row.is-total,
+.trueadmin-shell.is-dark .trueadmin-complex-form-amount-row.is-total .ant-typography,
+.trueadmin-shell.is-dark .trueadmin-complex-form-amount-row.is-balance .ant-typography {
+  color: var(--trueadmin-color-primary, #4096ff);
+}
+
+@media (max-width: 1200px) {
+  .trueadmin-complex-form-side {
+    position: static;
+  }
+}
+
+.trueadmin-complex-form.is-modal {
+  padding: 12px;
+}
+
+.trueadmin-complex-form.is-modal .trueadmin-complex-form-side {
+  position: sticky;
+}
+
+.trueadmin-complex-form-modal {
+  max-width: calc(100vw - 48px);
+  padding-block: 24px;
+}
+
+.trueadmin-complex-form-modal .ant-modal-content {
+  display: flex;
+  max-height: calc(100vh - 48px);
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.trueadmin-complex-form-modal .ant-modal-body {
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.trueadmin-complex-form-modal-body {
+  max-height: calc(100vh - 166px);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.trueadmin-complex-form-modal-footer {
+  display: flex;
+  justify-content: flex-end;
 }

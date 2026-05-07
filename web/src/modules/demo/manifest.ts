@@ -25,6 +25,11 @@ export default defineModule({
       meta: { title: 'demo.crud.title', pageType: 'crud-page', auth: true },
     },
     {
+      path: '/examples/complex-form',
+      component: lazy(() => import('./pages/ComplexFormExamplePage')),
+      meta: { title: 'demo.complexForm.title', pageType: 'custom-page', auth: true },
+    },
+    {
       path: '/examples/multilevel/second/third',
       component: lazy(() => import('./pages/MultiLevelMenuPage')),
       meta: { title: 'demo.multilevel.title', pageType: 'custom-page', auth: true },
@@ -83,6 +88,16 @@ export default defineModule({
           sort: 40,
         },
         {
+          code: 'demo.complexForm',
+          title: 'Complex Form',
+          i18n: 'menu.demo.complexForm',
+          path: '/examples/complex-form',
+          icon: 'app',
+          type: 'menu',
+          status: 'enabled',
+          sort: 50,
+        },
+        {
           code: 'demo.multilevel',
           title: 'Multi-level Menu',
           i18n: 'menu.demo.multilevel',
@@ -90,7 +105,7 @@ export default defineModule({
           icon: 'app',
           type: 'directory',
           status: 'enabled',
-          sort: 50,
+          sort: 60,
           children: [
             {
               code: 'demo.multilevel.second',
