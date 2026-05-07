@@ -66,6 +66,7 @@ function TrueAdminCrudTable<
       search={{ labelWidth: 'auto' }}
       scroll={{ y: tableScrollY }}
       pagination={{ defaultPageSize: 20, showSizeChanger: true }}
+      options={{ density: false, fullScreen: false, reload: true, setting: true }}
       toolBarRender={() => [
         service.create ? (
           <Permission key="create" code={toPermissionCode(resource, 'create')}>

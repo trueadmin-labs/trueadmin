@@ -89,10 +89,7 @@ export function WorkspaceViewportProvider({
       pageHeight,
       availableHeight,
       contentHeight: availableHeight,
-      tableScrollY: Math.max(
-        layoutConfig.workspace.minTableHeight,
-        availableHeight - layoutConfig.workspace.tableBottomReserve - 230,
-      ),
+      tableScrollY: Math.max(0, availableHeight - layoutConfig.workspace.tableBottomReserve - 230),
       containerRef,
       footerRef,
     }),

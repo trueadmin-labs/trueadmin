@@ -802,6 +802,23 @@ body,
   flex-direction: column;
 }
 
+.trueadmin-crud-page-body .ant-pro-table-list-toolbar-title {
+  font-size: inherit;
+  font-weight: 400;
+}
+
+.trueadmin-crud-toolbar-business {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.trueadmin-crud-toolbar-selected {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+}
+
 .trueadmin-crud-page-body .ant-pro-table-list-toolbar-right,
 .trueadmin-crud-page-body .ant-pro-table-list-toolbar-right > div,
 .trueadmin-crud-page-body .ant-pro-table-list-toolbar-setting-items {

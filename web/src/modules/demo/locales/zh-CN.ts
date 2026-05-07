@@ -83,6 +83,7 @@ export default {
   'demo.crud.action.delete': '删除',
   'demo.crud.action.export': '导出',
   'demo.crud.action.reload': '刷新',
+  'demo.crud.batch.actions': '批量操作',
   'demo.crud.batch.enable': '批量启用',
   'demo.crud.batch.delete': '批量删除',
   'demo.crud.selected.count': '已选择 {{count}} 项',

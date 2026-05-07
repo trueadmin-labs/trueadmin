@@ -86,6 +86,7 @@ export default {
   'demo.crud.action.delete': 'Delete',
   'demo.crud.action.export': 'Export',
   'demo.crud.action.reload': 'Reload',
+  'demo.crud.batch.actions': 'Batch actions',
   'demo.crud.batch.enable': 'Batch enable',
   'demo.crud.batch.delete': 'Batch delete',
   'demo.crud.selected.count': '{{count}} selected',

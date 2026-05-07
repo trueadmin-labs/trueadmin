@@ -1,6 +1,12 @@
-import { DeleteOutlined, ExportOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons';
+import {
+  CheckCircleOutlined,
+  DeleteOutlined,
+  DownOutlined,
+  ExportOutlined,
+  PlusOutlined,
+} from '@ant-design/icons';
 import { type ActionType, type ProColumns, ProTable } from '@ant-design/pro-components';
-import { App, Button, Space, Tag } from 'antd';
+import { App, Button, Dropdown, Space, Tag, Typography } from 'antd';
 import { useMemo, useRef, useState } from 'react';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { useWorkspaceViewport } from '@/core/layout/WorkspaceViewport';
@@ -83,6 +89,9 @@ export default function CrudExamplePage() {
     finance: t('demo.crud.category.finance', '财务配置'),
     system: t('demo.crud.category.system', '系统配置'),
   };
+  const selectedRowKeys = selectedRows.map((row) => row.id);
+  const hasSelectedRows = selectedRows.length > 0;
+
   const columns: ProColumns<CrudExampleRecord>[] = [
     {
       title: t('demo.crud.column.name', '名称'),
@@ -180,65 +189,65 @@ export default function CrudExamplePage() {
         rowKey="id"
         columns={columns}
         search={{ labelWidth: 'auto', span: 8 }}
-        options={{ density: true, fullScreen: true, reload: true, setting: true }}
+        options={{ density: false, fullScreen: false, reload: true, setting: true }}
         scroll={{ x: 1280, y: tableScrollY }}
         pagination={{ defaultPageSize: 20, showSizeChanger: true }}
         rowSelection={{
-          selectedRowKeys: selectedRows.map((row) => row.id),
+          selectedRowKeys,
           onChange: (_, rows) => setSelectedRows(rows),
         }}
-        tableAlertRender={({ selectedRowKeys }) =>
-          t('demo.crud.selected.count', '已选择 {{count}} 项').replace(
-            '{{count}}',
-            String(selectedRowKeys.length),
-          )
-        }
-        tableAlertOptionRender={() => (
-          <Space size={8}>
-            <Button
-              type="link"
-              size="small"
-              onClick={() => message.info(t('demo.crud.message.batchEnable', '已触发批量启用'))}
-            >
-              {t('demo.crud.batch.enable', '批量启用')}
-            </Button>
-            <Button
-              type="link"
-              danger
-              size="small"
-              onClick={() => {
-                message.info(t('demo.crud.message.batchDelete', '已触发批量删除'));
-                setSelectedRows([]);
-              }}
-            >
-              {t('demo.crud.batch.delete', '批量删除')}
-            </Button>
-          </Space>
-        )}
-        toolbar={{ title: t('demo.crud.table.title', '配置列表') }}
-        toolBarRender={() => [
-          <Button
-            key="reload"
-            icon={<ReloadOutlined />}
-            onClick={() => actionRef.current?.reload()}
-          >
-            {t('demo.crud.action.reload', '刷新')}
-          </Button>,
-          <Button key="export" icon={<ExportOutlined />}>
-            {t('demo.crud.action.export', '导出')}
-          </Button>,
-          <Button
-            key="delete"
-            danger
-            icon={<DeleteOutlined />}
-            disabled={selectedRows.length === 0}
-          >
-            {t('demo.crud.batch.delete', '批量删除')}
-          </Button>,
-          <Button key="create" type="primary" icon={<PlusOutlined />}>
-            {t('demo.crud.action.create', '新增')}
-          </Button>,
-        ]}
+        tableAlertRender={false}
+        tableAlertOptionRender={false}
+        toolbar={{
+          title: (
+            <Space className="trueadmin-crud-toolbar-business" size={8} wrap>
+              <Button type="primary" icon={<PlusOutlined />}>
+                {t('demo.crud.action.create', '新增')}
+              </Button>
+              <Button icon={<ExportOutlined />}>{t('demo.crud.action.export', '导出')}</Button>
+              <Dropdown
+                disabled={!hasSelectedRows}
+                menu={{
+                  items: [
+                    {
+                      key: 'enable',
+                      icon: <CheckCircleOutlined />,
+                      label: t('demo.crud.batch.enable', '批量启用'),
+                    },
+                    {
+                      danger: true,
+                      key: 'delete',
+                      icon: <DeleteOutlined />,
+                      label: t('demo.crud.batch.delete', '批量删除'),
+                    },
+                  ],
+                  onClick: ({ key }) => {
+                    if (key === 'enable') {
+                      message.info(t('demo.crud.message.batchEnable', '已触发批量启用'));
+                      return;
+                    }
+                    if (key === 'delete') {
+                      message.info(t('demo.crud.message.batchDelete', '已触发批量删除'));
+                      setSelectedRows([]);
+                    }
+                  },
+                }}
+              >
+                <Button disabled={!hasSelectedRows} icon={<DownOutlined />}>
+                  {t('demo.crud.batch.actions', '批量操作')}
+                </Button>
+              </Dropdown>
+              {hasSelectedRows ? (
+                <Typography.Text className="trueadmin-crud-toolbar-selected">
+                  {t('demo.crud.selected.count', '已选择 {{count}} 项').replace(
+                    '{{count}}',
+                    String(selectedRows.length),
+                  )}
+                </Typography.Text>
+              ) : null}
+            </Space>
+          ),
+        }}
         request={async (params, sort) => {
           await wait(350);
           const sortedRecords = [...filterRecords(records, params)];

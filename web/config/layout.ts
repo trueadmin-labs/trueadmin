@@ -7,7 +7,6 @@ export const layoutConfig = {
   fixSiderbar: true,
   splitMenus: false,
   workspace: {
-    minTableHeight: 320,
     tableBottomReserve: 32,
   },
 };
