@@ -20,6 +20,11 @@ export default defineModule({
       meta: { title: 'demo.pageContainer.title', pageType: 'custom-page', auth: true },
     },
     {
+      path: '/examples/crud',
+      component: lazy(() => import('./pages/CrudExamplePage')),
+      meta: { title: 'demo.crud.title', pageType: 'crud-page', auth: true },
+    },
+    {
       path: '/examples/multilevel/second/third',
       component: lazy(() => import('./pages/MultiLevelMenuPage')),
       meta: { title: 'demo.multilevel.title', pageType: 'custom-page', auth: true },
@@ -68,6 +73,16 @@ export default defineModule({
           sort: 30,
         },
         {
+          code: 'demo.crud',
+          title: 'CRUD Demo',
+          i18n: 'menu.demo.crud',
+          path: '/examples/crud',
+          icon: 'table',
+          type: 'menu',
+          status: 'enabled',
+          sort: 40,
+        },
+        {
           code: 'demo.multilevel',
           title: 'Multi-level Menu',
           i18n: 'menu.demo.multilevel',
@@ -75,7 +90,7 @@ export default defineModule({
           icon: 'app',
           type: 'directory',
           status: 'enabled',
-          sort: 40,
+          sort: 50,
           children: [
             {
               code: 'demo.multilevel.second',

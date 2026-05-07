@@ -802,6 +802,139 @@ body,
   flex-direction: column;
 }
 
+.trueadmin-crud-page-body .ant-pro-table-list-toolbar-right,
+.trueadmin-crud-page-body .ant-pro-table-list-toolbar-right > div,
+.trueadmin-crud-page-body .ant-pro-table-list-toolbar-setting-items {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  line-height: 1;
+}
+
+.trueadmin-crud-page-body .ant-pro-table-list-toolbar-setting-item {
+  display: inline-flex;
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  margin: 0;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(5, 5, 5, 0.06);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.02);
+  line-height: 1;
+  transition:
+    color 0.18s cubic-bezier(0.2, 0, 0, 1),
+    border-color 0.18s cubic-bezier(0.2, 0, 0, 1),
+    background-color 0.18s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.trueadmin-crud-page-body .ant-pro-table-list-toolbar-right .ant-btn {
+  display: inline-flex;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.trueadmin-crud-page-body .ant-pro-table-list-toolbar-right .ant-btn:not(.ant-btn-primary) {
+  min-width: 32px;
+  margin: 0;
+  border-color: rgba(5, 5, 5, 0.06);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.02);
+  transition:
+    color 0.18s cubic-bezier(0.2, 0, 0, 1),
+    border-color 0.18s cubic-bezier(0.2, 0, 0, 1),
+    background-color 0.18s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.trueadmin-crud-page-body .ant-pro-table-list-toolbar-setting-item > span,
+.trueadmin-crud-page-body .ant-pro-table-list-toolbar-setting-item .ant-dropdown-trigger,
+.trueadmin-crud-page-body .ant-pro-table-list-toolbar-setting-item .ant-tooltip-open,
+.trueadmin-crud-page-body .ant-pro-table-list-toolbar-setting-item .anticon,
+.trueadmin-crud-page-body .ant-pro-table-list-toolbar-right .ant-btn > span,
+.trueadmin-crud-page-body .ant-pro-table-list-toolbar-right .ant-btn-icon,
+.trueadmin-crud-page-body .ant-pro-table-list-toolbar-right .anticon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.trueadmin-crud-page-body .ant-pro-table-list-toolbar-setting-item svg,
+.trueadmin-crud-page-body .ant-pro-table-list-toolbar-right .ant-btn svg {
+  display: block;
+}
+
+.trueadmin-crud-page-body .ant-pro-table-list-toolbar-setting-item:hover,
+.trueadmin-crud-page-body .ant-pro-table-list-toolbar-right .ant-btn:not(.ant-btn-primary):hover {
+  border-color: var(--trueadmin-color-primary-border, rgba(22, 119, 255, 0.32));
+  color: var(--trueadmin-color-primary, #1677ff);
+  background: var(--trueadmin-color-primary-bg, rgba(22, 119, 255, 0.08));
+}
+
+.trueadmin-shell.is-dark .trueadmin-crud-page-body .ant-pro-table-list-toolbar-setting-item,
+.trueadmin-shell.is-dark
+  .trueadmin-crud-page-body
+  .ant-pro-table-list-toolbar-right
+  .ant-btn:not(.ant-btn-primary) {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.trueadmin-shell.is-dark .trueadmin-crud-page-body .ant-pro-table-list-toolbar-setting-item:hover,
+.trueadmin-shell.is-dark
+  .trueadmin-crud-page-body
+  .ant-pro-table-list-toolbar-right
+  .ant-btn:not(.ant-btn-primary):hover {
+  border-color: var(--trueadmin-color-primary-border, rgba(22, 119, 255, 0.5));
+  color: var(--trueadmin-color-primary-text, #69b1ff);
+  background: var(--trueadmin-color-primary-bg, rgba(22, 119, 255, 0.16));
+}
+
+.ant-pro-table-column-setting-overlay .ant-pro-table-column-setting-list-item {
+  min-width: 0;
+  gap: 8px;
+}
+
+.ant-pro-table-column-setting-overlay .ant-pro-table-column-setting-list-item-title {
+  min-width: 0;
+}
+
+.ant-pro-table-column-setting-overlay .ant-pro-table-column-setting-list-item-option {
+  display: inline-flex;
+  width: 44px;
+  min-width: 44px;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.16s cubic-bezier(0.2, 0, 0, 1),
+    visibility 0.16s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.ant-pro-table-column-setting-overlay
+  .ant-tree-treenode:hover
+  .ant-pro-table-column-setting-list-item-option,
+.ant-pro-table-column-setting-overlay
+  .ant-pro-table-column-setting-list-item:hover
+  .ant-pro-table-column-setting-list-item-option {
+  display: inline-flex;
+  opacity: 1;
+  visibility: visible;
+}
+
+.ant-pro-table-column-setting-overlay .ant-pro-table-column-setting-list-item-option > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .trueadmin-split-page-left .ant-list-item {
   border-radius: 6px;
   padding-inline: 10px;
