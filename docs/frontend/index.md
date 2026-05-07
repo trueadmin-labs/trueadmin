@@ -1,15 +1,16 @@
 # 前端架构
 
-本目录是 TrueAdmin Web 管理端的主文档入口。前端当前处于架构定稿阶段，`web/` 目录可以为空，后续实现必须优先遵守本文档中的架构约定。
+本目录是 TrueAdmin Web 管理端的主文档入口。前端当前已进入实现落地阶段，后续新增或调整能力必须优先遵守本文档中的架构约定。
 
 ## 阅读路径
 
 1. [前端总体架构](architecture.md)
 2. [页面容器规范](page-container.md)
-3. [总体架构](../architecture/index.md)
-4. [技术栈说明](../overview/tech-stack.md)
-5. [API 规范](../api/index.md)
-6. [AI 开发指南](../ai/ai-development-guide.md)
+3. [CRUD 搜索与筛选规范](crud-search-filter.md)
+4. [总体架构](../architecture/index.md)
+5. [技术栈说明](../overview/tech-stack.md)
+6. [API 规范](../api/index.md)
+7. [AI 开发指南](../ai/ai-development-guide.md)
 
 ## 核心结论
 

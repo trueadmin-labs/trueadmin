@@ -255,13 +255,13 @@ export default defineModule({
 
 布局采用 Ant Design Pro 基础布局 + 可插拔工作区增强。默认基础能力包括 ProLayout、RightContent、AvatarDropdown、Footer、SettingDrawer 和 PageContainer。可选工作区增强包括 RouteTabs、KeepAlive、PageRefresh、Fullscreen 和 Breadcrumb 增强。第一版默认不实现 KeepAlive，不默认开启 RouteTabs。
 
-框架提供 WorkspaceViewport 尺寸系统，统一支撑内容高度、表格 scrollY、内容区全屏、弹窗全屏、Drawer/Form 滚动区域。WorkspaceViewport 必须响应 window resize、orientation change、侧栏折叠、Header 固定切换、RouteTabs 开关、PageContainer header 高度变化、ProTable search 展开收起、Toolbar 高度变化、Footer 显示隐藏、SettingDrawer 改布局配置、内容区全屏和弹窗全屏。实现策略为 ResizeObserver + requestAnimationFrame + Context。标准 CRUD 默认消费 `tableScrollY`，避免整个页面滚动，移动端回退自然滚动。
+框架提供 WorkspaceViewport 尺寸系统，统一支撑内容高度、内容区全屏、弹窗全屏、Drawer/Form 滚动区域等布局场景。WorkspaceViewport 必须响应 window resize、orientation change、侧栏折叠、Header 固定切换、RouteTabs 开关、Footer 显示隐藏、SettingDrawer 改布局配置、内容区全屏和弹窗全屏。实现策略为 ResizeObserver + requestAnimationFrame + Context。标准 CRUD 的表格高度由 `TrueAdminCrudTable` 自己测量表格主区域实际高度后传给 AntD Table `scroll.y`，避免搜索区、工具栏、批量提示或分页变化时依赖固定估算。
 
 前端定义标准 Page Types：`crud-page`、`form-page`、`detail-page`、`dashboard-page`、`split-page`、`custom-page`。标准页面推荐/默认使用 TrueAdminPage 包装，但允许复杂页面逃逸。页面容器规范见 `docs/frontend/page-container.md`。`TrueAdminCrudPage` 内部默认集成 `TrueAdminPage`。
 
 ## CRUD 架构
 
-标准 CRUD 使用 TrueAdminCrudPage 高层封装，底层复用 ProComponents。复杂页面允许直接使用 ProTable / ProForm。标准能力包括分页、搜索、响应解包、列表结果、增删改查、批量操作、权限按钮、DrawerForm / ModalForm、错误提示和 escape hatch。
+标准 CRUD 使用 `TrueAdminCrudPage` 做页面级封装，核心表格能力由可独立复用的 `TrueAdminCrudTable` 承载，底层使用 Ant Design 基础组件组合，不依赖 ProTable。复杂页面可以直接使用 `TrueAdminCrudTable`、AntD Table / Form 或继续在业务内自行选择更高阶组件。标准能力包括分页、搜索、响应解包、列表结果、增删改查、批量操作、权限按钮、Drawer / Modal、错误提示和 escape hatch。标准 CRUD 的快速搜索、复杂筛选、分页和排序状态必须由 URL 驱动，筛选字段使用独立 filter schema，不依赖 columns search 配置；规范见 `docs/frontend/crud-search-filter.md`。
 
 表单校验采用前端基础体验校验 + 后端最终校验。前端负责必填、长度、格式和基础范围；后端负责业务规则、唯一性、权限、数据权限和状态机。后端 validation error 要能映射回 ProForm 字段。
 

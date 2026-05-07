@@ -1,6 +1,6 @@
-import type { ProColumns } from '@ant-design/pro-components';
 import { Tag } from 'antd';
 import { TrueAdminCrudPage } from '@/core/crud/TrueAdminCrudPage';
+import type { CrudColumns, CrudFilterSchema } from '@/core/crud/types';
 import { adminUserApi } from '../../services/admin-user.api';
 import type {
   AdminUser,
@@ -8,18 +8,44 @@ import type {
   AdminUserUpdatePayload,
 } from '../../types/admin-user';
 
-const columns: ProColumns<AdminUser>[] = [
+const filters: CrudFilterSchema[] = [
+  {
+    name: 'status',
+    label: '状态',
+    type: 'select',
+    options: [
+      { label: '启用', value: 'enabled' },
+      { label: '禁用', value: 'disabled' },
+    ],
+  },
+  {
+    name: 'roles',
+    label: '角色',
+    type: 'select',
+    mode: 'multiple',
+    options: [
+      { label: '超级管理员', value: 'super_admin' },
+      { label: '运营管理员', value: 'operator' },
+      { label: '审计员', value: 'auditor' },
+    ],
+  },
+  {
+    name: 'createdAt',
+    label: '创建时间',
+    type: 'dateRange',
+  },
+];
+
+const columns: CrudColumns<AdminUser> = [
   {
     title: 'ID',
     dataIndex: 'id',
     width: 72,
-    search: false,
     sorter: true,
   },
   {
     title: '用户名',
     dataIndex: 'username',
-    copyable: true,
   },
   {
     title: '昵称',
@@ -28,11 +54,6 @@ const columns: ProColumns<AdminUser>[] = [
   {
     title: '状态',
     dataIndex: 'status',
-    valueType: 'select',
-    valueEnum: {
-      enabled: { text: '启用', status: 'Success' },
-      disabled: { text: '禁用', status: 'Default' },
-    },
     render: (_, record) => (
       <Tag color={record.status === 'enabled' ? 'green' : 'default'}>
         {record.status === 'enabled' ? '启用' : '禁用'}
@@ -42,14 +63,11 @@ const columns: ProColumns<AdminUser>[] = [
   {
     title: '角色',
     dataIndex: 'roles',
-    search: false,
     render: (_, record) => record.roles.map((role) => <Tag key={role}>{role}</Tag>),
   },
   {
     title: '创建时间',
     dataIndex: 'createdAt',
-    valueType: 'dateTime',
-    search: false,
     sorter: true,
   },
 ];
@@ -61,6 +79,8 @@ export default function AdminUsersPage() {
       resource="system.user"
       columns={columns}
       service={adminUserApi}
+      quickSearch={{ placeholder: '搜索用户名 / 昵称' }}
+      filters={filters}
     />
   );
 }

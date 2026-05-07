@@ -86,6 +86,8 @@ export default {
   'demo.crud.action.delete': 'Delete',
   'demo.crud.action.export': 'Export',
   'demo.crud.action.reload': 'Reload',
+  'demo.crud.quickSearch.placeholder': 'Search name / owner',
+  'demo.crud.filter.owner.placeholder': 'Enter owner',
   'demo.crud.batch.actions': 'Batch actions',
   'demo.crud.batch.enable': 'Batch enable',
   'demo.crud.batch.delete': 'Batch delete',
