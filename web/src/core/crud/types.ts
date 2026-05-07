@@ -126,6 +126,7 @@ export type CrudTableRenderContext<
   response?: CrudPageResult<TRecord, TMeta>;
   selectedRowKeys: React.Key[];
   selectedRows: TRecord[];
+  error?: unknown;
   total: number;
 };
 
@@ -135,6 +136,71 @@ export type CrudToolbarRenderContext<
   TCreate = Partial<TRecord>,
   TUpdate = Partial<TRecord>,
 > = CrudTableRenderContext<TRecord, TMeta, TCreate, TUpdate>;
+
+export type CrudRowActionContext<
+  TRecord extends Record<string, unknown>,
+  TMeta = Record<string, unknown>,
+  TCreate = Partial<TRecord>,
+  TUpdate = Partial<TRecord>,
+> = CrudTableRenderContext<TRecord, TMeta, TCreate, TUpdate> & {
+  record: TRecord;
+};
+
+export type CrudRowActionsConfig<
+  TRecord extends Record<string, unknown>,
+  TMeta = Record<string, unknown>,
+  TCreate = Partial<TRecord>,
+  TUpdate = Partial<TRecord>,
+> = {
+  delete?: false;
+  render?: (context: CrudRowActionContext<TRecord, TMeta, TCreate, TUpdate>) => ReactNode;
+  title?: ReactNode;
+  width?: number;
+};
+
+export type CrudExportType = 'page' | 'selected' | 'all';
+
+export type CrudImportConfig<
+  TRecord extends Record<string, unknown>,
+  TMeta = Record<string, unknown>,
+  TCreate = Partial<TRecord>,
+  TUpdate = Partial<TRecord>,
+> =
+  | boolean
+  | {
+      accept?: string;
+      description?: ReactNode;
+      disabled?: boolean;
+      title?: ReactNode;
+      template?: {
+        disabled?: boolean;
+        label?: ReactNode;
+        onDownload?: (context: CrudTableRenderContext<TRecord, TMeta, TCreate, TUpdate>) => void;
+      };
+      onConfirm?: (
+        file: File,
+        context: CrudTableRenderContext<TRecord, TMeta, TCreate, TUpdate>,
+      ) => Promise<void> | void;
+    };
+
+export type CrudImportExportConfig<
+  TRecord extends Record<string, unknown>,
+  TMeta = Record<string, unknown>,
+  TCreate = Partial<TRecord>,
+  TUpdate = Partial<TRecord>,
+> = {
+  import?: CrudImportConfig<TRecord, TMeta, TCreate, TUpdate>;
+  export?:
+    | boolean
+    | {
+        disabled?: boolean;
+        options?: CrudExportType[];
+        onExport?: (
+          type: CrudExportType,
+          context: CrudTableRenderContext<TRecord, TMeta, TCreate, TUpdate>,
+        ) => void;
+      };
+};
 
 export type CrudTableDomList = {
   summary: ReactNode;
@@ -179,10 +245,15 @@ export type TrueAdminCrudTableProps<
   toolbarRender?: (
     context: CrudToolbarRenderContext<TRecord, TMeta, TCreate, TUpdate>,
   ) => ReactNode;
+  toolbarExtraRender?: (
+    context: CrudToolbarRenderContext<TRecord, TMeta, TCreate, TUpdate>,
+  ) => ReactNode;
   summaryRender?: (context: CrudTableRenderContext<TRecord, TMeta, TCreate, TUpdate>) => ReactNode;
   tableExtraRender?: (
     context: CrudTableRenderContext<TRecord, TMeta, TCreate, TUpdate>,
   ) => ReactNode;
+  emptyRender?: (context: CrudTableRenderContext<TRecord, TMeta, TCreate, TUpdate>) => ReactNode;
+  errorRender?: (context: CrudTableRenderContext<TRecord, TMeta, TCreate, TUpdate>) => ReactNode;
   tableViewRender?: (
     context: CrudTableRenderContext<TRecord, TMeta, TCreate, TUpdate>,
     defaultDom: ReactNode,
@@ -199,6 +270,8 @@ export type TrueAdminCrudTableProps<
     | false
     | ((context: CrudTableRenderContext<TRecord, TMeta, TCreate, TUpdate>) => ReactNode);
   rowSelection?: TableProps<TRecord>['rowSelection'];
+  rowActions?: false | CrudRowActionsConfig<TRecord, TMeta, TCreate, TUpdate>;
+  importExport?: false | CrudImportExportConfig<TRecord, TMeta, TCreate, TUpdate>;
   tableScrollX?: number | string;
   filters?: CrudFilterSchema[];
   quickSearch?: CrudQuickSearchConfig;

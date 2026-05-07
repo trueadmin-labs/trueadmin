@@ -19,6 +19,19 @@
 - 页面内重复内容优先使用 `TrueAdminPageSection`，但不要把卡片再套卡片；`surface` 只用于确实需要独立面板边界的区域。
 - 表格固定高度、左右分栏、树表页面优先消费 `WorkspaceViewport` 或 `TrueAdminSplitPage`，不要让 body 滚动策略散落在业务页面里。
 
+
+## 标准 CRUD 页面
+
+标准列表页优先使用 `TrueAdminCrudPage`。它固定采用 `TrueAdminPage layout="workspace"`，页面标题卡片、可选左侧区域、表格工作区会共同占满 AppShell 的 content 可用高度。
+
+纯表格页面：只传 `columns`、`service`、`filters`、`quickSearch` 等 CRUD 配置。页面级新增、导出等主操作放在 `extra` 或 `toolbarRender`，不要在页面外再包一层自定义滚动容器。
+
+左树右表页面：使用 `aside`、`asideWidth`、`asideGap` 扩展左侧区域。左侧树的搜索、刷新、展开收起属于树组件职责；右侧表格高度仍由 `TrueAdminCrudTable` 统一测量。
+
+复杂组合页面：如果页面不是标准“标题 + 可选侧栏 + 单表格”结构，可以直接组合 `TrueAdminPage`、`TrueAdminPageSection` 和 `TrueAdminCrudTable`。这样可以复用标准表格查询、生命周期、空态、错误态和分页能力，同时由业务页面控制外层布局。
+
+不要在业务页手动计算 `100vh - header - tabs - footer`。AppShell 和页面容器已经提供工作区高度，CRUD 内部会继续计算表格主体可用高度。
+
 ## 加载态规则
 
 - 页面首次进入或路由级加载由路由/页面负责。

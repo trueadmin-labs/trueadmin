@@ -1141,6 +1141,18 @@ body,
   background: var(--trueadmin-color-primary-bg, rgba(22, 119, 255, 0.08));
 }
 
+.trueadmin-crud-import-modal-header {
+  display: flex;
+  min-height: 32px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.trueadmin-crud-import-modal-header .ant-typography {
+  flex: 1 1 auto;
+}
+
 .trueadmin-crud-filter-panel {
   display: grid;
   min-height: 0;
@@ -1231,7 +1243,19 @@ body,
   width: 100%;
 }
 
-.trueadmin-shell.is-dark .trueadmin-crud-filter-panel {
+.trueadmin-shell.is-dark .trueadmin-crud-import-modal-header {
+  display: flex;
+  min-height: 32px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.trueadmin-crud-import-modal-header .ant-typography {
+  flex: 1 1 auto;
+}
+
+.trueadmin-crud-filter-panel {
   background: rgba(255, 255, 255, 0.04);
 }
 

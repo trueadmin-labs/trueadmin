@@ -3,14 +3,27 @@ import {
   CheckCircleOutlined,
   DeleteOutlined,
   DownOutlined,
-  ExportOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   PlusOutlined,
 } from '@ant-design/icons';
 import { StatisticCard } from '@ant-design/pro-components';
-import { App, Button, Col, Dropdown, Row, Space, Tag, Tooltip } from 'antd';
-import { useCallback, useMemo, useState } from 'react';
+import {
+  App,
+  Button,
+  Col,
+  Dropdown,
+  Form,
+  Input,
+  Modal,
+  Row,
+  Select,
+  Space,
+  Tag,
+  Tooltip,
+} from 'antd';
+import type { Key } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { TrueAdminCrudPage } from '@/core/crud/TrueAdminCrudPage';
 import type {
   CrudColumns,
@@ -178,12 +191,17 @@ const sortRecords = (records: CrudExampleRecord[], params: CrudListParams) => {
 export default function CrudExamplePage() {
   const { t } = useI18n();
   const { message } = App.useApp();
+  const [form] = Form.useForm<Partial<CrudExampleRecord>>();
+  const [records, setRecords] = useState(() => createRecords(t));
+  const recordsRef = useRef(records);
+  const [editingRecord, setEditingRecord] = useState<CrudExampleRecord>();
+  const [formOpen, setFormOpen] = useState(false);
+  const [formSubmitting, setFormSubmitting] = useState(false);
   const [selectedRows, setSelectedRows] = useState<CrudExampleRecord[]>([]);
   const [statusScope, setStatusScope] = useState<CrudExampleStatusFilter>('all');
   const [categoryScope, setCategoryScope] = useState<CrudExampleCategoryFilter>('all');
   const [categoryFilterCollapsed, setCategoryFilterCollapsed] = useState(false);
   const [categoryTreeLoading, setCategoryTreeLoading] = useState(false);
-  const records = useMemo(() => createRecords(t), [t]);
   const statusText = useMemo<Record<CrudExampleRecord['status'], string>>(
     () => ({
       disabled: t('demo.crud.status.disabled', '已禁用'),
@@ -285,34 +303,8 @@ export default function CrudExamplePage() {
         dataIndex: 'updatedAt',
         width: 170,
       },
-      {
-        title: t('demo.crud.column.action', '操作'),
-        fixed: 'right',
-        width: 140,
-        render: (_, record) => [
-          <Button key="edit" type="link" size="small">
-            {t('demo.crud.action.edit', '编辑')}
-          </Button>,
-          <Button
-            key="delete"
-            type="link"
-            danger
-            size="small"
-            onClick={() =>
-              message.info(
-                t('demo.crud.message.deleteOne', '已触发删除：{{name}}').replace(
-                  '{{name}}',
-                  record.name,
-                ),
-              )
-            }
-          >
-            {t('demo.crud.action.delete', '删除')}
-          </Button>,
-        ],
-      },
     ],
-    [categoryText, message, statusText, t],
+    [categoryText, statusText, t],
   );
 
   const statusFilterItems = useMemo(
@@ -356,9 +348,35 @@ export default function CrudExamplePage() {
     >
   >(
     () => ({
+      create: async (payload) => {
+        await wait(300);
+        const now = '2026-05-07 18:30';
+        const nextRecord: CrudExampleRecord = {
+          category: payload.category ?? 'system',
+          createdAt: now,
+          id: String(Date.now()),
+          name: payload.name ?? t('demo.crud.record.name', '配置项'),
+          owner: payload.owner ?? t('demo.crud.owner.system', '系统管理员'),
+          status: payload.status ?? 'pending',
+          updatedAt: now,
+          visits: 0,
+        };
+        const nextRecords = [nextRecord, ...recordsRef.current];
+        recordsRef.current = nextRecords;
+        setRecords(nextRecords);
+        return nextRecord;
+      },
+      delete: async (id) => {
+        await wait(300);
+        const nextRecords = recordsRef.current.filter((record) => record.id !== String(id));
+        recordsRef.current = nextRecords;
+        setRecords(nextRecords);
+        return { id };
+      },
       list: async (params) => {
         await wait(350);
-        const filteredRecords = filterRecords(records, params);
+        const currentRecords = recordsRef.current;
+        const filteredRecords = filterRecords(currentRecords, params);
         const sortedRecords = sortRecords(filteredRecords, params);
         const page = params.page ?? 1;
         const pageSize = params.pageSize ?? 20;
@@ -366,14 +384,31 @@ export default function CrudExamplePage() {
 
         return {
           items: sortedRecords.slice(start, start + pageSize),
-          meta: getListMeta(records),
+          meta: getListMeta(currentRecords),
           page,
           pageSize,
           total: sortedRecords.length,
         };
       },
+      update: async (id, payload) => {
+        await wait(300);
+        let nextRecord: CrudExampleRecord | undefined;
+        const nextRecords = recordsRef.current.map((record) => {
+          if (record.id !== String(id)) {
+            return record;
+          }
+          nextRecord = { ...record, ...payload, updatedAt: '2026-05-07 18:30' };
+          return nextRecord;
+        });
+        if (!nextRecord) {
+          throw new Error('Record not found.');
+        }
+        recordsRef.current = nextRecords;
+        setRecords(nextRecords);
+        return nextRecord;
+      },
     }),
-    [records],
+    [t],
   );
 
   const scopedService = useMemo<
@@ -462,6 +497,58 @@ export default function CrudExamplePage() {
     [appendLifecycleLog],
   );
 
+  const openCreateForm = useCallback(() => {
+    setEditingRecord(undefined);
+    form.resetFields();
+    form.setFieldsValue({ category: 'system', status: 'pending' });
+    setFormOpen(true);
+  }, [form]);
+
+  const openEditForm = useCallback(
+    (record: CrudExampleRecord) => {
+      setEditingRecord(record);
+      form.setFieldsValue(record);
+      setFormOpen(true);
+    },
+    [form],
+  );
+
+  const closeForm = useCallback(() => {
+    setFormOpen(false);
+    setEditingRecord(undefined);
+    form.resetFields();
+  }, [form]);
+
+  const handleCreateSuccess = useCallback(
+    (
+      record: CrudExampleRecord,
+      context: { payload: Partial<CrudExampleRecord>; resource: string },
+    ) => {
+      appendLifecycleLog('onCreateSuccess', record.name, { context, record });
+      message.success(t('demo.crud.message.createSuccess', '新增成功'));
+    },
+    [appendLifecycleLog, message, t],
+  );
+
+  const handleUpdateSuccess = useCallback(
+    (
+      record: CrudExampleRecord,
+      context: { id: Key; payload: Partial<CrudExampleRecord>; resource: string },
+    ) => {
+      appendLifecycleLog('onUpdateSuccess', record.name, { context, record });
+      message.success(t('demo.crud.message.updateSuccess', '保存成功'));
+    },
+    [appendLifecycleLog, message, t],
+  );
+
+  const handleDeleteSuccess = useCallback(
+    (result: unknown, context: { id: Key; resource: string }) => {
+      appendLifecycleLog('onDeleteSuccess', String(context.id), { context, result });
+      message.success(t('demo.crud.message.deleteSuccess', '删除成功'));
+    },
+    [appendLifecycleLog, message, t],
+  );
+
   return (
     <TrueAdminCrudPage<
       CrudExampleRecord,
@@ -479,6 +566,9 @@ export default function CrudExamplePage() {
       transformResponse={handleTransformResponse}
       onLoadSuccess={handleLoadSuccess}
       onLoadError={handleLoadError}
+      onCreateSuccess={handleCreateSuccess}
+      onUpdateSuccess={handleUpdateSuccess}
+      onDeleteSuccess={handleDeleteSuccess}
       rowKey="id"
       quickSearch={{ placeholder: t('demo.crud.quickSearch.placeholder', '搜索名称 / 负责人') }}
       filters={filters}
@@ -532,18 +622,59 @@ export default function CrudExamplePage() {
           </div>
         </>
       }
+      rowActions={{
+        render: ({ record }) => (
+          <Button key="edit" type="link" size="small" onClick={() => openEditForm(record)}>
+            {t('demo.crud.action.edit', '编辑')}
+          </Button>
+        ),
+        width: 150,
+      }}
       rowSelection={{
         selectedRowKeys,
         onChange: (_, rows) => setSelectedRows(rows),
       }}
       extra={
-        <Space size={8} wrap>
-          <Button type="primary" icon={<PlusOutlined />}>
-            {t('demo.crud.action.create', '新增')}
-          </Button>
-          <Button icon={<ExportOutlined />}>{t('demo.crud.action.export', '导出')}</Button>
-        </Space>
+        <Button type="primary" icon={<PlusOutlined />} onClick={openCreateForm}>
+          {t('demo.crud.action.create', '新增')}
+        </Button>
       }
+      importExport={{
+        import: {
+          accept: '.xlsx,.xls,.csv',
+          description: t('demo.crud.import.description', '请先下载模板，按模板整理数据后上传。'),
+          template: {
+            onDownload: () =>
+              message.info(t('demo.crud.message.downloadTemplate', '已触发下载导入模板')),
+          },
+          onConfirm: async (file) => {
+            await wait(350);
+            message.success(
+              t('demo.crud.message.importSuccess', '已确认导入：{{name}}').replace(
+                '{{name}}',
+                file.name,
+              ),
+            );
+          },
+        },
+        export: {
+          onExport: (type) => {
+            const messageKey =
+              type === 'page'
+                ? 'demo.crud.message.exportPage'
+                : type === 'selected'
+                  ? 'demo.crud.message.exportSelected'
+                  : 'demo.crud.message.exportFilteredAll';
+            const fallback =
+              type === 'page'
+                ? '已触发导出当页'
+                : type === 'selected'
+                  ? '已触发导出选中'
+                  : '已触发导出全部结果';
+            message.info(t(messageKey, fallback));
+          },
+        },
+      }}
       summaryRender={({ response, total }) => {
         const statusStats = response?.meta?.statusStats;
         const enabledCount = statusStats?.enabled ?? 0;
@@ -674,49 +805,117 @@ export default function CrudExamplePage() {
           </Row>
         );
       }}
-      toolbarRender={({ response }) => (
-        <Space className="trueadmin-crud-toolbar-business" size={8} wrap>
-          <TrueAdminQuickFilter<CrudExampleStatusFilter>
-            value={statusScope}
-            items={statusFilterItems.map((item) => ({
-              ...item,
-              count: item.value === 'pending' ? response?.meta?.statusStats.pending : undefined,
-            }))}
-            onChange={setStatusScope}
-          />
-          <Dropdown
-            disabled={!hasSelectedRows}
-            menu={{
-              items: [
-                {
-                  key: 'enable',
-                  icon: <CheckCircleOutlined />,
-                  label: t('demo.crud.batch.enable', '批量启用'),
+      toolbarRender={({ action, response }) => (
+        <>
+          <Space className="trueadmin-crud-toolbar-business" size={8} wrap>
+            <TrueAdminQuickFilter<CrudExampleStatusFilter>
+              value={statusScope}
+              items={statusFilterItems.map((item) => ({
+                ...item,
+                count: item.value === 'pending' ? response?.meta?.statusStats.pending : undefined,
+              }))}
+              onChange={setStatusScope}
+            />
+            <Dropdown
+              disabled={!hasSelectedRows}
+              menu={{
+                items: [
+                  {
+                    key: 'enable',
+                    icon: <CheckCircleOutlined />,
+                    label: t('demo.crud.batch.enable', '批量启用'),
+                  },
+                  {
+                    danger: true,
+                    key: 'delete',
+                    icon: <DeleteOutlined />,
+                    label: t('demo.crud.batch.delete', '批量删除'),
+                  },
+                ],
+                onClick: ({ key }) => {
+                  if (key === 'enable') {
+                    message.info(t('demo.crud.message.batchEnable', '已触发批量启用'));
+                    return;
+                  }
+                  if (key === 'delete') {
+                    message.info(t('demo.crud.message.batchDelete', '已触发批量删除'));
+                    setSelectedRows([]);
+                  }
                 },
-                {
-                  danger: true,
-                  key: 'delete',
-                  icon: <DeleteOutlined />,
-                  label: t('demo.crud.batch.delete', '批量删除'),
-                },
-              ],
-              onClick: ({ key }) => {
-                if (key === 'enable') {
-                  message.info(t('demo.crud.message.batchEnable', '已触发批量启用'));
-                  return;
-                }
-                if (key === 'delete') {
-                  message.info(t('demo.crud.message.batchDelete', '已触发批量删除'));
-                  setSelectedRows([]);
-                }
-              },
-            }}
+              }}
+            >
+              <Button disabled={!hasSelectedRows} icon={<DownOutlined />}>
+                {t('demo.crud.batch.actions', '批量操作')}
+              </Button>
+            </Dropdown>
+          </Space>
+          <Modal
+            title={
+              editingRecord
+                ? t('demo.crud.form.editTitle', '编辑配置')
+                : t('demo.crud.form.createTitle', '新增配置')
+            }
+            open={formOpen}
+            confirmLoading={formSubmitting}
+            onCancel={closeForm}
+            onOk={() => form.submit()}
           >
-            <Button disabled={!hasSelectedRows} icon={<DownOutlined />}>
-              {t('demo.crud.batch.actions', '批量操作')}
-            </Button>
-          </Dropdown>
-        </Space>
+            <Form
+              form={form}
+              layout="vertical"
+              onFinish={async (values) => {
+                setFormSubmitting(true);
+                try {
+                  if (editingRecord) {
+                    await action.update?.(editingRecord.id, values);
+                  } else {
+                    await action.create?.(values);
+                  }
+                  closeForm();
+                } finally {
+                  setFormSubmitting(false);
+                }
+              }}
+            >
+              <Form.Item
+                name="name"
+                label={t('demo.crud.column.name', '名称')}
+                rules={[
+                  { required: true, message: t('demo.crud.form.nameRequired', '请输入名称') },
+                ]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+                name="owner"
+                label={t('demo.crud.column.owner', '负责人')}
+                rules={[
+                  { required: true, message: t('demo.crud.form.ownerRequired', '请输入负责人') },
+                ]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item name="status" label={t('demo.crud.column.status', '状态')}>
+                <Select
+                  options={[
+                    { label: statusText.enabled, value: 'enabled' },
+                    { label: statusText.pending, value: 'pending' },
+                    { label: statusText.disabled, value: 'disabled' },
+                  ]}
+                />
+              </Form.Item>
+              <Form.Item name="category" label={t('demo.crud.column.category', '分类')}>
+                <Select
+                  options={[
+                    { label: categoryText.system, value: 'system' },
+                    { label: categoryText.business, value: 'business' },
+                    { label: categoryText.finance, value: 'finance' },
+                  ]}
+                />
+              </Form.Item>
+            </Form>
+          </Modal>
+        </>
       )}
     />
   );

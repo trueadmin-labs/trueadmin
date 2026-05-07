@@ -2,6 +2,7 @@ import { PlusOutlined } from '@ant-design/icons';
 import { Button, Card, Typography } from 'antd';
 import type { CSSProperties } from 'react';
 import { Permission } from '@/core/auth/Permission';
+import { useI18n } from '@/core/i18n/I18nProvider';
 import { TrueAdminPage } from '@/core/page/TrueAdminPage';
 import { TrueAdminCrudTable } from './TrueAdminCrudTable';
 import type { TrueAdminCrudPageProps } from './types';
@@ -32,6 +33,7 @@ export function TrueAdminCrudPage<
   service,
   ...tableProps
 }: TrueAdminCrudPageProps<TRecord, TCreate, TUpdate, TMeta>) {
+  const { t } = useI18n();
   const hasAside = Boolean(aside);
   const contentStyle = hasAside
     ? ({
@@ -42,7 +44,7 @@ export function TrueAdminCrudPage<
   const defaultExtra = service.create ? (
     <Permission code={toPermissionCode(resource, 'create')}>
       <Button type="primary" icon={<PlusOutlined />} disabled>
-        新增
+        {t('crud.action.create', '新增')}
       </Button>
     </Permission>
   ) : null;

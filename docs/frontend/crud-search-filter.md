@@ -99,8 +99,9 @@ TrueAdmin 标准 CRUD 由 `TrueAdminCrudTable` 统一管理列表查询状态、
 
 标准表格工具栏遵循以下分区：
 
-- 左侧：业务操作，例如新增、导出、批量操作。通过 `toolbarRender` 注入，核心 CRUD 负责放到标准 toolbar 左侧。
-- 右侧：快速搜索、筛选按钮等通用查询能力。由核心 CRUD 统一渲染。
+- 页面标题右侧：页面级主操作，例如新增。通过 `TrueAdminCrudPage.extra` 注入。
+- toolbar 左侧：列表上下文业务操作，例如状态快速筛选、批量操作。通过 `toolbarRender` 注入。
+- toolbar 右侧：通用查询和列表工具，顺序为快速搜索、高级筛选、导入/导出、刷新。导入/导出使用 `importExport` 开启；少量页面级特殊工具可以通过 `toolbarExtraRender` 插入到导入/导出前。
 
 标准 CRUD 页面使用 Ant Design 基础组件实现，不依赖 ProTable。业务需要行选择时，通过 `rowSelection` 传入；业务需要横向滚动时，通过 `tableScrollX` 传入。
 
@@ -122,6 +123,87 @@ TrueAdmin 标准 CRUD 由 `TrueAdminCrudTable` 统一管理列表查询状态、
 ```
 
 如果业务页面需要更复杂的分栏、嵌套布局或多块列表，应直接组合 `TrueAdminPage`、`TrueAdminPageSection` 和 `TrueAdminCrudTable`，不要为了单个场景新增专用 CRUD 页面组件。
+
+
+## 数据生命周期
+
+`TrueAdminCrudTable` 的数据请求、刷新和写操作由 `useCrudTableData` 管理。表格组件只组合 toolbar、筛选、表格、分页和布局测量，不在组件主体里直接维护请求流程。
+
+标准生命周期顺序：
+
+1. `beforeRequest(params, context)`：请求前拦截。返回 `false` 时中断本次列表请求。
+2. `transformParams(params, context)`：把 URL/筛选状态转换成接口请求参数。
+3. `service.list(params)`：执行业务列表请求。
+4. `transformResponse(response, context)`：规范化后端响应。
+5. `onLoadSuccess(response, context)`：列表加载成功后通知业务。
+6. `onLoadError(error, context)`：列表加载失败后通知业务。返回 `false` 时跳过全局错误中心。
+
+新增、编辑、删除统一通过 render context 里的 `action` 调用：
+
+```tsx
+toolbarRender={({ action }) => (
+  <UserForm
+    onCreate={(values) => action.create?.(values)}
+    onUpdate={(id, values) => action.update?.(id, values)}
+  />
+)}
+```
+
+这样可以保证 `onCreateSuccess`、`onUpdateSuccess`、`onDeleteSuccess` 和自动刷新流程都能执行。业务如果绕过 `action` 直接调用 `service.create/update/delete`，核心 CRUD 不会感知这次写操作。
+
+导入/导出属于列表通用工具能力，推荐通过 `importExport` 开启并放在表格右侧工具区、刷新按钮之前。导出默认提供“导出当页 / 导出选中 / 导出当前筛选结果”三个入口，实际导出数量和异步任务策略由后端控制。导入第一阶段使用标准弹窗流程：模板下载、拖拽/选择文件、确认导入；不内置粘贴导入。确认导入成功后核心会自动刷新列表。
+
+## 行操作
+
+标准表格默认在配置了 `service.delete` 时展示删除操作列，并使用 `resource` 自动推导权限码。页面可以通过 `rowActions` 扩展或关闭行操作：
+
+```tsx
+<TrueAdminCrudPage
+  rowActions={{
+    width: 160,
+    render: ({ record, action }) => (
+      <Button type="link" size="small" onClick={() => openEdit(record)}>
+        编辑
+      </Button>
+    ),
+  }}
+/>
+```
+
+- `rowActions.render`：在默认删除按钮前追加业务操作。
+- `rowActions.delete = false`：保留操作列，但不展示默认删除。
+- `rowActions = false`：完全关闭核心行操作列。
+- `rowActions.title` / `rowActions.width`：覆盖操作列标题和宽度。
+
+删除成功提示由核心提供兜底。如果页面配置了 `onDeleteSuccess`，成功反馈由业务钩子负责，避免重复提示。
+
+## 空态与错误态
+
+标准空态使用 AntD `Empty.PRESENTED_IMAGE_SIMPLE`。列表请求失败时，表格区展示 AntD `Result` 错误态和刷新按钮，并继续把错误交给全局错误中心，除非 `onLoadError` 返回 `false`。
+
+页面可以用 `emptyRender` 和 `errorRender` 覆盖表格区展示：
+
+```tsx
+<TrueAdminCrudTable
+  emptyRender={({ action }) => <Empty description="暂无用户" />}
+  errorRender={({ action }) => <Result status="error" extra={<Button onClick={action.reload}>重试</Button>} />}
+/>
+```
+
+错误态只替换表格主体区域，不改变 toolbar、筛选、分页和页面外框，避免业务页面自己重复搭建整套 CRUD 结构。
+
+## 表格高度职责
+
+表格高度由 `useCrudTableLayout` 统一测量，目标是让标准 CRUD 在 `layout="workspace"` 下填满页面可用空间，并在高级筛选展开/收起后刷新 `scroll.y` 和空态高度。
+
+高度职责分层：
+
+- `TrueAdminPage(layout="workspace")` 决定页面是否占满 AppShell 内容区。
+- `TrueAdminCrudPage` 决定标题卡片、左侧 aside 和表格主区的组合结构。
+- `TrueAdminCrudTable` 决定 toolbar、筛选、summary、table、pagination 的内部高度分配。
+- 业务内容只负责自己的表单、树、图表、弹窗内容高度，不手写全局 header、tabs、footer 计算。
+
+如果页面是左树右表，优先使用 `TrueAdminCrudPage` 的 `aside` 插槽。如果只是需要在复杂页面里放一个表格，直接使用 `TrueAdminCrudTable`，不要复制 CRUD 页面结构。
 
 ## 后端统计信息
 

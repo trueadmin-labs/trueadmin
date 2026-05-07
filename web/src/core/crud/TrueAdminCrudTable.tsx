@@ -1,10 +1,11 @@
 import type { TableProps } from 'antd';
-import { App, Button, Card, Pagination, Popconfirm, Table, Typography } from 'antd';
+import { App, Button, Card, Empty, Pagination, Popconfirm, Result, Table, Typography } from 'antd';
 import type { SorterResult, TablePaginationConfig } from 'antd/es/table/interface';
 import type { Key } from 'react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Permission } from '@/core/auth/Permission';
 import { errorCenter } from '@/core/error/errorCenter';
+import { useI18n } from '@/core/i18n/I18nProvider';
 import {
   getColumnSortKey,
   getSorterKey,
@@ -12,9 +13,11 @@ import {
   toCrudOrder,
   toPermissionCode,
 } from './crudTableUtils';
+import { TrueAdminImportModal } from './TrueAdminImportModal';
 import { TrueAdminTableFilterPanel } from './TrueAdminTableFilterPanel';
 import { TrueAdminTableToolbar } from './TrueAdminTableToolbar';
-import type { CrudColumns, CrudPageResult, TrueAdminCrudTableProps } from './types';
+import type { CrudColumns, CrudImportConfig, TrueAdminCrudTableProps } from './types';
+import { useCrudTableData } from './useCrudTableData';
 import { useCrudTableLayout } from './useCrudTableLayout';
 import { useCrudTableQueryState } from './useCrudTableQueryState';
 
@@ -45,13 +48,18 @@ export function TrueAdminCrudTable<
   onCreateSuccess,
   onUpdateSuccess,
   onDeleteSuccess,
+  emptyRender,
+  errorRender,
   toolbarRender,
+  toolbarExtraRender,
   summaryRender,
   tableExtraRender,
   tableViewRender,
   tableRender,
   tableAlertRender,
   tableAlertOptionRender,
+  rowActions,
+  importExport,
   rowSelection,
   tableScrollX,
 }: Pick<
@@ -71,39 +79,35 @@ export function TrueAdminCrudTable<
   | 'onCreateSuccess'
   | 'onUpdateSuccess'
   | 'onDeleteSuccess'
+  | 'emptyRender'
+  | 'errorRender'
   | 'toolbarRender'
+  | 'toolbarExtraRender'
   | 'summaryRender'
   | 'tableExtraRender'
   | 'tableViewRender'
   | 'tableRender'
   | 'tableAlertRender'
   | 'tableAlertOptionRender'
+  | 'rowActions'
+  | 'importExport'
   | 'rowSelection'
   | 'tableScrollX'
 >) {
   const { message } = App.useApp();
+  const { t } = useI18n();
   const [filtersExpanded, setFiltersExpanded] = useState(defaultFiltersExpanded ?? false);
-  const [dataSource, setDataSource] = useState<TRecord[]>([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [response, setResponse] = useState<CrudPageResult<TRecord, TMeta>>();
   const [innerSelectedRowKeys, setInnerSelectedRowKeys] = useState<Key[]>([]);
   const [innerSelectedRows, setInnerSelectedRows] = useState<TRecord[]>([]);
-  const reloadSeedRef = useRef(0);
-  const [reloadSeed, setReloadSeed] = useState(0);
   const [queryResetSeed, setQueryResetSeed] = useState(0);
+  const [importModalConfig, setImportModalConfig] = useState<
+    CrudImportConfig<TRecord, TMeta, TCreate, TUpdate> | undefined
+  >();
   const queryState = useCrudTableQueryState({
     filters,
     quickSearch,
     defaultPageSize: DEFAULT_PAGE_SIZE,
   });
-  const {
-    beginFilterPanelTransition,
-    finishFilterPanelTransition,
-    tableBodyScrollY,
-    tableMainRef,
-    tableMainStyle,
-  } = useCrudTableLayout({ dataSourceLength: dataSource.length });
   const hasFilters = filters.length > 0;
   const selectedRowKeys = rowSelection?.selectedRowKeys ?? innerSelectedRowKeys;
   const selectedRows = rowSelection ? innerSelectedRows : [];
@@ -111,15 +115,6 @@ export function TrueAdminCrudTable<
   const hasSelectedStatus = Boolean(
     rowSelection && selectedCount > 0 && tableAlertRender !== false,
   );
-  const toggleFiltersExpanded = useCallback(() => {
-    beginFilterPanelTransition(() => setFiltersExpanded((value) => !value));
-  }, [beginFilterPanelTransition]);
-
-  const reload = useCallback(() => {
-    reloadSeedRef.current += 1;
-    setReloadSeed(reloadSeedRef.current);
-  }, []);
-
   const clearSelected = useCallback(() => {
     setInnerSelectedRowKeys([]);
     setInnerSelectedRows([]);
@@ -128,172 +123,107 @@ export function TrueAdminCrudTable<
     >[2]);
   }, [rowSelection]);
 
-  const createRecord = useCallback(
-    async (payload: TCreate) => {
-      if (!service.create) {
-        throw new Error('Create service is not configured.');
-      }
+  const { action, dataSource, deleteRecord, error, loading, reload, response, total } =
+    useCrudTableData<TRecord, TCreate, TUpdate, TMeta>({
+      beforeRequest,
+      clearSelected,
+      onCreateSuccess,
+      onDeleteSuccess,
+      onLoadError,
+      onLoadSuccess,
+      onUpdateSuccess,
+      requestParams: queryState.requestParams,
+      resource,
+      service,
+      transformParams,
+      transformResponse,
+    });
 
-      const record = await service.create(payload);
-      onCreateSuccess?.(record, { payload, resource });
-      reload();
-      return record;
-    },
-    [onCreateSuccess, reload, resource, service],
-  );
+  const {
+    beginFilterPanelTransition,
+    finishFilterPanelTransition,
+    tableBodyScrollY,
+    tableMainRef,
+    tableMainStyle,
+  } = useCrudTableLayout({ dataSourceLength: dataSource.length });
 
-  const updateRecord = useCallback(
-    async (id: Key, payload: TUpdate) => {
-      if (!service.update) {
-        throw new Error('Update service is not configured.');
-      }
+  const toggleFiltersExpanded = useCallback(() => {
+    beginFilterPanelTransition(() => setFiltersExpanded((value) => !value));
+  }, [beginFilterPanelTransition]);
 
-      const record = await service.update(id, payload);
-      onUpdateSuccess?.(record, { id, payload, resource });
-      reload();
-      return record;
-    },
-    [onUpdateSuccess, reload, resource, service],
-  );
-
-  const deleteRecord = useCallback(
-    async (id: Key) => {
-      if (!service.delete) {
-        throw new Error('Delete service is not configured.');
-      }
-
-      const result = await service.delete(id);
-      onDeleteSuccess?.(result, { id, resource });
-      clearSelected();
-      reload();
-      return result;
-    },
-    [clearSelected, onDeleteSuccess, reload, resource, service],
-  );
-
-  const action = useMemo(
+  const tableRenderContext = useMemo(
     () => ({
-      clearSelected,
-      create: service.create ? createRecord : undefined,
-      delete: service.delete ? deleteRecord : undefined,
-      reload,
-      update: service.update ? updateRecord : undefined,
+      action,
+      dataSource,
+      error,
+      loading,
+      response,
+      selectedRowKeys,
+      selectedRows,
+      total,
     }),
-    [
-      clearSelected,
-      createRecord,
-      deleteRecord,
-      reload,
-      service.create,
-      service.delete,
-      service.update,
-      updateRecord,
-    ],
+    [action, dataSource, error, loading, response, selectedRowKeys, selectedRows, total],
   );
 
-  useEffect(() => {
-    let cancelled = false;
-
-    const loadData = async () => {
-      const context = { resource };
-      const baseParams = queryState.requestParams;
-      let requestParams = baseParams;
-
-      setLoading(true);
-
-      try {
-        const beforeResult = await beforeRequest?.(baseParams, context);
-        if (cancelled || beforeResult === false) {
-          return;
-        }
-
-        requestParams = transformParams ? await transformParams(baseParams, context) : baseParams;
-
-        if (cancelled) {
-          return;
-        }
-
-        const result = await service.list(requestParams);
-        if (cancelled) {
-          return;
-        }
-
-        const loadContext = { params: requestParams, resource };
-        const finalResult = transformResponse
-          ? await transformResponse(result, loadContext)
-          : result;
-
-        if (cancelled) {
-          return;
-        }
-
-        setDataSource(finalResult.items ?? []);
-        setTotal(finalResult.total ?? 0);
-        setResponse(finalResult);
-        onLoadSuccess?.(finalResult, loadContext);
-      } catch (error) {
-        if (!cancelled) {
-          const shouldSkipGlobalError = onLoadError?.(error, { params: requestParams, resource });
-          if (shouldSkipGlobalError !== false) {
-            errorCenter.emit(error);
-          }
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
+  const getRecordKey = useCallback(
+    (record: TRecord) => {
+      if (typeof rowKey === 'function') {
+        return rowKey(record);
       }
-    };
-
-    void loadData();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [
-    beforeRequest,
-    onLoadError,
-    onLoadSuccess,
-    queryState.requestParams,
-    reloadSeed,
-    resource,
-    service,
-    transformParams,
-    transformResponse,
-  ]);
+      return record[(rowKey ?? 'id') as keyof TRecord] as Key;
+    },
+    [rowKey],
+  );
 
   const operationColumn = useMemo<CrudColumns<TRecord>>(
     () =>
-      service.delete
+      rowActions !== false && (service.delete || rowActions?.render)
         ? [
             {
-              title: '操作',
+              title: rowActions?.title ?? t('crud.column.action', '操作'),
               key: '__actions',
               fixed: 'right',
-              width: 120,
+              width: rowActions?.width ?? 120,
               render: (_, record) => (
-                <Permission code={toPermissionCode(resource, 'delete')}>
-                  <Popconfirm
-                    title="确认删除这条记录吗？"
-                    onConfirm={async () => {
-                      try {
-                        await deleteRecord(record.id as Key);
-                        message.success('删除成功');
-                      } catch (error) {
-                        errorCenter.emit(error);
-                      }
-                    }}
-                  >
-                    <Button danger type="link" size="small">
-                      删除
-                    </Button>
-                  </Popconfirm>
-                </Permission>
+                <>
+                  {rowActions?.render?.({ ...tableRenderContext, record })}
+                  {service.delete && rowActions?.delete !== false ? (
+                    <Permission code={toPermissionCode(resource, 'delete')}>
+                      <Popconfirm
+                        title={t('crud.action.deleteConfirm', '确认删除这条记录吗？')}
+                        onConfirm={async () => {
+                          try {
+                            await deleteRecord(getRecordKey(record));
+                            if (!onDeleteSuccess) {
+                              message.success(t('crud.action.deleteSuccess', '删除成功'));
+                            }
+                          } catch (error) {
+                            errorCenter.emit(error);
+                          }
+                        }}
+                      >
+                        <Button danger type="link" size="small">
+                          {t('crud.action.delete', '删除')}
+                        </Button>
+                      </Popconfirm>
+                    </Permission>
+                  ) : null}
+                </>
               ),
             },
           ]
         : [],
-    [deleteRecord, message, resource, service.delete],
+    [
+      deleteRecord,
+      getRecordKey,
+      message,
+      onDeleteSuccess,
+      resource,
+      rowActions,
+      service.delete,
+      t,
+      tableRenderContext,
+    ],
   );
 
   const mergedColumns = useMemo<CrudColumns<TRecord>>(() => {
@@ -315,20 +245,8 @@ export function TrueAdminCrudTable<
     });
   }, [columns, operationColumn, queryState.order, queryState.sort]);
 
-  const tableRenderContext = useMemo(
-    () => ({
-      action,
-      dataSource,
-      loading,
-      response,
-      selectedRowKeys,
-      selectedRows,
-      total,
-    }),
-    [action, dataSource, loading, response, selectedRowKeys, selectedRows, total],
-  );
-
   const toolbarTitle = toolbarRender?.(tableRenderContext) ?? null;
+  const toolbarExtra = toolbarExtraRender?.(tableRenderContext) ?? null;
 
   const handleTableChange = (
     _pagination: TablePaginationConfig,
@@ -391,11 +309,19 @@ export function TrueAdminCrudTable<
           filtersExpanded={filtersExpanded}
           hasFilters={hasFilters}
           loading={loading}
+          extra={toolbarExtra}
+          importExport={importExport as never}
+          renderContext={tableRenderContext as never}
+          selectedCount={selectedCount}
+          t={t}
           quickSearch={quickSearch}
           quickSearchName={queryState.quickSearchName}
           quickSearchResetSeed={queryResetSeed}
           quickSearchValue={
             queryState.quickSearchName ? queryState.values[queryState.quickSearchName] : undefined
+          }
+          onOpenImport={(config) =>
+            setImportModalConfig(config as CrudImportConfig<TRecord, TMeta, TCreate, TUpdate>)
           }
           onClearQuickSearch={queryState.clearQuickSearch}
           onReload={reload}
@@ -410,14 +336,14 @@ export function TrueAdminCrudTable<
     tableAlertRender(tableRenderContext)
   ) : (
     <Typography.Text type="secondary">
-      已选择 <Typography.Text strong>{selectedCount}</Typography.Text> 项
+      {t('crud.selection.count', '已选择 {{count}} 项').replace('{{count}}', String(selectedCount))}
     </Typography.Text>
   );
   const selectedStatusOptionContent = tableAlertOptionRender ? (
     tableAlertOptionRender(tableRenderContext)
   ) : (
     <Button type="link" size="small" onClick={clearSelected}>
-      清空
+      {t('crud.selection.clear', '清空')}
     </Button>
   );
   const selectedStatusDom = hasSelectedStatus ? (
@@ -431,12 +357,29 @@ export function TrueAdminCrudTable<
     </div>
   ) : null;
 
-  const tableDom = (
+  const emptyContent = emptyRender?.(tableRenderContext) ?? (
+    <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+  );
+  const tableDom = error ? (
+    (errorRender?.(tableRenderContext) ?? (
+      <Result
+        status="error"
+        title={t('crud.error.loadFailed', '数据加载失败')}
+        subTitle={t('crud.error.loadFailedDescription', '请稍后重试或联系管理员。')}
+        extra={
+          <Button type="primary" onClick={reload}>
+            {t('crud.action.reload', '刷新')}
+          </Button>
+        }
+      />
+    ))
+  ) : (
     <Table<TRecord>
       rowKey={rowKey as TableProps<TRecord>['rowKey']}
       columns={mergedColumns}
       dataSource={dataSource}
       loading={loading}
+      locale={{ emptyText: emptyContent }}
       pagination={false}
       rowSelection={mergedRowSelection}
       scroll={{ x: tableScrollX, y: tableBodyScrollY }}
@@ -453,7 +396,9 @@ export function TrueAdminCrudTable<
           pageSize={queryState.pageSize}
           total={total}
           showSizeChanger
-          showTotal={(nextTotal) => `共 ${nextTotal} 条`}
+          showTotal={(nextTotal) =>
+            t('crud.pagination.total', '共 {{total}} 条').replace('{{total}}', String(nextTotal))
+          }
           onChange={(current, pageSize) => queryState.changePage(current, pageSize)}
         />
       </div>
@@ -486,5 +431,20 @@ export function TrueAdminCrudTable<
     </div>
   );
 
-  return tableRender ? tableRender(tableRenderContext, defaultDom, domList) : defaultDom;
+  const contentDom = tableRender
+    ? tableRender(tableRenderContext, defaultDom, domList)
+    : defaultDom;
+
+  return (
+    <>
+      {contentDom}
+      <TrueAdminImportModal
+        config={importModalConfig as never}
+        context={tableRenderContext as never}
+        open={Boolean(importModalConfig)}
+        t={t}
+        onClose={() => setImportModalConfig(undefined)}
+      />
+    </>
+  );
 }
