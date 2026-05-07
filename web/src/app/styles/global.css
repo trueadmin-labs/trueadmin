@@ -2513,7 +2513,8 @@ body,
   background: rgba(255, 255, 255, 0.1);
 }
 
-.trueadmin-complex-form {
+.trueadmin-complex-form,
+.trueadmin-complex-detail {
   min-width: 0;
 }
 
@@ -2521,11 +2522,13 @@ body,
   width: 100%;
 }
 
-.trueadmin-complex-form .ant-card {
+.trueadmin-complex-form .ant-card,
+.trueadmin-complex-detail .ant-card {
   border-radius: 8px;
 }
 
-.trueadmin-complex-form .ant-card-head {
+.trueadmin-complex-form .ant-card-head,
+.trueadmin-complex-detail .ant-card-head {
   min-height: 44px;
 }
 
@@ -2597,7 +2600,8 @@ body,
   }
 }
 
-.trueadmin-complex-form.is-modal {
+.trueadmin-complex-form.is-modal,
+.trueadmin-complex-detail.is-modal {
   padding: 12px;
 }
 
