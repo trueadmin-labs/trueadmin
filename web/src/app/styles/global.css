@@ -1009,6 +1009,15 @@ body,
   height: 100%;
 }
 
+.trueadmin-crud-table-main .ant-table-placeholder .ant-empty {
+  display: flex;
+  height: var(--trueadmin-crud-table-empty-height, 120px);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-block: 0;
+}
+
 .trueadmin-crud-table-pagination {
   display: flex;
   min-height: 42px;

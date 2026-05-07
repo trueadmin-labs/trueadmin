@@ -1,7 +1,7 @@
 import type { TableProps } from 'antd';
 import { App, Button, Card, Pagination, Popconfirm, Table, Typography } from 'antd';
 import type { SorterResult, SortOrder, TablePaginationConfig } from 'antd/es/table/interface';
-import type { Key } from 'react';
+import type { CSSProperties, Key } from 'react';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Permission } from '@/core/auth/Permission';
 import { errorCenter } from '@/core/error/errorCenter';
@@ -13,9 +13,9 @@ import { type CrudOrder, useCrudTableQueryState } from './useCrudTableQueryState
 const DEFAULT_PAGE_SIZE = 20;
 const TABLE_HEADER_HEIGHT = 55;
 
-const useElementHeight = <TElement extends HTMLElement>() => {
+const useElementSize = <TElement extends HTMLElement>() => {
   const ref = useRef<TElement | null>(null);
-  const [height, setHeight] = useState(0);
+  const [size, setSize] = useState({ height: 0, width: 0 });
 
   useLayoutEffect(() => {
     const node = ref.current;
@@ -23,23 +23,37 @@ const useElementHeight = <TElement extends HTMLElement>() => {
       return undefined;
     }
 
-    const updateHeight = () => {
-      setHeight(Math.floor(node.getBoundingClientRect().height));
+    const updateSize = () => {
+      const rect = node.getBoundingClientRect();
+      const nextSize = {
+        height: Math.floor(rect.height),
+        width: Math.floor(rect.width),
+      };
+      setSize((currentSize) =>
+        currentSize.height === nextSize.height && currentSize.width === nextSize.width
+          ? currentSize
+          : nextSize,
+      );
     };
 
-    updateHeight();
+    updateSize();
 
     if (typeof ResizeObserver === 'undefined') {
-      window.addEventListener('resize', updateHeight);
-      return () => window.removeEventListener('resize', updateHeight);
+      window.addEventListener('resize', updateSize);
+      return () => window.removeEventListener('resize', updateSize);
     }
 
-    const observer = new ResizeObserver(updateHeight);
+    const observer = new ResizeObserver(updateSize);
     observer.observe(node);
     return () => observer.disconnect();
   }, []);
 
-  return [ref, height] as const;
+  return [ref, size] as const;
+};
+
+const getElementNumberStyle = (element: Element, property: keyof CSSStyleDeclaration) => {
+  const value = Number.parseFloat(getComputedStyle(element)[property] as string);
+  return Number.isNaN(value) ? 0 : value;
 };
 
 const toPermissionCode = (resource: string, action: string) =>
@@ -167,7 +181,8 @@ export function TrueAdminCrudTable<
     quickSearch,
     defaultPageSize: DEFAULT_PAGE_SIZE,
   });
-  const [tableMainRef, tableMainHeight] = useElementHeight<HTMLDivElement>();
+  const [tableMainRef, tableMainSize] = useElementSize<HTMLDivElement>();
+  const [tableEmptyChromeHeight, setTableEmptyChromeHeight] = useState(32);
   const hasFilters = filters.length > 0;
   const selectedRowKeys = rowSelection?.selectedRowKeys ?? innerSelectedRowKeys;
   const selectedRows = rowSelection ? innerSelectedRows : [];
@@ -175,7 +190,43 @@ export function TrueAdminCrudTable<
   const hasSelectedStatus = Boolean(
     rowSelection && selectedCount > 0 && tableAlertRender !== false,
   );
-  const tableBodyScrollY = Math.max(120, tableMainHeight - TABLE_HEADER_HEIGHT);
+  const tableBodyScrollY = Math.max(120, tableMainSize.height - TABLE_HEADER_HEIGHT);
+  const tableEmptyHeight = Math.max(120, tableBodyScrollY - tableEmptyChromeHeight);
+  const tableMainStyle = {
+    '--trueadmin-crud-table-empty-height': `${tableEmptyHeight}px`,
+  } as CSSProperties;
+
+  useLayoutEffect(() => {
+    const tableMainNode = tableMainRef.current;
+    if (!tableMainNode) {
+      return;
+    }
+
+    const bodyNode = tableMainNode.querySelector('.ant-table-body');
+    const cellNode = tableMainNode.querySelector('.ant-table-placeholder > .ant-table-cell');
+    if (!bodyNode || !cellNode) {
+      return;
+    }
+
+    const cellVerticalPadding =
+      getElementNumberStyle(cellNode, 'paddingTop') +
+      getElementNumberStyle(cellNode, 'paddingBottom');
+    const cellVerticalBorder =
+      getElementNumberStyle(cellNode, 'borderTopWidth') +
+      getElementNumberStyle(cellNode, 'borderBottomWidth');
+    const horizontalScrollbarHeight =
+      bodyNode.clientWidth < bodyNode.scrollWidth
+        ? bodyNode.getBoundingClientRect().height - bodyNode.clientHeight
+        : 0;
+    const nextChromeHeight = Math.max(
+      0,
+      Math.ceil(cellVerticalPadding + cellVerticalBorder + horizontalScrollbarHeight),
+    );
+
+    setTableEmptyChromeHeight((currentChromeHeight) =>
+      currentChromeHeight === nextChromeHeight ? currentChromeHeight : nextChromeHeight,
+    );
+  }, [tableMainRef, tableMainSize.height, tableMainSize.width, dataSource.length]);
 
   const reload = useCallback(() => {
     reloadSeedRef.current += 1;
@@ -523,7 +574,7 @@ export function TrueAdminCrudTable<
   const tableAreaDom = (
     <Card className="trueadmin-crud-table-card" styles={{ body: { padding: 0 } }}>
       {toolbarDom}
-      <div ref={tableMainRef} className="trueadmin-crud-table-main">
+      <div ref={tableMainRef} className="trueadmin-crud-table-main" style={tableMainStyle}>
         {tableViewDom}
       </div>
       {paginationDom}
