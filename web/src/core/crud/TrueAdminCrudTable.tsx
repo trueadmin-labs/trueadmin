@@ -1,129 +1,24 @@
 import type { TableProps } from 'antd';
 import { App, Button, Card, Pagination, Popconfirm, Table, Typography } from 'antd';
-import type { SorterResult, SortOrder, TablePaginationConfig } from 'antd/es/table/interface';
-import type { CSSProperties, Key } from 'react';
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import type { SorterResult, TablePaginationConfig } from 'antd/es/table/interface';
+import type { Key } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Permission } from '@/core/auth/Permission';
 import { errorCenter } from '@/core/error/errorCenter';
+import {
+  getColumnSortKey,
+  getSorterKey,
+  getSorterResult,
+  toCrudOrder,
+  toPermissionCode,
+} from './crudTableUtils';
 import { TrueAdminTableFilterPanel } from './TrueAdminTableFilterPanel';
 import { TrueAdminTableToolbar } from './TrueAdminTableToolbar';
 import type { CrudColumns, CrudPageResult, TrueAdminCrudTableProps } from './types';
-import { type CrudOrder, useCrudTableQueryState } from './useCrudTableQueryState';
+import { useCrudTableLayout } from './useCrudTableLayout';
+import { useCrudTableQueryState } from './useCrudTableQueryState';
 
 const DEFAULT_PAGE_SIZE = 20;
-const TABLE_HEADER_HEIGHT = 55;
-const FILTER_PANEL_TRANSITION_FALLBACK_MS = 280;
-
-type ElementSizeOptions = {
-  paused?: boolean;
-};
-
-const useElementSize = <TElement extends HTMLElement>({
-  paused = false,
-}: ElementSizeOptions = {}) => {
-  const ref = useRef<TElement | null>(null);
-  const pausedRef = useRef(paused);
-  const [size, setSize] = useState({ height: 0, width: 0 });
-
-  pausedRef.current = paused;
-
-  const measureSize = useCallback(() => {
-    const node = ref.current;
-    if (!node) {
-      return;
-    }
-
-    const rect = node.getBoundingClientRect();
-    const nextSize = {
-      height: Math.floor(rect.height),
-      width: Math.floor(rect.width),
-    };
-    setSize((currentSize) =>
-      currentSize.height === nextSize.height && currentSize.width === nextSize.width
-        ? currentSize
-        : nextSize,
-    );
-  }, []);
-
-  useLayoutEffect(() => {
-    const node = ref.current;
-    if (!node) {
-      return undefined;
-    }
-
-    const updateSize = () => {
-      if (!pausedRef.current) {
-        measureSize();
-      }
-    };
-
-    measureSize();
-
-    if (typeof ResizeObserver === 'undefined') {
-      window.addEventListener('resize', updateSize);
-      return () => window.removeEventListener('resize', updateSize);
-    }
-
-    const observer = new ResizeObserver(updateSize);
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [measureSize]);
-
-  return [ref, size, measureSize] as const;
-};
-
-const getElementNumberStyle = (element: Element, property: keyof CSSStyleDeclaration) => {
-  const value = Number.parseFloat(getComputedStyle(element)[property] as string);
-  return Number.isNaN(value) ? 0 : value;
-};
-
-const toPermissionCode = (resource: string, action: string) =>
-  `${resource.replaceAll('.', ':')}:${action}`;
-
-const getColumnSortKey = <TRecord extends Record<string, unknown>>(
-  column: CrudColumns<TRecord>[number],
-) => {
-  if (typeof column.key === 'string') {
-    return column.key;
-  }
-  if (!('dataIndex' in column)) {
-    return undefined;
-  }
-  if (typeof column.dataIndex === 'string') {
-    return column.dataIndex;
-  }
-  if (Array.isArray(column.dataIndex)) {
-    return column.dataIndex.join('.');
-  }
-  return undefined;
-};
-
-const toCrudOrder = (order: SortOrder | undefined): CrudOrder | undefined => {
-  if (order === 'ascend') {
-    return 'asc';
-  }
-  if (order === 'descend') {
-    return 'desc';
-  }
-  return undefined;
-};
-
-const getSorterResult = <TRecord extends Record<string, unknown>>(
-  sorter: SorterResult<TRecord> | SorterResult<TRecord>[],
-) => (Array.isArray(sorter) ? sorter[0] : sorter);
-
-const getSorterKey = <TRecord extends Record<string, unknown>>(sorter: SorterResult<TRecord>) => {
-  if (typeof sorter.columnKey === 'string') {
-    return sorter.columnKey;
-  }
-  if (typeof sorter.field === 'string') {
-    return sorter.field;
-  }
-  if (Array.isArray(sorter.field)) {
-    return sorter.field.join('.');
-  }
-  return undefined;
-};
 
 type RowSelectionOnChange<TRecord extends Record<string, unknown>> = NonNullable<
   NonNullable<TableProps<TRecord>['rowSelection']>['onChange']
@@ -188,7 +83,6 @@ export function TrueAdminCrudTable<
 >) {
   const { message } = App.useApp();
   const [filtersExpanded, setFiltersExpanded] = useState(defaultFiltersExpanded ?? false);
-  const [isFilterPanelTransitioning, setIsFilterPanelTransitioning] = useState(false);
   const [dataSource, setDataSource] = useState<TRecord[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -196,7 +90,6 @@ export function TrueAdminCrudTable<
   const [innerSelectedRowKeys, setInnerSelectedRowKeys] = useState<Key[]>([]);
   const [innerSelectedRows, setInnerSelectedRows] = useState<TRecord[]>([]);
   const reloadSeedRef = useRef(0);
-  const filterPanelTransitionTimerRef = useRef<number | undefined>(undefined);
   const [reloadSeed, setReloadSeed] = useState(0);
   const [queryResetSeed, setQueryResetSeed] = useState(0);
   const queryState = useCrudTableQueryState({
@@ -204,10 +97,13 @@ export function TrueAdminCrudTable<
     quickSearch,
     defaultPageSize: DEFAULT_PAGE_SIZE,
   });
-  const [tableMainRef, tableMainSize, measureTableMainSize] = useElementSize<HTMLDivElement>({
-    paused: isFilterPanelTransitioning,
-  });
-  const [tableEmptyChromeHeight, setTableEmptyChromeHeight] = useState(32);
+  const {
+    beginFilterPanelTransition,
+    finishFilterPanelTransition,
+    tableBodyScrollY,
+    tableMainRef,
+    tableMainStyle,
+  } = useCrudTableLayout({ dataSourceLength: dataSource.length });
   const hasFilters = filters.length > 0;
   const selectedRowKeys = rowSelection?.selectedRowKeys ?? innerSelectedRowKeys;
   const selectedRows = rowSelection ? innerSelectedRows : [];
@@ -215,74 +111,9 @@ export function TrueAdminCrudTable<
   const hasSelectedStatus = Boolean(
     rowSelection && selectedCount > 0 && tableAlertRender !== false,
   );
-  const tableBodyScrollY = Math.max(120, tableMainSize.height - TABLE_HEADER_HEIGHT);
-  const tableEmptyHeight = Math.max(120, tableBodyScrollY - tableEmptyChromeHeight);
-  const tableMainStyle = {
-    '--trueadmin-crud-table-empty-height': `${tableEmptyHeight}px`,
-  } as CSSProperties;
-
-  useLayoutEffect(() => {
-    const tableMainNode = tableMainRef.current;
-    if (!tableMainNode) {
-      return;
-    }
-
-    const bodyNode = tableMainNode.querySelector('.ant-table-body');
-    const cellNode = tableMainNode.querySelector('.ant-table-placeholder > .ant-table-cell');
-    if (!bodyNode || !cellNode) {
-      return;
-    }
-
-    const cellVerticalPadding =
-      getElementNumberStyle(cellNode, 'paddingTop') +
-      getElementNumberStyle(cellNode, 'paddingBottom');
-    const cellVerticalBorder =
-      getElementNumberStyle(cellNode, 'borderTopWidth') +
-      getElementNumberStyle(cellNode, 'borderBottomWidth');
-    const horizontalScrollbarHeight =
-      bodyNode.clientWidth < bodyNode.scrollWidth
-        ? bodyNode.getBoundingClientRect().height - bodyNode.clientHeight
-        : 0;
-    const nextChromeHeight = Math.max(
-      0,
-      Math.ceil(cellVerticalPadding + cellVerticalBorder + horizontalScrollbarHeight),
-    );
-
-    setTableEmptyChromeHeight((currentChromeHeight) =>
-      currentChromeHeight === nextChromeHeight ? currentChromeHeight : nextChromeHeight,
-    );
-  }, [tableMainRef, tableMainSize.height, tableMainSize.width, dataSource.length]);
-
-  const finishFilterPanelTransition = useCallback(() => {
-    if (filterPanelTransitionTimerRef.current) {
-      window.clearTimeout(filterPanelTransitionTimerRef.current);
-      filterPanelTransitionTimerRef.current = undefined;
-    }
-
-    setIsFilterPanelTransitioning(false);
-    measureTableMainSize();
-  }, [measureTableMainSize]);
-
   const toggleFiltersExpanded = useCallback(() => {
-    if (filterPanelTransitionTimerRef.current) {
-      window.clearTimeout(filterPanelTransitionTimerRef.current);
-    }
-
-    setIsFilterPanelTransitioning(true);
-    setFiltersExpanded((value) => !value);
-    filterPanelTransitionTimerRef.current = window.setTimeout(() => {
-      window.requestAnimationFrame(finishFilterPanelTransition);
-    }, FILTER_PANEL_TRANSITION_FALLBACK_MS);
-  }, [finishFilterPanelTransition]);
-
-  useEffect(
-    () => () => {
-      if (filterPanelTransitionTimerRef.current) {
-        window.clearTimeout(filterPanelTransitionTimerRef.current);
-      }
-    },
-    [],
-  );
+    beginFilterPanelTransition(() => setFiltersExpanded((value) => !value));
+  }, [beginFilterPanelTransition]);
 
   const reload = useCallback(() => {
     reloadSeedRef.current += 1;
