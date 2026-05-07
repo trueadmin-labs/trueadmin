@@ -24,9 +24,11 @@ import {
   Upload,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
+import type { CSSProperties } from 'react';
 import { useMemo, useState } from 'react';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { TrueAdminPage } from '@/core/page/TrueAdminPage';
+import { TrueAdminScrollShadow } from '@/core/scroll/TrueAdminScrollShadow';
 
 type SalesItem = {
   key: string;
@@ -558,29 +560,37 @@ export default function ComplexFormExamplePage() {
         title={t('demo.complexForm.modal.title', '销售订单')}
         open={modalOpen}
         width="min(1440px, calc(100vw - 48px))"
-        className="trueadmin-complex-form-modal"
-        styles={{ body: { padding: 0, overflow: 'hidden' } }}
+        className="trueadmin-page-modal trueadmin-complex-form-modal"
+        style={
+          {
+            '--trueadmin-modal-content-bg': 'var(--trueadmin-shell-bg)',
+            '--trueadmin-modal-content-padding-block': '20px',
+            '--trueadmin-modal-content-padding-inline': '24px',
+          } as CSSProperties
+        }
+        styles={{ body: { overflow: 'hidden', padding: 0 } }}
         footer={
-          <div className="trueadmin-complex-form-modal-footer">
-            <Space size={8} wrap>
-              <Button onClick={() => setModalOpen(false)}>
-                {t('demo.complexForm.action.cancel', '取消')}
-              </Button>
-              <Button icon={<SaveOutlined />}>
-                {t('demo.complexForm.action.saveDraft', '保存草稿')}
-              </Button>
-              <Button type="primary" icon={<SendOutlined />}>
-                {t('demo.complexForm.action.submit', '提交订单')}
-              </Button>
-            </Space>
-          </div>
+          <Space size={8} wrap>
+            <Button onClick={() => setModalOpen(false)}>
+              {t('demo.complexForm.action.cancel', '取消')}
+            </Button>
+            <Button icon={<SaveOutlined />}>
+              {t('demo.complexForm.action.saveDraft', '保存草稿')}
+            </Button>
+            <Button type="primary" icon={<SendOutlined />}>
+              {t('demo.complexForm.action.submit', '提交订单')}
+            </Button>
+          </Space>
         }
         onCancel={() => setModalOpen(false)}
         destroyOnHidden
       >
-        <div className="trueadmin-complex-form-modal-body">
+        <TrueAdminScrollShadow
+          className="trueadmin-complex-form-modal-shadow"
+          contentClassName="trueadmin-complex-form-modal-body"
+        >
           <SalesOrderFormBody variant="modal" />
-        </div>
+        </TrueAdminScrollShadow>
       </Modal>
     </>
   );
