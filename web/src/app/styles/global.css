@@ -905,52 +905,85 @@ body,
   margin-bottom: 16px;
 }
 
-.trueadmin-demo-crud-summary.ant-pro-card {
+.trueadmin-demo-crud-summary {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.trueadmin-demo-crud-summary-card.ant-pro-card {
+  min-width: 0;
+  height: 92px;
   border-radius: 8px;
 }
 
-.trueadmin-demo-crud-summary .ant-pro-card-body {
+.trueadmin-demo-crud-summary-card .ant-pro-card-body {
+  display: flex;
+  min-width: 0;
+  height: 100%;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.trueadmin-demo-crud-summary-card .ant-pro-statistic-card-content {
   min-width: 0;
 }
 
+.trueadmin-demo-crud-summary-card .ant-pro-statistic-card-content-horizontal {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 76px;
+  gap: 8px;
+  align-items: center;
+}
+
+.trueadmin-demo-crud-summary-card .ant-pro-statistic-card-chart {
+  min-width: 0;
+}
+
+.trueadmin-demo-crud-summary-card .ant-pro-statistic-card-footer {
+  margin-top: 8px;
+}
+
 .trueadmin-demo-crud-summary-chart {
-  height: 46px;
-  margin-top: 10px;
+  width: 76px;
+  height: 30px;
 }
 
 .trueadmin-demo-crud-summary-progress {
-  height: 8px;
-  margin-top: 18px;
-}
-
-.trueadmin-demo-crud-summary-footer {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
   color: rgba(0, 0, 0, 0.45);
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .trueadmin-demo-crud-summary-tags {
   display: flex;
   min-width: 0;
-  flex-wrap: wrap;
-  gap: 6px;
+  flex-wrap: nowrap;
+  gap: 4px;
+  overflow: hidden;
 }
 
 .trueadmin-demo-crud-summary-tags span {
   display: inline-flex;
   max-width: 100%;
   align-items: center;
-  padding: 2px 8px;
+  padding: 1px 6px;
   overflow: hidden;
   border-radius: 4px;
   background: rgba(0, 0, 0, 0.04);
   color: rgba(0, 0, 0, 0.65);
   font-size: 12px;
-  line-height: 20px;
+  line-height: 18px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.trueadmin-shell.is-dark .trueadmin-demo-crud-summary-footer {
+.trueadmin-shell.is-dark .trueadmin-demo-crud-summary-progress {
   color: rgba(255, 255, 255, 0.45);
 }
 
@@ -1244,6 +1277,10 @@ body,
 
   .trueadmin-crud-table-tools {
     width: 100%;
+  }
+
+  .trueadmin-demo-crud-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .trueadmin-crud-table-toolbar {

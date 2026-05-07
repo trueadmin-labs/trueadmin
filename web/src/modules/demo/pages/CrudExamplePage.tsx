@@ -368,20 +368,23 @@ export default function CrudExamplePage() {
         const categoryStats = response?.meta?.categoryStats ?? [];
 
         return (
-          <StatisticCard.Group className="trueadmin-demo-crud-summary" direction="row">
+          <div className="trueadmin-demo-crud-summary">
             <StatisticCard
+              className="trueadmin-demo-crud-summary-card"
+              chartPlacement="right"
+              styles={{ body: { padding: 12 } }}
               statistic={{
                 title: t('demo.crud.summary.currentTotal', '当前结果'),
                 value: total,
                 suffix: t('demo.crud.summary.unit.items', '项'),
               }}
               chart={
-                <div className="trueadmin-demo-crud-summary-chart">
+                <div className="trueadmin-demo-crud-summary-chart is-area">
                   <Tiny.Area
                     data={visitTrend}
                     xField="period"
                     yField="value"
-                    height={46}
+                    height={30}
                     autoFit
                     color="var(--ant-color-primary)"
                     tooltip={false}
@@ -389,37 +392,32 @@ export default function CrudExamplePage() {
                   />
                 </div>
               }
-              footer={
-                <span className="trueadmin-demo-crud-summary-footer">
-                  {t('demo.crud.summary.footer.listResponse', '随列表响应刷新')}
-                </span>
-              }
             />
             <StatisticCard
+              className="trueadmin-demo-crud-summary-card"
+              styles={{ body: { padding: 12 } }}
               statistic={{
                 title: t('demo.crud.summary.enabled', '启用配置'),
                 value: enabledCount,
                 suffix: t('demo.crud.summary.unit.items', '项'),
                 trend: 'up',
               }}
-              chart={
+              footer={
                 <div className="trueadmin-demo-crud-summary-progress">
                   <Tiny.Progress
-                    height={8}
+                    height={6}
                     percent={enabledPercent}
                     color={['var(--ant-color-success)', 'var(--ant-color-fill-secondary)']}
                     tooltip={false}
                   />
+                  <span>{Math.round(enabledPercent * 100)}%</span>
                 </div>
-              }
-              footer={
-                <span className="trueadmin-demo-crud-summary-footer">
-                  {t('demo.crud.summary.footer.enabledRate', '启用占比')}{' '}
-                  {Math.round(enabledPercent * 100)}%
-                </span>
               }
             />
             <StatisticCard
+              className="trueadmin-demo-crud-summary-card"
+              chartPlacement="right"
+              styles={{ body: { padding: 12 } }}
               statistic={{
                 title: t('demo.crud.summary.todayUpdated', '今日更新'),
                 value: response?.meta?.todayUpdated ?? 0,
@@ -427,25 +425,22 @@ export default function CrudExamplePage() {
                 status: 'processing',
               }}
               chart={
-                <div className="trueadmin-demo-crud-summary-chart">
+                <div className="trueadmin-demo-crud-summary-chart is-column">
                   <Tiny.Column
                     data={statusTrend}
                     xField="period"
                     yField="value"
-                    height={46}
+                    height={30}
                     autoFit
                     color="var(--ant-color-info)"
                     tooltip={false}
                   />
                 </div>
               }
-              footer={
-                <span className="trueadmin-demo-crud-summary-footer">
-                  {t('demo.crud.summary.footer.recentActive', '近 12 期更新趋势')}
-                </span>
-              }
             />
             <StatisticCard
+              className="trueadmin-demo-crud-summary-card"
+              styles={{ body: { padding: 12 } }}
               statistic={{
                 title: t('demo.crud.summary.totalVisits', '累计访问'),
                 value: response?.meta?.totalVisits ?? 0,
@@ -461,7 +456,7 @@ export default function CrudExamplePage() {
                 </div>
               }
             />
-          </StatisticCard.Group>
+          </div>
         );
       }}
       toolbarRender={({ response }) => (
