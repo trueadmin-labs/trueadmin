@@ -4,14 +4,17 @@ import {
   DeleteOutlined,
   DownOutlined,
   ExportOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
   PlusOutlined,
 } from '@ant-design/icons';
 import { StatisticCard } from '@ant-design/pro-components';
-import { App, Button, Col, Dropdown, Row, Space, Tag } from 'antd';
+import { App, Button, Col, Dropdown, Row, Space, Tag, Tooltip } from 'antd';
 import { useMemo, useState } from 'react';
 import { TrueAdminCrudPage } from '@/core/crud/TrueAdminCrudPage';
 import type { CrudColumns, CrudFilterSchema, CrudListParams, CrudService } from '@/core/crud/types';
 import { TrueAdminQuickFilter } from '@/core/filter/TrueAdminQuickFilter';
+import { TrueAdminTreeFilter } from '@/core/filter/TrueAdminTreeFilter';
 import { useI18n } from '@/core/i18n/I18nProvider';
 
 type CrudExampleRecord = {
@@ -26,6 +29,8 @@ type CrudExampleRecord = {
 };
 
 type CrudExampleStatusFilter = 'all' | CrudExampleRecord['status'];
+type CrudExampleCategoryFilter = 'all' | CrudExampleRecord['category'];
+type CrudExampleCategoryTreeValue = CrudExampleCategoryFilter | 'config';
 
 type CrudExampleTrendItem = {
   period: string;
@@ -114,6 +119,7 @@ const filterRecords = (records: CrudExampleRecord[], params: CrudListParams) =>
     const keyword = typeof params.keyword === 'string' ? params.keyword.trim() : '';
     const owner = typeof params.owner === 'string' ? params.owner.trim() : '';
     const statusScope = typeof params.statusScope === 'string' ? params.statusScope : 'all';
+    const categoryScope = typeof params.categoryScope === 'string' ? params.categoryScope : 'all';
     const statuses = splitParam(params.status);
     const categories = splitParam(params.category);
     const [createdAtStart, createdAtEnd] = splitParam(params.createdAt);
@@ -122,6 +128,7 @@ const filterRecords = (records: CrudExampleRecord[], params: CrudListParams) =>
       : true;
     const matchOwner = owner ? record.owner.includes(owner) : true;
     const matchStatusScope = statusScope === 'all' ? true : record.status === statusScope;
+    const matchCategoryScope = categoryScope === 'all' ? true : record.category === categoryScope;
     const matchStatus = statuses.length > 0 ? statuses.includes(record.status) : true;
     const matchCategory = categories.length > 0 ? categories.includes(record.category) : true;
     const matchCreatedAtStart = createdAtStart ? record.createdAt >= createdAtStart : true;
@@ -131,6 +138,7 @@ const filterRecords = (records: CrudExampleRecord[], params: CrudListParams) =>
       matchKeyword &&
       matchOwner &&
       matchStatusScope &&
+      matchCategoryScope &&
       matchStatus &&
       matchCategory &&
       matchCreatedAtStart &&
@@ -153,6 +161,8 @@ export default function CrudExamplePage() {
   const { message } = App.useApp();
   const [selectedRows, setSelectedRows] = useState<CrudExampleRecord[]>([]);
   const [statusScope, setStatusScope] = useState<CrudExampleStatusFilter>('all');
+  const [categoryScope, setCategoryScope] = useState<CrudExampleCategoryFilter>('all');
+  const [categoryFilterCollapsed, setCategoryFilterCollapsed] = useState(false);
   const records = useMemo(() => createRecords(t), [t]);
   const statusText = useMemo<Record<CrudExampleRecord['status'], string>>(
     () => ({
@@ -295,6 +305,28 @@ export default function CrudExamplePage() {
     [statusText, t],
   );
 
+  const categoryFilterItems = useMemo(
+    () => [
+      {
+        label: t('demo.crud.category.all', '全部分类'),
+        searchText: t('demo.crud.category.all.searchText', '全部 分类'),
+        value: 'all' as const,
+      },
+      {
+        children: [
+          { label: categoryText.system, value: 'system' as const },
+          { label: categoryText.business, value: 'business' as const },
+          { label: categoryText.finance, value: 'finance' as const },
+        ],
+        label: t('demo.crud.category.group.config', '配置分类'),
+        searchText: t('demo.crud.category.group.config.searchText', '配置 分类'),
+        selectable: false,
+        value: 'config' as const,
+      },
+    ],
+    [categoryText.business, categoryText.finance, categoryText.system, t],
+  );
+
   const service = useMemo<
     CrudService<
       CrudExampleRecord,
@@ -334,9 +366,9 @@ export default function CrudExamplePage() {
   >(
     () => ({
       ...service,
-      list: (params) => service.list({ ...params, statusScope }),
+      list: (params) => service.list({ ...params, categoryScope, statusScope }),
     }),
-    [service, statusScope],
+    [categoryScope, service, statusScope],
   );
 
   return (
@@ -347,6 +379,7 @@ export default function CrudExamplePage() {
       CrudExampleMeta
     >
       title={t('demo.crud.title', 'CRUD 页面示例')}
+      description={t('demo.crud.description', '展示分类目录、统计概览、高级筛选和标准表格组合。')}
       resource="demo.crud"
       columns={columns}
       service={scopedService}
@@ -354,6 +387,52 @@ export default function CrudExamplePage() {
       quickSearch={{ placeholder: t('demo.crud.quickSearch.placeholder', '搜索名称 / 负责人') }}
       filters={filters}
       tableScrollX={1280}
+      asideWidth={categoryFilterCollapsed ? 44 : 260}
+      asideBodyClassName={
+        categoryFilterCollapsed
+          ? 'trueadmin-demo-crud-aside is-collapsed'
+          : 'trueadmin-demo-crud-aside is-expanded'
+      }
+      aside={
+        <>
+          <div className="trueadmin-demo-crud-aside-panel" aria-hidden={categoryFilterCollapsed}>
+            <TrueAdminTreeFilter<CrudExampleCategoryTreeValue>
+              title={t('demo.crud.category.tree.title', '分类目录')}
+              placeholder={t('demo.crud.category.tree.placeholder', '搜索分类')}
+              emptyText={t('demo.crud.category.tree.empty', '暂无匹配分类')}
+              value={categoryScope}
+              expandAllText={t('demo.crud.category.tree.expandAll', '展开全部')}
+              collapseAllText={t('demo.crud.category.tree.collapseAll', '收起全部')}
+              extra={
+                <Tooltip title={t('demo.crud.category.tree.hide', '隐藏分类目录')}>
+                  <Button
+                    size="small"
+                    type="text"
+                    icon={<MenuFoldOutlined />}
+                    onClick={() => setCategoryFilterCollapsed(true)}
+                  />
+                </Tooltip>
+              }
+              items={categoryFilterItems}
+              onChange={(nextValue) => {
+                if (nextValue !== 'config') {
+                  setCategoryScope(nextValue);
+                  setSelectedRows([]);
+                }
+              }}
+            />
+          </div>
+          <div className="trueadmin-demo-crud-aside-rail" aria-hidden={!categoryFilterCollapsed}>
+            <Tooltip title={t('demo.crud.category.tree.show', '显示分类目录')} placement="right">
+              <Button
+                type="text"
+                icon={<MenuUnfoldOutlined />}
+                onClick={() => setCategoryFilterCollapsed(false)}
+              />
+            </Tooltip>
+          </div>
+        </>
+      }
       rowSelection={{
         selectedRowKeys,
         onChange: (_, rows) => setSelectedRows(rows),

@@ -19,10 +19,11 @@ export function TrueAdminCrudPage<
   TMeta = Record<string, unknown>,
 >({
   title,
+  description,
   extra,
   aside,
   asideWidth = 280,
-  asideGap = 16,
+  asideGap = 10,
   asideClassName,
   asideStyle,
   asideBodyClassName,
@@ -54,10 +55,17 @@ export function TrueAdminCrudPage<
       bodyClassName="trueadmin-crud-page-body"
     >
       <div className="trueadmin-crud-page-stack">
-        <Card className="trueadmin-crud-title-card" styles={{ body: { padding: '14px 16px' } }}>
+        <Card className="trueadmin-crud-title-card" styles={{ body: { padding: '10px 12px' } }}>
           <div className="trueadmin-crud-title-card-content">
             <div className="trueadmin-crud-title-card-main">
-              <Typography.Title level={4}>{title}</Typography.Title>
+              <Typography.Title className="trueadmin-crud-title-card-title" level={4}>
+                {title}
+              </Typography.Title>
+              {description ? (
+                <Typography.Text className="trueadmin-crud-title-card-description" type="secondary">
+                  {description}
+                </Typography.Text>
+              ) : null}
             </div>
             {pageExtra ? <div className="trueadmin-crud-title-card-extra">{pageExtra}</div> : null}
           </div>

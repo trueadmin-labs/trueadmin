@@ -151,6 +151,7 @@ export type TrueAdminCrudPageProps<
   TMeta = Record<string, unknown>,
 > = TrueAdminCrudTableProps<TRecord, TCreate, TUpdate, TMeta> & {
   title: string;
+  description?: ReactNode;
   extra?: ReactNode;
   aside?: ReactNode;
   asideWidth?: number | string;
