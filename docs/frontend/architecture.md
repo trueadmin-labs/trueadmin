@@ -287,11 +287,11 @@ Mock 只保留最小开发 Mock，默认优先真实后端。Mock 技术使用 M
 
 前端测试采用框架核心做单元测试，业务页面轻测试。重点测试 manifest 收集、plugin config 合并、permission rule、menu adapter、icon registry、i18n locale 合并、http response unwrap、error normalize、crud query params 转换和 WorkspaceViewport 纯计算函数。工具使用 Vitest 和 React Testing Library。
 
-包管理器固定 pnpm，只提交 `pnpm-lock.yaml`，禁止提交 `package-lock.json` 和 `yarn.lock`。代码规范工具使用 Biome 为主 + TypeScript typecheck。第一版 `pnpm check` 包含 `pnpm lint`、`pnpm typecheck` 和 `pnpm build`，有测试后再加入 `pnpm test:run`。
+包管理器固定 pnpm，前端依赖在 `web` 目录内自包含管理，只提交 `web/pnpm-lock.yaml`，禁止提交 `package-lock.json` 和 `yarn.lock`。代码规范工具使用 Biome 为主 + TypeScript typecheck。第一版 `pnpm --dir web check` 包含 `pnpm --dir web lint`、`pnpm --dir web typecheck` 和 `pnpm --dir web build`，有测试后再加入 `pnpm --dir web test:run`。
 
 ## 第一版落地范围
 
-第一版目标是“框架 + System/admin-users 黄金 CRUD 闭环”。必须完成工程底座、配置体系、module/plugin manifest 扫描、plugin enabled 配置、ProLayout、后端 menu-tree 驱动菜单、auth/me、Permission 组件、alova + TanStack Query、Zustand、i18n、icon registry、TrueAdminPage、WorkspaceViewport、TrueAdminCrudPage、System/admin-users 黄金 CRUD、最小 MSW mock、错误处理和 `pnpm check`。
+第一版目标是“框架 + System/admin-users 黄金 CRUD 闭环”。必须完成工程底座、配置体系、module/plugin manifest 扫描、plugin enabled 配置、ProLayout、后端 menu-tree 驱动菜单、auth/me、Permission 组件、alova + TanStack Query、Zustand、i18n、icon registry、TrueAdminPage、WorkspaceViewport、TrueAdminCrudPage、System/admin-users 黄金 CRUD、最小 MSW mock、错误处理和 `pnpm --dir web check`。
 
 第一版不强制完成完整 System 所有页面、RouteTabs、KeepAlive、插件市场、OpenAPI 生成器、完整代码生成器和 E2E 测试。System 模块作为第一版黄金模块，`system/admin-users` 作为黄金 CRUD 页面。后续 roles、menus、departments、client-users 都基于黄金 CRUD 模板扩展。
 

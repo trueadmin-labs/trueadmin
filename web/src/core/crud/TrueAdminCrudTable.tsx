@@ -7,7 +7,7 @@ import { Permission } from '@/core/auth/Permission';
 import { errorCenter } from '@/core/error/errorCenter';
 import { TrueAdminTableFilterPanel } from './TrueAdminTableFilterPanel';
 import { TrueAdminTableToolbar } from './TrueAdminTableToolbar';
-import type { CrudColumns, TrueAdminCrudTableProps } from './types';
+import type { CrudColumns, CrudPageResult, TrueAdminCrudTableProps } from './types';
 import { type CrudOrder, useCrudTableQueryState } from './useCrudTableQueryState';
 
 const DEFAULT_PAGE_SIZE = 20;
@@ -98,6 +98,7 @@ export function TrueAdminCrudTable<
   TRecord extends Record<string, unknown>,
   TCreate = Partial<TRecord>,
   TUpdate = Partial<TRecord>,
+  TMeta = Record<string, unknown>,
 >({
   defaultFiltersExpanded,
   filters = [],
@@ -107,6 +108,7 @@ export function TrueAdminCrudTable<
   columns,
   service,
   toolbarRender,
+  summaryRender,
   tableExtraRender,
   tableViewRender,
   tableRender,
@@ -115,7 +117,7 @@ export function TrueAdminCrudTable<
   rowSelection,
   tableScrollX,
 }: Pick<
-  TrueAdminCrudTableProps<TRecord, TCreate, TUpdate>,
+  TrueAdminCrudTableProps<TRecord, TCreate, TUpdate, TMeta>,
   | 'defaultFiltersExpanded'
   | 'filters'
   | 'quickSearch'
@@ -124,6 +126,7 @@ export function TrueAdminCrudTable<
   | 'columns'
   | 'service'
   | 'toolbarRender'
+  | 'summaryRender'
   | 'tableExtraRender'
   | 'tableViewRender'
   | 'tableRender'
@@ -137,6 +140,7 @@ export function TrueAdminCrudTable<
   const [dataSource, setDataSource] = useState<TRecord[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [response, setResponse] = useState<CrudPageResult<TRecord, TMeta>>();
   const [innerSelectedRowKeys, setInnerSelectedRowKeys] = useState<Key[]>([]);
   const [innerSelectedRows, setInnerSelectedRows] = useState<TRecord[]>([]);
   const reloadSeedRef = useRef(0);
@@ -189,6 +193,7 @@ export function TrueAdminCrudTable<
         }
         setDataSource(result.items ?? []);
         setTotal(result.total ?? 0);
+        setResponse(result);
       })
       .catch((error) => {
         if (!cancelled) {
@@ -265,14 +270,15 @@ export function TrueAdminCrudTable<
       action,
       dataSource,
       loading,
+      response,
       selectedRowKeys,
       selectedRows,
       total,
     }),
-    [action, dataSource, loading, selectedRowKeys, selectedRows, total],
+    [action, dataSource, loading, response, selectedRowKeys, selectedRows, total],
   );
 
-  const toolbarTitle = toolbarRender?.({ action }) ?? null;
+  const toolbarTitle = toolbarRender?.(tableRenderContext) ?? null;
 
   const handleTableChange = (
     _pagination: TablePaginationConfig,
@@ -310,6 +316,10 @@ export function TrueAdminCrudTable<
       onReset={queryState.resetFilters}
       onSubmit={queryState.submitFilters}
     />
+  ) : null;
+
+  const summaryDom = summaryRender ? (
+    <div className="trueadmin-crud-table-summary">{summaryRender(tableRenderContext)}</div>
   ) : null;
 
   const extraDom = tableExtraRender ? (
@@ -406,11 +416,13 @@ export function TrueAdminCrudTable<
     extra: extraDom,
     pagination: paginationDom,
     search: searchDom,
+    summary: summaryDom,
     table: tableViewDom,
     toolbar: toolbarDom,
   };
   const defaultDom = (
     <div className="trueadmin-crud-shell">
+      {summaryDom}
       {searchDom}
       {extraDom}
       {tableAreaDom}

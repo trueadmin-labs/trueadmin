@@ -899,9 +899,64 @@ body,
   flex-direction: column;
 }
 
+.trueadmin-crud-table-summary,
 .trueadmin-crud-table-extra {
   flex: 0 0 auto;
   margin-bottom: 16px;
+}
+
+.trueadmin-demo-crud-summary.ant-pro-card {
+  border-radius: 8px;
+}
+
+.trueadmin-demo-crud-summary .ant-pro-card-body {
+  min-width: 0;
+}
+
+.trueadmin-demo-crud-summary-chart {
+  height: 46px;
+  margin-top: 10px;
+}
+
+.trueadmin-demo-crud-summary-progress {
+  height: 8px;
+  margin-top: 18px;
+}
+
+.trueadmin-demo-crud-summary-footer {
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 13px;
+}
+
+.trueadmin-demo-crud-summary-tags {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.trueadmin-demo-crud-summary-tags span {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  padding: 2px 8px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.04);
+  color: rgba(0, 0, 0, 0.65);
+  font-size: 12px;
+  line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trueadmin-shell.is-dark .trueadmin-demo-crud-summary-footer {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.trueadmin-shell.is-dark .trueadmin-demo-crud-summary-tags span {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.65);
 }
 
 .trueadmin-crud-table-toolbar {
@@ -1397,6 +1452,94 @@ body,
     grid-template-columns: 1fr;
     gap: 8px;
   }
+}
+
+.trueadmin-quick-filter {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+}
+
+.trueadmin-quick-filter.is-block {
+  display: grid;
+  align-items: stretch;
+  gap: 10px;
+  padding: 12px;
+}
+
+.trueadmin-quick-filter-header {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.trueadmin-quick-filter-extra {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+}
+
+.trueadmin-quick-filter-segmented.ant-segmented {
+  width: auto;
+  max-width: 100%;
+}
+
+.trueadmin-quick-filter.is-block .trueadmin-quick-filter-segmented.ant-segmented {
+  width: 100%;
+}
+
+.trueadmin-quick-filter.is-block .trueadmin-quick-filter-segmented .ant-segmented-group {
+  display: grid;
+  gap: 4px;
+}
+
+.trueadmin-quick-filter-segmented .ant-segmented-item {
+  min-width: 0;
+}
+
+.trueadmin-quick-filter-segmented .ant-segmented-item-label {
+  min-height: 30px;
+  padding-inline: 10px;
+}
+
+.trueadmin-quick-filter-option {
+  display: inline-flex;
+  min-width: 0;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.trueadmin-quick-filter.is-block .trueadmin-quick-filter-option {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.trueadmin-quick-filter-option-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+}
+
+.trueadmin-quick-filter-option-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trueadmin-quick-filter.is-block .trueadmin-quick-filter-option-label {
+  flex: 1 1 auto;
+  text-align: start;
+}
+
+.trueadmin-quick-filter-option-badge {
+  flex: 0 0 auto;
 }
 
 .trueadmin-loading-container {

@@ -122,3 +122,31 @@ TrueAdmin 标准 CRUD 由 `TrueAdminCrudTable` 统一管理列表查询状态、
 ```
 
 如果业务页面需要更复杂的分栏、嵌套布局或多块列表，应直接组合 `TrueAdminPage`、`TrueAdminPageSection` 和 `TrueAdminCrudTable`，不要为了单个场景新增专用 CRUD 页面组件。
+
+## 后端统计信息
+
+后端列表接口可以在分页结果中通过 `meta` 返回扩展信息，例如状态统计、分类统计或汇总金额：
+
+```ts
+{
+  items: [],
+  total: 128,
+  page: 1,
+  pageSize: 20,
+  meta: {
+    statusStats: {
+      all: 128,
+      enabled: 86,
+      pending: 21,
+      disabled: 21,
+    },
+  },
+}
+```
+
+`TrueAdminCrudTable` 会保留完整列表响应，并通过 render context 暴露 `response`。页面可以在 `summaryRender`、`toolbarRender`、`tableExtraRender`、`tableRender`、`tableViewRender`、`tableAlertRender` 中读取 `response.meta`，用于渲染状态统计、快速筛选或自定义表格区域。
+
+`summaryRender` 是页面标题下方、高级筛选上方的独立插槽。CRUD 核心只提供插槽位置，不内置卡片或图表样式；业务页面应自行决定使用 `Card`、`StatisticCard`、图表或提示组件。`meta` 只是列表响应扩展的默认便利能力，不是统计区的数据来源限制；复杂统计可以在 `summaryRender` 内通过业务 service、React Query 或其他数据层独立请求。
+
+状态类快速筛选优先使用 `TrueAdminQuickFilter`，默认放在 `toolbarRender` 左侧业务区，与批量操作同区展示。它基于 AntD `Segmented`，数量通过角标展示；数量为 0 时不展示，超过 99 时展示 `99+`。
+

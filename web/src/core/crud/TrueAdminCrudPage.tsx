@@ -16,6 +16,7 @@ export function TrueAdminCrudPage<
   TRecord extends Record<string, unknown>,
   TCreate = Partial<TRecord>,
   TUpdate = Partial<TRecord>,
+  TMeta = Record<string, unknown>,
 >({
   title,
   extra,
@@ -29,7 +30,7 @@ export function TrueAdminCrudPage<
   resource,
   service,
   ...tableProps
-}: TrueAdminCrudPageProps<TRecord, TCreate, TUpdate>) {
+}: TrueAdminCrudPageProps<TRecord, TCreate, TUpdate, TMeta>) {
   const hasAside = Boolean(aside);
   const contentStyle = hasAside
     ? ({

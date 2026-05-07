@@ -1,3 +1,4 @@
+import { Tiny } from '@ant-design/charts';
 import {
   CheckCircleOutlined,
   DeleteOutlined,
@@ -5,10 +6,12 @@ import {
   ExportOutlined,
   PlusOutlined,
 } from '@ant-design/icons';
+import { StatisticCard } from '@ant-design/pro-components';
 import { App, Button, Dropdown, Space, Tag } from 'antd';
 import { useMemo, useState } from 'react';
 import { TrueAdminCrudPage } from '@/core/crud/TrueAdminCrudPage';
 import type { CrudColumns, CrudFilterSchema, CrudListParams, CrudService } from '@/core/crud/types';
+import { TrueAdminQuickFilter } from '@/core/filter/TrueAdminQuickFilter';
 import { useI18n } from '@/core/i18n/I18nProvider';
 
 type CrudExampleRecord = {
@@ -20,6 +23,22 @@ type CrudExampleRecord = {
   visits: number;
   createdAt: string;
   updatedAt: string;
+};
+
+type CrudExampleStatusFilter = 'all' | CrudExampleRecord['status'];
+
+type CrudExampleTrendItem = {
+  period: string;
+  value: number;
+};
+
+type CrudExampleMeta = {
+  categoryStats: Array<{ category: CrudExampleRecord['category']; count: number }>;
+  statusStats: Record<CrudExampleStatusFilter, number>;
+  statusTrend: CrudExampleTrendItem[];
+  totalVisits: number;
+  visitTrend: CrudExampleTrendItem[];
+  todayUpdated: number;
 };
 
 const wait = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
@@ -55,10 +74,38 @@ const createRecords = (t: (key?: string, fallback?: string) => string): CrudExam
 const splitParam = (value: unknown) =>
   typeof value === 'string' && value.length > 0 ? value.split(',').filter(Boolean) : [];
 
+const getStatusStats = (records: CrudExampleRecord[]): CrudExampleMeta['statusStats'] => ({
+  all: records.length,
+  disabled: records.filter((record) => record.status === 'disabled').length,
+  enabled: records.filter((record) => record.status === 'enabled').length,
+  pending: records.filter((record) => record.status === 'pending').length,
+});
+
+const toTrendItems = (values: number[]): CrudExampleTrendItem[] =>
+  values.map((value, index) => ({
+    period: String(index + 1).padStart(2, '0'),
+    value,
+  }));
+
+const getListMeta = (records: CrudExampleRecord[]): CrudExampleMeta => ({
+  categoryStats: ['system', 'business', 'finance'].map((category) => ({
+    category: category as CrudExampleRecord['category'],
+    count: records.filter((record) => record.category === category).length,
+  })),
+  statusStats: getStatusStats(records),
+  statusTrend: toTrendItems([18, 22, 21, 25, 28, 26, 31, 34, 33, 36, 39, 42]),
+  todayUpdated: records.filter((record) => record.updatedAt.startsWith('2026-05-07')).length,
+  totalVisits: records.reduce((total, record) => total + record.visits, 0),
+  visitTrend: toTrendItems([28, 32, 36, 35, 41, 48, 46, 53, 58, 61, 65, 72]),
+});
+
+const formatNumber = (value: number) => new Intl.NumberFormat('zh-CN').format(value);
+
 const filterRecords = (records: CrudExampleRecord[], params: CrudListParams) =>
   records.filter((record) => {
     const keyword = typeof params.keyword === 'string' ? params.keyword.trim() : '';
     const owner = typeof params.owner === 'string' ? params.owner.trim() : '';
+    const statusScope = typeof params.statusScope === 'string' ? params.statusScope : 'all';
     const statuses = splitParam(params.status);
     const categories = splitParam(params.category);
     const [createdAtStart, createdAtEnd] = splitParam(params.createdAt);
@@ -66,6 +113,7 @@ const filterRecords = (records: CrudExampleRecord[], params: CrudListParams) =>
       ? record.name.includes(keyword) || record.owner.includes(keyword)
       : true;
     const matchOwner = owner ? record.owner.includes(owner) : true;
+    const matchStatusScope = statusScope === 'all' ? true : record.status === statusScope;
     const matchStatus = statuses.length > 0 ? statuses.includes(record.status) : true;
     const matchCategory = categories.length > 0 ? categories.includes(record.category) : true;
     const matchCreatedAtStart = createdAtStart ? record.createdAt >= createdAtStart : true;
@@ -74,6 +122,7 @@ const filterRecords = (records: CrudExampleRecord[], params: CrudListParams) =>
     return (
       matchKeyword &&
       matchOwner &&
+      matchStatusScope &&
       matchStatus &&
       matchCategory &&
       matchCreatedAtStart &&
@@ -95,6 +144,7 @@ export default function CrudExamplePage() {
   const { t } = useI18n();
   const { message } = App.useApp();
   const [selectedRows, setSelectedRows] = useState<CrudExampleRecord[]>([]);
+  const [statusScope, setStatusScope] = useState<CrudExampleStatusFilter>('all');
   const records = useMemo(() => createRecords(t), [t]);
   const statusText = useMemo<Record<CrudExampleRecord['status'], string>>(
     () => ({
@@ -227,7 +277,24 @@ export default function CrudExamplePage() {
     [categoryText, message, statusText, t],
   );
 
-  const service = useMemo<CrudService<CrudExampleRecord>>(
+  const statusFilterItems = useMemo(
+    () => [
+      { label: t('demo.crud.status.all', '全部'), value: 'all' as const },
+      { label: statusText.enabled, value: 'enabled' as const },
+      { label: statusText.pending, value: 'pending' as const },
+      { label: statusText.disabled, value: 'disabled' as const },
+    ],
+    [statusText, t],
+  );
+
+  const service = useMemo<
+    CrudService<
+      CrudExampleRecord,
+      Partial<CrudExampleRecord>,
+      Partial<CrudExampleRecord>,
+      CrudExampleMeta
+    >
+  >(
     () => ({
       list: async (params) => {
         await wait(350);
@@ -239,6 +306,7 @@ export default function CrudExamplePage() {
 
         return {
           items: sortedRecords.slice(start, start + pageSize),
+          meta: getListMeta(records),
           page,
           pageSize,
           total: sortedRecords.length,
@@ -248,12 +316,33 @@ export default function CrudExamplePage() {
     [records],
   );
 
+  const scopedService = useMemo<
+    CrudService<
+      CrudExampleRecord,
+      Partial<CrudExampleRecord>,
+      Partial<CrudExampleRecord>,
+      CrudExampleMeta
+    >
+  >(
+    () => ({
+      ...service,
+      list: (params) => service.list({ ...params, statusScope }),
+    }),
+    [service, statusScope],
+  );
+
   return (
-    <TrueAdminCrudPage<CrudExampleRecord>
+    <TrueAdminCrudPage<
+      CrudExampleRecord,
+      Partial<CrudExampleRecord>,
+      Partial<CrudExampleRecord>,
+      CrudExampleMeta
+    >
       title={t('demo.crud.title', 'CRUD 页面示例')}
       resource="demo.crud"
       columns={columns}
-      service={service}
+      service={scopedService}
+      rowKey="id"
       quickSearch={{ placeholder: t('demo.crud.quickSearch.placeholder', '搜索名称 / 负责人') }}
       filters={filters}
       tableScrollX={1280}
@@ -269,8 +358,122 @@ export default function CrudExamplePage() {
           <Button icon={<ExportOutlined />}>{t('demo.crud.action.export', '导出')}</Button>
         </Space>
       }
-      toolbarRender={() => (
+      summaryRender={({ response, total }) => {
+        const statusStats = response?.meta?.statusStats;
+        const enabledCount = statusStats?.enabled ?? 0;
+        const allCount = statusStats?.all ?? 0;
+        const enabledPercent = allCount > 0 ? enabledCount / allCount : 0;
+        const visitTrend = response?.meta?.visitTrend ?? [];
+        const statusTrend = response?.meta?.statusTrend ?? [];
+        const categoryStats = response?.meta?.categoryStats ?? [];
+
+        return (
+          <StatisticCard.Group className="trueadmin-demo-crud-summary" direction="row">
+            <StatisticCard
+              statistic={{
+                title: t('demo.crud.summary.currentTotal', '当前结果'),
+                value: total,
+                suffix: t('demo.crud.summary.unit.items', '项'),
+              }}
+              chart={
+                <div className="trueadmin-demo-crud-summary-chart">
+                  <Tiny.Area
+                    data={visitTrend}
+                    xField="period"
+                    yField="value"
+                    height={46}
+                    autoFit
+                    color="var(--ant-color-primary)"
+                    tooltip={false}
+                    smooth
+                  />
+                </div>
+              }
+              footer={
+                <span className="trueadmin-demo-crud-summary-footer">
+                  {t('demo.crud.summary.footer.listResponse', '随列表响应刷新')}
+                </span>
+              }
+            />
+            <StatisticCard
+              statistic={{
+                title: t('demo.crud.summary.enabled', '启用配置'),
+                value: enabledCount,
+                suffix: t('demo.crud.summary.unit.items', '项'),
+                trend: 'up',
+              }}
+              chart={
+                <div className="trueadmin-demo-crud-summary-progress">
+                  <Tiny.Progress
+                    height={8}
+                    percent={enabledPercent}
+                    color={['var(--ant-color-success)', 'var(--ant-color-fill-secondary)']}
+                    tooltip={false}
+                  />
+                </div>
+              }
+              footer={
+                <span className="trueadmin-demo-crud-summary-footer">
+                  {t('demo.crud.summary.footer.enabledRate', '启用占比')}{' '}
+                  {Math.round(enabledPercent * 100)}%
+                </span>
+              }
+            />
+            <StatisticCard
+              statistic={{
+                title: t('demo.crud.summary.todayUpdated', '今日更新'),
+                value: response?.meta?.todayUpdated ?? 0,
+                suffix: t('demo.crud.summary.unit.items', '项'),
+                status: 'processing',
+              }}
+              chart={
+                <div className="trueadmin-demo-crud-summary-chart">
+                  <Tiny.Column
+                    data={statusTrend}
+                    xField="period"
+                    yField="value"
+                    height={46}
+                    autoFit
+                    color="var(--ant-color-info)"
+                    tooltip={false}
+                  />
+                </div>
+              }
+              footer={
+                <span className="trueadmin-demo-crud-summary-footer">
+                  {t('demo.crud.summary.footer.recentActive', '近 12 期更新趋势')}
+                </span>
+              }
+            />
+            <StatisticCard
+              statistic={{
+                title: t('demo.crud.summary.totalVisits', '累计访问'),
+                value: response?.meta?.totalVisits ?? 0,
+                formatter: (value) => formatNumber(Number(value ?? 0)),
+              }}
+              footer={
+                <div className="trueadmin-demo-crud-summary-tags">
+                  {categoryStats.map((item) => (
+                    <span key={item.category}>
+                      {categoryText[item.category]} {item.count}
+                    </span>
+                  ))}
+                </div>
+              }
+            />
+          </StatisticCard.Group>
+        );
+      }}
+      toolbarRender={({ response }) => (
         <Space className="trueadmin-crud-toolbar-business" size={8} wrap>
+          <TrueAdminQuickFilter<CrudExampleStatusFilter>
+            value={statusScope}
+            items={statusFilterItems.map((item) => ({
+              ...item,
+              count: response?.meta?.statusStats[item.value],
+            }))}
+            onChange={setStatusScope}
+          />
           <Dropdown
             disabled={!hasSelectedRows}
             menu={{

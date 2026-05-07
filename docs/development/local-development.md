@@ -55,7 +55,7 @@ TrueAdmin 默认优先使用 PostgreSQL，后端通过 Hyperf 官方扩展包 `h
 
 当前 `web/` 目录处于清空待初始化状态。实现前必须先阅读 [前端架构](../frontend/index.md)，按自研模块化底座初始化，不直接使用 Ant Design Pro v6 官方工程作为项目底座。
 
-前端包管理器固定为 pnpm，只提交 `pnpm-lock.yaml`，禁止提交 `package-lock.json` 和 `yarn.lock`。
+前端包管理器固定为 pnpm，依赖在 `web` 目录内自包含管理，只提交 `web/pnpm-lock.yaml`，禁止提交 `package-lock.json` 和 `yarn.lock`。
 
 前端命令必须显式指定 Vite mode，推荐脚本：
 
@@ -72,6 +72,8 @@ TrueAdmin 默认优先使用 PostgreSQL，后端通过 Hyperf 官方扩展包 `h
   "check": "pnpm lint && pnpm typecheck && pnpm build"
 }
 ```
+
+在仓库根目录执行前端命令时统一使用 `pnpm --dir web <script>`，例如 `pnpm --dir web check`。如果已经进入 `web/` 目录，也可以直接执行 `pnpm check`。
 
 前端 env 遵循 Vite 官方优先级：
 

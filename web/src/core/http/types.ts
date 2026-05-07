@@ -5,9 +5,10 @@ export type ApiEnvelope<T> = {
   success?: boolean;
 };
 
-export type PageResult<T> = {
+export type PageResult<T, TMeta = Record<string, unknown>> = {
   items: T[];
   total: number;
   page: number;
   pageSize: number;
+  meta?: TMeta;
 };
