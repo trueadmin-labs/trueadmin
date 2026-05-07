@@ -302,16 +302,15 @@ export function TrueAdminCrudTable<
       }
     : undefined;
 
-  const searchDom =
-    filtersExpanded && hasFilters ? (
-      <TrueAdminTableFilterPanel
-        expanded={filtersExpanded}
-        filters={filters}
-        values={queryState.values}
-        onReset={queryState.resetFilters}
-        onSubmit={queryState.submitFilters}
-      />
-    ) : null;
+  const searchDom = hasFilters ? (
+    <TrueAdminTableFilterPanel
+      expanded={filtersExpanded}
+      filters={filters}
+      values={queryState.values}
+      onReset={queryState.resetFilters}
+      onSubmit={queryState.submitFilters}
+    />
+  ) : null;
 
   const extraDom = tableExtraRender ? (
     <div className="trueadmin-crud-table-extra">{tableExtraRender(tableRenderContext)}</div>

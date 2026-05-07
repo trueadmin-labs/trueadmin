@@ -136,7 +136,7 @@ export function TrueAdminTableFilterPanel({
     }
   }, [expanded, form, formValues]);
 
-  if (!expanded || filters.length === 0) {
+  if (filters.length === 0) {
     return null;
   }
 
@@ -149,30 +149,36 @@ export function TrueAdminTableFilterPanel({
   };
 
   return (
-    <div className="trueadmin-crud-filter-panel">
-      <Form form={form} layout="vertical" onFinish={handleFinish}>
-        <div className="trueadmin-crud-filter-layout">
-          <div className="trueadmin-crud-filter-content">
-            <div className="trueadmin-crud-filter-grid">
-              {filters.map((filter) => (
-                <Form.Item key={filter.name} label={filter.label} name={filter.name}>
-                  <FilterField filter={filter} />
-                </Form.Item>
-              ))}
+    <div
+      className={
+        expanded ? 'trueadmin-crud-filter-panel is-expanded' : 'trueadmin-crud-filter-panel'
+      }
+    >
+      <div className="trueadmin-crud-filter-panel-inner" aria-hidden={!expanded}>
+        <Form form={form} layout="vertical" onFinish={handleFinish}>
+          <div className="trueadmin-crud-filter-layout">
+            <div className="trueadmin-crud-filter-content">
+              <div className="trueadmin-crud-filter-grid">
+                {filters.map((filter) => (
+                  <Form.Item key={filter.name} label={filter.label} name={filter.name}>
+                    <FilterField filter={filter} />
+                  </Form.Item>
+                ))}
+              </div>
+            </div>
+            <div className="trueadmin-crud-filter-actions">
+              <Space direction="vertical" size={8}>
+                <Button block type="primary" htmlType="submit" icon={<SearchOutlined />}>
+                  查询
+                </Button>
+                <Button block onClick={onReset}>
+                  重置
+                </Button>
+              </Space>
             </div>
           </div>
-          <div className="trueadmin-crud-filter-actions">
-            <Space direction="vertical" size={8}>
-              <Button block type="primary" htmlType="submit" icon={<SearchOutlined />}>
-                查询
-              </Button>
-              <Button block onClick={onReset}>
-                重置
-              </Button>
-            </Space>
-          </div>
-        </div>
-      </Form>
+        </Form>
+      </div>
     </div>
   );
 }
