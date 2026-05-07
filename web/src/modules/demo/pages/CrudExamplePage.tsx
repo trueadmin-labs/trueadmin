@@ -7,7 +7,7 @@ import {
   PlusOutlined,
 } from '@ant-design/icons';
 import { StatisticCard } from '@ant-design/pro-components';
-import { App, Button, Dropdown, Space, Tag } from 'antd';
+import { App, Button, Col, Dropdown, Row, Space, Tag } from 'antd';
 import { useMemo, useState } from 'react';
 import { TrueAdminCrudPage } from '@/core/crud/TrueAdminCrudPage';
 import type { CrudColumns, CrudFilterSchema, CrudListParams, CrudService } from '@/core/crud/types';
@@ -99,7 +99,15 @@ const getListMeta = (records: CrudExampleRecord[]): CrudExampleMeta => ({
   visitTrend: toTrendItems([28, 32, 36, 35, 41, 48, 46, 53, 58, 61, 65, 72]),
 });
 
-const formatNumber = (value: number) => new Intl.NumberFormat('zh-CN').format(value);
+const formatCompactNumber = (value: number) =>
+  new Intl.NumberFormat('zh-CN', {
+    maximumFractionDigits: 1,
+    notation: 'compact',
+  }).format(value);
+
+const summaryCardStyles = {
+  body: { alignItems: 'center', display: 'flex', height: '100%', padding: 12 },
+};
 
 const filterRecords = (records: CrudExampleRecord[], params: CrudListParams) =>
   records.filter((record) => {
@@ -365,98 +373,116 @@ export default function CrudExamplePage() {
         const enabledPercent = allCount > 0 ? enabledCount / allCount : 0;
         const visitTrend = response?.meta?.visitTrend ?? [];
         const statusTrend = response?.meta?.statusTrend ?? [];
-        const categoryStats = response?.meta?.categoryStats ?? [];
 
         return (
-          <div className="trueadmin-demo-crud-summary">
-            <StatisticCard
-              className="trueadmin-demo-crud-summary-card"
-              chartPlacement="right"
-              styles={{ body: { padding: 12 } }}
-              statistic={{
-                title: t('demo.crud.summary.currentTotal', '当前结果'),
-                value: total,
-                suffix: t('demo.crud.summary.unit.items', '项'),
-              }}
-              chart={
-                <div className="trueadmin-demo-crud-summary-chart is-area">
-                  <Tiny.Area
-                    data={visitTrend}
-                    xField="period"
-                    yField="value"
-                    height={30}
-                    autoFit
-                    color="var(--ant-color-primary)"
-                    tooltip={false}
-                    smooth
-                  />
-                </div>
-              }
-            />
-            <StatisticCard
-              className="trueadmin-demo-crud-summary-card"
-              styles={{ body: { padding: 12 } }}
-              statistic={{
-                title: t('demo.crud.summary.enabled', '启用配置'),
-                value: enabledCount,
-                suffix: t('demo.crud.summary.unit.items', '项'),
-                trend: 'up',
-              }}
-              footer={
-                <div className="trueadmin-demo-crud-summary-progress">
-                  <Tiny.Progress
-                    height={6}
-                    percent={enabledPercent}
-                    color={['var(--ant-color-success)', 'var(--ant-color-fill-secondary)']}
-                    tooltip={false}
-                  />
-                  <span>{Math.round(enabledPercent * 100)}%</span>
-                </div>
-              }
-            />
-            <StatisticCard
-              className="trueadmin-demo-crud-summary-card"
-              chartPlacement="right"
-              styles={{ body: { padding: 12 } }}
-              statistic={{
-                title: t('demo.crud.summary.todayUpdated', '今日更新'),
-                value: response?.meta?.todayUpdated ?? 0,
-                suffix: t('demo.crud.summary.unit.items', '项'),
-                status: 'processing',
-              }}
-              chart={
-                <div className="trueadmin-demo-crud-summary-chart is-column">
-                  <Tiny.Column
-                    data={statusTrend}
-                    xField="period"
-                    yField="value"
-                    height={30}
-                    autoFit
-                    color="var(--ant-color-info)"
-                    tooltip={false}
-                  />
-                </div>
-              }
-            />
-            <StatisticCard
-              className="trueadmin-demo-crud-summary-card"
-              styles={{ body: { padding: 12 } }}
-              statistic={{
-                title: t('demo.crud.summary.totalVisits', '累计访问'),
-                value: response?.meta?.totalVisits ?? 0,
-                formatter: (value) => formatNumber(Number(value ?? 0)),
-              }}
-              footer={
-                <div className="trueadmin-demo-crud-summary-tags">
-                  {categoryStats.map((item) => (
-                    <span key={item.category}>
-                      {categoryText[item.category]} {item.count}
-                    </span>
-                  ))}
-                </div>
-              }
-            />
-          </div>
+          <Row className="trueadmin-demo-crud-summary" gutter={[12, 12]}>
+            <Col xs={24} sm={12} xl={6}>
+              <StatisticCard
+                className="trueadmin-demo-crud-summary-card"
+                chartPlacement="right"
+                styles={summaryCardStyles}
+                statistic={{
+                  title: t('demo.crud.summary.currentTotal', '当前结果'),
+                  value: total,
+                  suffix: t('demo.crud.summary.unit.items', '项'),
+                  valueStyle: { fontSize: 20 },
+                }}
+                chart={
+                  <div className="trueadmin-demo-crud-summary-chart">
+                    <Tiny.Line
+                      data={statusTrend}
+                      xField="period"
+                      yField="value"
+                      height={38}
+                      autoFit
+                      color="var(--ant-color-primary)"
+                      tooltip={false}
+                      smooth
+                    />
+                  </div>
+                }
+              />
+            </Col>
+            <Col xs={24} sm={12} xl={6}>
+              <StatisticCard
+                className="trueadmin-demo-crud-summary-card"
+                chartPlacement="right"
+                styles={summaryCardStyles}
+                statistic={{
+                  title: t('demo.crud.summary.enabled', '启用配置'),
+                  value: enabledCount,
+                  suffix: t('demo.crud.summary.unit.items', '项'),
+                  trend: 'up',
+                  valueStyle: { fontSize: 20 },
+                }}
+                chart={
+                  <div className="trueadmin-demo-crud-summary-chart is-ring">
+                    <Tiny.Ring
+                      height={44}
+                      percent={enabledPercent}
+                      autoFit
+                      color={['var(--ant-color-success)', 'var(--ant-color-fill-secondary)']}
+                      tooltip={false}
+                    />
+                  </div>
+                }
+              />
+            </Col>
+            <Col xs={24} sm={12} xl={6}>
+              <StatisticCard
+                className="trueadmin-demo-crud-summary-card"
+                chartPlacement="right"
+                styles={summaryCardStyles}
+                statistic={{
+                  title: t('demo.crud.summary.todayUpdated', '今日更新'),
+                  value: response?.meta?.todayUpdated ?? 0,
+                  suffix: t('demo.crud.summary.unit.items', '项'),
+                  status: 'processing',
+                  valueStyle: { fontSize: 20 },
+                }}
+                chart={
+                  <div className="trueadmin-demo-crud-summary-chart">
+                    <Tiny.Column
+                      data={statusTrend}
+                      xField="period"
+                      yField="value"
+                      height={38}
+                      autoFit
+                      color="var(--ant-color-info)"
+                      tooltip={false}
+                    />
+                  </div>
+                }
+              />
+            </Col>
+            <Col xs={24} sm={12} xl={6}>
+              <StatisticCard
+                className="trueadmin-demo-crud-summary-card"
+                chartPlacement="right"
+                styles={summaryCardStyles}
+                statistic={{
+                  title: t('demo.crud.summary.totalVisits', '累计访问'),
+                  value: response?.meta?.totalVisits ?? 0,
+                  formatter: (value) => formatCompactNumber(Number(value ?? 0)),
+                  valueStyle: { fontSize: 20 },
+                }}
+                chart={
+                  <div className="trueadmin-demo-crud-summary-chart">
+                    <Tiny.Area
+                      data={visitTrend}
+                      xField="period"
+                      yField="value"
+                      height={38}
+                      autoFit
+                      color="var(--ant-color-warning)"
+                      tooltip={false}
+                      smooth
+                    />
+                  </div>
+                }
+              />
+            </Col>
+          </Row>
         );
       }}
       toolbarRender={({ response }) => (
