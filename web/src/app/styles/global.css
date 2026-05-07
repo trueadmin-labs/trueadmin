@@ -911,18 +911,46 @@ body,
 
 .trueadmin-demo-crud-summary-card.ant-pro-card {
   min-width: 0;
-  height: 96px;
+  height: 104px;
   border-radius: 8px;
 }
 
-.trueadmin-demo-crud-summary-chart {
-  width: 72px;
-  height: 38px;
+.trueadmin-demo-crud-summary-card .ant-pro-statistic-card-content {
+  width: 100%;
+  min-width: 0;
 }
 
-.trueadmin-demo-crud-summary-chart.is-ring {
-  width: 44px;
-  height: 44px;
+.trueadmin-demo-crud-summary-card .ant-pro-statistic-card-content-horizontal {
+  display: flex;
+  min-height: 100%;
+  align-items: center;
+  gap: 12px;
+}
+
+.trueadmin-demo-crud-summary-card .ant-pro-card-statistic {
+  flex: 0 0 auto;
+  max-width: 44%;
+  min-width: 72px;
+}
+
+.trueadmin-demo-crud-summary-card .ant-pro-statistic-card-chart {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-block: 0;
+  margin-inline-start: 0;
+  align-self: center;
+  align-items: stretch;
+}
+
+.trueadmin-demo-crud-summary-chart {
+  width: 100%;
+  height: 48px;
+}
+
+.trueadmin-demo-crud-summary-chart.is-pie {
+  width: min(72px, 100%);
+  height: 72px;
+  margin-inline-start: auto;
 }
 
 .trueadmin-crud-table-toolbar {

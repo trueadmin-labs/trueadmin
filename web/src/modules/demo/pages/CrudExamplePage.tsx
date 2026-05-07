@@ -1,4 +1,4 @@
-import { Tiny } from '@ant-design/charts';
+import { Pie, Tiny } from '@ant-design/charts';
 import {
   CheckCircleOutlined,
   DeleteOutlined,
@@ -106,7 +106,7 @@ const formatCompactNumber = (value: number) =>
   }).format(value);
 
 const summaryCardStyles = {
-  body: { alignItems: 'center', display: 'flex', height: '100%', padding: 12 },
+  body: { display: 'flex', height: '100%', justifyContent: 'center', padding: 12 },
 };
 
 const filterRecords = (records: CrudExampleRecord[], params: CrudListParams) =>
@@ -370,9 +370,15 @@ export default function CrudExamplePage() {
         const statusStats = response?.meta?.statusStats;
         const enabledCount = statusStats?.enabled ?? 0;
         const allCount = statusStats?.all ?? 0;
-        const enabledPercent = allCount > 0 ? enabledCount / allCount : 0;
         const visitTrend = response?.meta?.visitTrend ?? [];
         const statusTrend = response?.meta?.statusTrend ?? [];
+        const enabledChartData = [
+          { label: t('demo.crud.summary.enabled', '启用配置'), value: enabledCount },
+          {
+            label: t('demo.crud.summary.disabledOther', '其他配置'),
+            value: Math.max(allCount - enabledCount, 0),
+          },
+        ];
 
         return (
           <Row className="trueadmin-demo-crud-summary" gutter={[12, 12]}>
@@ -393,7 +399,7 @@ export default function CrudExamplePage() {
                       data={statusTrend}
                       xField="period"
                       yField="value"
-                      height={38}
+                      height={48}
                       autoFit
                       color="var(--ant-color-primary)"
                       tooltip={false}
@@ -416,13 +422,18 @@ export default function CrudExamplePage() {
                   valueStyle: { fontSize: 20 },
                 }}
                 chart={
-                  <div className="trueadmin-demo-crud-summary-chart is-ring">
-                    <Tiny.Ring
-                      height={44}
-                      percent={enabledPercent}
+                  <div className="trueadmin-demo-crud-summary-chart is-pie">
+                    <Pie
+                      data={enabledChartData}
+                      angleField="value"
+                      colorField="label"
+                      height={72}
                       autoFit
-                      color={['var(--ant-color-success)', 'var(--ant-color-fill-secondary)']}
+                      innerRadius={0.72}
+                      legend={false}
+                      label={false}
                       tooltip={false}
+                      color={['var(--ant-color-success)', 'var(--ant-color-fill-secondary)']}
                     />
                   </div>
                 }
@@ -446,7 +457,7 @@ export default function CrudExamplePage() {
                       data={statusTrend}
                       xField="period"
                       yField="value"
-                      height={38}
+                      height={48}
                       autoFit
                       color="var(--ant-color-info)"
                       tooltip={false}
@@ -472,7 +483,7 @@ export default function CrudExamplePage() {
                       data={visitTrend}
                       xField="period"
                       yField="value"
-                      height={38}
+                      height={48}
                       autoFit
                       color="var(--ant-color-warning)"
                       tooltip={false}
