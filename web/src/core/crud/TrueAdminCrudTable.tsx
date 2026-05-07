@@ -12,10 +12,38 @@ import { type CrudOrder, useCrudTableQueryState } from './useCrudTableQueryState
 
 const DEFAULT_PAGE_SIZE = 20;
 const TABLE_HEADER_HEIGHT = 55;
+const FILTER_PANEL_TRANSITION_FALLBACK_MS = 280;
 
-const useElementSize = <TElement extends HTMLElement>() => {
+type ElementSizeOptions = {
+  paused?: boolean;
+};
+
+const useElementSize = <TElement extends HTMLElement>({
+  paused = false,
+}: ElementSizeOptions = {}) => {
   const ref = useRef<TElement | null>(null);
+  const pausedRef = useRef(paused);
   const [size, setSize] = useState({ height: 0, width: 0 });
+
+  pausedRef.current = paused;
+
+  const measureSize = useCallback(() => {
+    const node = ref.current;
+    if (!node) {
+      return;
+    }
+
+    const rect = node.getBoundingClientRect();
+    const nextSize = {
+      height: Math.floor(rect.height),
+      width: Math.floor(rect.width),
+    };
+    setSize((currentSize) =>
+      currentSize.height === nextSize.height && currentSize.width === nextSize.width
+        ? currentSize
+        : nextSize,
+    );
+  }, []);
 
   useLayoutEffect(() => {
     const node = ref.current;
@@ -24,19 +52,12 @@ const useElementSize = <TElement extends HTMLElement>() => {
     }
 
     const updateSize = () => {
-      const rect = node.getBoundingClientRect();
-      const nextSize = {
-        height: Math.floor(rect.height),
-        width: Math.floor(rect.width),
-      };
-      setSize((currentSize) =>
-        currentSize.height === nextSize.height && currentSize.width === nextSize.width
-          ? currentSize
-          : nextSize,
-      );
+      if (!pausedRef.current) {
+        measureSize();
+      }
     };
 
-    updateSize();
+    measureSize();
 
     if (typeof ResizeObserver === 'undefined') {
       window.addEventListener('resize', updateSize);
@@ -46,9 +67,9 @@ const useElementSize = <TElement extends HTMLElement>() => {
     const observer = new ResizeObserver(updateSize);
     observer.observe(node);
     return () => observer.disconnect();
-  }, []);
+  }, [measureSize]);
 
-  return [ref, size] as const;
+  return [ref, size, measureSize] as const;
 };
 
 const getElementNumberStyle = (element: Element, property: keyof CSSStyleDeclaration) => {
@@ -167,6 +188,7 @@ export function TrueAdminCrudTable<
 >) {
   const { message } = App.useApp();
   const [filtersExpanded, setFiltersExpanded] = useState(defaultFiltersExpanded ?? false);
+  const [isFilterPanelTransitioning, setIsFilterPanelTransitioning] = useState(false);
   const [dataSource, setDataSource] = useState<TRecord[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -174,6 +196,7 @@ export function TrueAdminCrudTable<
   const [innerSelectedRowKeys, setInnerSelectedRowKeys] = useState<Key[]>([]);
   const [innerSelectedRows, setInnerSelectedRows] = useState<TRecord[]>([]);
   const reloadSeedRef = useRef(0);
+  const filterPanelTransitionTimerRef = useRef<number | undefined>(undefined);
   const [reloadSeed, setReloadSeed] = useState(0);
   const [queryResetSeed, setQueryResetSeed] = useState(0);
   const queryState = useCrudTableQueryState({
@@ -181,7 +204,9 @@ export function TrueAdminCrudTable<
     quickSearch,
     defaultPageSize: DEFAULT_PAGE_SIZE,
   });
-  const [tableMainRef, tableMainSize] = useElementSize<HTMLDivElement>();
+  const [tableMainRef, tableMainSize, measureTableMainSize] = useElementSize<HTMLDivElement>({
+    paused: isFilterPanelTransitioning,
+  });
   const [tableEmptyChromeHeight, setTableEmptyChromeHeight] = useState(32);
   const hasFilters = filters.length > 0;
   const selectedRowKeys = rowSelection?.selectedRowKeys ?? innerSelectedRowKeys;
@@ -227,6 +252,37 @@ export function TrueAdminCrudTable<
       currentChromeHeight === nextChromeHeight ? currentChromeHeight : nextChromeHeight,
     );
   }, [tableMainRef, tableMainSize.height, tableMainSize.width, dataSource.length]);
+
+  const finishFilterPanelTransition = useCallback(() => {
+    if (filterPanelTransitionTimerRef.current) {
+      window.clearTimeout(filterPanelTransitionTimerRef.current);
+      filterPanelTransitionTimerRef.current = undefined;
+    }
+
+    setIsFilterPanelTransitioning(false);
+    measureTableMainSize();
+  }, [measureTableMainSize]);
+
+  const toggleFiltersExpanded = useCallback(() => {
+    if (filterPanelTransitionTimerRef.current) {
+      window.clearTimeout(filterPanelTransitionTimerRef.current);
+    }
+
+    setIsFilterPanelTransitioning(true);
+    setFiltersExpanded((value) => !value);
+    filterPanelTransitionTimerRef.current = window.setTimeout(() => {
+      window.requestAnimationFrame(finishFilterPanelTransition);
+    }, FILTER_PANEL_TRANSITION_FALLBACK_MS);
+  }, [finishFilterPanelTransition]);
+
+  useEffect(
+    () => () => {
+      if (filterPanelTransitionTimerRef.current) {
+        window.clearTimeout(filterPanelTransitionTimerRef.current);
+      }
+    },
+    [],
+  );
 
   const reload = useCallback(() => {
     reloadSeedRef.current += 1;
@@ -483,6 +539,7 @@ export function TrueAdminCrudTable<
       values={queryState.values}
       onReset={resetQuery}
       onSubmit={queryState.submitFilters}
+      onTransitionEnd={finishFilterPanelTransition}
     />
   ) : null;
 
@@ -512,7 +569,7 @@ export function TrueAdminCrudTable<
           onClearQuickSearch={queryState.clearQuickSearch}
           onReload={reload}
           onSubmitQuickSearch={queryState.submitQuickSearch}
-          onToggleFilters={() => setFiltersExpanded((value) => !value)}
+          onToggleFilters={toggleFiltersExpanded}
         />
       </div>
     </div>

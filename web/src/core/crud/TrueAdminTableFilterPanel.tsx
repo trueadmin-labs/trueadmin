@@ -10,6 +10,7 @@ export type TrueAdminTableFilterPanelProps = {
   values: Record<string, string>;
   onReset: () => void;
   onSubmit: (values: Record<string, string | undefined>) => void;
+  onTransitionEnd?: () => void;
 };
 
 type FilterFormValues = Record<string, unknown>;
@@ -126,6 +127,7 @@ export function TrueAdminTableFilterPanel({
   values,
   onReset,
   onSubmit,
+  onTransitionEnd,
 }: TrueAdminTableFilterPanelProps) {
   const [form] = Form.useForm<FilterFormValues>();
   const formValues = useMemo(() => toFormValues(filters, values), [filters, values]);
@@ -164,6 +166,11 @@ export function TrueAdminTableFilterPanel({
       className={
         expanded ? 'trueadmin-crud-filter-panel is-expanded' : 'trueadmin-crud-filter-panel'
       }
+      onTransitionEnd={(event) => {
+        if (event.currentTarget === event.target && event.propertyName === 'grid-template-rows') {
+          onTransitionEnd?.();
+        }
+      }}
     >
       <div className="trueadmin-crud-filter-panel-inner" aria-hidden={!expanded}>
         <Form form={form} layout="vertical" onFinish={handleFinish}>
