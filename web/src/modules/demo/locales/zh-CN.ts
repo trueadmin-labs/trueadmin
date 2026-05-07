@@ -65,6 +65,7 @@ export default {
   'demo.crud.owner.business': '业务管理员',
   'demo.crud.owner.finance': '财务管理员',
   'demo.crud.owner.ops': '运营管理员',
+  'demo.crud.status.all': '全部',
   'demo.crud.status.enabled': '已启用',
   'demo.crud.status.disabled': '已禁用',
   'demo.crud.status.pending': '待确认',

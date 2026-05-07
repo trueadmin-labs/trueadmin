@@ -1,7 +1,8 @@
-import { SearchOutlined } from '@ant-design/icons';
+import { ReloadOutlined, SearchOutlined } from '@ant-design/icons';
 import { Button, DatePicker, Form, Input, Select, Space } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
 import { useEffect, useMemo } from 'react';
+import { useI18n } from '@/core/i18n/I18nProvider';
 import type { CrudFilterSchema } from './types';
 
 export type TrueAdminTableFilterPanelProps = {
@@ -96,6 +97,8 @@ function FilterField({
     return (
       <Select
         allowClear
+        maxTagCount={filter.mode === 'multiple' ? (filter.maxTagCount ?? 1) : undefined}
+        maxTagPlaceholder={(omittedValues) => `+${omittedValues.length}`}
         mode={filter.mode}
         value={value}
         options={filter.options}
@@ -129,6 +132,7 @@ export function TrueAdminTableFilterPanel({
   onSubmit,
   onTransitionEnd,
 }: TrueAdminTableFilterPanelProps) {
+  const { t } = useI18n();
   const [form] = Form.useForm<FilterFormValues>();
   const formValues = useMemo(() => toFormValues(filters, values), [filters, values]);
 
@@ -187,16 +191,15 @@ export function TrueAdminTableFilterPanel({
             <div className="trueadmin-crud-filter-actions">
               <Space orientation="vertical" size={8}>
                 <Button
-                  block
                   type="primary"
                   htmlType="button"
                   icon={<SearchOutlined />}
                   onClick={() => form.submit()}
                 >
-                  查询
+                  {t('crud.filter.search', '查询')}
                 </Button>
-                <Button block htmlType="button" onClick={handleReset}>
-                  重置
+                <Button htmlType="button" icon={<ReloadOutlined />} onClick={handleReset}>
+                  {t('crud.filter.reset', '重置')}
                 </Button>
               </Space>
             </div>

@@ -38,6 +38,7 @@ export type CrudInputFilter = CrudFilterBase & {
 export type CrudSelectFilter = CrudFilterBase & {
   type: 'select';
   mode?: 'multiple';
+  maxTagCount?: number;
   options: CrudFilterOption[];
 };
 

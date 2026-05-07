@@ -1180,7 +1180,7 @@ body,
 .trueadmin-crud-filter-layout {
   display: grid;
   min-width: 0;
-  grid-template-columns: minmax(0, 1fr) 88px;
+  grid-template-columns: minmax(0, 1fr) max-content;
   gap: 24px;
   align-items: center;
 }
@@ -1222,6 +1222,12 @@ body,
 }
 
 .trueadmin-crud-filter-actions .ant-space {
+  width: max-content;
+  min-width: 72px;
+}
+
+.trueadmin-crud-filter-actions .ant-space-item,
+.trueadmin-crud-filter-actions .ant-btn {
   width: 100%;
 }
 
@@ -1305,16 +1311,13 @@ body,
   }
 
   .trueadmin-crud-filter-actions .ant-space {
-    width: auto;
+    width: max-content;
+    flex-direction: row;
   }
 
   .trueadmin-crud-filter-actions .ant-space-item,
   .trueadmin-crud-filter-actions .ant-btn {
     width: auto;
-  }
-
-  .trueadmin-crud-filter-actions .ant-space {
-    flex-direction: row;
   }
 }
 

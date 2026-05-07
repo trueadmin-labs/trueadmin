@@ -69,6 +69,7 @@ export default {
   'demo.crud.owner.business': 'Business admin',
   'demo.crud.owner.finance': 'Finance admin',
   'demo.crud.owner.ops': 'Ops admin',
+  'demo.crud.status.all': 'All',
   'demo.crud.status.enabled': 'Enabled',
   'demo.crud.status.disabled': 'Disabled',
   'demo.crud.status.pending': 'Pending',
