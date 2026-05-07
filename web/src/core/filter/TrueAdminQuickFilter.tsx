@@ -1,4 +1,4 @@
-import { Badge, Segmented, Typography } from 'antd';
+import { Segmented, Tag, Typography } from 'antd';
 import type { ReactNode } from 'react';
 
 export type TrueAdminQuickFilterValue = string | number;
@@ -24,7 +24,7 @@ export type TrueAdminQuickFilterProps<TValue extends TrueAdminQuickFilterValue> 
   onChange?: (value: TValue) => void;
 };
 
-const toBadgeCount = (count?: number) => {
+const toCountText = (count?: number) => {
   if (!count || count <= 0) {
     return 0;
   }
@@ -47,13 +47,8 @@ export function TrueAdminQuickFilter<TValue extends TrueAdminQuickFilterValue>({
       <span className="trueadmin-quick-filter-option">
         {item.icon ? <span className="trueadmin-quick-filter-option-icon">{item.icon}</span> : null}
         <span className="trueadmin-quick-filter-option-label">{item.label}</span>
-        {toBadgeCount(item.count) ? (
-          <Badge
-            className="trueadmin-quick-filter-option-badge"
-            count={toBadgeCount(item.count)}
-            overflowCount={99}
-            size="small"
-          />
+        {toCountText(item.count) ? (
+          <Tag className="trueadmin-quick-filter-option-count">{toCountText(item.count)}</Tag>
         ) : null}
       </span>
     ),

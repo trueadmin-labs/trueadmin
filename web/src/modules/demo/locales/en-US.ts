@@ -86,6 +86,8 @@ export default {
   'demo.crud.category.tree.collapseAll': 'Collapse all',
   'demo.crud.category.tree.show': 'Show catalog',
   'demo.crud.category.tree.hide': 'Hide catalog',
+  'demo.crud.category.tree.reload': 'Refresh catalog',
+  'demo.crud.category.tree.reloadSuccess': 'Category catalog refreshed',
   'demo.crud.column.name': 'Name',
   'demo.crud.column.owner': 'Owner',
   'demo.crud.column.status': 'Status',

@@ -44,6 +44,12 @@ const toFormValues = (filters: CrudFilterSchema[], values: Record<string, string
   return formValues;
 };
 
+const getEmptyFormValues = (filters: CrudFilterSchema[]) =>
+  filters.reduce<FilterFormValues>((result, filter) => {
+    result[filter.name] = undefined;
+    return result;
+  }, {});
+
 const normalizeFieldValue = (filter: CrudFilterSchema, value: unknown) => {
   if (value === undefined || value === null || value === '') {
     return undefined;
@@ -148,6 +154,11 @@ export function TrueAdminTableFilterPanel({
     onSubmit(normalizedValues);
   };
 
+  const handleReset = () => {
+    form.setFieldsValue(getEmptyFormValues(filters));
+    onReset();
+  };
+
   return (
     <div
       className={
@@ -167,11 +178,17 @@ export function TrueAdminTableFilterPanel({
               </div>
             </div>
             <div className="trueadmin-crud-filter-actions">
-              <Space direction="vertical" size={8}>
-                <Button block type="primary" htmlType="submit" icon={<SearchOutlined />}>
+              <Space orientation="vertical" size={8}>
+                <Button
+                  block
+                  type="primary"
+                  htmlType="button"
+                  icon={<SearchOutlined />}
+                  onClick={() => form.submit()}
+                >
                   查询
                 </Button>
-                <Button block onClick={onReset}>
+                <Button block htmlType="button" onClick={handleReset}>
                   重置
                 </Button>
               </Space>

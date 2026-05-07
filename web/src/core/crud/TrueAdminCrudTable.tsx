@@ -107,6 +107,14 @@ export function TrueAdminCrudTable<
   rowKey,
   columns,
   service,
+  beforeRequest,
+  transformParams,
+  transformResponse,
+  onLoadSuccess,
+  onLoadError,
+  onCreateSuccess,
+  onUpdateSuccess,
+  onDeleteSuccess,
   toolbarRender,
   summaryRender,
   tableExtraRender,
@@ -125,6 +133,14 @@ export function TrueAdminCrudTable<
   | 'rowKey'
   | 'columns'
   | 'service'
+  | 'beforeRequest'
+  | 'transformParams'
+  | 'transformResponse'
+  | 'onLoadSuccess'
+  | 'onLoadError'
+  | 'onCreateSuccess'
+  | 'onUpdateSuccess'
+  | 'onDeleteSuccess'
   | 'toolbarRender'
   | 'summaryRender'
   | 'tableExtraRender'
@@ -145,6 +161,7 @@ export function TrueAdminCrudTable<
   const [innerSelectedRows, setInnerSelectedRows] = useState<TRecord[]>([]);
   const reloadSeedRef = useRef(0);
   const [reloadSeed, setReloadSeed] = useState(0);
+  const [queryResetSeed, setQueryResetSeed] = useState(0);
   const queryState = useCrudTableQueryState({
     filters,
     quickSearch,
@@ -173,43 +190,139 @@ export function TrueAdminCrudTable<
     >[2]);
   }, [rowSelection]);
 
+  const createRecord = useCallback(
+    async (payload: TCreate) => {
+      if (!service.create) {
+        throw new Error('Create service is not configured.');
+      }
+
+      const record = await service.create(payload);
+      onCreateSuccess?.(record, { payload, resource });
+      reload();
+      return record;
+    },
+    [onCreateSuccess, reload, resource, service],
+  );
+
+  const updateRecord = useCallback(
+    async (id: Key, payload: TUpdate) => {
+      if (!service.update) {
+        throw new Error('Update service is not configured.');
+      }
+
+      const record = await service.update(id, payload);
+      onUpdateSuccess?.(record, { id, payload, resource });
+      reload();
+      return record;
+    },
+    [onUpdateSuccess, reload, resource, service],
+  );
+
+  const deleteRecord = useCallback(
+    async (id: Key) => {
+      if (!service.delete) {
+        throw new Error('Delete service is not configured.');
+      }
+
+      const result = await service.delete(id);
+      onDeleteSuccess?.(result, { id, resource });
+      clearSelected();
+      reload();
+      return result;
+    },
+    [clearSelected, onDeleteSuccess, reload, resource, service],
+  );
+
   const action = useMemo(
     () => ({
       clearSelected,
+      create: service.create ? createRecord : undefined,
+      delete: service.delete ? deleteRecord : undefined,
       reload,
+      update: service.update ? updateRecord : undefined,
     }),
-    [clearSelected, reload],
+    [
+      clearSelected,
+      createRecord,
+      deleteRecord,
+      reload,
+      service.create,
+      service.delete,
+      service.update,
+      updateRecord,
+    ],
   );
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
 
-    service
-      .list(queryState.requestParams)
-      .then((result) => {
+    const loadData = async () => {
+      const context = { resource };
+      const baseParams = queryState.requestParams;
+      let requestParams = baseParams;
+
+      setLoading(true);
+
+      try {
+        const beforeResult = await beforeRequest?.(baseParams, context);
+        if (cancelled || beforeResult === false) {
+          return;
+        }
+
+        requestParams = transformParams ? await transformParams(baseParams, context) : baseParams;
+
         if (cancelled) {
           return;
         }
-        setDataSource(result.items ?? []);
-        setTotal(result.total ?? 0);
-        setResponse(result);
-      })
-      .catch((error) => {
-        if (!cancelled) {
-          errorCenter.emit(error);
+
+        const result = await service.list(requestParams);
+        if (cancelled) {
+          return;
         }
-      })
-      .finally(() => {
+
+        const loadContext = { params: requestParams, resource };
+        const finalResult = transformResponse
+          ? await transformResponse(result, loadContext)
+          : result;
+
+        if (cancelled) {
+          return;
+        }
+
+        setDataSource(finalResult.items ?? []);
+        setTotal(finalResult.total ?? 0);
+        setResponse(finalResult);
+        onLoadSuccess?.(finalResult, loadContext);
+      } catch (error) {
+        if (!cancelled) {
+          const shouldSkipGlobalError = onLoadError?.(error, { params: requestParams, resource });
+          if (shouldSkipGlobalError !== false) {
+            errorCenter.emit(error);
+          }
+        }
+      } finally {
         if (!cancelled) {
           setLoading(false);
         }
-      });
+      }
+    };
+
+    void loadData();
 
     return () => {
       cancelled = true;
     };
-  }, [queryState.requestParams, reloadSeed, service]);
+  }, [
+    beforeRequest,
+    onLoadError,
+    onLoadSuccess,
+    queryState.requestParams,
+    reloadSeed,
+    resource,
+    service,
+    transformParams,
+    transformResponse,
+  ]);
 
   const operationColumn = useMemo<CrudColumns<TRecord>>(
     () =>
@@ -226,9 +339,8 @@ export function TrueAdminCrudTable<
                     title="确认删除这条记录吗？"
                     onConfirm={async () => {
                       try {
-                        await service.delete?.(record.id as Key);
+                        await deleteRecord(record.id as Key);
                         message.success('删除成功');
-                        reload();
                       } catch (error) {
                         errorCenter.emit(error);
                       }
@@ -243,7 +355,7 @@ export function TrueAdminCrudTable<
             },
           ]
         : [],
-    [message, reload, resource, service],
+    [deleteRecord, message, resource, service.delete],
   );
 
   const mergedColumns = useMemo<CrudColumns<TRecord>>(() => {
@@ -308,12 +420,17 @@ export function TrueAdminCrudTable<
       }
     : undefined;
 
+  const resetQuery = useCallback(() => {
+    queryState.resetFilters();
+    setQueryResetSeed((seed) => seed + 1);
+  }, [queryState]);
+
   const searchDom = hasFilters ? (
     <TrueAdminTableFilterPanel
       expanded={filtersExpanded}
       filters={filters}
       values={queryState.values}
-      onReset={queryState.resetFilters}
+      onReset={resetQuery}
       onSubmit={queryState.submitFilters}
     />
   ) : null;
@@ -337,6 +454,7 @@ export function TrueAdminCrudTable<
           loading={loading}
           quickSearch={quickSearch}
           quickSearchName={queryState.quickSearchName}
+          quickSearchResetSeed={queryResetSeed}
           quickSearchValue={
             queryState.quickSearchName ? queryState.values[queryState.quickSearchName] : undefined
           }

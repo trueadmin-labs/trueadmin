@@ -121,7 +121,7 @@ export default function WorkbenchPage() {
 
   return (
     <TrueAdminPage className="trueadmin-workbench">
-      <Space direction="vertical" size={16} className="trueadmin-workbench-stack">
+      <Space orientation="vertical" size={16} className="trueadmin-workbench-stack">
         <section className="trueadmin-workbench-summary">
           <div>
             <Title level={4}>{t('workbench.greeting', '早上好，超级管理员')}</Title>
@@ -190,7 +190,7 @@ export default function WorkbenchPage() {
         <Row gutter={[16, 16]} align="stretch">
           <Col xs={24} xl={14}>
             <Card size="small" title={t('workbench.health.title', '系统状态')}>
-              <Space direction="vertical" size={14} className="trueadmin-workbench-health-list">
+              <Space orientation="vertical" size={14} className="trueadmin-workbench-health-list">
                 {data.health.map((item) => (
                   <div key={item.label} className="trueadmin-workbench-health-item">
                     <Space>

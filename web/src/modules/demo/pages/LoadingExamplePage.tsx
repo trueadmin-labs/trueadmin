@@ -113,7 +113,7 @@ function ModalProfileContent({
   const recordCount = version % 2 === 0 ? 4 : 9;
 
   return (
-    <Space direction="vertical" size={12} style={{ width: '100%' }}>
+    <Space orientation="vertical" size={12} style={{ width: '100%' }}>
       <ProfileDescriptions profile={profile} t={t} />
       <Descriptions size="small" column={1} bordered>
         {Array.from({ length: recordCount }).map((_, index) => (
@@ -207,7 +207,7 @@ export default function LoadingExamplePage() {
 
   return (
     <TrueAdminPage title={t('demo.loading.title', '加载态示例')}>
-      <Space direction="vertical" size={16} className="trueadmin-example-stack">
+      <Space orientation="vertical" size={16} className="trueadmin-example-stack">
         <Card title={t('demo.loading.strategy.title', '容器级加载策略')} size="small">
           <Paragraph>
             {t(

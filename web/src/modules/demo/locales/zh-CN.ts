@@ -82,6 +82,8 @@ export default {
   'demo.crud.category.tree.collapseAll': '收起全部',
   'demo.crud.category.tree.show': '显示分类目录',
   'demo.crud.category.tree.hide': '隐藏分类目录',
+  'demo.crud.category.tree.reload': '刷新分类目录',
+  'demo.crud.category.tree.reloadSuccess': '分类目录已刷新',
   'demo.crud.column.name': '名称',
   'demo.crud.column.owner': '负责人',
   'demo.crud.column.status': '状态',

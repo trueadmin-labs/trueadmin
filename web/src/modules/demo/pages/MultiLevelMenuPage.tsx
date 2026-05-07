@@ -10,7 +10,7 @@ export default function MultiLevelMenuPage() {
 
   return (
     <TrueAdminPage title={t('demo.multilevel.title', '多级菜单示例')}>
-      <Space direction="vertical" size={16} className="trueadmin-example-stack">
+      <Space orientation="vertical" size={16} className="trueadmin-example-stack">
         <Card
           size="small"
           title={t('demo.multilevel.structure.title', '菜单层级')}
@@ -38,7 +38,7 @@ export default function MultiLevelMenuPage() {
         </Card>
 
         <Card size="small" title={t('demo.multilevel.expected.title', '预期表现')}>
-          <Space direction="vertical" size={8}>
+          <Space orientation="vertical" size={8}>
             <Text>
               {t('demo.multilevel.expected.classic', 'Classic：左侧完整菜单树展开到当前页面。')}
             </Text>

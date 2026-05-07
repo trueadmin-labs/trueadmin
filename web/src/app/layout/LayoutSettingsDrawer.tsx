@@ -76,11 +76,11 @@ export function LayoutSettingsDrawer() {
       <Drawer
         className={`trueadmin-settings-drawer${darkMode ? ' is-dark' : ''}`}
         title="布局设置"
-        width={360}
+        size={360}
         open={open}
         onClose={() => setOpen(false)}
       >
-        <Space direction="vertical" size={20} className="trueadmin-settings-content">
+        <Space orientation="vertical" size={20} className="trueadmin-settings-content">
           <SettingSection title="主题" icon={<BgColorsOutlined />}>
             <div className="trueadmin-settings-color-grid">
               {colorPresets.map((color) => (
@@ -121,7 +121,7 @@ export function LayoutSettingsDrawer() {
           <Divider className="trueadmin-settings-divider" />
 
           <SettingSection title="显示" icon={<MenuFoldOutlined />}>
-            <Space direction="vertical" size={12} className="trueadmin-settings-content">
+            <Space orientation="vertical" size={12} className="trueadmin-settings-content">
               <Flex className="trueadmin-settings-row" align="center" justify="space-between">
                 <span>折叠菜单</span>
                 <Switch checked={collapsed} onChange={setCollapsed} />

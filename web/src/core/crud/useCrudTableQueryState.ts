@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from 'react';
-import { useSearchParams } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
+import { updateRawSearchParams } from '@/core/url/searchParams';
 import type { CrudFilterSchema, CrudListParams, CrudQuickSearchConfig } from './types';
 
 export type CrudOrder = 'asc' | 'desc';
@@ -142,7 +143,8 @@ export function useCrudTableQueryState({
   quickSearch,
   defaultPageSize = DEFAULT_PAGE_SIZE,
 }: UseCrudTableQueryStateOptions): CrudTableQueryState {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const quickSearchName = getQuickSearchName(quickSearch);
   const filterNames = useMemo(() => getFilterNames(filters), [filters]);
   const valueKeys = useMemo(() => {
@@ -168,16 +170,10 @@ export function useCrudTableQueryState({
 
   const updateQuery = useCallback(
     (updater: (params: URLSearchParams) => void) => {
-      setSearchParams(
-        (prev) => {
-          const next = new URLSearchParams(prev);
-          updater(next);
-          return next;
-        },
-        { replace: true },
-      );
+      const nextSearch = updateRawSearchParams(searchParams, updater);
+      navigate({ search: nextSearch ? `?${nextSearch}` : '' }, { replace: true });
     },
-    [setSearchParams],
+    [navigate, searchParams],
   );
 
   const submitQuickSearch = useCallback(

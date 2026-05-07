@@ -10,6 +10,7 @@ export type TrueAdminTableToolbarProps = {
   loading?: boolean;
   quickSearch?: CrudQuickSearchConfig;
   quickSearchName?: string;
+  quickSearchResetSeed?: number;
   quickSearchValue?: string;
   onClearQuickSearch: () => void;
   onReload: () => void;
@@ -23,6 +24,7 @@ export function TrueAdminTableToolbar({
   hasFilters,
   loading,
   quickSearch,
+  quickSearchResetSeed = 0,
   quickSearchValue,
   onClearQuickSearch,
   onReload,
@@ -34,6 +36,12 @@ export function TrueAdminTableToolbar({
   useEffect(() => {
     setInputValue(quickSearchValue ?? '');
   }, [quickSearchValue]);
+
+  useEffect(() => {
+    if (quickSearchResetSeed > 0) {
+      setInputValue('');
+    }
+  }, [quickSearchResetSeed]);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const nextValue = event.target.value;

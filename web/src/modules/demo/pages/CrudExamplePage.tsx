@@ -10,9 +10,17 @@ import {
 } from '@ant-design/icons';
 import { StatisticCard } from '@ant-design/pro-components';
 import { App, Button, Col, Dropdown, Row, Space, Tag, Tooltip } from 'antd';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { TrueAdminCrudPage } from '@/core/crud/TrueAdminCrudPage';
-import type { CrudColumns, CrudFilterSchema, CrudListParams, CrudService } from '@/core/crud/types';
+import type {
+  CrudColumns,
+  CrudFilterSchema,
+  CrudListParams,
+  CrudLoadLifecycleContext,
+  CrudPageResult,
+  CrudRequestLifecycleContext,
+  CrudService,
+} from '@/core/crud/types';
 import { TrueAdminQuickFilter } from '@/core/filter/TrueAdminQuickFilter';
 import { TrueAdminTreeFilter } from '@/core/filter/TrueAdminTreeFilter';
 import { useI18n } from '@/core/i18n/I18nProvider';
@@ -114,6 +122,17 @@ const summaryCardStyles = {
   body: { display: 'flex', height: '100%', justifyContent: 'center', padding: 12 },
 };
 
+const formatLifecycleParams = (params: CrudListParams) => {
+  const entries = Object.entries(params).filter(([, value]) => value !== undefined);
+  if (entries.length === 0) {
+    return '-';
+  }
+
+  return entries
+    .map(([key, value]) => `${key}=${Array.isArray(value) ? value.join(',') : String(value)}`)
+    .join(' / ');
+};
+
 const filterRecords = (records: CrudExampleRecord[], params: CrudListParams) =>
   records.filter((record) => {
     const keyword = typeof params.keyword === 'string' ? params.keyword.trim() : '';
@@ -163,6 +182,7 @@ export default function CrudExamplePage() {
   const [statusScope, setStatusScope] = useState<CrudExampleStatusFilter>('all');
   const [categoryScope, setCategoryScope] = useState<CrudExampleCategoryFilter>('all');
   const [categoryFilterCollapsed, setCategoryFilterCollapsed] = useState(false);
+  const [categoryTreeLoading, setCategoryTreeLoading] = useState(false);
   const records = useMemo(() => createRecords(t), [t]);
   const statusText = useMemo<Record<CrudExampleRecord['status'], string>>(
     () => ({
@@ -371,6 +391,77 @@ export default function CrudExamplePage() {
     [categoryScope, service, statusScope],
   );
 
+  const appendLifecycleLog = useCallback(
+    (name: string, messageText: string, payload: Record<string, unknown>) => {
+      console.info('[CRUD lifecycle]', name, messageText, payload);
+    },
+    [],
+  );
+
+  const handleReloadCategoryTree = useCallback(async () => {
+    setCategoryTreeLoading(true);
+    await wait(350);
+    setCategoryTreeLoading(false);
+    message.success(t('demo.crud.category.tree.reloadSuccess', '分类目录已刷新'));
+  }, [message, t]);
+
+  const handleBeforeRequest = useCallback(
+    (params: CrudListParams, context: CrudRequestLifecycleContext) => {
+      appendLifecycleLog('beforeRequest', formatLifecycleParams(params), { context, params });
+      return undefined;
+    },
+    [appendLifecycleLog],
+  );
+
+  const handleTransformParams = useCallback(
+    (params: CrudListParams, context: CrudRequestLifecycleContext) => {
+      const nextParams = { ...params, lifecycleDemo: 'enabled' };
+      appendLifecycleLog('transformParams', formatLifecycleParams(nextParams), {
+        context,
+        nextParams,
+        params,
+      });
+      return nextParams;
+    },
+    [appendLifecycleLog],
+  );
+
+  const handleTransformResponse = useCallback(
+    (
+      response: CrudPageResult<CrudExampleRecord, CrudExampleMeta>,
+      context: CrudLoadLifecycleContext,
+    ) => {
+      appendLifecycleLog(
+        'transformResponse',
+        `items=${response.items.length} / total=${response.total}`,
+        { context, response },
+      );
+      return response;
+    },
+    [appendLifecycleLog],
+  );
+
+  const handleLoadSuccess = useCallback(
+    (
+      response: CrudPageResult<CrudExampleRecord, CrudExampleMeta>,
+      context: CrudLoadLifecycleContext,
+    ) => {
+      appendLifecycleLog('onLoadSuccess', `total=${response.total}`, { context, response });
+    },
+    [appendLifecycleLog],
+  );
+
+  const handleLoadError = useCallback(
+    (error: unknown, context: CrudLoadLifecycleContext) => {
+      appendLifecycleLog('onLoadError', error instanceof Error ? error.message : String(error), {
+        context,
+        error,
+      });
+      return undefined;
+    },
+    [appendLifecycleLog],
+  );
+
   return (
     <TrueAdminCrudPage<
       CrudExampleRecord,
@@ -383,6 +474,11 @@ export default function CrudExamplePage() {
       resource="demo.crud"
       columns={columns}
       service={scopedService}
+      beforeRequest={handleBeforeRequest}
+      transformParams={handleTransformParams}
+      transformResponse={handleTransformResponse}
+      onLoadSuccess={handleLoadSuccess}
+      onLoadError={handleLoadError}
       rowKey="id"
       quickSearch={{ placeholder: t('demo.crud.quickSearch.placeholder', '搜索名称 / 负责人') }}
       filters={filters}
@@ -401,8 +497,11 @@ export default function CrudExamplePage() {
               placeholder={t('demo.crud.category.tree.placeholder', '搜索分类')}
               emptyText={t('demo.crud.category.tree.empty', '暂无匹配分类')}
               value={categoryScope}
+              loading={categoryTreeLoading}
               expandAllText={t('demo.crud.category.tree.expandAll', '展开全部')}
               collapseAllText={t('demo.crud.category.tree.collapseAll', '收起全部')}
+              reloadText={t('demo.crud.category.tree.reload', '刷新分类目录')}
+              onReload={handleReloadCategoryTree}
               extra={
                 <Tooltip title={t('demo.crud.category.tree.hide', '隐藏分类目录')}>
                   <Button
@@ -470,7 +569,7 @@ export default function CrudExamplePage() {
                   title: t('demo.crud.summary.currentTotal', '当前结果'),
                   value: total,
                   suffix: t('demo.crud.summary.unit.items', '项'),
-                  valueStyle: { fontSize: 20 },
+                  styles: { content: { fontSize: 20 } },
                 }}
                 chart={
                   <div className="trueadmin-demo-crud-summary-chart">
@@ -498,7 +597,7 @@ export default function CrudExamplePage() {
                   value: enabledCount,
                   suffix: t('demo.crud.summary.unit.items', '项'),
                   trend: 'up',
-                  valueStyle: { fontSize: 20 },
+                  styles: { content: { fontSize: 20 } },
                 }}
                 chart={
                   <div className="trueadmin-demo-crud-summary-chart is-pie">
@@ -528,7 +627,7 @@ export default function CrudExamplePage() {
                   value: response?.meta?.todayUpdated ?? 0,
                   suffix: t('demo.crud.summary.unit.items', '项'),
                   status: 'processing',
-                  valueStyle: { fontSize: 20 },
+                  styles: { content: { fontSize: 20 } },
                 }}
                 chart={
                   <div className="trueadmin-demo-crud-summary-chart">
@@ -554,7 +653,7 @@ export default function CrudExamplePage() {
                   title: t('demo.crud.summary.totalVisits', '累计访问'),
                   value: response?.meta?.totalVisits ?? 0,
                   formatter: (value) => formatCompactNumber(Number(value ?? 0)),
-                  valueStyle: { fontSize: 20 },
+                  styles: { content: { fontSize: 20 } },
                 }}
                 chart={
                   <div className="trueadmin-demo-crud-summary-chart">
@@ -581,7 +680,7 @@ export default function CrudExamplePage() {
             value={statusScope}
             items={statusFilterItems.map((item) => ({
               ...item,
-              count: response?.meta?.statusStats[item.value],
+              count: item.value === 'pending' ? response?.meta?.statusStats.pending : undefined,
             }))}
             onChange={setStatusScope}
           />

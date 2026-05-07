@@ -78,9 +78,37 @@ export type CrudService<
   delete?: (id: React.Key) => Promise<unknown>;
 };
 
-export type CrudTableAction = {
+export type CrudTableAction<
+  TRecord extends Record<string, unknown>,
+  TCreate = Partial<TRecord>,
+  TUpdate = Partial<TRecord>,
+> = {
   clearSelected: () => void;
   reload: () => void;
+  create?: (payload: TCreate) => Promise<TRecord>;
+  update?: (id: React.Key, payload: TUpdate) => Promise<TRecord>;
+  delete?: (id: React.Key) => Promise<unknown>;
+};
+
+export type CrudRequestLifecycleContext = {
+  resource: string;
+};
+
+export type CrudLoadLifecycleContext = CrudRequestLifecycleContext & {
+  params: CrudListParams;
+};
+
+export type CrudCreateSuccessContext<TCreate> = CrudRequestLifecycleContext & {
+  payload: TCreate;
+};
+
+export type CrudUpdateSuccessContext<TUpdate> = CrudRequestLifecycleContext & {
+  id: React.Key;
+  payload: TUpdate;
+};
+
+export type CrudDeleteSuccessContext = CrudRequestLifecycleContext & {
+  id: React.Key;
 };
 
 export type CrudColumns<TRecord extends Record<string, unknown>> = TableColumnsType<TRecord>;
@@ -88,8 +116,10 @@ export type CrudColumns<TRecord extends Record<string, unknown>> = TableColumnsT
 export type CrudTableRenderContext<
   TRecord extends Record<string, unknown>,
   TMeta = Record<string, unknown>,
+  TCreate = Partial<TRecord>,
+  TUpdate = Partial<TRecord>,
 > = {
-  action: CrudTableAction;
+  action: CrudTableAction<TRecord, TCreate, TUpdate>;
   dataSource: TRecord[];
   loading: boolean;
   response?: CrudPageResult<TRecord, TMeta>;
@@ -101,7 +131,9 @@ export type CrudTableRenderContext<
 export type CrudToolbarRenderContext<
   TRecord extends Record<string, unknown>,
   TMeta = Record<string, unknown>,
-> = CrudTableRenderContext<TRecord, TMeta>;
+  TCreate = Partial<TRecord>,
+  TUpdate = Partial<TRecord>,
+> = CrudTableRenderContext<TRecord, TMeta, TCreate, TUpdate>;
 
 export type CrudTableDomList = {
   summary: ReactNode;
@@ -123,20 +155,48 @@ export type TrueAdminCrudTableProps<
   rowKey?: keyof TRecord | ((record: TRecord) => React.Key);
   columns: CrudColumns<TRecord>;
   service: CrudService<TRecord, TCreate, TUpdate, TMeta>;
-  toolbarRender?: (context: CrudToolbarRenderContext<TRecord, TMeta>) => ReactNode;
-  summaryRender?: (context: CrudTableRenderContext<TRecord, TMeta>) => ReactNode;
-  tableExtraRender?: (context: CrudTableRenderContext<TRecord, TMeta>) => ReactNode;
+  beforeRequest?: (
+    params: CrudListParams,
+    context: CrudRequestLifecycleContext,
+  ) => boolean | undefined | Promise<boolean | undefined>;
+  transformParams?: (
+    params: CrudListParams,
+    context: CrudRequestLifecycleContext,
+  ) => CrudListParams | Promise<CrudListParams>;
+  transformResponse?: (
+    response: CrudPageResult<TRecord, TMeta>,
+    context: CrudLoadLifecycleContext,
+  ) => CrudPageResult<TRecord, TMeta> | Promise<CrudPageResult<TRecord, TMeta>>;
+  onLoadSuccess?: (
+    response: CrudPageResult<TRecord, TMeta>,
+    context: CrudLoadLifecycleContext,
+  ) => void;
+  onLoadError?: (error: unknown, context: CrudLoadLifecycleContext) => false | undefined;
+  onCreateSuccess?: (record: TRecord, context: CrudCreateSuccessContext<TCreate>) => void;
+  onUpdateSuccess?: (record: TRecord, context: CrudUpdateSuccessContext<TUpdate>) => void;
+  onDeleteSuccess?: (result: unknown, context: CrudDeleteSuccessContext) => void;
+  toolbarRender?: (
+    context: CrudToolbarRenderContext<TRecord, TMeta, TCreate, TUpdate>,
+  ) => ReactNode;
+  summaryRender?: (context: CrudTableRenderContext<TRecord, TMeta, TCreate, TUpdate>) => ReactNode;
+  tableExtraRender?: (
+    context: CrudTableRenderContext<TRecord, TMeta, TCreate, TUpdate>,
+  ) => ReactNode;
   tableViewRender?: (
-    context: CrudTableRenderContext<TRecord, TMeta>,
+    context: CrudTableRenderContext<TRecord, TMeta, TCreate, TUpdate>,
     defaultDom: ReactNode,
   ) => ReactNode;
   tableRender?: (
-    context: CrudTableRenderContext<TRecord, TMeta>,
+    context: CrudTableRenderContext<TRecord, TMeta, TCreate, TUpdate>,
     defaultDom: ReactNode,
     domList: CrudTableDomList,
   ) => ReactNode;
-  tableAlertRender?: false | ((context: CrudTableRenderContext<TRecord, TMeta>) => ReactNode);
-  tableAlertOptionRender?: false | ((context: CrudTableRenderContext<TRecord, TMeta>) => ReactNode);
+  tableAlertRender?:
+    | false
+    | ((context: CrudTableRenderContext<TRecord, TMeta, TCreate, TUpdate>) => ReactNode);
+  tableAlertOptionRender?:
+    | false
+    | ((context: CrudTableRenderContext<TRecord, TMeta, TCreate, TUpdate>) => ReactNode);
   rowSelection?: TableProps<TRecord>['rowSelection'];
   tableScrollX?: number | string;
   filters?: CrudFilterSchema[];

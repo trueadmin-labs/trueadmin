@@ -106,7 +106,7 @@ export default function PageContainerExamplePage() {
         />
       }
       right={
-        <Space direction="vertical" size={16} style={{ width: '100%' }}>
+        <Space orientation="vertical" size={16} style={{ width: '100%' }}>
           <TrueAdminPageSection
             title={t('demo.pageContainer.section.standard.title', '标准区块')}
             description={t(

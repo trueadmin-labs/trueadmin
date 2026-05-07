@@ -1,4 +1,4 @@
-import { CaretDownOutlined, CaretUpOutlined } from '@ant-design/icons';
+import { CaretDownOutlined, CaretUpOutlined, ReloadOutlined } from '@ant-design/icons';
 import { Button, Empty, Input, Space, Tooltip, Tree, Typography } from 'antd';
 import type { DataNode } from 'antd/es/tree';
 import type { ReactNode } from 'react';
@@ -29,8 +29,10 @@ export type TrueAdminTreeFilterProps<TValue extends TrueAdminTreeFilterValue> = 
   showExpandAction?: boolean;
   expandAllText?: ReactNode;
   collapseAllText?: ReactNode;
+  reloadText?: ReactNode;
   extra?: ReactNode;
   onChange?: (value: TValue, item: TrueAdminTreeFilterItem<TValue>) => void;
+  onReload?: () => void;
 };
 
 const toKey = (value: TrueAdminTreeFilterValue) => String(value);
@@ -118,8 +120,10 @@ export function TrueAdminTreeFilter<TValue extends TrueAdminTreeFilterValue>({
   showExpandAction = true,
   expandAllText = '展开全部',
   collapseAllText = '收起全部',
+  reloadText = '刷新',
   extra,
   onChange,
+  onReload,
 }: TrueAdminTreeFilterProps<TValue>) {
   const [keyword, setKeyword] = useState('');
   const normalizedKeyword = normalizeKeyword(keyword);
@@ -139,10 +143,22 @@ export function TrueAdminTreeFilter<TValue extends TrueAdminTreeFilterValue>({
 
   return (
     <div className="trueadmin-tree-filter">
-      {title || extra || showExpandAction ? (
+      {title || extra || onReload || showExpandAction ? (
         <div className="trueadmin-tree-filter-header">
           {title ? <Typography.Text strong>{title}</Typography.Text> : <span />}
           <Space className="trueadmin-tree-filter-extra" size={4}>
+            {onReload ? (
+              <Tooltip title={reloadText}>
+                <Button
+                  disabled={disabled || loading}
+                  icon={<ReloadOutlined />}
+                  loading={loading}
+                  size="small"
+                  type="text"
+                  onClick={onReload}
+                />
+              </Tooltip>
+            ) : null}
             {showExpandAction ? (
               <Tooltip title={isAllExpanded ? collapseAllText : expandAllText}>
                 <Button
