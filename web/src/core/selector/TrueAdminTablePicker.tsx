@@ -1,5 +1,5 @@
 import type { Key, ReactNode } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { TrueAdminCrudTable } from '@/core/crud/TrueAdminCrudTable';
 import type { TrueAdminCrudTableProps } from '@/core/crud/types';
 import { useI18n } from '@/core/i18n/I18nProvider';
@@ -62,33 +62,47 @@ export function TrueAdminTablePicker<
   TCreate = Partial<TRecord>,
   TUpdate = Partial<TRecord>,
   TMeta = Record<string, unknown>,
->({
-  aside,
-  asideGap = 10,
-  asideWidth = 280,
-  cancelText,
-  className,
-  classNames,
-  confirmText,
-  defaultValue = [],
-  modalProps,
-  multiple = false,
-  onCancel,
-  onChange,
-  onConfirm,
-  open,
-  rowSelection,
-  selectedRows: controlledSelectedRows = [],
-  styles,
-  style,
-  title,
-  value,
-  ...crudTableProps
-}: TrueAdminTablePickerProps<TRecord, TCreate, TUpdate, TMeta>) {
+>(props: TrueAdminTablePickerProps<TRecord, TCreate, TUpdate, TMeta>) {
+  const {
+    aside,
+    asideGap = 0,
+    asideWidth = 280,
+    cancelText,
+    className,
+    classNames,
+    confirmText,
+    defaultValue = [],
+    modalProps,
+    multiple = false,
+    onCancel,
+    onChange,
+    onConfirm,
+    open,
+    rowSelection,
+    selectedRows: controlledSelectedRows = [],
+    styles,
+    style,
+    title,
+    value,
+    ...crudTableProps
+  } = props;
+  const isValueControlled = Object.hasOwn(props, 'value');
   const { t } = useI18n();
+  const wasOpenRef = useRef(false);
   const [innerSelectedRowKeys, setInnerSelectedRowKeys] = useState<Key[]>(defaultValue);
   const [selectedRowMap, setSelectedRowMap] = useState<Map<string, TRecord>>(() => new Map());
-  const selectedRowKeys = value ?? innerSelectedRowKeys;
+  const [draftSelectedRowKeys, setDraftSelectedRowKeys] = useState<Key[]>(defaultValue);
+  const [draftRowMap, setDraftRowMap] = useState<Map<string, TRecord>>(() => new Map());
+  const selectedRowKeys = isValueControlled ? (value ?? []) : innerSelectedRowKeys;
+  const hasAside = Boolean(aside);
+  const getRecordKey = useCallback(
+    (record: TRecord) =>
+      typeof crudTableProps.rowKey === 'function'
+        ? crudTableProps.rowKey(record)
+        : (record[(crudTableProps.rowKey ?? 'id') as keyof TRecord] as Key),
+    [crudTableProps.rowKey],
+  );
+
   useEffect(() => {
     if (controlledSelectedRows.length === 0) {
       return;
@@ -97,10 +111,7 @@ export function TrueAdminTablePicker<
       const nextMap = new Map(currentMap);
       let changed = false;
       controlledSelectedRows.forEach((record) => {
-        const key =
-          typeof crudTableProps.rowKey === 'function'
-            ? crudTableProps.rowKey(record)
-            : (record[(crudTableProps.rowKey ?? 'id') as keyof TRecord] as Key);
+        const key = getRecordKey(record);
         const keyString = toKeyString(key);
         if (nextMap.get(keyString) !== record) {
           nextMap.set(keyString, record);
@@ -109,15 +120,34 @@ export function TrueAdminTablePicker<
       });
       return changed ? nextMap : currentMap;
     });
-  }, [controlledSelectedRows, crudTableProps.rowKey]);
-  const selectedRows = useMemo(
+  }, [controlledSelectedRows, getRecordKey]);
+
+  const committedRowMap = useMemo(() => {
+    if (controlledSelectedRows.length === 0) {
+      return selectedRowMap;
+    }
+    const nextMap = new Map(selectedRowMap);
+    controlledSelectedRows.forEach((record) => {
+      nextMap.set(toKeyString(getRecordKey(record)), record);
+    });
+    return nextMap;
+  }, [controlledSelectedRows, getRecordKey, selectedRowMap]);
+
+  useEffect(() => {
+    if (open && !wasOpenRef.current) {
+      setDraftSelectedRowKeys(selectedRowKeys);
+      setDraftRowMap(committedRowMap);
+    }
+    wasOpenRef.current = open;
+  }, [committedRowMap, open, selectedRowKeys]);
+
+  const draftSelectedRows = useMemo(
     () =>
-      selectedRowKeys
-        .map((key) => selectedRowMap.get(toKeyString(key)))
+      draftSelectedRowKeys
+        .map((key) => draftRowMap.get(toKeyString(key)))
         .filter((record): record is TRecord => Boolean(record)),
-    [selectedRowKeys, selectedRowMap],
+    [draftSelectedRowKeys, draftRowMap],
   );
-  const hasAside = Boolean(aside);
 
   const rootStyle = {
     '--trueadmin-table-picker-aside-width': toSizeValue(asideWidth),
@@ -131,7 +161,7 @@ export function TrueAdminTablePicker<
       preserveSelectedRowKeys: true,
       type: multiple ? ('checkbox' as const) : ('radio' as const),
       ...rowSelection,
-      selectedRowKeys,
+      selectedRowKeys: draftSelectedRowKeys,
       onChange: (keys: Key[], rows: TRecord[]) => {
         const currentRows = new Map<string, TRecord>();
         rows.forEach((record, index) => {
@@ -140,7 +170,7 @@ export function TrueAdminTablePicker<
             currentRows.set(toKeyString(key), record);
           }
         });
-        const nextMap = new Map(selectedRowMap);
+        const nextMap = new Map(draftRowMap);
         keys.forEach((key) => {
           const record = currentRows.get(toKeyString(key));
           if (record) {
@@ -156,16 +186,22 @@ export function TrueAdminTablePicker<
           .map((key) => nextMap.get(toKeyString(key)))
           .filter((record): record is TRecord => Boolean(record));
 
-        setSelectedRowMap(nextMap);
-        if (value === undefined) {
-          setInnerSelectedRowKeys(keys);
-        }
+        setDraftRowMap(nextMap);
+        setDraftSelectedRowKeys(keys);
         rowSelection?.onChange?.(keys, nextRows);
-        onChange?.(keys, nextRows);
       },
     }),
-    [multiple, onChange, rowSelection, selectedRowKeys, selectedRowMap, value],
+    [draftRowMap, draftSelectedRowKeys, multiple, rowSelection],
   );
+
+  const confirmSelection = () => {
+    setSelectedRowMap(draftRowMap);
+    if (!isValueControlled) {
+      setInnerSelectedRowKeys(draftSelectedRowKeys);
+    }
+    onChange?.(draftSelectedRowKeys, draftSelectedRows);
+    onConfirm?.(draftSelectedRowKeys, draftSelectedRows);
+  };
 
   const tableDom = (
     <TrueAdminCrudTable<TRecord, TCreate, TUpdate, TMeta>
@@ -190,7 +226,7 @@ export function TrueAdminTablePicker<
       title={title ?? t('selector.table.title', '选择数据')}
       cancelText={cancelText ?? t('selector.table.cancel', '取消')}
       onCancel={onCancel}
-      onOk={() => onConfirm?.(selectedRowKeys, selectedRows)}
+      onOk={confirmSelection}
     >
       <div
         className={joinClassNames(

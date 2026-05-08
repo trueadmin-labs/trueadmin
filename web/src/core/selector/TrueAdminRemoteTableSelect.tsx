@@ -49,28 +49,30 @@ export function TrueAdminRemoteTableSelect<
   TCreate = Partial<TRecord>,
   TUpdate = Partial<TRecord>,
   TMeta = Record<string, unknown>,
->({
-  className,
-  defaultValue,
-  disabled,
-  multiple,
-  onChange,
-  picker,
-  pickerButtonProps,
-  pickerButtonTooltip,
-  selectClassName,
-  selectStyle,
-  style,
-  value,
-  ...selectProps
-}: TrueAdminRemoteTableSelectProps<TRecord, TValue, TMultiple, TCreate, TUpdate, TMeta>) {
+>(props: TrueAdminRemoteTableSelectProps<TRecord, TValue, TMultiple, TCreate, TUpdate, TMeta>) {
+  const {
+    className,
+    defaultValue,
+    disabled,
+    multiple,
+    onChange,
+    picker,
+    pickerButtonProps,
+    pickerButtonTooltip,
+    selectClassName,
+    selectStyle,
+    style,
+    value,
+    ...selectProps
+  } = props;
+  const isValueControlled = Object.hasOwn(props, 'value');
   const { t } = useI18n();
   const [pickerOpen, setPickerOpen] = useState(false);
   const [innerValue, setInnerValue] = useState(defaultValue);
   const [selectedRecords, setSelectedRecords] = useState<TRecord[]>([]);
   const [draftKeys, setDraftKeys] = useState<Key[]>([]);
   const [draftRows, setDraftRows] = useState<TRecord[]>([]);
-  const mergedValue = value ?? innerValue;
+  const mergedValue = isValueControlled ? value : innerValue;
 
   const {
     onCancel: pickerOnCancel,
@@ -98,12 +100,12 @@ export function TrueAdminRemoteTableSelect<
           ? [nextRecords as TRecord]
           : [];
       setSelectedRecords(nextRecordList);
-      if (value === undefined) {
+      if (!isValueControlled) {
         setInnerValue(nextValue as TMultiple extends true ? TValue[] : TValue);
       }
       onChange?.(nextValue, nextRecords);
     },
-    [onChange, value],
+    [isValueControlled, onChange],
   );
 
   const openPicker = () => {

@@ -2814,9 +2814,11 @@ body,
 
 .trueadmin-table-picker {
   display: flex;
+  box-sizing: border-box;
   min-height: 0;
   height: min(680px, calc(100vh - 186px));
   flex-direction: column;
+  background: var(--ant-color-bg-container, #fff);
 }
 
 .trueadmin-table-picker-body {
@@ -2828,7 +2830,7 @@ body,
 }
 
 .trueadmin-table-picker.has-aside .trueadmin-table-picker-body {
-  gap: var(--trueadmin-table-picker-aside-gap, 10px);
+  gap: var(--trueadmin-table-picker-aside-gap, 0px);
 }
 
 .trueadmin-table-picker-aside {
@@ -2840,7 +2842,6 @@ body,
   flex-direction: column;
   overflow: auto;
   border: 1px solid var(--trueadmin-shell-border);
-  border-radius: 8px;
   background: var(--ant-color-bg-container, #fff);
 }
 
@@ -2851,6 +2852,18 @@ body,
   flex: 1 1 auto;
   flex-direction: column;
   overflow: hidden;
+  border: 1px solid var(--trueadmin-shell-border);
+  background: var(--ant-color-bg-container, #fff);
+}
+
+.trueadmin-table-picker-main .trueadmin-crud-table-card.ant-card {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.trueadmin-table-picker-main .trueadmin-crud-table-card > .ant-card-body {
+  background: transparent;
 }
 
 .trueadmin-table-picker-table {
@@ -2858,8 +2871,12 @@ body,
   flex: 1 1 auto;
 }
 
+.trueadmin-page-modal.is-dark .trueadmin-table-picker,
+.trueadmin-shell.is-dark .trueadmin-table-picker,
 .trueadmin-page-modal.is-dark .trueadmin-table-picker-aside,
-.trueadmin-shell.is-dark .trueadmin-table-picker-aside {
+.trueadmin-shell.is-dark .trueadmin-table-picker-aside,
+.trueadmin-page-modal.is-dark .trueadmin-table-picker-main,
+.trueadmin-shell.is-dark .trueadmin-table-picker-main {
   border-color: var(--trueadmin-shell-dark-border);
   background: var(--ant-color-bg-container, #141414);
 }
