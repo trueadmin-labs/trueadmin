@@ -75,7 +75,7 @@ export function TrueAdminImportModal({
       onOk={handleConfirm}
       destroyOnHidden
     >
-      <Space direction="vertical" size={12} style={{ width: '100%' }}>
+      <Space orientation="vertical" size={12} style={{ width: '100%' }}>
         <div className="trueadmin-crud-import-modal-header">
           {mergedConfig?.description ? (
             <Typography.Text type="secondary">{mergedConfig.description}</Typography.Text>

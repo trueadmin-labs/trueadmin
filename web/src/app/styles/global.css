@@ -601,11 +601,20 @@ body,
 
 .trueadmin-page-transition {
   min-width: 0;
+  overflow: clip;
 }
 
 .trueadmin-page-transition.is-workspace {
   min-height: 0;
   flex: 0 0 auto;
+}
+
+.trueadmin-page-transition-inner {
+  min-width: 0;
+}
+
+.trueadmin-page-transition.is-workspace > .trueadmin-page-transition-inner {
+  min-height: 0;
 }
 
 .trueadmin-shell-footer {
@@ -2685,21 +2694,27 @@ body,
   font-weight: 600;
 }
 
-.trueadmin-shell.is-dark .trueadmin-complex-form-amount-row {
+.trueadmin-shell.is-dark .trueadmin-complex-form-amount-row,
+.trueadmin-page-modal.is-dark .trueadmin-complex-form-amount-row {
   color: rgba(255, 255, 255, 0.65);
 }
 
-.trueadmin-shell.is-dark .trueadmin-complex-form-amount-row .ant-typography {
+.trueadmin-shell.is-dark .trueadmin-complex-form-amount-row .ant-typography,
+.trueadmin-page-modal.is-dark .trueadmin-complex-form-amount-row .ant-typography {
   color: rgba(255, 255, 255, 0.88);
 }
 
-.trueadmin-shell.is-dark .trueadmin-complex-form-amount-row.is-negative .ant-typography {
+.trueadmin-shell.is-dark .trueadmin-complex-form-amount-row.is-negative .ant-typography,
+.trueadmin-page-modal.is-dark .trueadmin-complex-form-amount-row.is-negative .ant-typography {
   color: #ff7875;
 }
 
 .trueadmin-shell.is-dark .trueadmin-complex-form-amount-row.is-total,
 .trueadmin-shell.is-dark .trueadmin-complex-form-amount-row.is-total .ant-typography,
-.trueadmin-shell.is-dark .trueadmin-complex-form-amount-row.is-balance .ant-typography {
+.trueadmin-shell.is-dark .trueadmin-complex-form-amount-row.is-balance .ant-typography,
+.trueadmin-page-modal.is-dark .trueadmin-complex-form-amount-row.is-total,
+.trueadmin-page-modal.is-dark .trueadmin-complex-form-amount-row.is-total .ant-typography,
+.trueadmin-page-modal.is-dark .trueadmin-complex-form-amount-row.is-balance .ant-typography {
   color: var(--trueadmin-color-primary, #4096ff);
 }
 
@@ -2734,6 +2749,10 @@ body,
 
 .trueadmin-page-modal.ant-modal .ant-modal-body {
   background: var(--trueadmin-shell-bg);
+}
+
+.trueadmin-page-modal.ant-modal.is-dark .ant-modal-body {
+  background: var(--trueadmin-shell-dark-bg);
 }
 
 .trueadmin-scroll-shadow {

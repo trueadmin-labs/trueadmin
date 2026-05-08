@@ -147,9 +147,9 @@ function SalesOrderDetailBody({ variant = 'page' }: SalesOrderDetailBodyProps) {
     <div className={isModal ? 'trueadmin-complex-detail is-modal' : 'trueadmin-complex-detail'}>
       <Row gutter={[12, 12]} align="top">
         <Col xs={24} xl={mainSpan}>
-          <Space className="trueadmin-complex-form-stack" direction="vertical" size={12}>
+          <Space className="trueadmin-complex-form-stack" orientation="vertical" size={12}>
             <Card size="small" title={t('demo.complexDetail.overview.title', '订单概览')}>
-              <Space direction="vertical" size={12} style={{ width: '100%' }}>
+              <Space orientation="vertical" size={12} style={{ width: '100%' }}>
                 <Space size={8} wrap>
                   <Typography.Title level={5} style={{ margin: 0 }}>
                     SO-202605070001

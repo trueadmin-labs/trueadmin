@@ -11,13 +11,15 @@ export function PageTransition({
   const classes = ['trueadmin-page-transition', className].filter(Boolean).join(' ');
 
   return (
-    <motion.div
-      className={classes}
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.22, ease: 'easeOut' }}
-    >
-      {children}
-    </motion.div>
+    <div className={classes}>
+      <motion.div
+        className="trueadmin-page-transition-inner"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.22, ease: 'easeOut' }}
+      >
+        {children}
+      </motion.div>
+    </div>
   );
 }

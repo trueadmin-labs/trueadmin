@@ -211,7 +211,7 @@ function SalesOrderFormBody({ variant = 'page' }: SalesOrderFormBodyProps) {
     >
       <Row gutter={[12, 12]} align="top">
         <Col xs={24} xl={mainSpan}>
-          <Space className="trueadmin-complex-form-stack" direction="vertical" size={12}>
+          <Space className="trueadmin-complex-form-stack" orientation="vertical" size={12}>
             <Card size="small" title={t('demo.complexForm.basic.title', '基础信息')}>
               <Row gutter={12}>
                 <Col xs={24} md={12} xl={isModal ? 12 : 8}>
@@ -432,6 +432,8 @@ function SalesOrderFormBody({ variant = 'page' }: SalesOrderFormBodyProps) {
                   <Form.Item
                     label={t('demo.complexForm.other.attachment', '附件')}
                     name="attachments"
+                    valuePropName="fileList"
+                    getValueFromEvent={(event) => (Array.isArray(event) ? event : event?.fileList)}
                   >
                     <Upload.Dragger beforeUpload={() => false} maxCount={5} multiple>
                       <p className="ant-upload-drag-icon">
