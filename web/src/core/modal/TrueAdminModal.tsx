@@ -4,6 +4,10 @@ import type { ModalSemanticStyles, ModalStylesType } from 'antd/es/modal/interfa
 import type { CSSProperties, MouseEvent, ReactNode } from 'react';
 import { useCallback, useState } from 'react';
 import { useI18n } from '@/core/i18n/I18nProvider';
+import {
+  TrueAdminScrollShadow,
+  type TrueAdminScrollShadowProps,
+} from '@/core/scroll/TrueAdminScrollShadow';
 
 const DEFAULT_MODAL_CONTENT_PADDING_BLOCK = '20px';
 const DEFAULT_MODAL_CONTENT_PADDING_INLINE = '24px';
@@ -58,6 +62,14 @@ export type TrueAdminModalProps = ModalProps & {
   exitFullscreenText?: ReactNode;
   closeText?: ReactNode;
   headerActions?: ReactNode;
+  scrollBody?: boolean;
+  scrollClassName?: string;
+  scrollContentClassName?: string;
+  scrollContentStyle?: CSSProperties;
+  scrollShadowProps?: Omit<
+    TrueAdminScrollShadowProps,
+    'children' | 'className' | 'contentClassName' | 'contentStyle'
+  >;
   onFullscreenChange?: (fullscreen: boolean) => void;
 };
 
@@ -77,6 +89,11 @@ export function TrueAdminModal({
   modalRender,
   onCancel,
   onFullscreenChange,
+  scrollBody = false,
+  scrollClassName,
+  scrollContentClassName,
+  scrollContentStyle,
+  scrollShadowProps,
   style,
   styles,
   ...modalProps
@@ -114,6 +131,19 @@ export function TrueAdminModal({
       onCancel?.(event);
     },
     [onCancel],
+  );
+
+  const bodyNode = scrollBody ? (
+    <TrueAdminScrollShadow
+      {...scrollShadowProps}
+      className={scrollClassName}
+      contentClassName={scrollContentClassName}
+      contentStyle={scrollContentStyle}
+    >
+      {children}
+    </TrueAdminScrollShadow>
+  ) : (
+    children
   );
 
   const headerActionNode = (
@@ -161,7 +191,7 @@ export function TrueAdminModal({
       styles={modalStyles}
       width={mergedFullscreen ? '100%' : modalProps.width}
     >
-      {children}
+      {bodyNode}
     </Modal>
   );
 }

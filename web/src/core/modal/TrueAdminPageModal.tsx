@@ -1,9 +1,5 @@
 import type { ModalSemanticStyles, ModalStylesType } from 'antd/es/modal/interface';
-import type { CSSProperties, ReactNode } from 'react';
-import {
-  TrueAdminScrollShadow,
-  type TrueAdminScrollShadowProps,
-} from '@/core/scroll/TrueAdminScrollShadow';
+import type { ReactNode } from 'react';
 import { useLayoutStore } from '@/core/store/layoutStore';
 import { TrueAdminModal, type TrueAdminModalProps } from './TrueAdminModal';
 
@@ -26,13 +22,6 @@ const mergePageModalStyles = (styles?: ModalStylesType): ModalStylesType => {
 
 export type TrueAdminPageModalProps = TrueAdminModalProps & {
   children?: ReactNode;
-  scrollClassName?: string;
-  scrollContentClassName?: string;
-  scrollContentStyle?: CSSProperties;
-  scrollShadowProps?: Omit<
-    TrueAdminScrollShadowProps,
-    'children' | 'className' | 'contentClassName' | 'contentStyle'
-  >;
 };
 
 export function TrueAdminPageModal({
@@ -42,10 +31,6 @@ export function TrueAdminPageModal({
   contentPaddingBlock = DEFAULT_CONTENT_PADDING_BLOCK,
   contentPaddingInline = DEFAULT_CONTENT_PADDING_INLINE,
   destroyOnHidden = true,
-  scrollClassName,
-  scrollContentClassName,
-  scrollContentStyle,
-  scrollShadowProps,
   styles,
   width = DEFAULT_PAGE_MODAL_WIDTH,
   ...modalProps
@@ -64,17 +49,11 @@ export function TrueAdminPageModal({
       destroyOnHidden={destroyOnHidden}
       contentPaddingBlock={contentPaddingBlock}
       contentPaddingInline={contentPaddingInline}
+      scrollBody
       styles={modalStyles}
       width={width}
     >
-      <TrueAdminScrollShadow
-        {...scrollShadowProps}
-        className={scrollClassName}
-        contentClassName={scrollContentClassName}
-        contentStyle={scrollContentStyle}
-      >
-        {children}
-      </TrueAdminScrollShadow>
+      {children}
     </TrueAdminModal>
   );
 }
