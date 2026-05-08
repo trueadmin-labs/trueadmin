@@ -9,7 +9,12 @@ export default defineConfig(({ mode }) => {
   const enableMock = env.VITE_ENABLE_MSW === 'true';
 
   return {
+    root: __dirname,
     plugins: [react(), tailwindcss(), trueAdminMockPlugin(enableMock)],
+    build: {
+      outDir: path.resolve(__dirname, 'dist'),
+      emptyOutDir: true,
+    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, 'src'),
