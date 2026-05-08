@@ -2812,6 +2812,15 @@ body,
   overscroll-behavior: contain;
 }
 
+.trueadmin-remote-select-loading {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--ant-color-text-secondary);
+}
+
 .trueadmin-table-picker {
   display: flex;
   box-sizing: border-box;

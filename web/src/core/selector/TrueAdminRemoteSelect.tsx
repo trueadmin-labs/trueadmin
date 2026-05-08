@@ -1,5 +1,5 @@
 import type { SelectProps } from 'antd';
-import { Select } from 'antd';
+import { Select, Spin } from 'antd';
 import type { DefaultOptionType, SelectValue } from 'antd/es/select';
 import type { ReactNode } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -207,6 +207,15 @@ export function TrueAdminRemoteSelect<
     [getDisabled, getLabel, getValue, optionRender, recordMap],
   );
 
+  const notFoundContent = loading ? (
+    <div className="trueadmin-remote-select-loading">
+      <Spin size="small" />
+      {loadingText ? <span>{loadingText}</span> : null}
+    </div>
+  ) : (
+    emptyText
+  );
+
   const handleChange = (nextValue: SelectValue) => {
     if (multiple) {
       const nextValues = (Array.isArray(nextValue) ? nextValue : []) as TValue[];
@@ -236,7 +245,7 @@ export function TrueAdminRemoteSelect<
       filterOption={false}
       loading={loading}
       mode={multiple ? 'multiple' : undefined}
-      notFoundContent={loading ? loadingText : emptyText}
+      notFoundContent={notFoundContent}
       options={options}
       showSearch
       value={value}
