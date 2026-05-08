@@ -40,6 +40,11 @@ export default defineModule({
       meta: { title: 'examples.display.title', auth: true },
     },
     {
+      path: '/examples/markdown',
+      component: lazy(() => import('./pages/components/MarkdownExamplePage')),
+      meta: { title: 'examples.markdown.title', auth: true },
+    },
+    {
       path: '/examples/actions',
       component: lazy(() => import('./pages/components/ActionExamplePage')),
       meta: { title: 'examples.actions.title', auth: true },
@@ -174,6 +179,16 @@ export default defineModule({
               type: 'menu',
               status: 'enabled',
               sort: 30,
+            },
+            {
+              code: 'true-admin.examples.markdown',
+              title: 'Markdown',
+              i18n: 'menu.examples.markdown',
+              path: '/examples/markdown',
+              icon: 'app',
+              type: 'menu',
+              status: 'enabled',
+              sort: 35,
             },
             {
               code: 'true-admin.examples.actions',

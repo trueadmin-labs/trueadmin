@@ -32,7 +32,9 @@
     "react": "latest",
     "react-dom": "latest",
     "react-error-boundary": "^6.1.1",
+    "react-markdown": "^10.1.0",
     "react-router": "latest",
+    "remark-gfm": "^4.0.1",
     "zustand": "latest"
   },
   "devDependencies": {
