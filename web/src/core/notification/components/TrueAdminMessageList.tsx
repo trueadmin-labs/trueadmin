@@ -1,11 +1,17 @@
 import { ClockCircleOutlined, PaperClipOutlined } from '@ant-design/icons';
 import { Empty, List, Space, Tag, Typography } from 'antd';
-import { getAdminMessageTypeConfig } from '../registry';
+import { useI18n } from '@/core/i18n/I18nProvider';
+import {
+  getAdminMessageSourceConfig,
+  getAdminMessageTypeConfig,
+  resolveAdminMessageLabel,
+} from '../registry';
 import type { AdminMessageItem } from '../types';
 
 export type TrueAdminMessageListProps = {
   messages: AdminMessageItem[];
   emptyText?: React.ReactNode;
+  loading?: boolean;
   onItemClick?: (message: AdminMessageItem) => void;
 };
 
@@ -18,10 +24,12 @@ const toPlainText = (value?: string) =>
 
 export function TrueAdminMessageList({
   emptyText,
+  loading,
   messages,
   onItemClick,
 }: TrueAdminMessageListProps) {
-  if (messages.length === 0) {
+  const { t } = useI18n();
+  if (!loading && messages.length === 0) {
     return <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={emptyText ?? '-'} />;
   }
 
@@ -29,8 +37,16 @@ export function TrueAdminMessageList({
     <List<AdminMessageItem>
       className="trueadmin-message-list"
       dataSource={messages}
+      loading={loading}
       renderItem={(message) => {
         const typeConfig = getAdminMessageTypeConfig(message.type);
+        const sourceLabel = message.source
+          ? resolveAdminMessageLabel(
+              getAdminMessageSourceConfig(message.source)?.label,
+              t,
+              message.source,
+            )
+          : undefined;
         const summary = toPlainText(message.content);
         return (
           <List.Item
@@ -43,9 +59,10 @@ export function TrueAdminMessageList({
               avatar={<span className="trueadmin-message-list-icon">{typeConfig.icon}</span>}
               title={
                 <Space size={6} wrap>
+                  <Tag color={typeConfig.color}>
+                    {resolveAdminMessageLabel(typeConfig.label, t, message.type)}
+                  </Tag>
                   <Typography.Text strong={!message.readAt}>{message.title}</Typography.Text>
-                  <Tag color={typeConfig.color}>{typeConfig.label ?? message.type}</Tag>
-                  {message.kind === 'announcement' ? <Tag color="purple">公告</Tag> : null}
                   {message.attachments?.length ? <PaperClipOutlined /> : null}
                 </Space>
               }
@@ -59,7 +76,7 @@ export function TrueAdminMessageList({
                   <Space size={6} className="trueadmin-message-list-time">
                     <ClockCircleOutlined />
                     <span>{message.createdAt}</span>
-                    {message.source ? <span>{message.source}</span> : null}
+                    {sourceLabel ? <span>{sourceLabel}</span> : null}
                   </Space>
                 </Space>
               }

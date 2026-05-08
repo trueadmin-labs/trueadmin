@@ -1,4 +1,5 @@
 import { pluginConfig } from '@config/plugin';
+import { registerModuleNotifications } from '@/core/notification/registry';
 import type { ModuleManifest } from './types';
 
 const moduleLoaders = import.meta.glob<{ default: ModuleManifest }>('/src/modules/*/manifest.ts', {
@@ -17,6 +18,8 @@ export const pluginManifests = Object.values(pluginLoaders)
   .map((module) => module.default)
   .filter((manifest) => pluginConfig[manifest.id]?.enabled !== false);
 export const enabledManifests = [...moduleManifests, ...pluginManifests];
+
+enabledManifests.forEach(registerModuleNotifications);
 
 export const frontendRoutes = enabledManifests.flatMap((manifest) => manifest.routes ?? []);
 export const frontendMenus = enabledManifests.flatMap((manifest) => manifest.menus ?? []);

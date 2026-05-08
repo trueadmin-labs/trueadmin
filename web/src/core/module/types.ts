@@ -1,6 +1,7 @@
 import type { ComponentType, LazyExoticComponent, ReactNode } from 'react';
 import type { ErrorRegistry } from '@/core/error/types';
 import type { BackendMenu } from '@/core/menu/types';
+import type { AdminMessageSourceConfig, AdminMessageTypeConfig } from '@/core/notification/types';
 
 export type RouteComponent = LazyExoticComponent<ComponentType> | ComponentType;
 
@@ -45,6 +46,15 @@ export type LocaleLoader = () => Promise<
 
 export type IconLoader = Record<string, ReactNode>;
 
+export type ModuleNotificationSourceConfig = AdminMessageSourceConfig;
+
+export type ModuleNotificationTypeConfig = Omit<AdminMessageTypeConfig, 'onClick'>;
+
+export type ModuleNotificationManifest = {
+  sources?: Record<string, ModuleNotificationSourceConfig>;
+  types?: Record<string, ModuleNotificationTypeConfig>;
+};
+
 export type ModuleManifest = {
   id: string;
   routes?: FrontendRoute[];
@@ -52,6 +62,7 @@ export type ModuleManifest = {
   locales?: Record<string, LocaleLoader>;
   icons?: IconLoader;
   errors?: ErrorRegistry;
+  notification?: ModuleNotificationManifest;
 };
 
 export const defineModule = <T extends ModuleManifest>(manifest: T): T => manifest;

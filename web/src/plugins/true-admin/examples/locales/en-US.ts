@@ -1,5 +1,6 @@
 export default {
   'menu.examples': 'Demo',
+  'examples.name': 'Examples',
   'menu.examples.permission': 'Permission Demo',
   'menu.examples.loading': 'Loading Demo',
   'menu.examples.pageContainer': 'Page Container',

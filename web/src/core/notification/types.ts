@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import type { PageResult } from '@/core/http/types';
+import type { TransText } from '@/core/i18n/trans';
 import type { TrueAdminAttachmentValue } from '@/core/upload';
 
 export type AdminMessageKind = 'notification' | 'announcement';
@@ -32,6 +33,7 @@ export type AdminMessageQuery = {
   status?: AdminMessageReadStatus;
   level?: AdminMessageLevel;
   type?: string;
+  source?: string;
   keyword?: string;
   startAt?: string;
   endAt?: string;
@@ -50,14 +52,27 @@ export type AdminMessageTypeClickContext = {
   defaultNavigate: () => void;
 };
 
+export type AdminMessageLabel = ReactNode | TransText;
+
+export type AdminMessagePayloadRenderContext = {
+  message: AdminMessageItem;
+  payload: Record<string, unknown>;
+};
+
 export type AdminMessageTypeConfig = {
-  label?: ReactNode;
+  label?: AdminMessageLabel;
   icon?: ReactNode;
   color?: string;
+  payloadRender?: (context: AdminMessagePayloadRenderContext) => ReactNode;
   onClick?: (
     message: AdminMessageItem,
     context: AdminMessageTypeClickContext,
   ) => void | Promise<void>;
+};
+
+export type AdminMessageSourceConfig = {
+  label?: AdminMessageLabel;
+  payloadRender?: (context: AdminMessagePayloadRenderContext) => ReactNode;
 };
 
 export type AdminNotificationRealtimeMode = 'auto' | 'polling' | 'sse' | 'disabled';

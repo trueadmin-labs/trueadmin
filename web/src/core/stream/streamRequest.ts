@@ -1,15 +1,12 @@
-import { requestConfig } from '@config/index';
 import { ApiError } from '@/core/error/ApiError';
 import type { ApiEnvelope } from '@/core/http/types';
-import { useLocaleStore } from '@/core/store/localeStore';
-import { stringifyRawSearchParams } from '@/core/url/searchParams';
+import { buildStreamUrl, createStreamHeaders } from './requestUtils';
 import { StreamError } from './StreamError';
 import { SseDataParser } from './streamParser';
 import type {
   StreamEventPayload,
   StreamRequestBody,
   StreamRequestOptions,
-  StreamRequestParams,
   StreamRequestResult,
 } from './types';
 
@@ -18,58 +15,6 @@ const isSuccessCode = (code: string | number): boolean =>
 
 const isEnvelope = <TData = unknown>(value: unknown): value is ApiEnvelope<TData> =>
   typeof value === 'object' && value !== null && 'code' in value && 'message' in value;
-
-const appendSearchParams = (url: string, params?: StreamRequestParams): string => {
-  if (!params) {
-    return url;
-  }
-
-  const searchParams = params instanceof URLSearchParams ? params : new URLSearchParams();
-  if (!(params instanceof URLSearchParams)) {
-    Object.entries(params).forEach(([key, value]) => {
-      if (value === undefined || value === null || value === '') {
-        return;
-      }
-
-      searchParams.set(key, Array.isArray(value) ? value.join(',') : String(value));
-    });
-  }
-
-  const query = stringifyRawSearchParams(searchParams);
-  if (query === '') {
-    return url;
-  }
-
-  return `${url}${url.includes('?') ? '&' : '?'}${query}`;
-};
-
-const buildUrl = (url: string, params?: StreamRequestParams): string => {
-  const baseUrl = /^https?:\/\//.test(url)
-    ? url
-    : `${requestConfig.baseURL}${url.startsWith('/') ? url : `/${url}`}`;
-
-  return appendSearchParams(baseUrl, params);
-};
-
-const createHeaders = (headers?: HeadersInit, hasBody = false): Headers => {
-  const result = new Headers(headers);
-  const locale = useLocaleStore.getState().locale;
-  const token = localStorage.getItem('trueadmin.accessToken');
-
-  result.set('Accept', 'text/event-stream');
-  result.set('Accept-Language', locale);
-  result.set('X-Page-Path', window.location.pathname);
-
-  if (token && !result.has('Authorization')) {
-    result.set('Authorization', ['Bearer', token].join(' '));
-  }
-
-  if (hasBody && !result.has('Content-Type')) {
-    result.set('Content-Type', 'application/json');
-  }
-
-  return result;
-};
 
 const parseErrorEnvelope = async (
   response: Response,
@@ -96,12 +41,12 @@ export const streamRequest = async <
 ): Promise<StreamRequestResult<TData>> => {
   const method = options.method ?? 'POST';
   const hasBody = options.body !== undefined && method !== 'GET';
-  const headers = createHeaders(options.headers, hasBody);
+  const headers = createStreamHeaders(options.headers, options.body, method);
   const events: StreamEventPayload[] = [];
 
   let response: Response;
   try {
-    response = await fetch(buildUrl(url, options.params), {
+    response = await fetch(buildStreamUrl(url, options.params), {
       method,
       headers,
       body: hasBody ? JSON.stringify(options.body) : undefined,

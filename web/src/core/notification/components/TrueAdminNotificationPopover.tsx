@@ -1,7 +1,8 @@
 import { Button, Divider, Space, Tabs, Typography } from 'antd';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useI18n } from '@/core/i18n/I18nProvider';
+import { getAdminMessageTypeConfig } from '../registry';
 import { useAdminNotificationStore } from '../store';
 import type { AdminMessageItem, AdminMessageKind } from '../types';
 import { TrueAdminMessageDetailModal } from './TrueAdminMessageDetailModal';
@@ -15,7 +16,47 @@ export function TrueAdminNotificationPopover() {
   const messages = useAdminNotificationStore((state) => state.latestMessages);
   const readAll = useAdminNotificationStore((state) => state.readAll);
   const refresh = useAdminNotificationStore((state) => state.refresh);
-  const [detailMessage, setDetailMessage] = useState<AdminMessageItem>();
+  const [selectedMessage, setSelectedMessage] = useState<AdminMessageItem>();
+  const detailMessage = useMemo(() => {
+    if (!selectedMessage) {
+      return undefined;
+    }
+
+    return (
+      messages.find(
+        (message) => message.kind === selectedMessage.kind && message.id === selectedMessage.id,
+      ) ?? selectedMessage
+    );
+  }, [messages, selectedMessage]);
+
+  const openMessage = useCallback(
+    (message: AdminMessageItem) => {
+      const typeConfig = getAdminMessageTypeConfig(message.type);
+      const defaultOpen = () => setSelectedMessage(message);
+      const defaultNavigate = () => {
+        if (!message.targetUrl) {
+          defaultOpen();
+          return;
+        }
+
+        if (/^https?:\/\//.test(message.targetUrl)) {
+          window.open(message.targetUrl, '_blank', 'noopener,noreferrer');
+          return;
+        }
+
+        navigate(message.targetUrl);
+      };
+
+      if (typeConfig.onClick) {
+        void typeConfig.onClick(message, { defaultNavigate, defaultOpen });
+        return;
+      }
+
+      defaultOpen();
+    },
+    [navigate],
+  );
+
   const tabItems = useMemo(
     () =>
       (['all', 'notification', 'announcement'] as NotificationTabKey[]).map((key) => ({
@@ -32,11 +73,11 @@ export function TrueAdminNotificationPopover() {
               .filter((message) => key === 'all' || message.kind === key)
               .slice(0, 5)}
             emptyText={t('notification.empty', '暂无消息')}
-            onItemClick={setDetailMessage}
+            onItemClick={openMessage}
           />
         ),
       })),
-    [messages, t],
+    [messages, openMessage, t],
   );
 
   return (
@@ -60,7 +101,7 @@ export function TrueAdminNotificationPopover() {
       <TrueAdminMessageDetailModal
         open={Boolean(detailMessage)}
         message={detailMessage}
-        onClose={() => setDetailMessage(undefined)}
+        onClose={() => setSelectedMessage(undefined)}
       />
     </div>
   );

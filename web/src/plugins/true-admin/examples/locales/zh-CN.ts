@@ -1,5 +1,6 @@
 export default {
   'menu.examples': '开发示例',
+  'examples.name': '开发示例',
   'menu.examples.permission': '权限展示',
   'menu.examples.loading': '加载态展示',
   'menu.examples.pageContainer': '页面容器',

@@ -3154,6 +3154,87 @@ body,
   font-size: 12px;
 }
 
+.trueadmin-message-cell {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  max-width: 520px;
+}
+
+.trueadmin-message-cell-type {
+  display: flex;
+  width: 72px;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.trueadmin-message-cell-type .ant-tag {
+  max-width: 72px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trueadmin-message-center-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.trueadmin-message-detail-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.trueadmin-message-detail-meta-extra {
+  justify-content: flex-end;
+  color: var(--ant-color-text-secondary, rgba(0, 0, 0, 0.65));
+  font-size: 13px;
+}
+
+.trueadmin-message-detail-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.trueadmin-message-detail-content {
+  min-height: 120px;
+  padding: 16px;
+  border: 1px solid var(--ant-color-border-secondary, rgba(5, 5, 5, 0.06));
+  border-radius: var(--ant-border-radius-lg, 8px);
+  background: var(--ant-color-fill-quaternary, rgba(0, 0, 0, 0.02));
+}
+
+.trueadmin-message-detail-content .trueadmin-markdown > :last-child {
+  margin-bottom: 0;
+}
+
+.trueadmin-message-detail-payload {
+  border-radius: var(--ant-border-radius-lg, 8px);
+  background: var(--ant-color-fill-quaternary, rgba(0, 0, 0, 0.02));
+}
+
+.trueadmin-message-detail-payload-code {
+  width: 100%;
+}
+
+@media (max-width: 767px) {
+  .trueadmin-message-detail-meta {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .trueadmin-message-detail-meta-extra {
+    justify-content: flex-start;
+  }
+}
+
 .trueadmin-upload-preview-trigger {
   display: inline-flex;
   padding: 0;

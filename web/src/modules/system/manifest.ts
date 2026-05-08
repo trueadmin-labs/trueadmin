@@ -10,7 +10,17 @@ export default defineModule({
       component: lazy(() => import('./pages/users')),
       meta: { title: 'system.users.title', auth: true },
     },
+    {
+      path: '/system/messages',
+      component: lazy(() => import('./pages/messages')),
+      meta: { title: 'system.messages.title', auth: true },
+    },
   ],
+  notification: {
+    sources: {
+      system: { label: trans('system.messages.source.system', '系统') },
+    },
+  },
   locales: {
     'zh-CN': () => import('./locales/zh-CN'),
     'en-US': () => import('./locales/en-US'),

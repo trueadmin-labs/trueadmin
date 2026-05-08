@@ -1,18 +1,29 @@
-import { Button, Descriptions, Space, Tag, Typography } from 'antd';
-import { useEffect } from 'react';
+import { Button, Collapse, Space, Tag, Typography } from 'antd';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { TrueAdminMarkdown } from '@/core/markdown';
 import { TrueAdminModal } from '@/core/modal';
 import { TrueAdminAttachmentUpload } from '@/core/upload';
-import { getAdminMessageTypeConfig } from '../registry';
+import {
+  getAdminMessageSourceConfig,
+  getAdminMessageTypeConfig,
+  resolveAdminMessageLabel,
+} from '../registry';
 import { useAdminNotificationStore } from '../store';
-import type { AdminMessageItem } from '../types';
+import type { AdminMessageItem, AdminMessageLevel } from '../types';
 
 export type TrueAdminMessageDetailModalProps = {
   message?: AdminMessageItem;
   open?: boolean;
   onClose?: () => void;
+};
+
+const levelColorMap: Record<AdminMessageLevel, string> = {
+  error: 'red',
+  info: 'blue',
+  success: 'green',
+  warning: 'gold',
 };
 
 export function TrueAdminMessageDetailModal({
@@ -23,41 +34,99 @@ export function TrueAdminMessageDetailModal({
   const { t } = useI18n();
   const navigate = useNavigate();
   const markRead = useAdminNotificationStore((state) => state.markRead);
+  const [cachedMessage, setCachedMessage] = useState<AdminMessageItem>();
+  const [optimisticReadAt, setOptimisticReadAt] = useState<string>();
+  const markedReadKeyRef = useRef<string | undefined>(undefined);
+  const activeMessage = message ?? cachedMessage;
+  const messageKey = activeMessage ? [activeMessage.kind, activeMessage.id].join(':') : undefined;
 
   useEffect(() => {
-    if (open && message && !message.readAt) {
-      void markRead([message]);
+    if (message) {
+      setCachedMessage(message);
     }
+  }, [message]);
+
+  useEffect(() => {
+    setOptimisticReadAt(undefined);
+  }, [messageKey]);
+
+  useEffect(() => {
+    if (!open || !message || message.readAt) {
+      return;
+    }
+
+    const nextMessageKey = [message.kind, message.id].join(':');
+    if (markedReadKeyRef.current === nextMessageKey) {
+      return;
+    }
+
+    markedReadKeyRef.current = nextMessageKey;
+    const readAt = new Date().toISOString();
+    setOptimisticReadAt(readAt);
+    void markRead([message]).catch(() => {
+      markedReadKeyRef.current = undefined;
+      setOptimisticReadAt(undefined);
+    });
   }, [markRead, message, open]);
 
-  if (!message) {
+  const displayMessage = useMemo(
+    () =>
+      activeMessage && optimisticReadAt
+        ? { ...activeMessage, readAt: activeMessage.readAt ?? optimisticReadAt }
+        : activeMessage,
+    [activeMessage, optimisticReadAt],
+  );
+
+  if (!displayMessage) {
     return null;
   }
 
-  const typeConfig = getAdminMessageTypeConfig(message.type);
+  const typeConfig = getAdminMessageTypeConfig(displayMessage.type);
+  const sourceConfig = displayMessage.source
+    ? getAdminMessageSourceConfig(displayMessage.source)
+    : undefined;
+  const sourceLabel = displayMessage.source
+    ? resolveAdminMessageLabel(sourceConfig?.label, t, displayMessage.source)
+    : '-';
+  const levelLabel = t(`notification.level.${displayMessage.level}`, displayMessage.level);
+  const payloadContent = displayMessage.payload
+    ? (typeConfig.payloadRender?.({ message: displayMessage, payload: displayMessage.payload }) ??
+      sourceConfig?.payloadRender?.({
+        message: displayMessage,
+        payload: displayMessage.payload,
+      }) ?? (
+        <Typography.Paragraph
+          code
+          className="trueadmin-message-detail-payload-code"
+          style={{ margin: 0, whiteSpace: 'pre-wrap' }}
+        >
+          {JSON.stringify(displayMessage.payload, null, 2)}
+        </Typography.Paragraph>
+      ))
+    : null;
   const goTarget = () => {
-    if (!message.targetUrl) {
+    if (!displayMessage.targetUrl) {
       return;
     }
 
     onClose?.();
-    if (/^https?:\/\//.test(message.targetUrl)) {
-      window.open(message.targetUrl, '_blank', 'noopener,noreferrer');
+    if (/^https?:\/\//.test(displayMessage.targetUrl)) {
+      window.open(displayMessage.targetUrl, '_blank', 'noopener,noreferrer');
       return;
     }
 
-    navigate(message.targetUrl);
+    navigate(displayMessage.targetUrl);
   };
 
   return (
     <TrueAdminModal
       destroyOnHidden
       open={open}
-      title={message.title}
+      title={displayMessage.title}
       width={920}
       footer={
         <Space>
-          {message.targetUrl ? (
+          {displayMessage.targetUrl ? (
             <Button type="primary" onClick={goTarget}>
               {t('notification.detail.goTarget', '前往处理')}
             </Button>
@@ -65,41 +134,66 @@ export function TrueAdminMessageDetailModal({
           <Button onClick={onClose}>{t('modal.action.close', '关闭')}</Button>
         </Space>
       }
+      afterOpenChange={(nextOpen) => {
+        if (!nextOpen) {
+          setCachedMessage(undefined);
+          setOptimisticReadAt(undefined);
+          markedReadKeyRef.current = undefined;
+        }
+      }}
       onCancel={onClose}
     >
-      <Space orientation="vertical" size={16} style={{ width: '100%' }}>
-        <Space size={8} wrap>
-          <Tag color={message.kind === 'announcement' ? 'purple' : 'blue'}>
-            {message.kind === 'announcement'
-              ? t('notification.kind.announcement', '公告')
-              : t('notification.kind.notification', '通知')}
-          </Tag>
-          <Tag color={typeConfig.color}>{typeConfig.label ?? message.type}</Tag>
-          <Tag>{message.level}</Tag>
-          {message.pinned ? <Tag color="gold">{t('notification.pinned', '置顶')}</Tag> : null}
-        </Space>
-        <TrueAdminMarkdown value={message.content} />
-        {message.attachments?.length ? (
-          <TrueAdminAttachmentUpload readonly value={message.attachments} />
+      <Space
+        className="trueadmin-message-detail"
+        orientation="vertical"
+        size={16}
+        style={{ width: '100%' }}
+      >
+        <div className="trueadmin-message-detail-meta">
+          <Space size={8} wrap>
+            <Tag color={typeConfig.color}>
+              {resolveAdminMessageLabel(typeConfig.label, t, displayMessage.type)}
+            </Tag>
+            <Tag color={levelColorMap[displayMessage.level]}>{levelLabel}</Tag>
+            {displayMessage.pinned ? (
+              <Tag color="gold">{t('notification.pinned', '置顶')}</Tag>
+            ) : null}
+          </Space>
+          <Space className="trueadmin-message-detail-meta-extra" size={16} wrap>
+            <span className="trueadmin-message-detail-meta-item">
+              <Typography.Text type="secondary">
+                {t('notification.detail.source', '来源')}
+              </Typography.Text>
+              <Typography.Text>{sourceLabel}</Typography.Text>
+            </span>
+            <span className="trueadmin-message-detail-meta-item">
+              <Typography.Text type="secondary">
+                {t('notification.detail.createdAt', '时间')}
+              </Typography.Text>
+              <Typography.Text>{displayMessage.createdAt}</Typography.Text>
+            </span>
+          </Space>
+        </div>
+        <div className="trueadmin-message-detail-content">
+          <TrueAdminMarkdown value={displayMessage.content} />
+        </div>
+        {displayMessage.attachments?.length ? (
+          <TrueAdminAttachmentUpload readonly value={displayMessage.attachments} />
         ) : null}
-        <Descriptions size="small" column={2} bordered>
-          <Descriptions.Item label={t('notification.detail.source', '来源')}>
-            {message.source ?? '-'}
-          </Descriptions.Item>
-          <Descriptions.Item label={t('notification.detail.createdAt', '时间')}>
-            {message.createdAt}
-          </Descriptions.Item>
-          <Descriptions.Item label={t('notification.detail.readAt', '已读时间')} span={2}>
-            {message.readAt ?? '-'}
-          </Descriptions.Item>
-          {message.payload ? (
-            <Descriptions.Item label="Payload" span={2}>
-              <Typography.Paragraph code style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
-                {JSON.stringify(message.payload, null, 2)}
-              </Typography.Paragraph>
-            </Descriptions.Item>
-          ) : null}
-        </Descriptions>
+        {payloadContent ? (
+          <Collapse
+            className="trueadmin-message-detail-payload"
+            ghost
+            items={[
+              {
+                key: 'payload',
+                label: t('notification.detail.payload', '扩展数据'),
+                children: payloadContent,
+              },
+            ]}
+            size="small"
+          />
+        ) : null}
       </Space>
     </TrueAdminModal>
   );

@@ -175,6 +175,12 @@ export const handlers = [
     const pageSize = Number(url.searchParams.get('pageSize') || 5);
     const kind = url.searchParams.get('kind') || 'all';
     const status = url.searchParams.get('status') || 'all';
+    const keyword = url.searchParams.get('keyword')?.trim().toLowerCase();
+    const level = url.searchParams.get('level') || '';
+    const type = url.searchParams.get('type') || '';
+    const source = url.searchParams.get('source') || '';
+    const startAt = url.searchParams.get('startAt') || '';
+    const endAt = url.searchParams.get('endAt') || '';
     const items = withMessageState().filter((message) => {
       if (kind !== 'all' && message.kind !== kind) {
         return false;
@@ -188,10 +194,40 @@ export const handlers = [
       if (status === 'archived') {
         return Boolean(message.archivedAt);
       }
-      return !message.archivedAt;
+      if (level && message.level !== level) {
+        return false;
+      }
+      if (type && message.type !== type) {
+        return false;
+      }
+      if (source && message.source !== source) {
+        return false;
+      }
+      if (startAt && message.createdAt < startAt) {
+        return false;
+      }
+      if (endAt && message.createdAt > endAt) {
+        return false;
+      }
+      if (keyword) {
+        const searchable = [message.title, message.content, message.source, message.type]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        if (!searchable.includes(keyword)) {
+          return false;
+        }
+      }
+      return status === 'archived' || !message.archivedAt;
     });
+    const start = Math.max(0, (page - 1) * pageSize);
 
-    return success({ items: items.slice(0, pageSize), total: items.length, page, pageSize });
+    return success({
+      items: items.slice(start, start + pageSize),
+      total: items.length,
+      page,
+      pageSize,
+    });
   }),
   http.get('/api/admin/messages/unread-count', () => {
     const unreadItems = withMessageState().filter(
@@ -230,9 +266,12 @@ export const handlers = [
     });
     return success(null);
   }),
-  http.post('/api/admin/messages/read-all', async () => {
+  http.post('/api/admin/messages/read-all', async ({ request }) => {
+    const body = (await request.json()) as { kind?: string };
     withMessageState().forEach((message) => {
-      readMessageKeys.add(getMessageKey(message));
+      if (!body.kind || body.kind === 'all' || message.kind === body.kind) {
+        readMessageKeys.add(getMessageKey(message));
+      }
     });
     return success(null);
   }),

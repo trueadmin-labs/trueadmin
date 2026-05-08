@@ -232,3 +232,11 @@ toolbarRender={({ action }) => (
 
 状态类快速筛选优先使用 `TrueAdminQuickFilter`，默认放在 `toolbarRender` 左侧业务区，与批量操作同区展示。它基于 AntD `Segmented`，数量通过角标展示；数量为 0 时不展示，超过 99 时展示 `99+`。
 
+## 后续优化记录
+
+以下问题来自消息中心等页面的实际使用反馈，后续优化 CRUD 组件时优先处理：
+
+1. `filter` 的 `label` 和 `placeholder` 容易混乱。筛选项应默认使用 `label` 作为 `placeholder`，页面只在确实需要不同提示文案时显式覆盖，减少重复配置和误配。
+2. 查询状态和外部插槽联动还不够顺手。`toolbarRender`、`summaryRender`、`aside` 等外部区域需要更直接、更类型安全地读写 CRUD 查询状态，减少通过 `extraQuery` 手动桥接的样板代码。
+3. 查询参数类型安全需要继续推进。`TrueAdminCrudPage` / `TrueAdminCrudTable` 后续应支持查询参数泛型，例如 `TrueAdminCrudPage<TRecord, TQuery>`，让 `service.list`、`transformParams`、`extraQuery` 和外部查询控制器都能获得更准确的类型约束。
+4. 封装 `TrueAdminPrimaryCell`。表格主信息列中常见“固定前缀/类型 Tag + 标题 + 描述 + 附加状态”的布局，应沉淀为通用展示组件，减少业务页面重复编写列渲染结构。

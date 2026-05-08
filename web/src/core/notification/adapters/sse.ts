@@ -1,7 +1,8 @@
-import { requestConfig } from '@config/index';
+import { buildStreamUrl, createStreamHeaders } from '@/core/stream/requestUtils';
 import type {
   AdminNotificationRealtimeAdapter,
   AdminNotificationRealtimeAdapterContext,
+  AdminNotificationRealtimeEvent,
 } from '../types';
 
 export type SseNotificationAdapterOptions = {
@@ -9,35 +10,90 @@ export type SseNotificationAdapterOptions = {
   retryIntervalMs: number;
 };
 
-const buildUrl = (url: string) =>
-  /^https?:\/\//.test(url)
-    ? url
-    : `${requestConfig.baseURL}${url.startsWith('/') ? url : `/${url}`}`;
+type ParsedSseFrame = {
+  data: string;
+  event?: string;
+};
 
-const parseEventData = (data: string) => {
+class NotificationSseParser {
+  private buffer = '';
+
+  push(chunk: string): ParsedSseFrame[] {
+    this.buffer += chunk;
+    const frames = this.buffer.split(/\r?\n\r?\n/);
+    this.buffer = frames.pop() ?? '';
+
+    return frames.flatMap((frame) => this.parseFrame(frame));
+  }
+
+  flush(): ParsedSseFrame[] {
+    if (this.buffer.trim() === '') {
+      this.buffer = '';
+      return [];
+    }
+
+    const frame = this.buffer;
+    this.buffer = '';
+    return this.parseFrame(frame);
+  }
+
+  private parseFrame(frame: string): ParsedSseFrame[] {
+    let event: string | undefined;
+    const data = frame
+      .split(/\r?\n/)
+      .filter((line) => {
+        if (line.startsWith('event:')) {
+          event = line.slice(6).trim();
+          return false;
+        }
+
+        return line.startsWith('data:');
+      })
+      .map((line) => line.slice(5).trimStart())
+      .join('\n');
+
+    if (data === '') {
+      return [];
+    }
+
+    return [{ data, event }];
+  }
+}
+
+const parseEventData = ({
+  data,
+  event,
+}: ParsedSseFrame): AdminNotificationRealtimeEvent | undefined => {
+  if (data === '[DONE]') {
+    return undefined;
+  }
+
   if (!data) {
-    return { reason: 'sse_event', type: 'sync_required' } as const;
+    return { reason: event ?? 'sse_event', type: 'sync_required' };
   }
 
   try {
     const payload = JSON.parse(data) as { reason?: string; type?: string };
     return {
-      reason: payload.reason ?? 'sse_event',
+      reason: payload.reason ?? event ?? 'sse_event',
       type: 'sync_required',
-    } as const;
+    };
   } catch {
-    return { reason: data, type: 'sync_required' } as const;
+    return { reason: data || event || 'sse_event', type: 'sync_required' };
   }
 };
+
+const createSseError = (message: string, cause?: unknown) =>
+  Object.assign(new Error(message), { cause, name: 'NotificationSseError' });
 
 export function createSseNotificationAdapter(
   context: AdminNotificationRealtimeAdapterContext,
   options: SseNotificationAdapterOptions,
 ): AdminNotificationRealtimeAdapter {
-  let eventSource: EventSource | undefined;
+  let abortController: AbortController | undefined;
   let retryTimer: number | undefined;
   let started = false;
-  const url = buildUrl(options.url ?? '/admin/messages/stream');
+  const url = buildStreamUrl(options.url ?? '/admin/messages/stream');
 
   const clearRetryTimer = () => {
     if (retryTimer !== undefined) {
@@ -46,36 +102,108 @@ export function createSseNotificationAdapter(
     }
   };
 
-  const closeEventSource = () => {
-    eventSource?.close();
-    eventSource = undefined;
+  const abortRequest = () => {
+    abortController?.abort();
+    abortController = undefined;
   };
 
-  const connect = () => {
+  const scheduleReconnect = () => {
+    clearRetryTimer();
+    if (!started) {
+      return;
+    }
+
+    retryTimer = window.setTimeout(connect, options.retryIntervalMs);
+  };
+
+  const handleError = (error: unknown) => {
+    if (!started) {
+      return;
+    }
+
+    context.onError?.(error);
+    scheduleReconnect();
+  };
+
+  async function readStream(response: Response, signal: AbortSignal) {
+    const reader = response.body?.getReader();
+    if (!reader) {
+      throw createSseError('Notification SSE response does not contain a readable stream.');
+    }
+
+    const decoder = new TextDecoder();
+    const parser = new NotificationSseParser();
+
+    while (!signal.aborted) {
+      const { done, value } = await reader.read();
+      if (done) {
+        break;
+      }
+
+      const chunk = decoder.decode(value, { stream: true });
+      parser.push(chunk).forEach((frame) => {
+        const event = parseEventData(frame);
+        if (event) {
+          context.onEvent(event);
+        }
+      });
+    }
+
+    const tail = decoder.decode();
+    if (tail) {
+      parser.push(tail).forEach((frame) => {
+        const event = parseEventData(frame);
+        if (event) {
+          context.onEvent(event);
+        }
+      });
+    }
+
+    parser.flush().forEach((frame) => {
+      const event = parseEventData(frame);
+      if (event) {
+        context.onEvent(event);
+      }
+    });
+  }
+
+  async function connect() {
     if (!started) {
       return;
     }
 
     clearRetryTimer();
-    closeEventSource();
+    abortRequest();
+    const controller = new AbortController();
+    abortController = controller;
 
-    const nextEventSource = new EventSource(url, { withCredentials: true });
-    eventSource = nextEventSource;
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: createStreamHeaders(),
+        credentials: 'include',
+        signal: controller.signal,
+      });
 
-    nextEventSource.addEventListener('sync_required', (event) => {
-      context.onEvent(parseEventData((event as MessageEvent<string>).data));
-    });
+      if (!response.ok) {
+        throw createSseError(
+          `Notification SSE request failed with status ${String(response.status)}.`,
+          response,
+        );
+      }
 
-    nextEventSource.onmessage = (event) => {
-      context.onEvent(parseEventData(event.data));
-    };
+      await readStream(response, controller.signal);
+      if (started && !controller.signal.aborted) {
+        scheduleReconnect();
+      }
+    } catch (error) {
+      if (controller.signal.aborted) {
+        return;
+      }
 
-    nextEventSource.onerror = (error) => {
-      context.onError?.(error);
-      closeEventSource();
-      retryTimer = window.setTimeout(connect, options.retryIntervalMs);
-    };
-  };
+      handleError(error);
+    }
+  }
 
   return {
     start: () => {
@@ -84,12 +212,15 @@ export function createSseNotificationAdapter(
       }
 
       started = true;
-      connect();
+      void connect();
     },
     stop: () => {
       started = false;
       clearRetryTimer();
-      closeEventSource();
+      abortRequest();
+    },
+    refresh: () => {
+      context.onEvent({ reason: 'manual_refresh', type: 'sync_required' });
     },
   };
 }

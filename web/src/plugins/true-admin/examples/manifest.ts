@@ -1,4 +1,5 @@
 import { lazy } from 'react';
+import { trans } from '@/core/i18n/trans';
 import { defineModule } from '@/core/module/types';
 
 export default defineModule({
@@ -289,6 +290,11 @@ export default defineModule({
       ],
     },
   ],
+  notification: {
+    sources: {
+      'plugin.true-admin.examples': { label: trans('examples.name', '开发示例') },
+    },
+  },
   locales: {
     'zh-CN': () => import('./locales/zh-CN'),
     'en-US': () => import('./locales/en-US'),

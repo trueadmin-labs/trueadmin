@@ -153,7 +153,19 @@ export function TrueAdminCrudTable<
   });
   const hasFilters = filters.length > 0;
   const selectedRowKeys = rowSelection?.selectedRowKeys ?? innerSelectedRowKeys;
-  const selectedRows = rowSelection ? innerSelectedRows : [];
+  const selectedRowKeySet = useMemo(() => new Set(selectedRowKeys), [selectedRowKeys]);
+  const getRecordKey = useCallback(
+    (record: TRecord) => {
+      if (typeof rowKey === 'function') {
+        return rowKey(record);
+      }
+      return record[(rowKey ?? 'id') as keyof TRecord] as Key;
+    },
+    [rowKey],
+  );
+  const selectedRows = rowSelection
+    ? innerSelectedRows.filter((record) => selectedRowKeySet.has(getRecordKey(record)))
+    : [];
   const selectedCount = rowSelection ? selectedRowKeys.length : 0;
   const hasSelectedStatus = Boolean(
     rowSelection && selectedCount > 0 && tableAlertRender !== false,
@@ -217,16 +229,6 @@ export function TrueAdminCrudTable<
       selectedRows,
       total,
     ],
-  );
-
-  const getRecordKey = useCallback(
-    (record: TRecord) => {
-      if (typeof rowKey === 'function') {
-        return rowKey(record);
-      }
-      return record[(rowKey ?? 'id') as keyof TRecord] as Key;
-    },
-    [rowKey],
   );
 
   const operationColumn = useMemo<CrudColumns<TRecord>>(

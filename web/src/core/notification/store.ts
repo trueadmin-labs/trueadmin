@@ -50,6 +50,34 @@ let realtimeAdapter: AdminNotificationRealtimeAdapter | undefined;
 const toMessageIdentities = (messages: Array<Pick<AdminMessageItem, 'id' | 'kind'>>) =>
   messages.map((message) => ({ id: message.id, kind: message.kind }));
 
+const matchesMessage = (
+  target: Pick<AdminMessageItem, 'id' | 'kind'>,
+  messages: Array<Pick<AdminMessageItem, 'id' | 'kind'>>,
+) => messages.some((message) => message.id === target.id && message.kind === target.kind);
+
+const normalizeUnreadCount = (count: AdminMessageUnreadCount): AdminMessageUnreadCount => ({
+  announcement: Math.max(0, count.announcement),
+  notification: Math.max(0, count.notification),
+  total: Math.max(0, count.total),
+});
+
+const decrementUnreadCount = (
+  count: AdminMessageUnreadCount,
+  messages: AdminMessageItem[],
+): AdminMessageUnreadCount => {
+  const next = { ...count };
+  messages.forEach((message) => {
+    if (message.readAt) {
+      return;
+    }
+
+    next.total -= 1;
+    next[message.kind] -= 1;
+  });
+
+  return normalizeUnreadCount(next);
+};
+
 export const useAdminNotificationStore = create<NotificationStoreState>((set, get) => ({
   activeRealtime: 'disabled',
   initialized: false,
@@ -84,16 +112,48 @@ export const useAdminNotificationStore = create<NotificationStoreState>((set, ge
   },
 
   markRead: async (messages) => {
+    const readAt = new Date().toISOString();
+    const unreadTargets = get().latestMessages.filter(
+      (message) => matchesMessage(message, messages) && !message.readAt,
+    );
+
+    set((state) => ({
+      latestMessages: state.latestMessages.map((message) =>
+        matchesMessage(message, messages)
+          ? { ...message, readAt: message.readAt ?? readAt }
+          : message,
+      ),
+      unreadCount: decrementUnreadCount(state.unreadCount, unreadTargets),
+    }));
+
     await adminMessageApi.markRead(toMessageIdentities(messages)).send();
     await get().refresh();
   },
 
   archive: async (messages) => {
+    const archivedAt = new Date().toISOString();
+    const unreadTargets = get().latestMessages.filter(
+      (message) => matchesMessage(message, messages) && !message.readAt,
+    );
+
+    set((state) => ({
+      latestMessages: state.latestMessages.map((message) =>
+        matchesMessage(message, messages) ? { ...message, archivedAt } : message,
+      ),
+      unreadCount: decrementUnreadCount(state.unreadCount, unreadTargets),
+    }));
+
     await adminMessageApi.archive(toMessageIdentities(messages)).send();
     await get().refresh();
   },
 
   restore: async (messages) => {
+    set((state) => ({
+      latestMessages: state.latestMessages.map((message) =>
+        matchesMessage(message, messages) ? { ...message, archivedAt: null } : message,
+      ),
+    }));
+
     await adminMessageApi.restore(toMessageIdentities(messages)).send();
     await get().refresh();
   },
