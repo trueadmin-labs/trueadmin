@@ -1,10 +1,10 @@
-import { FileTextOutlined } from '@ant-design/icons';
 import { Button, Card, Col, Descriptions, Divider, Row, Space, Table, Tag, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useMemo, useState } from 'react';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { TrueAdminPageModal } from '@/core/modal/TrueAdminPageModal';
 import { TrueAdminFormPage } from '@/core/page/TrueAdminFormPage';
+import { TrueAdminAttachmentUpload, type TrueAdminAttachmentValue } from '@/core/upload';
 
 type SalesDetailItem = {
   key: string;
@@ -64,6 +64,25 @@ const salesItems: SalesDetailItem[] = [
 const otherFees: SalesDetailFee[] = [
   { key: '1', name: '安装服务费', amount: 3200, remark: '现场部署' },
   { key: '2', name: '加急处理费', amount: 1800, remark: '优先排期' },
+];
+
+const attachments: TrueAdminAttachmentValue[] = [
+  {
+    id: 'demo-contract-1',
+    name: '销售合同-客户已盖章',
+    url: '/mock/attachments/sales-contract.pdf',
+    extension: 'pdf',
+    size: 245760,
+    mimeType: 'application/pdf',
+  },
+  {
+    id: 'demo-quote-1',
+    name: '报价单-最终版',
+    url: '/mock/attachments/quotation.xlsx',
+    extension: 'xlsx',
+    size: 98304,
+    mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  },
 ];
 
 const currencyFormatter = new Intl.NumberFormat('zh-CN', {
@@ -265,10 +284,7 @@ function SalesOrderDetailBody({ variant = 'page' }: SalesOrderDetailBodyProps) {
                   客户要求分两批交付，第一批硬件先行，软件授权在验收前完成开通。
                 </Descriptions.Item>
                 <Descriptions.Item label={t('examples.complexForm.other.attachment', '附件')}>
-                  <Space size={8} wrap>
-                    <Tag icon={<FileTextOutlined />}>销售合同.pdf</Tag>
-                    <Tag icon={<FileTextOutlined />}>报价单.xlsx</Tag>
-                  </Space>
+                  <TrueAdminAttachmentUpload readonly value={attachments} />
                 </Descriptions.Item>
               </Descriptions>
             </Card>
