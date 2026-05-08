@@ -26,7 +26,7 @@ import type { ColumnsType } from 'antd/es/table';
 import { useMemo, useState } from 'react';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { TrueAdminPageModal } from '@/core/modal/TrueAdminPageModal';
-import { TrueAdminPage } from '@/core/page/TrueAdminPage';
+import { TrueAdminFormPage } from '@/core/page/TrueAdminFormPage';
 
 type SalesItem = {
   key: string;
@@ -528,11 +528,14 @@ export default function ComplexFormExamplePage() {
   const { t } = useI18n();
   const [modalOpen, setModalOpen] = useState(false);
 
-  const actions = (
+  const headerExtra = (
+    <Button onClick={() => setModalOpen(true)}>
+      {t('demo.complexForm.action.openModal', '弹窗承接')}
+    </Button>
+  );
+  const footerActions = (
     <Space size={8} wrap>
-      <Button onClick={() => setModalOpen(true)}>
-        {t('demo.complexForm.action.openModal', '弹窗承接')}
-      </Button>
+      <Button>{t('demo.complexForm.action.cancel', '取消')}</Button>
       <Button icon={<SaveOutlined />}>{t('demo.complexForm.action.saveDraft', '保存草稿')}</Button>
       <Button type="primary" icon={<SendOutlined />}>
         {t('demo.complexForm.action.submit', '提交订单')}
@@ -542,17 +545,18 @@ export default function ComplexFormExamplePage() {
 
   return (
     <>
-      <TrueAdminPage
+      <TrueAdminFormPage
         showHeader
         title={t('demo.complexForm.title', '复杂表单示例')}
         description={t(
           'demo.complexForm.description',
           '销售订单表单，覆盖分块录入、明细表格、费用与金额统计。',
         )}
-        extra={actions}
+        extra={headerExtra}
+        footer={footerActions}
       >
         <SalesOrderFormBody />
-      </TrueAdminPage>
+      </TrueAdminFormPage>
       <TrueAdminPageModal
         title={t('demo.complexForm.modal.title', '销售订单')}
         open={modalOpen}

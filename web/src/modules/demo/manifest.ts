@@ -27,7 +27,12 @@ export default defineModule({
     {
       path: '/examples/complex-form',
       component: lazy(() => import('./pages/ComplexFormExamplePage')),
-      meta: { title: 'demo.complexForm.title', pageType: 'custom-page', auth: true },
+      meta: {
+        title: 'demo.complexForm.title',
+        pageType: 'custom-page',
+        auth: true,
+        layout: { showFooter: false },
+      },
     },
     {
       path: '/examples/complex-detail',

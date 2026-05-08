@@ -56,7 +56,6 @@ export function TrueAdminPageModal({
   ...modalProps
 }: TrueAdminPageModalProps) {
   const modalStyle = {
-    '--trueadmin-modal-content-bg': 'var(--trueadmin-shell-bg)',
     '--trueadmin-modal-content-padding-block': toSizeValue(contentPaddingBlock),
     '--trueadmin-modal-content-padding-inline': toSizeValue(contentPaddingInline),
     ...style,
