@@ -3,7 +3,7 @@ import { TrueAdminActionBar } from '@core/action';
 import { TrueAdminPermissionButton } from '@core/auth';
 import { TrueAdminResultState } from '@core/result';
 import { TrueAdminDepartmentSelect, TrueAdminUserSelect } from '@modules/system';
-import { App, Button, Card, Col, Form, Row, Space, Typography } from 'antd';
+import { App, Card, Col, Form, Row, Space, Typography } from 'antd';
 import { useState } from 'react';
 import { TrueAdminDescriptionSection } from '@/core/description';
 import { TrueAdminDictSelect, TrueAdminEnumTag } from '@/core/dict';
@@ -11,11 +11,7 @@ import { useI18n } from '@/core/i18n/I18nProvider';
 import { TrueAdminImportExport } from '@/core/import-export';
 import { TrueAdminPage } from '@/core/page/TrueAdminPage';
 import { TrueAdminAuditPanel } from '@/core/timeline';
-import {
-  TrueAdminAttachmentUpload,
-  type TrueAdminAttachmentValue,
-  TrueAdminUploadPreview,
-} from '@/core/upload';
+import { TrueAdminAttachmentUpload, type TrueAdminAttachmentValue } from '@/core/upload';
 
 const initialFiles: TrueAdminAttachmentValue[] = [
   {
@@ -43,8 +39,6 @@ export default function ComponentsExamplePage() {
   const [departmentId, setDepartmentId] = useState<number>();
   const [userId, setUserId] = useState<number>();
   const [files, setFiles] = useState<TrueAdminAttachmentValue[]>(initialFiles);
-  const [previewFile, setPreviewFile] = useState<TrueAdminAttachmentValue>();
-  const [previewOpen, setPreviewOpen] = useState(false);
 
   const statusOptions = [
     {
@@ -131,37 +125,13 @@ export default function ComponentsExamplePage() {
         </Card>
 
         <Card size="small" title={t('examples.components.upload.title', '附件上传')}>
-          <Space orientation="vertical" size={12} style={{ width: '100%' }}>
-            <TrueAdminAttachmentUpload
-              multiple
-              value={files}
-              title={t('examples.components.upload.dragTitle', '拖拽附件到这里，或点击选择')}
-              hint={t(
-                'examples.components.upload.hint',
-                '示例不会真实上传文件，适合表单附件场景。',
-              )}
-              onChangeValue={setFiles}
-            />
-            <Space size={8} wrap>
-              {files.map((file) => (
-                <Button
-                  key={file.id}
-                  icon={<EyeOutlined />}
-                  onClick={() => {
-                    setPreviewFile(file);
-                    setPreviewOpen(true);
-                  }}
-                >
-                  {file.name}
-                </Button>
-              ))}
-            </Space>
-            <TrueAdminUploadPreview
-              file={previewFile}
-              open={previewOpen}
-              onOpenChange={setPreviewOpen}
-            />
-          </Space>
+          <TrueAdminAttachmentUpload
+            multiple
+            value={files}
+            title={t('examples.components.upload.dragTitle', '拖拽附件到这里，或点击选择')}
+            hint={t('examples.components.upload.hint', '示例不会真实上传文件，适合表单附件场景。')}
+            onChangeValue={setFiles}
+          />
         </Card>
 
         <Card size="small" title={t('examples.components.importExport.title', '导入导出')}>

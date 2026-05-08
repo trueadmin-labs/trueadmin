@@ -1,7 +1,8 @@
 import { DownloadOutlined, InboxOutlined } from '@ant-design/icons';
-import { Alert, Button, Modal, Space, Typography, Upload } from 'antd';
+import { Alert, Button, Space, Typography, Upload } from 'antd';
 import type { RcFile, UploadFile } from 'antd/es/upload/interface';
 import { useState } from 'react';
+import { TrueAdminModal } from '@/core/modal';
 import type { CrudImportConfig, CrudTableRenderContext } from './types';
 
 type TrueAdminImportModalProps = {
@@ -63,7 +64,7 @@ export function TrueAdminImportModal({
   };
 
   return (
-    <Modal
+    <TrueAdminModal
       title={mergedConfig?.title ?? t('crud.import.title', '导入数据')}
       open={open}
       width={520}
@@ -132,6 +133,6 @@ export function TrueAdminImportModal({
           />
         ) : null}
       </Space>
-    </Modal>
+    </TrueAdminModal>
   );
 }

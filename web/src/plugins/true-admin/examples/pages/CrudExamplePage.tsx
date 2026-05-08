@@ -8,20 +8,7 @@ import {
   PlusOutlined,
 } from '@ant-design/icons';
 import { StatisticCard } from '@ant-design/pro-components';
-import {
-  App,
-  Button,
-  Col,
-  Dropdown,
-  Form,
-  Input,
-  Modal,
-  Row,
-  Select,
-  Space,
-  Tag,
-  Tooltip,
-} from 'antd';
+import { App, Button, Col, Dropdown, Form, Input, Row, Select, Space, Tag, Tooltip } from 'antd';
 import type { Key } from 'react';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { TrueAdminCrudPage } from '@/core/crud/TrueAdminCrudPage';
@@ -35,9 +22,11 @@ import type {
   CrudRequestLifecycleContext,
   CrudService,
 } from '@/core/crud/types';
+import { downloadFile } from '@/core/download';
 import { TrueAdminQuickFilter } from '@/core/filter/TrueAdminQuickFilter';
 import { TrueAdminTreeFilter } from '@/core/filter/TrueAdminTreeFilter';
 import { useI18n } from '@/core/i18n/I18nProvider';
+import { TrueAdminModal } from '@/core/modal';
 
 type CrudExampleRecord = {
   id: string;
@@ -676,8 +665,12 @@ export default function CrudExamplePage() {
             '请先下载模板，按模板整理数据后上传。',
           ),
           template: {
-            onDownload: () =>
-              message.info(t('examples.crud.message.downloadTemplate', '已触发下载导入模板')),
+            onDownload: () => {
+              void downloadFile('/mock/attachments/quotation.xlsx', {
+                filename: 'trueadmin-import-template.xlsx',
+              });
+              message.info(t('examples.crud.message.downloadTemplate', '已触发下载导入模板'));
+            },
           },
           onConfirm: async (file) => {
             await wait(350);
@@ -887,7 +880,7 @@ export default function CrudExamplePage() {
                 </Button>
               </Dropdown>
             </Space>
-            <Modal
+            <TrueAdminModal
               title={
                 editingRecord
                   ? t('examples.crud.form.editTitle', '编辑配置')
@@ -955,7 +948,7 @@ export default function CrudExamplePage() {
                   />
                 </Form.Item>
               </Form>
-            </Modal>
+            </TrueAdminModal>
           </>
         );
       }}

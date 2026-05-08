@@ -11,7 +11,9 @@ import { Button, Input, message, Space, Tooltip, Upload } from 'antd';
 import type { RcFile, UploadFile } from 'antd/es/upload/interface';
 import type { ReactNode } from 'react';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useTrueAdminDownload } from '@/core/download';
 import { useI18n } from '@/core/i18n/I18nProvider';
+import { TrueAdminUploadPreview, type TrueAdminUploadPreviewProps } from './TrueAdminUploadPreview';
 
 export type TrueAdminAttachmentId = string | number;
 
@@ -40,7 +42,14 @@ export type TrueAdminAttachmentUploadResult = Partial<TrueAdminAttachmentValue> 
 
 export type TrueAdminAttachmentUploadProps = Omit<
   UploadProps,
-  'children' | 'fileList' | 'onChange' | 'beforeUpload' | 'customRequest' | 'onRemove' | 'value'
+  | 'beforeUpload'
+  | 'children'
+  | 'customRequest'
+  | 'fileList'
+  | 'onChange'
+  | 'onPreview'
+  | 'onRemove'
+  | 'value'
 > & {
   drag?: boolean;
   title?: ReactNode;
@@ -49,6 +58,8 @@ export type TrueAdminAttachmentUploadProps = Omit<
   value?: TrueAdminAttachmentValue[];
   onChange?: (files: TrueAdminAttachmentValue[]) => void;
   onChangeValue?: (files: TrueAdminAttachmentValue[]) => void;
+  onPreview?: (file: TrueAdminAttachmentValue) => void;
+  previewProps?: Omit<TrueAdminUploadPreviewProps, 'file' | 'onOpenChange' | 'open' | 'trigger'>;
   upload?: (file: File) => Promise<TrueAdminAttachmentUploadResult>;
   readonly?: boolean;
   editableName?: boolean;
@@ -128,6 +139,8 @@ export function TrueAdminAttachmentUpload({
   onChange,
   children,
   onChangeValue,
+  onPreview,
+  previewProps,
   upload,
   readonly = false,
   editableName = true,
@@ -137,11 +150,14 @@ export function TrueAdminAttachmentUpload({
   ...uploadProps
 }: TrueAdminAttachmentUploadProps) {
   const { t } = useI18n();
+  const { download } = useTrueAdminDownload();
   const contentRef = useRef<HTMLDivElement>(null);
   const [contentHeight, setContentHeight] = useState<number>();
   const [uploading, setUploading] = useState(false);
   const [editingId, setEditingId] = useState<TrueAdminAttachmentId>();
   const [editingName, setEditingName] = useState('');
+  const [previewFile, setPreviewFile] = useState<TrueAdminAttachmentValue>();
+  const [previewOpen, setPreviewOpen] = useState(false);
   const [animatedFiles, setAnimatedFiles] = useState<AnimatedAttachment[]>(() =>
     value.map((file) => ({ file, phase: 'active' })),
   );
@@ -281,7 +297,17 @@ export function TrueAdminAttachmentUpload({
   };
 
   const preview = (file: TrueAdminAttachmentValue) => {
-    window.open(file.url, '_blank', 'noopener,noreferrer');
+    if (onPreview) {
+      onPreview(file);
+      return;
+    }
+
+    setPreviewFile(file);
+    setPreviewOpen(true);
+  };
+
+  const downloadAttachment = (file: TrueAdminAttachmentValue) => {
+    void download(file.url, { filename: getAttachmentDisplayName(file) });
   };
 
   const content = (
@@ -323,113 +349,122 @@ export function TrueAdminAttachmentUpload({
   );
 
   return (
-    <div
-      className="trueadmin-attachment-upload-frame"
-      style={contentHeight === undefined ? undefined : { height: contentHeight }}
-    >
-      <div ref={contentRef} className="trueadmin-attachment-upload">
-        {animatedFiles.length ? (
-          <div className="trueadmin-attachment-list">
-            {animatedFiles.map(({ file, phase }) => {
-              const isEditing = editingId === file.id;
-              const isImage = imageExtensions.has(file.extension?.toLowerCase() ?? '');
-              return (
-                <div
-                  key={file.id}
-                  className={`trueadmin-attachment-item-shell is-${phase}`}
-                  aria-hidden={phase === 'leave' ? true : undefined}
-                >
-                  <div className="trueadmin-attachment-item-clip">
-                    <div className="trueadmin-attachment-item">
-                      <div className="trueadmin-attachment-thumb">
-                        {isImage ? (
-                          <img src={file.url} alt={file.name} />
-                        ) : (
-                          <span>{getFileTypeLabel(file)}</span>
-                        )}
-                      </div>
-                      <div className="trueadmin-attachment-meta">
-                        {isEditing ? (
-                          <Input
-                            size="small"
-                            value={editingName}
-                            autoFocus
-                            onChange={(event) => setEditingName(event.target.value)}
-                            onBlur={() => confirmEdit(file)}
-                            onPressEnter={() => confirmEdit(file)}
-                          />
-                        ) : (
-                          <Tooltip title={getAttachmentDisplayName(file)}>
-                            <button
-                              type="button"
-                              className="trueadmin-attachment-name"
-                              onClick={() => preview(file)}
-                            >
-                              <FileOutlined />
-                              <span>{getAttachmentDisplayName(file)}</span>
-                            </button>
-                          </Tooltip>
-                        )}
-                        <div className="trueadmin-attachment-subtitle">
-                          {[file.extension?.toUpperCase(), formatFileSize(file.size)]
-                            .filter(Boolean)
-                            .join(' · ')}
+    <>
+      <div
+        className="trueadmin-attachment-upload-frame"
+        style={contentHeight === undefined ? undefined : { height: contentHeight }}
+      >
+        <div ref={contentRef} className="trueadmin-attachment-upload">
+          {animatedFiles.length ? (
+            <div className="trueadmin-attachment-list">
+              {animatedFiles.map(({ file, phase }) => {
+                const isEditing = editingId === file.id;
+                const isImage = imageExtensions.has(file.extension?.toLowerCase() ?? '');
+                return (
+                  <div
+                    key={file.id}
+                    className={`trueadmin-attachment-item-shell is-${phase}`}
+                    aria-hidden={phase === 'leave' ? true : undefined}
+                  >
+                    <div className="trueadmin-attachment-item-clip">
+                      <div className="trueadmin-attachment-item">
+                        <div className="trueadmin-attachment-thumb">
+                          {isImage ? (
+                            <img src={file.url} alt={file.name} />
+                          ) : (
+                            <span>{getFileTypeLabel(file)}</span>
+                          )}
                         </div>
+                        <div className="trueadmin-attachment-meta">
+                          {isEditing ? (
+                            <Input
+                              size="small"
+                              value={editingName}
+                              autoFocus
+                              onChange={(event) => setEditingName(event.target.value)}
+                              onBlur={() => confirmEdit(file)}
+                              onPressEnter={() => confirmEdit(file)}
+                            />
+                          ) : (
+                            <Tooltip title={getAttachmentDisplayName(file)}>
+                              <button
+                                type="button"
+                                className="trueadmin-attachment-name"
+                                onClick={() => preview(file)}
+                              >
+                                <FileOutlined />
+                                <span>{getAttachmentDisplayName(file)}</span>
+                              </button>
+                            </Tooltip>
+                          )}
+                          <div className="trueadmin-attachment-subtitle">
+                            {[file.extension?.toUpperCase(), formatFileSize(file.size)]
+                              .filter(Boolean)
+                              .join(' · ')}
+                          </div>
+                        </div>
+                        <Space size={2} className="trueadmin-attachment-actions">
+                          <Tooltip title={t('upload.attachment.preview', '预览')}>
+                            <Button
+                              type="text"
+                              size="small"
+                              icon={<EyeOutlined />}
+                              onClick={() => preview(file)}
+                            />
+                          </Tooltip>
+                          <Tooltip title={t('upload.attachment.download', '下载')}>
+                            <Button
+                              type="text"
+                              size="small"
+                              icon={<DownloadOutlined />}
+                              onClick={() => downloadAttachment(file)}
+                            />
+                          </Tooltip>
+                          {!readonly && editableName ? (
+                            <Tooltip title={t('upload.attachment.editName', '编辑名称')}>
+                              <Button
+                                type="text"
+                                size="small"
+                                icon={<EditOutlined />}
+                                onClick={() => startEdit(file)}
+                              />
+                            </Tooltip>
+                          ) : null}
+                          {!readonly ? (
+                            <Tooltip title={t('upload.attachment.remove', '删除')}>
+                              <Button
+                                danger
+                                type="text"
+                                size="small"
+                                icon={<DeleteOutlined />}
+                                onClick={() => handleRemove(file.id)}
+                              />
+                            </Tooltip>
+                          ) : null}
+                        </Space>
                       </div>
-                      <Space size={2} className="trueadmin-attachment-actions">
-                        <Tooltip title={t('upload.attachment.preview', '预览')}>
-                          <Button
-                            type="text"
-                            size="small"
-                            icon={<EyeOutlined />}
-                            onClick={() => preview(file)}
-                          />
-                        </Tooltip>
-                        <Tooltip title={t('upload.attachment.download', '下载')}>
-                          <Button
-                            type="text"
-                            size="small"
-                            icon={<DownloadOutlined />}
-                            href={file.url}
-                            target="_blank"
-                          />
-                        </Tooltip>
-                        {!readonly && editableName ? (
-                          <Tooltip title={t('upload.attachment.editName', '编辑名称')}>
-                            <Button
-                              type="text"
-                              size="small"
-                              icon={<EditOutlined />}
-                              onClick={() => startEdit(file)}
-                            />
-                          </Tooltip>
-                        ) : null}
-                        {!readonly ? (
-                          <Tooltip title={t('upload.attachment.remove', '删除')}>
-                            <Button
-                              danger
-                              type="text"
-                              size="small"
-                              icon={<DeleteOutlined />}
-                              onClick={() => handleRemove(file.id)}
-                            />
-                          </Tooltip>
-                        ) : null}
-                      </Space>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        ) : null}
-        {canUpload ? <div className="trueadmin-attachment-upload-trigger">{uploader}</div> : null}
-        {uploading ? (
-          <div className="trueadmin-attachment-uploading">
-            {t('upload.attachment.uploading', '正在上传...')}
-          </div>
-        ) : null}
+                );
+              })}
+            </div>
+          ) : null}
+          {canUpload ? <div className="trueadmin-attachment-upload-trigger">{uploader}</div> : null}
+          {uploading ? (
+            <div className="trueadmin-attachment-uploading">
+              {t('upload.attachment.uploading', '正在上传...')}
+            </div>
+          ) : null}
+        </div>
       </div>
-    </div>
+      {onPreview ? null : (
+        <TrueAdminUploadPreview
+          {...previewProps}
+          file={previewFile}
+          open={previewOpen}
+          onOpenChange={setPreviewOpen}
+        />
+      )}
+    </>
   );
 }

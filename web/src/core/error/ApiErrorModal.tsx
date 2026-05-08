@@ -4,10 +4,11 @@ import {
   ExclamationCircleFilled,
   InfoCircleFilled,
 } from '@ant-design/icons';
-import { Button, Collapse, Modal, Space, Typography } from 'antd';
+import { Button, Collapse, Space, Typography } from 'antd';
 import { motion } from 'motion/react';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { resolveRenderableTrans } from '@/core/i18n/trans';
+import { TrueAdminModal } from '@/core/modal';
 import { useLayoutStore } from '@/core/store/layoutStore';
 import type { ApiError } from './ApiError';
 import { getErrorExplanation } from './errorRegistry';
@@ -122,7 +123,7 @@ export function ApiErrorModal({ error, open, onClose, afterOpenChange }: ApiErro
   ];
 
   return (
-    <Modal
+    <TrueAdminModal
       open={open}
       title={t('error.modal.title', '操作未完成')}
       onCancel={onClose}
@@ -200,6 +201,6 @@ export function ApiErrorModal({ error, open, onClose, afterOpenChange }: ApiErro
           ]}
         />
       </motion.div>
-    </Modal>
+    </TrueAdminModal>
   );
 }

@@ -146,6 +146,7 @@ import { TrueAdminPageModal } from '@core/modal';
 - `TrueAdminResultState`：页面、区块、弹窗内统一结果态。支持 `empty`、`403`、`404`、`500`、`error`、`success` 等 AntD Result 状态，并提供紧凑模式和重试入口。
 - `TrueAdminUploadPreview`：附件预览弹窗。图片和 PDF 直接预览，其他文件提供下载兜底；支持受控/非受控 open 和 trigger。
 - `TrueAdminAuditPanel`：审计/审批信息面板。复用 `TrueAdminAuditTimeline`，补充标题、描述、当前状态和操作区。
+- `downloadFile` / `useTrueAdminDownload`：统一文件下载能力。业务只需要传入 URL 和可选文件名，框架负责 fetch、Blob、Content-Disposition 文件名解析和临时链接触发下载；React 场景通过 hook 默认展示“已开始下载/下载失败”反馈，降低浏览器拦截或静默失败带来的困惑。
 
 业务域组件，例如用户选择器、部门选择器、商品选择器，不放进这些框架通用组件目录，应继续由所属模块或插件通过公开出口提供。
 

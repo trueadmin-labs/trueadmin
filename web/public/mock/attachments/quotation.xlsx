@@ -1,0 +1,4 @@
+TrueAdmin mock quotation file.
+
+This placeholder exists so example attachment download links do not return 404.
+The attachment preview component treats non-previewable files as download-only files.

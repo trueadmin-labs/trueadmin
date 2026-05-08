@@ -2748,14 +2748,9 @@ body,
   padding: 0;
 }
 
-.trueadmin-page-modal.ant-modal .ant-modal-header {
-  padding-block-start: var(--trueadmin-modal-content-padding-block);
-  padding-inline: var(--trueadmin-modal-content-padding-inline);
-}
-
-.trueadmin-page-modal.ant-modal .ant-modal-footer {
-  padding-block-end: var(--trueadmin-modal-content-padding-block);
-  padding-inline: var(--trueadmin-modal-content-padding-inline);
+.trueadmin-modal.ant-modal .ant-modal-content {
+  overflow: hidden;
+  padding: 0;
 }
 
 .trueadmin-page-modal.ant-modal .ant-modal-body {
@@ -2934,6 +2929,84 @@ body,
   padding: 0;
 }
 
+.trueadmin-modal-render-root {
+  position: relative;
+}
+
+.trueadmin-modal.is-fullscreen .ant-modal-render,
+.trueadmin-modal.is-fullscreen .trueadmin-modal-render-root {
+  height: 100%;
+}
+
+.trueadmin-modal-header-actions {
+  position: absolute;
+  z-index: 10;
+  top: 12px;
+  inset-inline-end: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  pointer-events: auto;
+}
+
+.trueadmin-modal-header-actions-extra {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.trueadmin-modal.is-fullscreen.ant-modal {
+  top: 0;
+  max-width: 100%;
+  height: 100%;
+  margin: 0;
+  padding-bottom: 0;
+}
+
+.ant-modal-wrap:has(.trueadmin-modal.is-fullscreen) {
+  overflow: hidden;
+}
+
+.ant-modal-wrap:has(.trueadmin-modal.is-fullscreen) .ant-modal-root,
+.ant-modal-wrap:has(.trueadmin-modal.is-fullscreen) .ant-modal-wrap {
+  height: 100%;
+}
+
+.trueadmin-modal.is-fullscreen .ant-modal-container,
+.trueadmin-modal.is-fullscreen .ant-modal-content {
+  display: flex;
+  height: 100%;
+  max-height: 100%;
+  flex-direction: column;
+}
+
+.trueadmin-modal.is-fullscreen .ant-modal-content {
+  border-radius: 0;
+}
+
+.trueadmin-modal.is-fullscreen .ant-modal-header {
+  flex: 0 0 auto;
+}
+
+.trueadmin-modal.is-fullscreen .ant-modal-body {
+  min-height: 0;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.trueadmin-modal.is-fullscreen .ant-modal-footer {
+  flex: 0 0 auto;
+}
+
+.trueadmin-page-modal.is-fullscreen .trueadmin-scroll-shadow,
+.trueadmin-page-modal.is-fullscreen .trueadmin-scroll-shadow-scroller {
+  height: 100%;
+  max-height: none;
+  flex: 1 1 auto;
+}
+
 .trueadmin-upload-preview-body {
   display: flex;
   min-height: 360px;
@@ -2943,10 +3016,19 @@ body,
   background: var(--ant-color-fill-quaternary, rgba(0, 0, 0, 0.02));
 }
 
+.trueadmin-upload-preview.is-fullscreen .trueadmin-upload-preview-body {
+  height: 100%;
+  min-height: 0;
+}
+
 .trueadmin-upload-preview-image {
   max-width: 100%;
   max-height: min(70vh, 720px);
   object-fit: contain;
+}
+
+.trueadmin-upload-preview.is-fullscreen .trueadmin-upload-preview-image {
+  max-height: 100%;
 }
 
 .trueadmin-upload-preview-frame {
@@ -2954,6 +3036,10 @@ body,
   height: min(70vh, 720px);
   border: 0;
   background: var(--ant-color-bg-container, #fff);
+}
+
+.trueadmin-upload-preview.is-fullscreen .trueadmin-upload-preview-frame {
+  height: 100%;
 }
 
 .trueadmin-upload-preview-file {

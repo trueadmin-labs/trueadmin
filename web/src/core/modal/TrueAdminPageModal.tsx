@@ -1,4 +1,3 @@
-import { Modal, type ModalProps } from 'antd';
 import type { ModalSemanticStyles, ModalStylesType } from 'antd/es/modal/interface';
 import type { CSSProperties, ReactNode } from 'react';
 import {
@@ -6,13 +5,11 @@ import {
   type TrueAdminScrollShadowProps,
 } from '@/core/scroll/TrueAdminScrollShadow';
 import { useLayoutStore } from '@/core/store/layoutStore';
+import { TrueAdminModal, type TrueAdminModalProps } from './TrueAdminModal';
 
 const DEFAULT_PAGE_MODAL_WIDTH = 'min(1440px, calc(100vw - 48px))';
 const DEFAULT_CONTENT_PADDING_BLOCK = '20px';
 const DEFAULT_CONTENT_PADDING_INLINE = '24px';
-
-const toSizeValue = (value: number | string) =>
-  typeof value === 'number' ? `${String(value)}px` : value;
 
 const mergePageModalStyles = (styles?: ModalStylesType): ModalStylesType => {
   const mergeBodyStyle = (nextStyles?: ModalSemanticStyles): ModalSemanticStyles => ({
@@ -27,10 +24,8 @@ const mergePageModalStyles = (styles?: ModalStylesType): ModalStylesType => {
   return mergeBodyStyle(styles);
 };
 
-export type TrueAdminPageModalProps = ModalProps & {
+export type TrueAdminPageModalProps = TrueAdminModalProps & {
   children?: ReactNode;
-  contentPaddingBlock?: number | string;
-  contentPaddingInline?: number | string;
   scrollClassName?: string;
   scrollContentClassName?: string;
   scrollContentStyle?: CSSProperties;
@@ -51,29 +46,23 @@ export function TrueAdminPageModal({
   scrollContentClassName,
   scrollContentStyle,
   scrollShadowProps,
-  style,
   styles,
   width = DEFAULT_PAGE_MODAL_WIDTH,
   ...modalProps
 }: TrueAdminPageModalProps) {
   const darkMode = useLayoutStore((state) => state.darkMode);
-  const modalStyle = {
-    '--trueadmin-modal-content-padding-block': toSizeValue(contentPaddingBlock),
-    '--trueadmin-modal-content-padding-inline': toSizeValue(contentPaddingInline),
-    ...style,
-  } as CSSProperties;
-
   const modalStyles = mergePageModalStyles(styles);
 
   return (
-    <Modal
+    <TrueAdminModal
       {...modalProps}
       centered={centered}
       className={['trueadmin-page-modal', darkMode ? 'is-dark' : '', className]
         .filter(Boolean)
         .join(' ')}
       destroyOnHidden={destroyOnHidden}
-      style={modalStyle}
+      contentPaddingBlock={contentPaddingBlock}
+      contentPaddingInline={contentPaddingInline}
       styles={modalStyles}
       width={width}
     >
@@ -85,6 +74,6 @@ export function TrueAdminPageModal({
       >
         {children}
       </TrueAdminScrollShadow>
-    </Modal>
+    </TrueAdminModal>
   );
 }
