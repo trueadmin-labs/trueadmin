@@ -1,0 +1,6 @@
+{
+  "id": "true-admin.examples",
+  "name": "examples",
+  "description": "Official TrueAdmin backend examples runtime.",
+  "version": "0.1.0"
+}

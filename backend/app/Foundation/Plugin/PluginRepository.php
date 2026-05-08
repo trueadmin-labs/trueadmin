@@ -61,7 +61,15 @@ final class PluginRepository
      */
     public function sourcePaths(): array
     {
-        return $this->enabledPluginPaths(static fn (Plugin $plugin): ?string => $plugin->sourcePath());
+        $paths = [];
+
+        foreach ($this->enabled() as $plugin) {
+            $paths = [...$paths, ...$plugin->sourcePaths()];
+        }
+
+        sort($paths);
+
+        return array_values(array_unique($paths));
     }
 
     /**
@@ -107,26 +115,6 @@ final class PluginRepository
         }
 
         return array_filter($installed, static fn ($definition): bool => is_array($definition));
-    }
-
-    /**
-     * @param callable(Plugin): ?string $resolver
-     * @return list<string>
-     */
-    private function enabledPluginPaths(callable $resolver): array
-    {
-        $paths = [];
-
-        foreach ($this->enabled() as $plugin) {
-            $path = $resolver($plugin);
-            if ($path !== null) {
-                $paths[] = $path;
-            }
-        }
-
-        sort($paths);
-
-        return array_values(array_unique($paths));
     }
 
     /**

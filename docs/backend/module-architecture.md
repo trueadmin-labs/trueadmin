@@ -231,7 +231,7 @@ plugins/true-admin/order
 
 模块内部结构保持一致，迁移成本会比较低。
 
-插件不是简单复制模块目录。插件必须提供根目录 `plugin.json` 描述插件身份、插件依赖、兼容性和生命周期；PHP 后端如需 Composer 依赖，在 `backend/php/composer.json` 中声明。安装器把 runtime 复制到各端运行时目录并写入宿主项目注册表，根目录 `plugins/` 不参与宿主代码扫描。完整规范见 [插件系统规范](plugin-system.md)。
+插件不是简单复制模块目录。插件必须提供根目录 `plugin.json` 描述插件身份、插件依赖、兼容性和生命周期；PHP 后端如需 Composer 依赖，在 `backend/php/composer.json` 中声明。插件后端目录与模块目录保持同构，不额外包 `src/`；安装器把 runtime 复制到各端运行时目录并写入宿主项目注册表，根目录 `plugins/` 不参与宿主代码扫描。完整规范见 [插件系统规范](plugin-system.md)。
 
 ## AI 新增模块检查清单
 

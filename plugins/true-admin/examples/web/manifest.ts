@@ -35,6 +35,11 @@ export default defineModule({
       meta: { title: 'examples.selector.title', auth: true },
     },
     {
+      path: '/examples/stream',
+      component: lazy(() => import('./pages/StreamExamplePage')),
+      meta: { title: 'examples.stream.title', auth: true },
+    },
+    {
       path: '/examples/complex-form',
       component: lazy(() => import('./pages/ComplexFormExamplePage')),
       meta: {
@@ -129,6 +134,16 @@ export default defineModule({
           type: 'menu',
           status: 'enabled',
           sort: 45,
+        },
+        {
+          code: 'true-admin.examples.stream',
+          title: 'Stream Demo',
+          i18n: 'menu.examples.stream',
+          path: '/examples/stream',
+          icon: 'sync',
+          type: 'menu',
+          status: 'enabled',
+          sort: 47,
         },
         {
           code: 'true-admin.examples.complexForm',

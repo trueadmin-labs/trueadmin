@@ -23,11 +23,15 @@ final class Plugin
         return $this->name;
     }
 
-    public function sourcePath(): ?string
+    /**
+     * @return list<string>
+     */
+    public function sourcePaths(): array
     {
-        $sourcePath = $this->path . '/src';
-
-        return is_dir($sourcePath) ? $sourcePath : null;
+        return $this->existingDirectories(array_map(
+            fn (string $directory): string => $this->path . '/' . $directory,
+            ['Http', 'Service', 'Repository', 'Model', 'Request', 'Vo', 'Event', 'Listener', 'Library'],
+        ));
     }
 
     public function languagePath(): ?string

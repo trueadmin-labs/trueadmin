@@ -318,6 +318,41 @@ export default defineModule({
 
 OpenAPI 采用生成基础类型 + 手写模块 service 封装。后端导出 OpenAPI，前端生成 DTO / schema / operation 类型，业务页面不直接依赖原始生成 request，模块 service 封装业务友好的 API 方法，CRUD 组件消费模块 service。第一版可以先保留 `src/generated` 目录，不实现完整生成链路。没有生成器前，模块可先在自己的 `types/` 中维护 DTO。
 
+## 流式响应
+
+前端提供 `src/core/stream` 作为通用流式响应底座，默认消费后端 OpenAI 风格 SSE data 块。它不依赖浏览器 `EventSource`，而是使用 `fetch + ReadableStream`，因此可以支持 `POST` 请求、鉴权头、请求体和 `AbortController`。
+
+后端约定：
+
+```text
+data: {"type":"progress","message":"正在处理","percent":30}
+
+data: {"type":"result","message":"success","response":{"code":"SUCCESS","message":"success","data":{}}}
+
+data: {"type":"completed","message":"处理完成"}
+
+data: [DONE]
+```
+
+前端调用使用 `streamRequest()`，它最终返回值和普通接口一样来自 `ApiResponse.data`：
+
+```ts
+const result = await streamRequest<Result>('/admin/example/run', {
+  method: 'POST',
+  body: payload,
+  signal: abortController.signal,
+  onEvent: (event) => {
+    // append event to component state
+  },
+});
+```
+
+如果一个业务调用需要在普通请求和流式请求之间切换，可以使用 `requestMaybeStream()`。`stream: false` 时走普通 alova JSON 请求，`stream: true` 时走 SSE，但最终都返回同一份业务数据。
+
+展示层使用 `StreamProgressPanel`。组件必须同时支持确定进度和不确定进度：有 `percent` 时显示百分比进度条，没有 `percent` 时显示 active 状态和步骤列表。
+
+异常规则：收到 `type=error` 时优先从 `error.response` 按普通 `ApiEnvelope` 生成 `ApiError`；连接结束但没有收到 `[DONE]` 时按网络中断处理；用户主动 `abort()` 时按取消处理；收到 `[DONE]` 但没有 `result` 或 `completed` 时按协议异常处理。流式响应不进入普通 alova JSON 解包链路，但最终结果解包规则必须与普通请求一致。
+
 ## 样式与主题
 
 主题系统以 Ant Design ThemeConfig 为核心，项目只做薄封装。Ant Design v6 token 是主题事实来源，`web/config/theme.ts` 只配置品牌色、圆角、算法、CSS variable、motion token，不自建和 antd 并行的主题变量系统。ProLayout navTheme 和 ConfigProvider algorithm 必须同步。

@@ -34,9 +34,11 @@ $enabledPluginSourcePaths = static function (): array {
             continue;
         }
 
-        $sourcePath = rtrim($pluginPath, '/') . '/src';
-        if (is_dir($sourcePath)) {
-            $paths[] = $sourcePath;
+        foreach (['Http', 'Service', 'Repository', 'Model', 'Request', 'Vo', 'Event', 'Listener', 'Library'] as $directory) {
+            $sourcePath = rtrim($pluginPath, '/') . '/' . $directory;
+            if (is_dir($sourcePath)) {
+                $paths[] = $sourcePath;
+            }
         }
     }
 

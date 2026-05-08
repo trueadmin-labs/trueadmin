@@ -55,7 +55,8 @@
             "App\\": "app/"
         },
         "classmap": [
-            "plugin/"
+            "plugin/",
+            "plugins/"
         ]
     },
     "autoload-dev": {

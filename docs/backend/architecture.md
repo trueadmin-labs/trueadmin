@@ -954,21 +954,29 @@ plugins/true-admin/product/
   plugin.json
   backend/php/
     composer.json
-    src/
+    Http/Admin/Controller/
+    Service/
+    Repository/
+    Model/
+    Request/
+    Vo/
+    Event/
+    Listener/
+    Library/
     Database/Migrations/
     Database/Seeders/
+    resources/
+      menus.php
+      permissions.php
+      openapi.json
+      metadata.json
   docs/
-  resources/
-    menus.php
-    permissions.php
-    openapi.json
-    metadata.json
   web/
   mobile/
   llms.txt
 ```
 
-插件根目录 `plugin.json` 是包级插件清单，描述插件身份、插件依赖、兼容性和生命周期。Composer 只作为 PHP 后端 runtime 的依赖工具，PHP 插件在 `backend/php/composer.json` 中声明 autoload 和 PHP 包依赖。安装器把插件包内的 runtime 目录复制到各端运行时目录，并写入宿主项目插件注册表；根目录 `plugins/` 不参与宿主代码扫描。完整规范见 [插件系统规范](plugin-system.md)。
+插件根目录 `plugin.json` 是包级插件清单，描述插件身份、插件依赖、兼容性和生命周期。Composer 只作为 PHP 后端 runtime 的依赖工具，PHP 插件在 `backend/php/composer.json` 中声明 autoload 和 PHP 包依赖。插件后端目录与 `backend/app/Module/*` 保持同构，不额外包 `src/`；安装器把插件包内的 runtime 目录复制到各端运行时目录，并写入宿主项目插件注册表。根目录 `plugins/` 不参与宿主代码扫描。完整规范见 [插件系统规范](plugin-system.md)。
 
 插件可变行为必须优先设计为配置项。插件安装后的默认配置写在宿主项目 `config/autoload/plugins.php` 的 `installed.<plugin>.defaults`，项目覆盖配置写在 `config.<plugin>`，插件代码通过 `PluginConfigRepository` 获取合并后的配置。这样开发者可以调整插件能力而不修改插件源码，后续升级插件时保留项目配置即可。
 
@@ -1050,6 +1058,60 @@ AI 修改架构前必须更新项目记忆。
 
 ## 21. 演进路线
 
+## 21. 流式进度事件
+
+TrueAdmin 默认提供请求绑定型流式响应能力，用于长耗时请求、批量操作、复杂流程和未来 AI 流式输出。第一版只做框架底层简单支持，不做后台任务、任务中心、断线续看或 WebSocket。
+
+核心设计是“普通执行方法 + 进度事件 + 注解声明可流式”：Service 方法本身仍然是普通 PHP 方法，不返回 SSE，不感知 HTTP 连接。需要暴露内部进度时，执行方法通过 `App\Foundation\Stream\StreamProgress` 抛出进度事件；Controller 方法通过 `#[Streamable]` 声明支持流式响应。普通请求仍返回原 JSON；客户端请求头包含 `Accept: text/event-stream`、`X-Stream-Response: 1` 或参数 `_stream=1` 时，框架 AOP 自动把 Controller 方法包裹成 SSE。
+
+示例：
+
+```php
+use App\Foundation\Stream\StreamProgress;
+
+final class DemoService
+{
+    public function execute(): array
+    {
+        StreamProgress::progress('开始处理', module: 'demo', stage: 'start');
+        // normal business logic
+        StreamProgress::progress('处理完成', module: 'demo', stage: 'finish', percent: 100);
+
+        return ['ok' => true];
+    }
+}
+```
+
+Controller 方法保持普通写法，只增加 `#[Streamable]`：
+
+```php
+use TrueAdmin\Kernel\Http\Attribute\Streamable;
+
+#[Streamable]
+public function run(): array
+{
+    return ApiResponse::success($this->demoService->execute());
+}
+```
+
+流式响应协议采用 OpenAI 风格 SSE data 块：
+
+```text
+data: {"type":"progress","message":"开始处理","module":"demo"}
+
+data: {"type":"result","message":"success","response":{"code":"SUCCESS","message":"success","data":{"ok":true}}}
+
+data: {"type":"completed","message":"处理完成"}
+
+data: [DONE]
+```
+
+异常时先发送结构化 `error` 块，`error.response` 使用普通接口相同的 `ApiResponse::fail()` 结构，再发送 `[DONE]`。前端主动断开或网络中断时，本次请求停止处理；框架不负责后台继续执行。复杂的后台任务、任务日志、断线续看和补偿机制后续由插件扩展。
+
+编码规范：执行步骤较多、耗时较长、需要日志或调试可观测性的业务方法，应优先使用 `StreamProgress::progress()` 暴露内部状态。这个事件不只服务 SSE，也会分发到 Hyperf 事件系统，后续日志、调试面板或插件可以监听同一个 `StreamProgressEvent`。没有流式监听器时，进度事件应退化为无副作用调用，监听器异常也不应改变原业务方法结果。
+
+## 22. 演进路线
+
 ### 阶段一：后端基础架构稳定
 
 - 固化 `app/Module + MineAdmin 内部分层`。
@@ -1091,7 +1153,7 @@ AI 修改架构前必须更新项目记忆。
 - Web/Mobile 页面注册。
 - AI 模块生成包。
 
-## 22. 决策总结
+## 23. 决策总结
 
 最终基线：
 

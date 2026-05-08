@@ -1,0 +1,12 @@
+{
+  "name": "true-admin/examples-backend",
+  "type": "trueadmin-plugin-runtime",
+  "description": "Official TrueAdmin examples backend runtime.",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "Plugin\\TrueAdmin\\Examples\\": ""
+    }
+  },
+  "require": {}
+}
