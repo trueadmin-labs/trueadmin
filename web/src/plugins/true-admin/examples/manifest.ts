@@ -25,6 +25,11 @@ export default defineModule({
       meta: { title: 'examples.crud.title', auth: true },
     },
     {
+      path: '/examples/selector',
+      component: lazy(() => import('./pages/SelectorExamplePage')),
+      meta: { title: 'examples.selector.title', auth: true },
+    },
+    {
       path: '/examples/complex-form',
       component: lazy(() => import('./pages/ComplexFormExamplePage')),
       meta: {
@@ -99,6 +104,16 @@ export default defineModule({
           type: 'menu',
           status: 'enabled',
           sort: 40,
+        },
+        {
+          code: 'true-admin.examples.selector',
+          title: 'Selector Demo',
+          i18n: 'menu.examples.selector',
+          path: '/examples/selector',
+          icon: 'app',
+          type: 'menu',
+          status: 'enabled',
+          sort: 45,
         },
         {
           code: 'true-admin.examples.complexForm',

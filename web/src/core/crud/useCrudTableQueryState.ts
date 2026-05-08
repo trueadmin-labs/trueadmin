@@ -42,6 +42,8 @@ const SORT_PARAM = '_sort';
 const ORDER_PARAM = '_order';
 const DEFAULT_PAGE = 1;
 const DEFAULT_PAGE_SIZE = 20;
+const EMPTY_FILTERS: CrudFilterSchema[] = [];
+const EMPTY_EXTRA_QUERY: CrudExtraQuerySchema[] = [];
 
 const toPositiveInteger = (value: string | null, fallback: number) => {
   const parsed = Number.parseInt(value ?? '', 10);
@@ -167,16 +169,18 @@ const getRequestParams = ({
 };
 
 export function useCrudTableQueryState({
-  extraQuery = [],
-  filters = [],
+  extraQuery,
+  filters,
   quickSearch,
   defaultPageSize = DEFAULT_PAGE_SIZE,
 }: UseCrudTableQueryStateOptions): CrudTableQueryState {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const stableFilters = filters && filters.length > 0 ? filters : EMPTY_FILTERS;
+  const stableExtraQuery = extraQuery && extraQuery.length > 0 ? extraQuery : EMPTY_EXTRA_QUERY;
   const quickSearchName = getQuickSearchName(quickSearch);
-  const filterNames = useMemo(() => getFilterNames(filters), [filters]);
-  const extraQueryNames = useMemo(() => getExtraQueryNames(extraQuery), [extraQuery]);
+  const filterNames = useMemo(() => getFilterNames(stableFilters), [stableFilters]);
+  const extraQueryNames = useMemo(() => getExtraQueryNames(stableExtraQuery), [stableExtraQuery]);
   const valueKeys = useMemo(() => {
     const keys = new Set(filterNames);
     if (quickSearchName) {
@@ -333,8 +337,17 @@ export function useCrudTableQueryState({
   );
 
   const requestParams = useMemo(
-    () => getRequestParams({ extraQuery, filters, order, page: current, pageSize, sort, values }),
-    [current, extraQuery, filters, order, pageSize, sort, values],
+    () =>
+      getRequestParams({
+        extraQuery: stableExtraQuery,
+        filters: stableFilters,
+        order,
+        page: current,
+        pageSize,
+        sort,
+        values,
+      }),
+    [current, stableExtraQuery, stableFilters, order, pageSize, sort, values],
   );
 
   return {

@@ -2811,3 +2811,55 @@ body,
   max-height: calc(100vh - 166px);
   overscroll-behavior: contain;
 }
+
+.trueadmin-table-picker {
+  display: flex;
+  min-height: 0;
+  height: min(680px, calc(100vh - 186px));
+  flex-direction: column;
+}
+
+.trueadmin-table-picker-body {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+.trueadmin-table-picker.has-aside .trueadmin-table-picker-body {
+  gap: var(--trueadmin-table-picker-aside-gap, 10px);
+}
+
+.trueadmin-table-picker-aside {
+  display: flex;
+  width: var(--trueadmin-table-picker-aside-width, 280px);
+  min-width: 0;
+  min-height: 0;
+  flex: 0 0 var(--trueadmin-table-picker-aside-width, 280px);
+  flex-direction: column;
+  overflow: auto;
+  border: 1px solid var(--trueadmin-shell-border);
+  border-radius: 8px;
+  background: var(--ant-color-bg-container, #fff);
+}
+
+.trueadmin-table-picker-main {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.trueadmin-table-picker-table {
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.trueadmin-page-modal.is-dark .trueadmin-table-picker-aside,
+.trueadmin-shell.is-dark .trueadmin-table-picker-aside {
+  border-color: var(--trueadmin-shell-dark-border);
+  background: var(--ant-color-bg-container, #141414);
+}
