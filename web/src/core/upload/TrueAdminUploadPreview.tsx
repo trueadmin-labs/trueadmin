@@ -178,6 +178,7 @@ export function TrueAdminUploadPreview({
       <TrueAdminModal
         {...modalProps}
         allowFullscreen
+        bodyPadding={false}
         className={['trueadmin-upload-preview', classNames?.root, className]
           .filter(Boolean)
           .join(' ')}

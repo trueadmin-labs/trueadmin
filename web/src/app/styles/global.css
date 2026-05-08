@@ -3129,6 +3129,19 @@ body,
   flex: 1 1 auto;
 }
 
+.trueadmin-page-modal.is-fullscreen .trueadmin-table-picker {
+  height: 100%;
+}
+
+.trueadmin-page-modal.is-fullscreen .trueadmin-table-picker-body,
+.trueadmin-page-modal.is-fullscreen .trueadmin-table-picker-main,
+.trueadmin-page-modal.is-fullscreen .trueadmin-table-picker-table,
+.trueadmin-page-modal.is-fullscreen .trueadmin-table-picker-table .trueadmin-crud-table,
+.trueadmin-page-modal.is-fullscreen .trueadmin-table-picker-table .trueadmin-crud-table-card {
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
 .trueadmin-page-modal.is-dark .trueadmin-table-picker,
 .trueadmin-shell.is-dark .trueadmin-table-picker,
 .trueadmin-page-modal.is-dark .trueadmin-table-picker-aside,

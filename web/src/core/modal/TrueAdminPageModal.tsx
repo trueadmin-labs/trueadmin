@@ -56,6 +56,7 @@ export function TrueAdminPageModal({
   return (
     <TrueAdminModal
       {...modalProps}
+      bodyPadding={false}
       centered={centered}
       className={['trueadmin-page-modal', darkMode ? 'is-dark' : '', className]
         .filter(Boolean)

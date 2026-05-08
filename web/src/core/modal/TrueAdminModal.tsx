@@ -11,7 +11,16 @@ const DEFAULT_MODAL_CONTENT_PADDING_INLINE = '24px';
 const toSizeValue = (value: number | string) =>
   typeof value === 'number' ? `${String(value)}px` : value;
 
-const mergeModalStyles = (styles?: ModalStylesType): ModalStylesType => {
+const mergeModalStyles = (
+  styles?: ModalStylesType,
+  bodyPadding: boolean | number | string = true,
+): ModalStylesType => {
+  const bodyPaddingStyle =
+    bodyPadding === true
+      ? 'var(--trueadmin-modal-content-padding-block) var(--trueadmin-modal-content-padding-inline)'
+      : bodyPadding === false
+        ? 0
+        : toSizeValue(bodyPadding);
   const mergeStyles = (nextStyles?: ModalSemanticStyles): ModalSemanticStyles => ({
     ...nextStyles,
     container: { padding: 0, ...nextStyles?.container },
@@ -22,7 +31,7 @@ const mergeModalStyles = (styles?: ModalStylesType): ModalStylesType => {
       paddingInlineStart: 'var(--trueadmin-modal-content-padding-inline)',
       ...nextStyles?.header,
     },
-    body: { padding: 0, ...nextStyles?.body },
+    body: { padding: bodyPaddingStyle, ...nextStyles?.body },
     footer: {
       marginTop: 0,
       paddingBlock: 'var(--trueadmin-modal-content-padding-block)',
@@ -40,6 +49,7 @@ const mergeModalStyles = (styles?: ModalStylesType): ModalStylesType => {
 
 export type TrueAdminModalProps = ModalProps & {
   allowFullscreen?: boolean;
+  bodyPadding?: boolean | number | string;
   contentPaddingBlock?: number | string;
   contentPaddingInline?: number | string;
   fullscreen?: boolean;
@@ -53,6 +63,7 @@ export type TrueAdminModalProps = ModalProps & {
 
 export function TrueAdminModal({
   allowFullscreen = true,
+  bodyPadding = true,
   children,
   className,
   closeText,
@@ -82,7 +93,7 @@ export function TrueAdminModal({
     '--trueadmin-modal-content-padding-inline': toSizeValue(contentPaddingInline),
     ...style,
   } as CSSProperties;
-  const modalStyles = mergeModalStyles(styles);
+  const modalStyles = mergeModalStyles(styles, bodyPadding);
 
   const setMergedFullscreen = useCallback(
     (nextFullscreen: boolean) => {
