@@ -43,6 +43,8 @@ export const adminNotificationManagementApi = {
     http.Post<AdminNotificationBatch>('/admin/notification-batches/announcements', payload),
   publishBatch: (id: number) =>
     http.Post<AdminNotificationBatch>(`/admin/notification-batches/${String(id)}/publish`),
+  cancelScheduledBatch: (id: number) =>
+    http.Post<AdminNotificationBatch>(`/admin/notification-batches/${String(id)}/cancel-scheduled`),
   offlineBatch: (id: number) =>
     http.Post<AdminNotificationBatch>(`/admin/notification-batches/${String(id)}/offline`),
   listDeliveries: (batchId: number, params?: AdminNotificationDeliveryQuery) =>

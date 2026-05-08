@@ -63,6 +63,7 @@ export function TrueAdminCrudTable<
   filters = [],
   extraQuery,
   quickSearch,
+  queryMode,
   resource,
   rowKey,
   columns,
@@ -105,6 +106,7 @@ export function TrueAdminCrudTable<
   | 'filters'
   | 'extraQuery'
   | 'quickSearch'
+  | 'queryMode'
   | 'resource'
   | 'rowKey'
   | 'columns'
@@ -150,6 +152,7 @@ export function TrueAdminCrudTable<
     filters,
     quickSearch,
     defaultPageSize: DEFAULT_PAGE_SIZE,
+    queryMode,
   });
   const hasFilters = filters.length > 0;
   const selectedRowKeys = rowSelection?.selectedRowKeys ?? innerSelectedRowKeys;

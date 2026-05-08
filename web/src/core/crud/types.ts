@@ -499,6 +499,7 @@ export type TrueAdminCrudTableProps<
   quickSearch?: CrudQuickSearchConfig;
   extraQuery?: CrudExtraQuerySchema[];
   defaultFiltersExpanded?: boolean;
+  queryMode?: 'url' | 'local';
 };
 
 export type TrueAdminCrudPageProps<

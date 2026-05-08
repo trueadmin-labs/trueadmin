@@ -526,6 +526,19 @@ export const handlers = [
     batch.updatedAt = now;
     return success(batch);
   }),
+  http.post('/api/admin/notification-batches/:id/cancel-scheduled', ({ params }) => {
+    const batch = notificationBatches.find((item) => String(item.id) === String(params.id));
+    if (!batch) {
+      return fail('SYSTEM.NOTIFICATION_BATCH.NOT_FOUND', '通知批次不存在');
+    }
+    if (batch.status !== 'scheduled') {
+      return fail('SYSTEM.NOTIFICATION_BATCH.NOT_SCHEDULED', '只有定时发布的通知批次可以取消');
+    }
+    batch.status = 'draft';
+    batch.scheduledAt = null;
+    batch.updatedAt = now;
+    return success(batch);
+  }),
   http.get('/api/admin/notification-batches/:id/deliveries', ({ params, request }) => {
     const url = new URL(request.url);
     const page = Number(url.searchParams.get('page') || 1);

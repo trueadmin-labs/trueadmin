@@ -3224,6 +3224,67 @@ body,
   width: 100%;
 }
 
+.trueadmin-notification-delivery-modal.ant-modal .ant-modal-content {
+  display: flex;
+  height: min(760px, calc(100vh - 96px));
+  max-height: calc(100vh - 96px);
+  flex-direction: column;
+}
+
+.trueadmin-notification-delivery-modal.ant-modal .ant-modal-header,
+.trueadmin-notification-delivery-modal.ant-modal .ant-modal-footer {
+  flex: 0 0 auto;
+}
+
+.trueadmin-notification-delivery-modal.ant-modal .ant-modal-body {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.trueadmin-notification-delivery-modal-body {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.trueadmin-notification-delivery-table.trueadmin-crud-shell {
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.trueadmin-notification-management-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.trueadmin-notification-management-stats .ant-statistic {
+  padding: 10px 12px;
+  border: 1px solid var(--ant-color-border-secondary, rgba(5, 5, 5, 0.06));
+  border-radius: var(--ant-border-radius-lg, 8px);
+  background: var(--ant-color-fill-quaternary, rgba(0, 0, 0, 0.02));
+}
+
+.trueadmin-notification-management-audit {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--ant-color-border-secondary, rgba(5, 5, 5, 0.06));
+  border-radius: var(--ant-border-radius-lg, 8px);
+}
+
+@media (max-width: 767px) {
+  .trueadmin-notification-management-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 767px) {
   .trueadmin-message-detail-meta {
     align-items: flex-start;
@@ -3318,6 +3379,22 @@ body,
 
 .trueadmin-modal.is-fullscreen .ant-modal-footer {
   flex: 0 0 auto;
+}
+
+.trueadmin-modal.is-fullscreen-changing .ant-modal-content,
+.trueadmin-modal.is-fullscreen-changing .ant-modal-body,
+.trueadmin-modal.is-fullscreen-changing .ant-table,
+.trueadmin-modal.is-fullscreen-changing .ant-table-wrapper,
+.trueadmin-modal.is-fullscreen-changing .ant-spin-nested-loading,
+.trueadmin-modal.is-fullscreen-changing .ant-spin-container,
+.trueadmin-modal.is-fullscreen-changing .ant-table-container,
+.trueadmin-modal.is-fullscreen-changing .ant-table-body,
+.trueadmin-modal.is-fullscreen-changing .trueadmin-notification-delivery-modal-body,
+.trueadmin-modal.is-fullscreen-changing .trueadmin-crud-shell,
+.trueadmin-modal.is-fullscreen-changing .trueadmin-crud-table-card,
+.trueadmin-modal.is-fullscreen-changing .trueadmin-crud-table-card > .ant-card-body,
+.trueadmin-modal.is-fullscreen-changing .trueadmin-crud-table-main {
+  transition: none;
 }
 
 .trueadmin-page-modal.is-fullscreen .trueadmin-scroll-shadow,

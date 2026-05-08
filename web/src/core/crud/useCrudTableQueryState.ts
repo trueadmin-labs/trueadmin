@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import { updateRawSearchParams } from '@/core/url/searchParams';
 import type {
@@ -34,6 +34,7 @@ type UseCrudTableQueryStateOptions = {
   filters?: CrudFilterSchema[];
   quickSearch?: CrudQuickSearchConfig;
   defaultPageSize?: number;
+  queryMode?: 'url' | 'local';
 };
 
 const PAGE_PARAM = '_page';
@@ -173,9 +174,12 @@ export function useCrudTableQueryState({
   filters,
   quickSearch,
   defaultPageSize = DEFAULT_PAGE_SIZE,
+  queryMode = 'url',
 }: UseCrudTableQueryStateOptions): CrudTableQueryState {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [urlSearchParams] = useSearchParams();
+  const [localSearchParams, setLocalSearchParams] = useState(() => new URLSearchParams());
+  const searchParams = queryMode === 'local' ? localSearchParams : urlSearchParams;
   const stableFilters = filters && filters.length > 0 ? filters : EMPTY_FILTERS;
   const stableExtraQuery = extraQuery && extraQuery.length > 0 ? extraQuery : EMPTY_EXTRA_QUERY;
   const quickSearchName = getQuickSearchName(quickSearch);
@@ -207,10 +211,18 @@ export function useCrudTableQueryState({
 
   const updateQuery = useCallback(
     (updater: (params: URLSearchParams) => void) => {
-      const nextSearch = updateRawSearchParams(searchParams, updater);
+      if (queryMode === 'local') {
+        setLocalSearchParams((currentParams) => {
+          const nextSearch = updateRawSearchParams(currentParams, updater);
+          return new URLSearchParams(nextSearch);
+        });
+        return;
+      }
+
+      const nextSearch = updateRawSearchParams(urlSearchParams, updater);
       navigate({ search: nextSearch ? `?${nextSearch}` : '' }, { replace: true });
     },
-    [navigate, searchParams],
+    [navigate, queryMode, urlSearchParams],
   );
 
   const submitQuickSearch = useCallback(

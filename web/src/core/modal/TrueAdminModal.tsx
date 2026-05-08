@@ -2,7 +2,7 @@ import { CloseOutlined, FullscreenExitOutlined, FullscreenOutlined } from '@ant-
 import { Button, Modal, type ModalProps } from 'antd';
 import type { ModalSemanticStyles, ModalStylesType } from 'antd/es/modal/interface';
 import type { CSSProperties, MouseEvent, ReactNode } from 'react';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import {
   TrueAdminScrollShadow,
@@ -11,6 +11,7 @@ import {
 
 const DEFAULT_MODAL_CONTENT_PADDING_BLOCK = '20px';
 const DEFAULT_MODAL_CONTENT_PADDING_INLINE = '24px';
+const FULLSCREEN_CHANGE_TRANSITION_MS = 180;
 
 const toSizeValue = (value: number | string) =>
   typeof value === 'number' ? `${String(value)}px` : value;
@@ -100,6 +101,8 @@ export function TrueAdminModal({
 }: TrueAdminModalProps) {
   const { t } = useI18n();
   const [innerFullscreen, setInnerFullscreen] = useState(defaultFullscreen);
+  const [fullscreenChanging, setFullscreenChanging] = useState(false);
+  const fullscreenChangeTimerRef = useRef<number | undefined>(undefined);
   const mergedFullscreen = fullscreen ?? innerFullscreen;
   const mergedFullscreenText = fullscreenText ?? t('modal.action.fullscreen', '全屏');
   const mergedExitFullscreenText =
@@ -114,12 +117,30 @@ export function TrueAdminModal({
 
   const setMergedFullscreen = useCallback(
     (nextFullscreen: boolean) => {
+      if (fullscreenChangeTimerRef.current) {
+        window.clearTimeout(fullscreenChangeTimerRef.current);
+      }
+      setFullscreenChanging(true);
+      fullscreenChangeTimerRef.current = window.setTimeout(() => {
+        setFullscreenChanging(false);
+        fullscreenChangeTimerRef.current = undefined;
+      }, FULLSCREEN_CHANGE_TRANSITION_MS);
+
       if (fullscreen === undefined) {
         setInnerFullscreen(nextFullscreen);
       }
       onFullscreenChange?.(nextFullscreen);
     },
     [fullscreen, onFullscreenChange],
+  );
+
+  useEffect(
+    () => () => {
+      if (fullscreenChangeTimerRef.current) {
+        window.clearTimeout(fullscreenChangeTimerRef.current);
+      }
+    },
+    [],
   );
 
   const toggleFullscreen = useCallback(() => {
@@ -173,7 +194,12 @@ export function TrueAdminModal({
   return (
     <Modal
       {...modalProps}
-      className={['trueadmin-modal', mergedFullscreen ? 'is-fullscreen' : '', className]
+      className={[
+        'trueadmin-modal',
+        mergedFullscreen ? 'is-fullscreen' : '',
+        fullscreenChanging ? 'is-fullscreen-changing' : '',
+        className,
+      ]
         .filter(Boolean)
         .join(' ')}
       closable={false}
