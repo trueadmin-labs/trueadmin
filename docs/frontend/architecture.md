@@ -106,7 +106,7 @@ export default defineModule({
     {
       path: '/system/admin-users',
       component: lazy(() => import('./pages/admin-users')),
-      meta: { pageType: 'crud-page' },
+      meta: { title: 'system.adminUsers.title', auth: true },
     },
   ],
   locales: {
@@ -120,7 +120,7 @@ export default defineModule({
 
 ## 插件系统
 
-插件采用 `vendor/plugin` 目录和 `vendor.plugin` 插件 ID，例如 `src/plugins/acme/cms/manifest.ts` 和 `acme.cms`。官方插件 vendor 为 `trueadmin`，项目私有插件 vendor 为 `local` 或公司/项目代号，第三方插件 vendor 为插件市场作者或组织名。
+插件采用 `vendor/plugin` 目录和 `vendor.plugin` 插件 ID，例如 `src/plugins/acme/cms/manifest.ts` 和 `acme.cms`。官方前端插件 vendor 使用 `true-admin`，例如 `src/plugins/true-admin/examples/manifest.ts` 和 `true-admin.examples`；项目私有插件 vendor 为 `local` 或公司/项目代号，第三方插件 vendor 为插件市场作者或组织名。
 
 插件目录包含 `plugin.json`、`manifest.ts`、`pages`、`services`、`components`、`hooks`、`types`、`locales`。`plugin.json` 给插件市场、安装器和升级器使用；`manifest.ts` 给前端运行时扫描和加载使用。
 
@@ -135,7 +135,7 @@ export default {
 };
 ```
 
-插件命名规则：插件目录为 `src/plugins/<vendor>/<plugin>`，插件 id 为 `<vendor>.<plugin>`，数据库 `source_id`、权限码前缀、配置 key 都使用 `<vendor>.<plugin>`，数据表前缀使用 `<vendor>_<plugin>`。
+插件命名规则：插件目录为 `src/plugins/<vendor>/<plugin>`，插件 id 为 `<vendor>.<plugin>`，`source_id`、权限码前缀、配置 key 默认使用 `<vendor>.<plugin>`。前端不负责定义或改写数据库表名；插件数据表命名由后端插件规范和上架/安装校验约束。
 
 ## 菜单、路由和权限
 
@@ -236,11 +236,11 @@ const showModal = (nextPayload: Payload) => {
 
 ```ts
 export default defineModule({
-  id: 'demo',
+  id: 'true-admin.examples',
   routes: [{ path: '/examples/permission', component: PermissionExamplePage }],
   menus: [
     {
-      code: 'demo.permission',
+      code: 'true-admin.examples.permission',
       title: 'Permission Demo',
       path: '/examples/permission',
       parentPath: '/examples',
@@ -257,7 +257,7 @@ export default defineModule({
 
 框架提供 WorkspaceViewport 尺寸系统，统一支撑内容高度、内容区全屏、弹窗全屏、Drawer/Form 滚动区域等布局场景。WorkspaceViewport 必须响应 window resize、orientation change、侧栏折叠、Header 固定切换、RouteTabs 开关、Footer 显示隐藏、SettingDrawer 改布局配置、内容区全屏和弹窗全屏。实现策略为 ResizeObserver + requestAnimationFrame + Context。标准 CRUD 的表格高度由 `TrueAdminCrudTable` 自己测量表格主区域实际高度后传给 AntD Table `scroll.y`，避免搜索区、工具栏、批量提示或分页变化时依赖固定估算。
 
-前端定义标准 Page Types：`crud-page`、`form-page`、`detail-page`、`dashboard-page`、`split-page`、`custom-page`。标准页面推荐/默认使用 TrueAdminPage 包装，但允许复杂页面逃逸。页面容器规范见 `docs/frontend/page-container.md`。`TrueAdminCrudPage` 内部默认集成 `TrueAdminPage`。
+前端不维护独立的路由页面类型字符串。页面类型由实际使用的标准组件表达：列表页使用 `TrueAdminCrudPage` / `TrueAdminCrudTable`，表单页使用 `TrueAdminFormPage`，分栏页使用 `TrueAdminSplitPage`，普通页面使用 `TrueAdminPage`。路由 `meta` 只保留真实参与运行时行为的字段，例如 `title`、`auth`、`icon`、`layout` 和 `tab`。页面容器规范见 `docs/frontend/page-container.md`。
 
 ## CRUD 架构
 

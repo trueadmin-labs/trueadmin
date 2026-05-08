@@ -26,13 +26,6 @@ export type FrontendRoute = {
   component: RouteComponent;
   meta?: {
     title?: string;
-    pageType?:
-      | 'crud-page'
-      | 'form-page'
-      | 'detail-page'
-      | 'dashboard-page'
-      | 'split-page'
-      | 'custom-page';
     icon?: string;
     auth?: boolean;
     layout?: RouteLayoutMeta;

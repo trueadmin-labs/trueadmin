@@ -9,7 +9,6 @@ export default defineModule({
       component: lazy(() => import('./pages/WorkbenchPage')),
       meta: {
         title: 'workbench.title',
-        pageType: 'dashboard-page',
         icon: 'dashboard',
         auth: true,
       },

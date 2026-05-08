@@ -2,34 +2,33 @@ import { lazy } from 'react';
 import { defineModule } from '@/core/module/types';
 
 export default defineModule({
-  id: 'demo',
+  id: 'true-admin.examples',
   routes: [
     {
       path: '/examples/permission',
-      component: lazy(() => import('@/app/pages/PermissionExamplePage')),
-      meta: { title: 'demo.permission.title', pageType: 'custom-page', auth: true },
+      component: lazy(() => import('./pages/PermissionExamplePage')),
+      meta: { title: 'examples.permission.title', auth: true },
     },
     {
       path: '/examples/loading',
       component: lazy(() => import('./pages/LoadingExamplePage')),
-      meta: { title: 'demo.loading.title', pageType: 'custom-page', auth: true },
+      meta: { title: 'examples.loading.title', auth: true },
     },
     {
       path: '/examples/page-container',
       component: lazy(() => import('./pages/PageContainerExamplePage')),
-      meta: { title: 'demo.pageContainer.title', pageType: 'custom-page', auth: true },
+      meta: { title: 'examples.pageContainer.title', auth: true },
     },
     {
       path: '/examples/crud',
       component: lazy(() => import('./pages/CrudExamplePage')),
-      meta: { title: 'demo.crud.title', pageType: 'crud-page', auth: true },
+      meta: { title: 'examples.crud.title', auth: true },
     },
     {
       path: '/examples/complex-form',
       component: lazy(() => import('./pages/ComplexFormExamplePage')),
       meta: {
-        title: 'demo.complexForm.title',
-        pageType: 'custom-page',
+        title: 'examples.complexForm.title',
         auth: true,
         layout: { showFooter: false },
       },
@@ -38,8 +37,7 @@ export default defineModule({
       path: '/examples/complex-detail',
       component: lazy(() => import('./pages/ComplexDetailExamplePage')),
       meta: {
-        title: 'demo.complexDetail.title',
-        pageType: 'custom-page',
+        title: 'examples.complexDetail.title',
         auth: true,
         layout: { showFooter: false },
       },
@@ -47,14 +45,14 @@ export default defineModule({
     {
       path: '/examples/multilevel/second/third',
       component: lazy(() => import('./pages/MultiLevelMenuPage')),
-      meta: { title: 'demo.multilevel.title', pageType: 'custom-page', auth: true },
+      meta: { title: 'examples.multilevel.title', auth: true },
     },
   ],
   menus: [
     {
-      code: 'demo',
+      code: 'true-admin.examples',
       title: 'Demo',
-      i18n: 'menu.demo',
+      i18n: 'menu.examples',
       path: '/examples',
       icon: 'app',
       type: 'directory',
@@ -63,9 +61,9 @@ export default defineModule({
       devOnly: true,
       children: [
         {
-          code: 'demo.permission',
+          code: 'true-admin.examples.permission',
           title: 'Permission Demo',
-          i18n: 'menu.demo.permission',
+          i18n: 'menu.examples.permission',
           path: '/examples/permission',
           icon: 'lock',
           type: 'menu',
@@ -73,9 +71,9 @@ export default defineModule({
           sort: 10,
         },
         {
-          code: 'demo.loading',
+          code: 'true-admin.examples.loading',
           title: 'Loading Demo',
-          i18n: 'menu.demo.loading',
+          i18n: 'menu.examples.loading',
           path: '/examples/loading',
           icon: 'sync',
           type: 'menu',
@@ -83,9 +81,9 @@ export default defineModule({
           sort: 20,
         },
         {
-          code: 'demo.pageContainer',
+          code: 'true-admin.examples.pageContainer',
           title: 'Page Container',
-          i18n: 'menu.demo.pageContainer',
+          i18n: 'menu.examples.pageContainer',
           path: '/examples/page-container',
           icon: 'app',
           type: 'menu',
@@ -93,9 +91,9 @@ export default defineModule({
           sort: 30,
         },
         {
-          code: 'demo.crud',
+          code: 'true-admin.examples.crud',
           title: 'CRUD Demo',
-          i18n: 'menu.demo.crud',
+          i18n: 'menu.examples.crud',
           path: '/examples/crud',
           icon: 'table',
           type: 'menu',
@@ -103,9 +101,9 @@ export default defineModule({
           sort: 40,
         },
         {
-          code: 'demo.complexForm',
+          code: 'true-admin.examples.complexForm',
           title: 'Complex Form',
-          i18n: 'menu.demo.complexForm',
+          i18n: 'menu.examples.complexForm',
           path: '/examples/complex-form',
           icon: 'app',
           type: 'menu',
@@ -113,9 +111,9 @@ export default defineModule({
           sort: 50,
         },
         {
-          code: 'demo.complexDetail',
+          code: 'true-admin.examples.complexDetail',
           title: 'Complex Detail',
-          i18n: 'menu.demo.complexDetail',
+          i18n: 'menu.examples.complexDetail',
           path: '/examples/complex-detail',
           icon: 'app',
           type: 'menu',
@@ -123,9 +121,9 @@ export default defineModule({
           sort: 60,
         },
         {
-          code: 'demo.multilevel',
+          code: 'true-admin.examples.multilevel',
           title: 'Multi-level Menu',
-          i18n: 'menu.demo.multilevel',
+          i18n: 'menu.examples.multilevel',
           path: '/examples/multilevel',
           icon: 'app',
           type: 'directory',
@@ -133,9 +131,9 @@ export default defineModule({
           sort: 70,
           children: [
             {
-              code: 'demo.multilevel.second',
+              code: 'true-admin.examples.multilevel.second',
               title: 'Second Level',
-              i18n: 'menu.demo.multilevel.second',
+              i18n: 'menu.examples.multilevel.second',
               path: '/examples/multilevel/second',
               icon: 'app',
               type: 'directory',
@@ -143,9 +141,9 @@ export default defineModule({
               sort: 10,
               children: [
                 {
-                  code: 'demo.multilevel.second.third',
+                  code: 'true-admin.examples.multilevel.second.third',
                   title: 'Third Level',
-                  i18n: 'menu.demo.multilevel.third',
+                  i18n: 'menu.examples.multilevel.third',
                   path: '/examples/multilevel/second/third',
                   icon: 'app',
                   type: 'menu',

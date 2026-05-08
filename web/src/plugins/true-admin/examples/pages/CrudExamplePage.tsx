@@ -80,15 +80,15 @@ const createRecords = (t: (key?: string, fallback?: string) => string): CrudExam
   const statuses: CrudExampleRecord['status'][] = ['enabled', 'pending', 'disabled'];
   const categories: CrudExampleRecord['category'][] = ['system', 'business', 'finance'];
   const owners = [
-    t('demo.crud.owner.system', '系统管理员'),
-    t('demo.crud.owner.business', '业务管理员'),
-    t('demo.crud.owner.finance', '财务管理员'),
-    t('demo.crud.owner.ops', '运营管理员'),
+    t('examples.crud.owner.system', '系统管理员'),
+    t('examples.crud.owner.business', '业务管理员'),
+    t('examples.crud.owner.finance', '财务管理员'),
+    t('examples.crud.owner.ops', '运营管理员'),
   ];
 
   return Array.from({ length: 64 }).map((_, index) => ({
     id: String(index + 1),
-    name: `${t('demo.crud.record.name', '配置项')} ${String(index + 1).padStart(2, '0')}`,
+    name: `${t('examples.crud.record.name', '配置项')} ${String(index + 1).padStart(2, '0')}`,
     owner: owners[index % owners.length],
     status: statuses[index % statuses.length],
     category: categories[index % categories.length],
@@ -203,17 +203,17 @@ export default function CrudExamplePage() {
   const [categoryTreeLoading, setCategoryTreeLoading] = useState(false);
   const statusText = useMemo<Record<CrudExampleRecord['status'], string>>(
     () => ({
-      disabled: t('demo.crud.status.disabled', '已禁用'),
-      enabled: t('demo.crud.status.enabled', '已启用'),
-      pending: t('demo.crud.status.pending', '待确认'),
+      disabled: t('examples.crud.status.disabled', '已禁用'),
+      enabled: t('examples.crud.status.enabled', '已启用'),
+      pending: t('examples.crud.status.pending', '待确认'),
     }),
     [t],
   );
   const categoryText = useMemo<Record<CrudExampleRecord['category'], string>>(
     () => ({
-      business: t('demo.crud.category.business', '业务配置'),
-      finance: t('demo.crud.category.finance', '财务配置'),
-      system: t('demo.crud.category.system', '系统配置'),
+      business: t('examples.crud.category.business', '业务配置'),
+      finance: t('examples.crud.category.finance', '财务配置'),
+      system: t('examples.crud.category.system', '系统配置'),
     }),
     [t],
   );
@@ -224,13 +224,13 @@ export default function CrudExamplePage() {
     () => [
       {
         name: 'owner',
-        label: t('demo.crud.column.owner', '负责人'),
-        placeholder: t('demo.crud.filter.owner.placeholder', '请输入负责人'),
+        label: t('examples.crud.column.owner', '负责人'),
+        placeholder: t('examples.crud.filter.owner.placeholder', '请输入负责人'),
         type: 'input',
       },
       {
         name: 'status',
-        label: t('demo.crud.column.status', '状态'),
+        label: t('examples.crud.column.status', '状态'),
         mode: 'multiple',
         type: 'select',
         options: [
@@ -241,7 +241,7 @@ export default function CrudExamplePage() {
       },
       {
         name: 'category',
-        label: t('demo.crud.column.category', '分类'),
+        label: t('examples.crud.column.category', '分类'),
         mode: 'multiple',
         type: 'select',
         options: [
@@ -252,7 +252,7 @@ export default function CrudExamplePage() {
       },
       {
         name: 'createdAt',
-        label: t('demo.crud.column.createdAt', '创建时间'),
+        label: t('examples.crud.column.createdAt', '创建时间'),
         type: 'dateRange',
       },
     ],
@@ -267,18 +267,18 @@ export default function CrudExamplePage() {
   const columns = useMemo<CrudColumns<CrudExampleRecord>>(
     () => [
       {
-        title: t('demo.crud.column.name', '名称'),
+        title: t('examples.crud.column.name', '名称'),
         dataIndex: 'name',
         ellipsis: true,
         width: 220,
       },
       {
-        title: t('demo.crud.column.owner', '负责人'),
+        title: t('examples.crud.column.owner', '负责人'),
         dataIndex: 'owner',
         width: 140,
       },
       {
-        title: t('demo.crud.column.status', '状态'),
+        title: t('examples.crud.column.status', '状态'),
         dataIndex: 'status',
         width: 120,
         render: (_, record) => (
@@ -286,24 +286,24 @@ export default function CrudExamplePage() {
         ),
       },
       {
-        title: t('demo.crud.column.category', '分类'),
+        title: t('examples.crud.column.category', '分类'),
         dataIndex: 'category',
         width: 140,
         render: (value) => categoryText[value as CrudExampleRecord['category']],
       },
       {
-        title: t('demo.crud.column.visits', '访问量'),
+        title: t('examples.crud.column.visits', '访问量'),
         dataIndex: 'visits',
         sorter: true,
         width: 120,
       },
       {
-        title: t('demo.crud.column.createdAt', '创建时间'),
+        title: t('examples.crud.column.createdAt', '创建时间'),
         dataIndex: 'createdAt',
         width: 170,
       },
       {
-        title: t('demo.crud.column.updatedAt', '更新时间'),
+        title: t('examples.crud.column.updatedAt', '更新时间'),
         dataIndex: 'updatedAt',
         width: 170,
       },
@@ -313,7 +313,7 @@ export default function CrudExamplePage() {
 
   const statusFilterItems = useMemo(
     () => [
-      { label: t('demo.crud.status.all', '全部'), value: 'all' as const },
+      { label: t('examples.crud.status.all', '全部'), value: 'all' as const },
       { label: statusText.enabled, value: 'enabled' as const },
       { label: statusText.pending, value: 'pending' as const },
       { label: statusText.disabled, value: 'disabled' as const },
@@ -324,8 +324,8 @@ export default function CrudExamplePage() {
   const categoryFilterItems = useMemo(
     () => [
       {
-        label: t('demo.crud.category.all', '全部分类'),
-        searchText: t('demo.crud.category.all.searchText', '全部 分类'),
+        label: t('examples.crud.category.all', '全部分类'),
+        searchText: t('examples.crud.category.all.searchText', '全部 分类'),
         value: 'all' as const,
       },
       {
@@ -334,8 +334,8 @@ export default function CrudExamplePage() {
           { label: categoryText.business, value: 'business' as const },
           { label: categoryText.finance, value: 'finance' as const },
         ],
-        label: t('demo.crud.category.group.config', '配置分类'),
-        searchText: t('demo.crud.category.group.config.searchText', '配置 分类'),
+        label: t('examples.crud.category.group.config', '配置分类'),
+        searchText: t('examples.crud.category.group.config.searchText', '配置 分类'),
         selectable: false,
         value: 'config' as const,
       },
@@ -359,8 +359,8 @@ export default function CrudExamplePage() {
           category: payload.category ?? 'system',
           createdAt: now,
           id: String(Date.now()),
-          name: payload.name ?? t('demo.crud.record.name', '配置项'),
-          owner: payload.owner ?? t('demo.crud.owner.system', '系统管理员'),
+          name: payload.name ?? t('examples.crud.record.name', '配置项'),
+          owner: payload.owner ?? t('examples.crud.owner.system', '系统管理员'),
           status: payload.status ?? 'pending',
           updatedAt: now,
           visits: 0,
@@ -426,7 +426,7 @@ export default function CrudExamplePage() {
     setCategoryTreeLoading(true);
     await wait(350);
     setCategoryTreeLoading(false);
-    message.success(t('demo.crud.category.tree.reloadSuccess', '分类目录已刷新'));
+    message.success(t('examples.crud.category.tree.reloadSuccess', '分类目录已刷新'));
   }, [message, t]);
 
   const handleBeforeRequest = useCallback(
@@ -514,7 +514,7 @@ export default function CrudExamplePage() {
       context: { payload: Partial<CrudExampleRecord>; resource: string },
     ) => {
       appendLifecycleLog('onCreateSuccess', record.name, { context, record });
-      message.success(t('demo.crud.message.createSuccess', '新增成功'));
+      message.success(t('examples.crud.message.createSuccess', '新增成功'));
     },
     [appendLifecycleLog, message, t],
   );
@@ -525,7 +525,7 @@ export default function CrudExamplePage() {
       context: { id: Key; payload: Partial<CrudExampleRecord>; resource: string },
     ) => {
       appendLifecycleLog('onUpdateSuccess', record.name, { context, record });
-      message.success(t('demo.crud.message.updateSuccess', '保存成功'));
+      message.success(t('examples.crud.message.updateSuccess', '保存成功'));
     },
     [appendLifecycleLog, message, t],
   );
@@ -533,7 +533,7 @@ export default function CrudExamplePage() {
   const handleDeleteSuccess = useCallback(
     (result: unknown, context: { id: Key; resource: string }) => {
       appendLifecycleLog('onDeleteSuccess', String(context.id), { context, result });
-      message.success(t('demo.crud.message.deleteSuccess', '删除成功'));
+      message.success(t('examples.crud.message.deleteSuccess', '删除成功'));
     },
     [appendLifecycleLog, message, t],
   );
@@ -545,9 +545,12 @@ export default function CrudExamplePage() {
       Partial<CrudExampleRecord>,
       CrudExampleMeta
     >
-      title={t('demo.crud.title', 'CRUD 页面示例')}
-      description={t('demo.crud.description', '展示分类目录、统计概览、高级筛选和标准表格组合。')}
-      resource="demo.crud"
+      title={t('examples.crud.title', 'CRUD 页面示例')}
+      description={t(
+        'examples.crud.description',
+        '展示分类目录、统计概览、高级筛选和标准表格组合。',
+      )}
+      resource="true-admin.examples.crud"
       columns={columns}
       service={service}
       extraQuery={extraQuery}
@@ -560,7 +563,7 @@ export default function CrudExamplePage() {
       onUpdateSuccess={handleUpdateSuccess}
       onDeleteSuccess={handleDeleteSuccess}
       rowKey="id"
-      quickSearch={{ placeholder: t('demo.crud.quickSearch.placeholder', '搜索名称 / 负责人') }}
+      quickSearch={{ placeholder: t('examples.crud.quickSearch.placeholder', '搜索名称 / 负责人') }}
       filters={filters}
       locale={{
         actionColumnTitle: t('crud.column.action', '操作'),
@@ -569,7 +572,7 @@ export default function CrudExamplePage() {
         filterSearchText: t('crud.filter.search', '查询'),
         paginationTotalText: (total) =>
           t('crud.pagination.total', '共 {{total}} 条').replace('{{total}}', String(total)),
-        quickSearchPlaceholder: t('demo.crud.quickSearch.placeholder', '搜索名称 / 负责人'),
+        quickSearchPlaceholder: t('examples.crud.quickSearch.placeholder', '搜索名称 / 负责人'),
         searchText: t('crud.action.search', '搜索'),
       }}
       toolbarProps={{
@@ -589,27 +592,30 @@ export default function CrudExamplePage() {
       asideWidth={categoryFilterCollapsed ? 44 : 260}
       asideBodyClassName={
         categoryFilterCollapsed
-          ? 'trueadmin-demo-crud-aside is-collapsed'
-          : 'trueadmin-demo-crud-aside is-expanded'
+          ? 'trueadmin-examples-crud-aside is-collapsed'
+          : 'trueadmin-examples-crud-aside is-expanded'
       }
       aside={({ query }) => {
         const categoryScope = (query.values.categoryScope as CrudExampleCategoryFilter) ?? 'all';
 
         return (
           <>
-            <div className="trueadmin-demo-crud-aside-panel" aria-hidden={categoryFilterCollapsed}>
+            <div
+              className="trueadmin-examples-crud-aside-panel"
+              aria-hidden={categoryFilterCollapsed}
+            >
               <TrueAdminTreeFilter<CrudExampleCategoryTreeValue>
-                title={t('demo.crud.category.tree.title', '分类目录')}
-                placeholder={t('demo.crud.category.tree.placeholder', '搜索分类')}
-                emptyText={t('demo.crud.category.tree.empty', '暂无匹配分类')}
+                title={t('examples.crud.category.tree.title', '分类目录')}
+                placeholder={t('examples.crud.category.tree.placeholder', '搜索分类')}
+                emptyText={t('examples.crud.category.tree.empty', '暂无匹配分类')}
                 value={categoryScope}
                 loading={categoryTreeLoading}
-                expandAllText={t('demo.crud.category.tree.expandAll', '展开全部')}
-                collapseAllText={t('demo.crud.category.tree.collapseAll', '收起全部')}
-                reloadText={t('demo.crud.category.tree.reload', '刷新分类目录')}
+                expandAllText={t('examples.crud.category.tree.expandAll', '展开全部')}
+                collapseAllText={t('examples.crud.category.tree.collapseAll', '收起全部')}
+                reloadText={t('examples.crud.category.tree.reload', '刷新分类目录')}
                 onReload={handleReloadCategoryTree}
                 extra={
-                  <Tooltip title={t('demo.crud.category.tree.hide', '隐藏分类目录')}>
+                  <Tooltip title={t('examples.crud.category.tree.hide', '隐藏分类目录')}>
                     <Button
                       size="small"
                       type="text"
@@ -627,8 +633,14 @@ export default function CrudExamplePage() {
                 }}
               />
             </div>
-            <div className="trueadmin-demo-crud-aside-rail" aria-hidden={!categoryFilterCollapsed}>
-              <Tooltip title={t('demo.crud.category.tree.show', '显示分类目录')} placement="right">
+            <div
+              className="trueadmin-examples-crud-aside-rail"
+              aria-hidden={!categoryFilterCollapsed}
+            >
+              <Tooltip
+                title={t('examples.crud.category.tree.show', '显示分类目录')}
+                placement="right"
+              >
                 <Button
                   type="text"
                   icon={<MenuUnfoldOutlined />}
@@ -642,7 +654,7 @@ export default function CrudExamplePage() {
       rowActions={{
         render: ({ record }) => (
           <Button key="edit" type="link" size="small" onClick={() => openEditForm(record)}>
-            {t('demo.crud.action.edit', '编辑')}
+            {t('examples.crud.action.edit', '编辑')}
           </Button>
         ),
         width: 150,
@@ -653,21 +665,24 @@ export default function CrudExamplePage() {
       }}
       extra={
         <Button type="primary" icon={<PlusOutlined />} onClick={openCreateForm}>
-          {t('demo.crud.action.create', '新增')}
+          {t('examples.crud.action.create', '新增')}
         </Button>
       }
       importExport={{
         import: {
           accept: '.xlsx,.xls,.csv',
-          description: t('demo.crud.import.description', '请先下载模板，按模板整理数据后上传。'),
+          description: t(
+            'examples.crud.import.description',
+            '请先下载模板，按模板整理数据后上传。',
+          ),
           template: {
             onDownload: () =>
-              message.info(t('demo.crud.message.downloadTemplate', '已触发下载导入模板')),
+              message.info(t('examples.crud.message.downloadTemplate', '已触发下载导入模板')),
           },
           onConfirm: async (file) => {
             await wait(350);
             message.success(
-              t('demo.crud.message.importSuccess', '已确认导入：{{name}}').replace(
+              t('examples.crud.message.importSuccess', '已确认导入：{{name}}').replace(
                 '{{name}}',
                 file.name,
               ),
@@ -678,10 +693,10 @@ export default function CrudExamplePage() {
           onExport: (type) => {
             const messageKey =
               type === 'page'
-                ? 'demo.crud.message.exportPage'
+                ? 'examples.crud.message.exportPage'
                 : type === 'selected'
-                  ? 'demo.crud.message.exportSelected'
-                  : 'demo.crud.message.exportFilteredAll';
+                  ? 'examples.crud.message.exportSelected'
+                  : 'examples.crud.message.exportFilteredAll';
             const fallback =
               type === 'page'
                 ? '已触发导出当页'
@@ -699,28 +714,28 @@ export default function CrudExamplePage() {
         const visitTrend = response?.meta?.visitTrend ?? [];
         const statusTrend = response?.meta?.statusTrend ?? [];
         const enabledChartData = [
-          { label: t('demo.crud.summary.enabled', '启用配置'), value: enabledCount },
+          { label: t('examples.crud.summary.enabled', '启用配置'), value: enabledCount },
           {
-            label: t('demo.crud.summary.disabledOther', '其他配置'),
+            label: t('examples.crud.summary.disabledOther', '其他配置'),
             value: Math.max(allCount - enabledCount, 0),
           },
         ];
 
         return (
-          <Row className="trueadmin-demo-crud-summary" gutter={[12, 12]}>
+          <Row className="trueadmin-examples-crud-summary" gutter={[12, 12]}>
             <Col xs={24} sm={12} xl={6}>
               <StatisticCard
-                className="trueadmin-demo-crud-summary-card"
+                className="trueadmin-examples-crud-summary-card"
                 chartPlacement="right"
                 styles={summaryCardStyles}
                 statistic={{
-                  title: t('demo.crud.summary.currentTotal', '当前结果'),
+                  title: t('examples.crud.summary.currentTotal', '当前结果'),
                   value: total,
-                  suffix: t('demo.crud.summary.unit.items', '项'),
+                  suffix: t('examples.crud.summary.unit.items', '项'),
                   styles: { content: { fontSize: 20 } },
                 }}
                 chart={
-                  <div className="trueadmin-demo-crud-summary-chart">
+                  <div className="trueadmin-examples-crud-summary-chart">
                     <Tiny.Line
                       data={statusTrend}
                       xField="period"
@@ -737,18 +752,18 @@ export default function CrudExamplePage() {
             </Col>
             <Col xs={24} sm={12} xl={6}>
               <StatisticCard
-                className="trueadmin-demo-crud-summary-card"
+                className="trueadmin-examples-crud-summary-card"
                 chartPlacement="right"
                 styles={summaryCardStyles}
                 statistic={{
-                  title: t('demo.crud.summary.enabled', '启用配置'),
+                  title: t('examples.crud.summary.enabled', '启用配置'),
                   value: enabledCount,
-                  suffix: t('demo.crud.summary.unit.items', '项'),
+                  suffix: t('examples.crud.summary.unit.items', '项'),
                   trend: 'up',
                   styles: { content: { fontSize: 20 } },
                 }}
                 chart={
-                  <div className="trueadmin-demo-crud-summary-chart is-pie">
+                  <div className="trueadmin-examples-crud-summary-chart is-pie">
                     <Pie
                       data={enabledChartData}
                       angleField="value"
@@ -767,18 +782,18 @@ export default function CrudExamplePage() {
             </Col>
             <Col xs={24} sm={12} xl={6}>
               <StatisticCard
-                className="trueadmin-demo-crud-summary-card"
+                className="trueadmin-examples-crud-summary-card"
                 chartPlacement="right"
                 styles={summaryCardStyles}
                 statistic={{
-                  title: t('demo.crud.summary.todayUpdated', '今日更新'),
+                  title: t('examples.crud.summary.todayUpdated', '今日更新'),
                   value: response?.meta?.todayUpdated ?? 0,
-                  suffix: t('demo.crud.summary.unit.items', '项'),
+                  suffix: t('examples.crud.summary.unit.items', '项'),
                   status: 'processing',
                   styles: { content: { fontSize: 20 } },
                 }}
                 chart={
-                  <div className="trueadmin-demo-crud-summary-chart">
+                  <div className="trueadmin-examples-crud-summary-chart">
                     <Tiny.Column
                       data={statusTrend}
                       xField="period"
@@ -794,17 +809,17 @@ export default function CrudExamplePage() {
             </Col>
             <Col xs={24} sm={12} xl={6}>
               <StatisticCard
-                className="trueadmin-demo-crud-summary-card"
+                className="trueadmin-examples-crud-summary-card"
                 chartPlacement="right"
                 styles={summaryCardStyles}
                 statistic={{
-                  title: t('demo.crud.summary.totalVisits', '累计访问'),
+                  title: t('examples.crud.summary.totalVisits', '累计访问'),
                   value: response?.meta?.totalVisits ?? 0,
                   formatter: (value) => formatCompactNumber(Number(value ?? 0)),
                   styles: { content: { fontSize: 20 } },
                 }}
                 chart={
-                  <div className="trueadmin-demo-crud-summary-chart">
+                  <div className="trueadmin-examples-crud-summary-chart">
                     <Tiny.Area
                       data={visitTrend}
                       xField="period"
@@ -846,37 +861,37 @@ export default function CrudExamplePage() {
                     {
                       key: 'enable',
                       icon: <CheckCircleOutlined />,
-                      label: t('demo.crud.batch.enable', '批量启用'),
+                      label: t('examples.crud.batch.enable', '批量启用'),
                     },
                     {
                       danger: true,
                       key: 'delete',
                       icon: <DeleteOutlined />,
-                      label: t('demo.crud.batch.delete', '批量删除'),
+                      label: t('examples.crud.batch.delete', '批量删除'),
                     },
                   ],
                   onClick: ({ key }) => {
                     if (key === 'enable') {
-                      message.info(t('demo.crud.message.batchEnable', '已触发批量启用'));
+                      message.info(t('examples.crud.message.batchEnable', '已触发批量启用'));
                       return;
                     }
                     if (key === 'delete') {
-                      message.info(t('demo.crud.message.batchDelete', '已触发批量删除'));
+                      message.info(t('examples.crud.message.batchDelete', '已触发批量删除'));
                       setSelectedRows([]);
                     }
                   },
                 }}
               >
                 <Button disabled={!hasSelectedRows} icon={<DownOutlined />}>
-                  {t('demo.crud.batch.actions', '批量操作')}
+                  {t('examples.crud.batch.actions', '批量操作')}
                 </Button>
               </Dropdown>
             </Space>
             <Modal
               title={
                 editingRecord
-                  ? t('demo.crud.form.editTitle', '编辑配置')
-                  : t('demo.crud.form.createTitle', '新增配置')
+                  ? t('examples.crud.form.editTitle', '编辑配置')
+                  : t('examples.crud.form.createTitle', '新增配置')
               }
               open={formOpen}
               confirmLoading={formSubmitting}
@@ -902,23 +917,26 @@ export default function CrudExamplePage() {
               >
                 <Form.Item
                   name="name"
-                  label={t('demo.crud.column.name', '名称')}
+                  label={t('examples.crud.column.name', '名称')}
                   rules={[
-                    { required: true, message: t('demo.crud.form.nameRequired', '请输入名称') },
+                    { required: true, message: t('examples.crud.form.nameRequired', '请输入名称') },
                   ]}
                 >
                   <Input />
                 </Form.Item>
                 <Form.Item
                   name="owner"
-                  label={t('demo.crud.column.owner', '负责人')}
+                  label={t('examples.crud.column.owner', '负责人')}
                   rules={[
-                    { required: true, message: t('demo.crud.form.ownerRequired', '请输入负责人') },
+                    {
+                      required: true,
+                      message: t('examples.crud.form.ownerRequired', '请输入负责人'),
+                    },
                   ]}
                 >
                   <Input />
                 </Form.Item>
-                <Form.Item name="status" label={t('demo.crud.column.status', '状态')}>
+                <Form.Item name="status" label={t('examples.crud.column.status', '状态')}>
                   <Select
                     options={[
                       { label: statusText.enabled, value: 'enabled' },
@@ -927,7 +945,7 @@ export default function CrudExamplePage() {
                     ]}
                   />
                 </Form.Item>
-                <Form.Item name="category" label={t('demo.crud.column.category', '分类')}>
+                <Form.Item name="category" label={t('examples.crud.column.category', '分类')}>
                   <Select
                     options={[
                       { label: categoryText.system, value: 'system' },

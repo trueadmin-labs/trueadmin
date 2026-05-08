@@ -1,0 +1,12 @@
+{
+  "id": "true-admin.examples",
+  "vendor": "true-admin",
+  "name": "examples",
+  "displayName": "Development Examples",
+  "description": "Official TrueAdmin frontend examples for layout, CRUD, loading, permission, form, and detail pages.",
+  "official": true,
+  "version": "0.1.0",
+  "runtime": {
+    "manifest": "manifest.ts"
+  }
+}

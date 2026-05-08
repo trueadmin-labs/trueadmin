@@ -113,49 +113,49 @@ function SalesOrderFormBody({ variant = 'page' }: SalesOrderFormBodyProps) {
 
   const salesColumns = useMemo<ColumnsType<SalesItem>>(
     () => [
-      { title: t('demo.complexForm.detail.product', '商品'), dataIndex: 'product', width: 180 },
-      { title: t('demo.complexForm.detail.spec', '规格'), dataIndex: 'spec', width: 180 },
-      { title: t('demo.complexForm.detail.unit', '单位'), dataIndex: 'unit', width: 70 },
+      { title: t('examples.complexForm.detail.product', '商品'), dataIndex: 'product', width: 180 },
+      { title: t('examples.complexForm.detail.spec', '规格'), dataIndex: 'spec', width: 180 },
+      { title: t('examples.complexForm.detail.unit', '单位'), dataIndex: 'unit', width: 70 },
       {
-        title: t('demo.complexForm.detail.quantity', '数量'),
+        title: t('examples.complexForm.detail.quantity', '数量'),
         dataIndex: 'quantity',
         align: 'right',
         width: 90,
       },
       {
-        title: t('demo.complexForm.detail.price', '单价'),
+        title: t('examples.complexForm.detail.price', '单价'),
         dataIndex: 'price',
         align: 'right',
         width: 120,
         render: (value) => formatCurrency(Number(value)),
       },
       {
-        title: t('demo.complexForm.detail.taxRate', '税率'),
+        title: t('examples.complexForm.detail.taxRate', '税率'),
         dataIndex: 'taxRate',
         align: 'right',
         width: 90,
         render: (value) => `${String(value)}%`,
       },
       {
-        title: t('demo.complexForm.detail.amount', '金额'),
+        title: t('examples.complexForm.detail.amount', '金额'),
         key: 'amount',
         align: 'right',
         width: 130,
         render: (_, record) => formatCurrency(record.quantity * record.price),
       },
       {
-        title: t('demo.complexForm.detail.deliveryDate', '交付日期'),
+        title: t('examples.complexForm.detail.deliveryDate', '交付日期'),
         dataIndex: 'deliveryDate',
         width: 120,
       },
       {
-        title: t('demo.complexForm.detail.action', '操作'),
+        title: t('examples.complexForm.detail.action', '操作'),
         key: 'action',
         fixed: 'right',
         width: 90,
         render: () => (
           <Button type="link" size="small" danger icon={<DeleteOutlined />}>
-            {t('demo.complexForm.action.delete', '删除')}
+            {t('examples.complexForm.action.delete', '删除')}
           </Button>
         ),
       },
@@ -165,22 +165,22 @@ function SalesOrderFormBody({ variant = 'page' }: SalesOrderFormBodyProps) {
 
   const feeColumns = useMemo<ColumnsType<OtherFee>>(
     () => [
-      { title: t('demo.complexForm.fee.name', '费用名称'), dataIndex: 'name', width: 180 },
+      { title: t('examples.complexForm.fee.name', '费用名称'), dataIndex: 'name', width: 180 },
       {
-        title: t('demo.complexForm.fee.amount', '金额'),
+        title: t('examples.complexForm.fee.amount', '金额'),
         dataIndex: 'amount',
         align: 'right',
         width: 140,
         render: (value) => formatCurrency(Number(value)),
       },
-      { title: t('demo.complexForm.fee.remark', '备注'), dataIndex: 'remark' },
+      { title: t('examples.complexForm.fee.remark', '备注'), dataIndex: 'remark' },
       {
-        title: t('demo.complexForm.detail.action', '操作'),
+        title: t('examples.complexForm.detail.action', '操作'),
         key: 'action',
         width: 90,
         render: () => (
           <Button type="link" size="small" danger>
-            {t('demo.complexForm.action.delete', '删除')}
+            {t('examples.complexForm.action.delete', '删除')}
           </Button>
         ),
       },
@@ -212,11 +212,11 @@ function SalesOrderFormBody({ variant = 'page' }: SalesOrderFormBodyProps) {
       <Row gutter={[12, 12]} align="top">
         <Col xs={24} xl={mainSpan}>
           <Space className="trueadmin-complex-form-stack" orientation="vertical" size={12}>
-            <Card size="small" title={t('demo.complexForm.basic.title', '基础信息')}>
+            <Card size="small" title={t('examples.complexForm.basic.title', '基础信息')}>
               <Row gutter={12}>
                 <Col xs={24} md={12} xl={isModal ? 12 : 8}>
                   <Form.Item
-                    label={t('demo.complexForm.basic.customer', '客户')}
+                    label={t('examples.complexForm.basic.customer', '客户')}
                     name="customer"
                     rules={[{ required: true }]}
                   >
@@ -231,7 +231,7 @@ function SalesOrderFormBody({ variant = 'page' }: SalesOrderFormBodyProps) {
                 </Col>
                 <Col xs={24} md={12} xl={isModal ? 12 : 8}>
                   <Form.Item
-                    label={t('demo.complexForm.basic.salesperson', '销售员')}
+                    label={t('examples.complexForm.basic.salesperson', '销售员')}
                     name="salesperson"
                     rules={[{ required: true }]}
                   >
@@ -245,17 +245,17 @@ function SalesOrderFormBody({ variant = 'page' }: SalesOrderFormBodyProps) {
                 </Col>
                 <Col xs={24} md={12} xl={isModal ? 12 : 8}>
                   <Form.Item
-                    label={t('demo.complexForm.basic.orderType', '订单类型')}
+                    label={t('examples.complexForm.basic.orderType', '订单类型')}
                     name="orderType"
                   >
                     <Select
                       options={[
                         {
-                          label: t('demo.complexForm.orderType.standard', '标准订单'),
+                          label: t('examples.complexForm.orderType.standard', '标准订单'),
                           value: 'standard',
                         },
                         {
-                          label: t('demo.complexForm.orderType.custom', '定制订单'),
+                          label: t('examples.complexForm.orderType.custom', '定制订单'),
                           value: 'custom',
                         },
                       ]}
@@ -264,7 +264,7 @@ function SalesOrderFormBody({ variant = 'page' }: SalesOrderFormBodyProps) {
                 </Col>
                 <Col xs={24} md={12} xl={isModal ? 12 : 8}>
                   <Form.Item
-                    label={t('demo.complexForm.basic.orderDate', '下单日期')}
+                    label={t('examples.complexForm.basic.orderDate', '下单日期')}
                     name="orderDate"
                   >
                     <DatePicker style={{ width: '100%' }} />
@@ -272,20 +272,23 @@ function SalesOrderFormBody({ variant = 'page' }: SalesOrderFormBodyProps) {
                 </Col>
                 <Col xs={24} md={12} xl={isModal ? 12 : 8}>
                   <Form.Item
-                    label={t('demo.complexForm.basic.expectedDeliveryDate', '期望交货日期')}
+                    label={t('examples.complexForm.basic.expectedDeliveryDate', '期望交货日期')}
                     name="expectedDeliveryDate"
                   >
                     <DatePicker style={{ width: '100%' }} />
                   </Form.Item>
                 </Col>
                 <Col xs={24} md={12} xl={isModal ? 12 : 8}>
-                  <Form.Item label={t('demo.complexForm.basic.contact', '联系人')} name="contact">
+                  <Form.Item
+                    label={t('examples.complexForm.basic.contact', '联系人')}
+                    name="contact"
+                  >
                     <Input />
                   </Form.Item>
                 </Col>
                 <Col xs={24} md={12} xl={isModal ? 12 : 8}>
                   <Form.Item
-                    label={t('demo.complexForm.basic.contactPhone', '联系电话')}
+                    label={t('examples.complexForm.basic.contactPhone', '联系电话')}
                     name="contactPhone"
                   >
                     <Input />
@@ -294,11 +297,11 @@ function SalesOrderFormBody({ variant = 'page' }: SalesOrderFormBodyProps) {
               </Row>
             </Card>
 
-            <Card size="small" title={t('demo.complexForm.shipping.title', '收货信息')}>
+            <Card size="small" title={t('examples.complexForm.shipping.title', '收货信息')}>
               <Row gutter={12}>
                 <Col xs={24} lg={12}>
                   <Form.Item
-                    label={t('demo.complexForm.shipping.address', '收货地址')}
+                    label={t('examples.complexForm.shipping.address', '收货地址')}
                     name="address"
                     rules={[{ required: true }]}
                   >
@@ -307,7 +310,7 @@ function SalesOrderFormBody({ variant = 'page' }: SalesOrderFormBodyProps) {
                 </Col>
                 <Col xs={24} md={12} lg={6}>
                   <Form.Item
-                    label={t('demo.complexForm.shipping.receiver', '联系人')}
+                    label={t('examples.complexForm.shipping.receiver', '联系人')}
                     name="receiver"
                   >
                     <Input />
@@ -315,7 +318,7 @@ function SalesOrderFormBody({ variant = 'page' }: SalesOrderFormBodyProps) {
                 </Col>
                 <Col xs={24} md={12} lg={6}>
                   <Form.Item
-                    label={t('demo.complexForm.shipping.receiverPhone', '联系电话')}
+                    label={t('examples.complexForm.shipping.receiverPhone', '联系电话')}
                     name="receiverPhone"
                   >
                     <Input />
@@ -324,11 +327,11 @@ function SalesOrderFormBody({ variant = 'page' }: SalesOrderFormBodyProps) {
               </Row>
             </Card>
 
-            <Card size="small" title={t('demo.complexForm.logistics.title', '物流信息')}>
+            <Card size="small" title={t('examples.complexForm.logistics.title', '物流信息')}>
               <Row gutter={12}>
                 <Col xs={24} md={8}>
                   <Form.Item
-                    label={t('demo.complexForm.logistics.company', '物流公司')}
+                    label={t('examples.complexForm.logistics.company', '物流公司')}
                     name="logisticsCompany"
                   >
                     <Input />
@@ -336,7 +339,7 @@ function SalesOrderFormBody({ variant = 'page' }: SalesOrderFormBodyProps) {
                 </Col>
                 <Col xs={24} md={8}>
                   <Form.Item
-                    label={t('demo.complexForm.logistics.no', '物流单号')}
+                    label={t('examples.complexForm.logistics.no', '物流单号')}
                     name="logisticsNo"
                   >
                     <Input />
@@ -344,7 +347,7 @@ function SalesOrderFormBody({ variant = 'page' }: SalesOrderFormBodyProps) {
                 </Col>
                 <Col xs={24} md={8}>
                   <Form.Item
-                    label={t('demo.complexForm.logistics.fee', '物流费用')}
+                    label={t('examples.complexForm.logistics.fee', '物流费用')}
                     name="logisticsFee"
                   >
                     <InputNumber min={0} precision={2} style={{ width: '100%' }} />
@@ -355,10 +358,10 @@ function SalesOrderFormBody({ variant = 'page' }: SalesOrderFormBodyProps) {
 
             <Card
               size="small"
-              title={t('demo.complexForm.detail.title', '销售明细')}
+              title={t('examples.complexForm.detail.title', '销售明细')}
               extra={
                 <Button size="small" icon={<PlusOutlined />}>
-                  {t('demo.complexForm.action.addDetail', '添加明细')}
+                  {t('examples.complexForm.action.addDetail', '添加明细')}
                 </Button>
               }
             >
@@ -373,7 +376,7 @@ function SalesOrderFormBody({ variant = 'page' }: SalesOrderFormBodyProps) {
                   <Table.Summary.Row>
                     <Table.Summary.Cell index={0} colSpan={6}>
                       <Typography.Text strong>
-                        {t('demo.complexForm.detail.subtotal', '明细小计')}
+                        {t('examples.complexForm.detail.subtotal', '明细小计')}
                       </Typography.Text>
                     </Table.Summary.Cell>
                     <Table.Summary.Cell index={6} align="right">
@@ -387,21 +390,21 @@ function SalesOrderFormBody({ variant = 'page' }: SalesOrderFormBodyProps) {
 
             <Card
               size="small"
-              title={t('demo.complexForm.fee.title', '费用信息')}
+              title={t('examples.complexForm.fee.title', '费用信息')}
               extra={
                 <Button size="small" icon={<PlusOutlined />}>
-                  {t('demo.complexForm.action.addFee', '添加费用')}
+                  {t('examples.complexForm.action.addFee', '添加费用')}
                 </Button>
               }
             >
               <Row gutter={[12, 12]}>
                 <Col xs={24} md={8}>
-                  <Form.Item label={t('demo.complexForm.fee.discount', '折扣')} name="discount">
+                  <Form.Item label={t('examples.complexForm.fee.discount', '折扣')} name="discount">
                     <InputNumber min={0} precision={2} style={{ width: '100%' }} />
                   </Form.Item>
                 </Col>
                 <Col xs={24} md={16}>
-                  <Form.Item label={t('demo.complexForm.fee.remark', '备注')} name="feeRemark">
+                  <Form.Item label={t('examples.complexForm.fee.remark', '备注')} name="feeRemark">
                     <Input />
                   </Form.Item>
                 </Col>
@@ -415,14 +418,14 @@ function SalesOrderFormBody({ variant = 'page' }: SalesOrderFormBodyProps) {
               />
             </Card>
 
-            <Card size="small" title={t('demo.complexForm.other.title', '其他信息')}>
+            <Card size="small" title={t('examples.complexForm.other.title', '其他信息')}>
               <Row gutter={12}>
                 <Col xs={24} lg={12}>
-                  <Form.Item label={t('demo.complexForm.other.remark', '备注')} name="remark">
+                  <Form.Item label={t('examples.complexForm.other.remark', '备注')} name="remark">
                     <Input.TextArea
                       autoSize={{ minRows: 4, maxRows: 8 }}
                       placeholder={t(
-                        'demo.complexForm.other.remarkPlaceholder',
+                        'examples.complexForm.other.remarkPlaceholder',
                         '填写订单特殊约定、开票要求或内部备注',
                       )}
                     />
@@ -430,7 +433,7 @@ function SalesOrderFormBody({ variant = 'page' }: SalesOrderFormBodyProps) {
                 </Col>
                 <Col xs={24} lg={12}>
                   <Form.Item
-                    label={t('demo.complexForm.other.attachment', '附件')}
+                    label={t('examples.complexForm.other.attachment', '附件')}
                     name="attachments"
                     valuePropName="fileList"
                     getValueFromEvent={(event) => (Array.isArray(event) ? event : event?.fileList)}
@@ -440,11 +443,14 @@ function SalesOrderFormBody({ variant = 'page' }: SalesOrderFormBodyProps) {
                         <InboxOutlined />
                       </p>
                       <p className="ant-upload-text">
-                        {t('demo.complexForm.other.uploadTitle', '拖拽合同、报价单或附件到这里')}
+                        {t(
+                          'examples.complexForm.other.uploadTitle',
+                          '拖拽合同、报价单或附件到这里',
+                        )}
                       </p>
                       <p className="ant-upload-hint">
                         {t(
-                          'demo.complexForm.other.uploadHint',
+                          'examples.complexForm.other.uploadHint',
                           '支持多文件上传，提交前不会真实上传。',
                         )}
                       </p>
@@ -458,65 +464,68 @@ function SalesOrderFormBody({ variant = 'page' }: SalesOrderFormBodyProps) {
 
         <Col xs={24} xl={sideSpan}>
           <div className="trueadmin-complex-form-side">
-            <Card size="small" title={t('demo.complexForm.amount.title', '金额统计')}>
+            <Card size="small" title={t('examples.complexForm.amount.title', '金额统计')}>
               <div className="trueadmin-complex-form-amount-row">
-                <span>{t('demo.complexForm.amount.detailTotal', '商品金额')}</span>
+                <span>{t('examples.complexForm.amount.detailTotal', '商品金额')}</span>
                 <Typography.Text>{formatCurrency(detailTotal)}</Typography.Text>
               </div>
               <div className="trueadmin-complex-form-amount-row">
-                <span>{t('demo.complexForm.amount.otherFees', '其他费用')}</span>
+                <span>{t('examples.complexForm.amount.otherFees', '其他费用')}</span>
                 <Typography.Text>{formatCurrency(feeTotal)}</Typography.Text>
               </div>
               <div className="trueadmin-complex-form-amount-row">
-                <span>{t('demo.complexForm.amount.logisticsFee', '物流费用')}</span>
+                <span>{t('examples.complexForm.amount.logisticsFee', '物流费用')}</span>
                 <Typography.Text>{formatCurrency(logisticsFee)}</Typography.Text>
               </div>
               <div className="trueadmin-complex-form-amount-row is-negative">
-                <span>{t('demo.complexForm.amount.discount', '折扣')}</span>
+                <span>{t('examples.complexForm.amount.discount', '折扣')}</span>
                 <Typography.Text>-{formatCurrency(discount)}</Typography.Text>
               </div>
               <Divider />
               <div className="trueadmin-complex-form-amount-row is-total">
-                <span>{t('demo.complexForm.amount.receivable', '应收金额')}</span>
+                <span>{t('examples.complexForm.amount.receivable', '应收金额')}</span>
                 <Typography.Text>{formatCurrency(receivableAmount)}</Typography.Text>
               </div>
             </Card>
 
-            <Card size="small" title={t('demo.complexForm.prepay.title', '预付款信息')}>
+            <Card size="small" title={t('examples.complexForm.prepay.title', '预付款信息')}>
               <Form.Item
-                label={t('demo.complexForm.prepay.method', '付款方式')}
+                label={t('examples.complexForm.prepay.method', '付款方式')}
                 name="prepayMethod"
               >
                 <Select
                   options={[
                     {
-                      label: t('demo.complexForm.prepay.method.bank', '银行转账'),
+                      label: t('examples.complexForm.prepay.method.bank', '银行转账'),
                       value: 'bank',
                     },
-                    { label: t('demo.complexForm.prepay.method.cash', '现金'), value: 'cash' },
+                    { label: t('examples.complexForm.prepay.method.cash', '现金'), value: 'cash' },
                   ]}
                 />
               </Form.Item>
               <Form.Item
-                label={t('demo.complexForm.prepay.amount', '预付款金额')}
+                label={t('examples.complexForm.prepay.amount', '预付款金额')}
                 name="prepaidAmount"
               >
                 <InputNumber min={0} precision={2} style={{ width: '100%' }} />
               </Form.Item>
-              <Form.Item label={t('demo.complexForm.prepay.date', '预付款日期')} name="prepayDate">
+              <Form.Item
+                label={t('examples.complexForm.prepay.date', '预付款日期')}
+                name="prepayDate"
+              >
                 <DatePicker style={{ width: '100%' }} />
               </Form.Item>
               <div className="trueadmin-complex-form-amount-row is-balance">
-                <span>{t('demo.complexForm.amount.balance', '待收余额')}</span>
+                <span>{t('examples.complexForm.amount.balance', '待收余额')}</span>
                 <Typography.Text>{formatCurrency(balanceAmount)}</Typography.Text>
               </div>
             </Card>
 
-            <Card size="small" title={t('demo.complexForm.process.title', '订单状态')}>
+            <Card size="small" title={t('examples.complexForm.process.title', '订单状态')}>
               <Space wrap size={6}>
-                <Tag color="processing">{t('demo.complexForm.process.draft', '草稿')}</Tag>
-                <Tag>{t('demo.complexForm.process.audit', '待审核')}</Tag>
-                <Tag>{t('demo.complexForm.process.delivery', '待交付')}</Tag>
+                <Tag color="processing">{t('examples.complexForm.process.draft', '草稿')}</Tag>
+                <Tag>{t('examples.complexForm.process.audit', '待审核')}</Tag>
+                <Tag>{t('examples.complexForm.process.delivery', '待交付')}</Tag>
               </Space>
             </Card>
           </div>
@@ -533,12 +542,14 @@ export default function ComplexFormExamplePage() {
   const headerExtra = (
     <Space size={8} wrap>
       <Button onClick={() => setModalOpen(true)}>
-        {t('demo.complexForm.action.openModal', '弹窗承接')}
+        {t('examples.complexForm.action.openModal', '弹窗承接')}
       </Button>
-      <Button>{t('demo.complexForm.action.cancel', '取消')}</Button>
-      <Button icon={<SaveOutlined />}>{t('demo.complexForm.action.saveDraft', '保存草稿')}</Button>
+      <Button>{t('examples.complexForm.action.cancel', '取消')}</Button>
+      <Button icon={<SaveOutlined />}>
+        {t('examples.complexForm.action.saveDraft', '保存草稿')}
+      </Button>
       <Button type="primary" icon={<SendOutlined />}>
-        {t('demo.complexForm.action.submit', '提交订单')}
+        {t('examples.complexForm.action.submit', '提交订单')}
       </Button>
     </Space>
   );
@@ -547,9 +558,9 @@ export default function ComplexFormExamplePage() {
     <>
       <TrueAdminFormPage
         showHeader
-        title={t('demo.complexForm.title', '复杂表单示例')}
+        title={t('examples.complexForm.title', '复杂表单示例')}
         description={t(
-          'demo.complexForm.description',
+          'examples.complexForm.description',
           '销售订单表单，覆盖分块录入、明细表格、费用与金额统计。',
         )}
         extra={headerExtra}
@@ -557,7 +568,7 @@ export default function ComplexFormExamplePage() {
         <SalesOrderFormBody />
       </TrueAdminFormPage>
       <TrueAdminPageModal
-        title={t('demo.complexForm.modal.title', '销售订单')}
+        title={t('examples.complexForm.modal.title', '销售订单')}
         open={modalOpen}
         className="trueadmin-complex-form-modal"
         scrollClassName="trueadmin-complex-form-modal-shadow"
@@ -565,13 +576,13 @@ export default function ComplexFormExamplePage() {
         footer={
           <Space size={8} wrap>
             <Button onClick={() => setModalOpen(false)}>
-              {t('demo.complexForm.action.cancel', '取消')}
+              {t('examples.complexForm.action.cancel', '取消')}
             </Button>
             <Button icon={<SaveOutlined />}>
-              {t('demo.complexForm.action.saveDraft', '保存草稿')}
+              {t('examples.complexForm.action.saveDraft', '保存草稿')}
             </Button>
             <Button type="primary" icon={<SendOutlined />}>
-              {t('demo.complexForm.action.submit', '提交订单')}
+              {t('examples.complexForm.action.submit', '提交订单')}
             </Button>
           </Space>
         }

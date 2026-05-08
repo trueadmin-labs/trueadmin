@@ -1040,35 +1040,35 @@ body,
   margin-bottom: 10px;
 }
 
-.trueadmin-demo-crud-summary {
+.trueadmin-examples-crud-summary {
   min-width: 0;
 }
 
-.trueadmin-demo-crud-summary-card.ant-pro-card {
+.trueadmin-examples-crud-summary-card.ant-pro-card {
   min-width: 0;
   height: 104px;
   border-radius: 8px;
 }
 
-.trueadmin-demo-crud-summary-card .ant-pro-statistic-card-content {
+.trueadmin-examples-crud-summary-card .ant-pro-statistic-card-content {
   width: 100%;
   min-width: 0;
 }
 
-.trueadmin-demo-crud-summary-card .ant-pro-statistic-card-content-horizontal {
+.trueadmin-examples-crud-summary-card .ant-pro-statistic-card-content-horizontal {
   display: flex;
   min-height: 100%;
   align-items: center;
   gap: 12px;
 }
 
-.trueadmin-demo-crud-summary-card .ant-pro-card-statistic {
+.trueadmin-examples-crud-summary-card .ant-pro-card-statistic {
   flex: 0 0 auto;
   max-width: 44%;
   min-width: 72px;
 }
 
-.trueadmin-demo-crud-summary-card .ant-pro-statistic-card-chart {
+.trueadmin-examples-crud-summary-card .ant-pro-statistic-card-chart {
   flex: 1 1 auto;
   min-width: 0;
   margin-block: 0;
@@ -1077,12 +1077,12 @@ body,
   align-items: stretch;
 }
 
-.trueadmin-demo-crud-summary-chart {
+.trueadmin-examples-crud-summary-chart {
   width: 100%;
   height: 48px;
 }
 
-.trueadmin-demo-crud-summary-chart.is-pie {
+.trueadmin-examples-crud-summary-chart.is-pie {
   width: min(72px, 100%);
   height: 72px;
   margin-inline-start: auto;
@@ -1707,13 +1707,13 @@ body,
   text-align: center;
 }
 
-.trueadmin-demo-crud-aside {
+.trueadmin-examples-crud-aside {
   position: relative;
   overflow: hidden;
 }
 
-.trueadmin-demo-crud-aside-panel,
-.trueadmin-demo-crud-aside-rail {
+.trueadmin-examples-crud-aside-panel,
+.trueadmin-examples-crud-aside-rail {
   position: absolute;
   inset: 0;
   transition:
@@ -1722,31 +1722,31 @@ body,
     visibility 0.18s ease;
 }
 
-.trueadmin-demo-crud-aside-panel {
+.trueadmin-examples-crud-aside-panel {
   min-width: 260px;
 }
 
-.trueadmin-demo-crud-aside-rail {
+.trueadmin-examples-crud-aside-rail {
   display: flex;
   padding-top: 10px;
   justify-content: center;
 }
 
-.trueadmin-demo-crud-aside.is-expanded .trueadmin-demo-crud-aside-panel,
-.trueadmin-demo-crud-aside.is-collapsed .trueadmin-demo-crud-aside-rail {
+.trueadmin-examples-crud-aside.is-expanded .trueadmin-examples-crud-aside-panel,
+.trueadmin-examples-crud-aside.is-collapsed .trueadmin-examples-crud-aside-rail {
   opacity: 1;
   transform: translateX(0);
   visibility: visible;
 }
 
-.trueadmin-demo-crud-aside.is-expanded .trueadmin-demo-crud-aside-rail {
+.trueadmin-examples-crud-aside.is-expanded .trueadmin-examples-crud-aside-rail {
   opacity: 0;
   transform: translateX(-4px);
   visibility: hidden;
   pointer-events: none;
 }
 
-.trueadmin-demo-crud-aside.is-collapsed .trueadmin-demo-crud-aside-panel {
+.trueadmin-examples-crud-aside.is-collapsed .trueadmin-examples-crud-aside-panel {
   opacity: 0;
   transform: translateX(-8px);
   visibility: hidden;
@@ -1920,11 +1920,11 @@ body,
   backdrop-filter: blur(1px);
 }
 
-.trueadmin-demo-loading-form .ant-form-item:last-child {
+.trueadmin-examples-loading-form .ant-form-item:last-child {
   margin-bottom: 0;
 }
 
-.trueadmin-demo-modal-loading-content {
+.trueadmin-examples-modal-loading-content {
   padding-right: 4px;
 }
 

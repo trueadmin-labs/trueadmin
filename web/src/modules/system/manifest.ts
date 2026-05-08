@@ -8,7 +8,7 @@ export default defineModule({
     {
       path: '/system/users',
       component: lazy(() => import('./pages/users')),
-      meta: { title: 'system.users.title', pageType: 'crud-page', auth: true },
+      meta: { title: 'system.users.title', auth: true },
     },
   ],
   locales: {

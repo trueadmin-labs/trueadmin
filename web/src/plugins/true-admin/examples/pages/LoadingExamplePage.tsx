@@ -33,26 +33,26 @@ const createProfile = (
   version: number,
   t: (key?: string, fallback?: string) => string,
 ): DemoProfile => ({
-  id: `DEMO-${String(version).padStart(4, '0')}`,
-  name: t('demo.loading.profile.name', '数据权限配置'),
+  id: `EXAMPLE-${String(version).padStart(4, '0')}`,
+  name: t('examples.loading.profile.name', '数据权限配置'),
   owner:
     version % 2 === 0
-      ? t('demo.loading.profile.owner.system', '系统管理员')
-      : t('demo.loading.profile.owner.business', '业务管理员'),
+      ? t('examples.loading.profile.owner.system', '系统管理员')
+      : t('examples.loading.profile.owner.business', '业务管理员'),
   status:
     version % 2 === 0
-      ? t('demo.loading.profile.status.enabled', '已启用')
-      : t('demo.loading.profile.status.review', '待复核'),
+      ? t('examples.loading.profile.status.enabled', '已启用')
+      : t('examples.loading.profile.status.review', '待复核'),
   updatedAt: `2026-05-06 14:${String(20 + version).padStart(2, '0')}`,
   scope:
     version % 2 === 0
-      ? t('demo.loading.profile.scope.full', '全部组织')
-      : t('demo.loading.profile.scope.partial', '华东区域'),
-  approval: version % 2 === 0 ? t('demo.loading.profile.approval', '需要二次审批') : undefined,
+      ? t('examples.loading.profile.scope.full', '全部组织')
+      : t('examples.loading.profile.scope.partial', '华东区域'),
+  approval: version % 2 === 0 ? t('examples.loading.profile.approval', '需要二次审批') : undefined,
   remark:
     version % 3 === 0
       ? t(
-          'demo.loading.profile.remark',
+          'examples.loading.profile.remark',
           '本次刷新返回了更多字段，容器会从上一次确认的高度平滑调整到新的内容高度。',
         )
       : undefined,
@@ -69,31 +69,31 @@ function ProfileDescriptions({
 }) {
   return (
     <Descriptions size="small" column={1} bordered>
-      <Descriptions.Item label={t('demo.loading.profile.id', '编号')}>
+      <Descriptions.Item label={t('examples.loading.profile.id', '编号')}>
         {profile.id}
       </Descriptions.Item>
-      <Descriptions.Item label={t('demo.loading.profile.configName', '名称')}>
+      <Descriptions.Item label={t('examples.loading.profile.configName', '名称')}>
         {profile.name}
       </Descriptions.Item>
-      <Descriptions.Item label={t('demo.loading.profile.owner', '负责人')}>
+      <Descriptions.Item label={t('examples.loading.profile.owner', '负责人')}>
         {profile.owner}
       </Descriptions.Item>
-      <Descriptions.Item label={t('demo.loading.profile.status', '状态')}>
+      <Descriptions.Item label={t('examples.loading.profile.status', '状态')}>
         {profile.status}
       </Descriptions.Item>
-      <Descriptions.Item label={t('demo.loading.profile.updatedAt', '更新时间')}>
+      <Descriptions.Item label={t('examples.loading.profile.updatedAt', '更新时间')}>
         {profile.updatedAt}
       </Descriptions.Item>
-      <Descriptions.Item label={t('demo.loading.profile.scope', '生效范围')}>
+      <Descriptions.Item label={t('examples.loading.profile.scope', '生效范围')}>
         {profile.scope}
       </Descriptions.Item>
       {profile.approval ? (
-        <Descriptions.Item label={t('demo.loading.profile.approvalLabel', '审批策略')}>
+        <Descriptions.Item label={t('examples.loading.profile.approvalLabel', '审批策略')}>
           {profile.approval}
         </Descriptions.Item>
       ) : null}
       {profile.remark ? (
-        <Descriptions.Item label={t('demo.loading.profile.remarkLabel', '备注')}>
+        <Descriptions.Item label={t('examples.loading.profile.remarkLabel', '备注')}>
           {profile.remark}
         </Descriptions.Item>
       ) : null}
@@ -119,12 +119,12 @@ function ModalProfileContent({
         {Array.from({ length: recordCount }).map((_, index) => (
           <Descriptions.Item
             key={index}
-            label={`${t('demo.loading.modal.auditRecord', '处理记录')} ${index + 1}`}
+            label={`${t('examples.loading.modal.auditRecord', '处理记录')} ${index + 1}`}
           >
             {version % 2 === 0
-              ? t('demo.loading.modal.auditShort', '已完成基础字段同步。')
+              ? t('examples.loading.modal.auditShort', '已完成基础字段同步。')
               : t(
-                  'demo.loading.modal.auditLong',
+                  'examples.loading.modal.auditLong',
                   '本次返回了更长的处理记录，用来确认固定高度弹窗内的内容区域可以独立滚动。',
                 )}
           </Descriptions.Item>
@@ -206,17 +206,17 @@ export default function LoadingExamplePage() {
   const effectiveLoading = disableLoading ? false : detailLoading || refreshing;
 
   return (
-    <TrueAdminPage title={t('demo.loading.title', '加载态示例')}>
+    <TrueAdminPage title={t('examples.loading.title', '加载态示例')}>
       <Space orientation="vertical" size={16} className="trueadmin-example-stack">
-        <Card title={t('demo.loading.strategy.title', '容器级加载策略')} size="small">
+        <Card title={t('examples.loading.strategy.title', '容器级加载策略')} size="small">
           <Paragraph>
             {t(
-              'demo.loading.strategy.beforeCode',
+              'examples.loading.strategy.beforeCode',
               '路由切换使用页面级加载；详情页、编辑页、抽屉和局部内容建议使用',
             )}{' '}
             <Text code>{'<LoadingContainer />'}</Text>
             {t(
-              'demo.loading.strategy.afterCode',
+              'examples.loading.strategy.afterCode',
               '。默认只绑定首次加载，后台刷新是否遮罩由业务显式决定。',
             )}
           </Paragraph>
@@ -224,73 +224,73 @@ export default function LoadingExamplePage() {
             <Switch
               checked={keepChildren}
               onChange={setKeepChildren}
-              checkedChildren={t('demo.loading.keepChildren.on', '保留内容')}
-              unCheckedChildren={t('demo.loading.keepChildren.off', '替换内容')}
+              checkedChildren={t('examples.loading.keepChildren.on', '保留内容')}
+              unCheckedChildren={t('examples.loading.keepChildren.off', '替换内容')}
             />
             <Switch
               checked={disableLoading}
               onChange={setDisableLoading}
-              checkedChildren={t('demo.loading.disable.on', '禁用加载')}
-              unCheckedChildren={t('demo.loading.disable.off', '启用加载')}
+              checkedChildren={t('examples.loading.disable.on', '禁用加载')}
+              unCheckedChildren={t('examples.loading.disable.off', '启用加载')}
             />
             <Button icon={<ReloadOutlined />} onClick={reloadProfile}>
-              {t('demo.loading.reload', '模拟刷新')}
+              {t('examples.loading.reload', '模拟刷新')}
             </Button>
           </Space>
         </Card>
 
-        <Card title={t('demo.loading.detail.title', '详情容器加载')} size="small">
+        <Card title={t('examples.loading.detail.title', '详情容器加载')} size="small">
           <LoadingContainer
             loading={effectiveLoading}
             keepChildren={keepChildren}
             initialLoadingHeight={240}
-            tip={t('demo.loading.detail.tip', '正在读取详情')}
+            tip={t('examples.loading.detail.tip', '正在读取详情')}
           >
             {profile ? <ProfileDescriptions profile={profile} t={t} /> : null}
           </LoadingContainer>
         </Card>
 
         <Card
-          title={t('demo.loading.drawer.title', '抽屉内加载')}
+          title={t('examples.loading.drawer.title', '抽屉内加载')}
           size="small"
           extra={
             <Button type="primary" onClick={openDrawer}>
-              {t('demo.loading.drawer.open', '打开抽屉')}
+              {t('examples.loading.drawer.open', '打开抽屉')}
             </Button>
           }
         >
           <Paragraph>
             {t(
-              'demo.loading.drawer.description',
+              'examples.loading.drawer.description',
               '抽屉打开后再请求详情时，只应该让抽屉内容区域进入加载态，不要阻塞页面其它区域。',
             )}
           </Paragraph>
         </Card>
 
         <Card
-          title={t('demo.loading.modal.title', '弹窗内加载')}
+          title={t('examples.loading.modal.title', '弹窗内加载')}
           size="small"
           extra={
             <Button type="primary" onClick={openModal}>
-              {t('demo.loading.modal.open', '打开弹窗')}
+              {t('examples.loading.modal.open', '打开弹窗')}
             </Button>
           }
         >
           <Paragraph>
             {t(
-              'demo.loading.modal.description',
+              'examples.loading.modal.description',
               '弹窗 body 固定高度，内容区域内部滚动；加载动画基于固定视窗居中展示。',
             )}
           </Paragraph>
         </Card>
 
-        <Card title={t('demo.loading.form.title', '编辑表单加载')} size="small">
+        <Card title={t('examples.loading.form.title', '编辑表单加载')} size="small">
           <LoadingContainer loading={effectiveLoading} initialLoadingHeight={220}>
-            <Form className="trueadmin-demo-loading-form" layout="vertical" disabled={!profile}>
-              <Form.Item label={t('demo.loading.form.configName', '配置名称')}>
+            <Form className="trueadmin-examples-loading-form" layout="vertical" disabled={!profile}>
+              <Form.Item label={t('examples.loading.form.configName', '配置名称')}>
                 <Input value={profile?.name ?? ''} readOnly />
               </Form.Item>
-              <Form.Item label={t('demo.loading.form.owner', '负责人')}>
+              <Form.Item label={t('examples.loading.form.owner', '负责人')}>
                 <Input value={profile?.owner ?? ''} readOnly />
               </Form.Item>
             </Form>
@@ -299,7 +299,7 @@ export default function LoadingExamplePage() {
       </Space>
 
       <Modal
-        title={t('demo.loading.modal.detailTitle', '弹窗详情')}
+        title={t('examples.loading.modal.detailTitle', '弹窗详情')}
         open={modalOpen}
         onCancel={() => setModalOpen(false)}
         width={520}
@@ -310,10 +310,10 @@ export default function LoadingExamplePage() {
             loading={modalLoading}
             onClick={reloadModalProfile}
           >
-            {t('demo.loading.modal.reload', '刷新内容')}
+            {t('examples.loading.modal.reload', '刷新内容')}
           </Button>,
           <Button key="close" type="primary" onClick={() => setModalOpen(false)}>
-            {t('demo.loading.modal.close', '关闭')}
+            {t('examples.loading.modal.close', '关闭')}
           </Button>,
         ]}
       >
@@ -321,9 +321,9 @@ export default function LoadingExamplePage() {
           loading={modalLoading}
           layout="viewport"
           viewportHeight={320}
-          tip={t('demo.loading.modal.tip', '正在加载弹窗内容')}
+          tip={t('examples.loading.modal.tip', '正在加载弹窗内容')}
         >
-          <div className="trueadmin-demo-modal-loading-content">
+          <div className="trueadmin-examples-modal-loading-content">
             {modalProfile ? (
               <ModalProfileContent profile={modalProfile} version={modalVersion} t={t} />
             ) : null}
@@ -332,7 +332,7 @@ export default function LoadingExamplePage() {
       </Modal>
 
       <Drawer
-        title={t('demo.loading.drawer.detailTitle', '详情抽屉')}
+        title={t('examples.loading.drawer.detailTitle', '详情抽屉')}
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         width={420}
@@ -341,7 +341,7 @@ export default function LoadingExamplePage() {
           loading={drawerLoading}
           mode="spin"
           initialLoadingHeight={220}
-          tip={t('demo.loading.drawer.tip', '正在加载抽屉数据')}
+          tip={t('examples.loading.drawer.tip', '正在加载抽屉数据')}
         >
           {drawerProfile ? <ProfileDescriptions profile={drawerProfile} t={t} /> : null}
         </LoadingContainer>
