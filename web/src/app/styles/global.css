@@ -973,7 +973,7 @@ body,
   overflow: hidden;
   border: 1px solid var(--trueadmin-shell-border);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.78);
+  background: var(--ant-color-bg-container, #fff);
   transition:
     width 0.2s ease,
     flex-basis 0.2s ease,
@@ -998,7 +998,7 @@ body,
 
 .trueadmin-shell.is-dark .trueadmin-crud-page-aside {
   border-color: var(--trueadmin-shell-dark-border);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--ant-color-bg-container, #141414);
 }
 
 .trueadmin-crud-shell {
