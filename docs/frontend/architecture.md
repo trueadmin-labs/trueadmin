@@ -99,6 +99,8 @@ import { TrueAdminUserSelect } from '@/modules/system/components/TrueAdminUserSe
 
 `core` 只放无领域归属的框架通用能力。用户选择器、部门选择器、客户选择器、商品选择器等带明确业务领域的组件，应保留在所属模块或插件中，并通过公开出口给其他模块使用。第一阶段不要求在 `manifest.ts` 中声明模块依赖；依赖关系由静态 import 和 TypeScript 编译直接约束。
 
+页面容器、CRUD 和页面型弹窗属于框架稳定 API，应通过 `@core/page`、`@core/crud`、`@core/modal` 公开出口导入。容器选择、标题/操作区、滚动区和版权显示规范见 [页面容器分层规范](./page-container.md)。
+
 ## 配置体系
 
 前端使用 `web/config` 作为唯一项目级配置入口。配置文件内部读取 `import.meta.env`，业务代码禁止直接读取 `import.meta.env`。

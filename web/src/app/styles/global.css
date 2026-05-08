@@ -925,6 +925,7 @@ body,
 .trueadmin-crud-title-card-content {
   display: flex;
   min-width: 0;
+  min-height: 32px;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
@@ -933,9 +934,11 @@ body,
 .trueadmin-crud-title-card-main {
   display: flex;
   min-width: 0;
-  flex-direction: column;
-  justify-content: center;
-  gap: 2px;
+  min-height: 32px;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
 }
 
 .trueadmin-crud-title-card-main .ant-typography {
@@ -943,13 +946,21 @@ body,
 }
 
 .trueadmin-crud-title-card-title.ant-typography {
+  --trueadmin-typography-title-margin-bottom: 0;
+  flex: 0 0 auto;
   font-size: 18px;
   line-height: 1.35;
+  margin: 0;
+  white-space: nowrap;
 }
 
 .trueadmin-crud-title-card-description.ant-typography {
+  min-width: 0;
+  overflow: hidden;
   font-size: 13px;
   line-height: 1.45;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .trueadmin-crud-title-card-extra {
