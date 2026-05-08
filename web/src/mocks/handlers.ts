@@ -6,6 +6,7 @@ import type {
   AdminNotificationDelivery,
   AdminNotificationTargetType,
 } from '@/core/notification';
+import type { TrueAdminAttachmentValue } from '@/core/upload';
 
 const success = <T>(data: T) =>
   HttpResponse.json({ code: 'KERNEL.SUCCESS', message: 'success', data });
@@ -122,6 +123,7 @@ const notificationBatches: AdminNotificationBatch[] = [
     status: 'published',
     targetType: 'all',
     targetSummary: '全员',
+    targetRoleIds: [],
     pinned: true,
     scheduledAt: null,
     publishedAt: '2026-05-09 10:30:00',
@@ -130,6 +132,16 @@ const notificationBatches: AdminNotificationBatch[] = [
     sentTotal: 3,
     failedTotal: 0,
     readTotal: 1,
+    attachments: [
+      {
+        id: 'maintenance-guide',
+        name: '维护说明',
+        url: '/mock/attachments/sales-contract.pdf',
+        extension: 'pdf',
+        size: 245760,
+        mimeType: 'application/pdf',
+      },
+    ],
     operatorId: 1,
     operatorName: '超级管理员',
     createdAt: '2026-05-09 10:20:00',
@@ -146,6 +158,7 @@ const notificationBatches: AdminNotificationBatch[] = [
     status: 'published',
     targetType: 'role',
     targetSummary: '运营管理员',
+    targetRoleIds: ['运营管理员'],
     pinned: false,
     scheduledAt: null,
     publishedAt: '2026-05-09 09:45:00',
@@ -154,6 +167,7 @@ const notificationBatches: AdminNotificationBatch[] = [
     sentTotal: 1,
     failedTotal: 1,
     readTotal: 0,
+    attachments: [],
     operatorId: 1,
     operatorName: '超级管理员',
     createdAt: '2026-05-09 09:40:00',
@@ -170,6 +184,7 @@ const notificationBatches: AdminNotificationBatch[] = [
     status: 'scheduled',
     targetType: 'role',
     targetSummary: '超级管理员、运营管理员',
+    targetRoleIds: ['超级管理员', '运营管理员'],
     pinned: false,
     scheduledAt: '2026-05-10 09:00:00',
     publishedAt: null,
@@ -178,6 +193,7 @@ const notificationBatches: AdminNotificationBatch[] = [
     sentTotal: 0,
     failedTotal: 0,
     readTotal: 0,
+    attachments: [],
     operatorId: 1,
     operatorName: '超级管理员',
     createdAt: '2026-05-09 08:30:00',
@@ -229,6 +245,12 @@ const notificationDeliveries: AdminNotificationDelivery[] = [
     updatedAt: '2026-05-09 09:46:00',
   },
 ];
+
+const getNotificationTargetSummary = (body: {
+  targetType?: AdminNotificationTargetType;
+  targetRoleIds?: string[];
+}) =>
+  body.targetType === 'role' && body.targetRoleIds?.length ? body.targetRoleIds.join('、') : '全员';
 
 const withMessageState = () =>
   messageItems.map((message) => {
@@ -468,6 +490,7 @@ export const handlers = [
       targetRoleIds?: string[];
       pinned?: boolean;
       scheduledAt?: string | null;
+      attachments?: TrueAdminAttachmentValue[];
     };
     const nextId = Math.max(...notificationBatches.map((batch) => batch.id)) + 1;
     const isScheduled = Boolean(body.scheduledAt);
@@ -481,10 +504,8 @@ export const handlers = [
       source: 'system',
       status: (isScheduled ? 'scheduled' : 'published') satisfies AdminNotificationBatchStatus,
       targetType: body.targetType || 'all',
-      targetSummary:
-        body.targetType === 'role' && body.targetRoleIds?.length
-          ? body.targetRoleIds.join('、')
-          : '全员',
+      targetSummary: getNotificationTargetSummary(body),
+      targetRoleIds: body.targetType === 'role' ? (body.targetRoleIds ?? []) : [],
       pinned: Boolean(body.pinned),
       scheduledAt: body.scheduledAt ?? null,
       publishedAt: isScheduled ? null : now,
@@ -493,6 +514,7 @@ export const handlers = [
       sentTotal: isScheduled ? 0 : 1,
       failedTotal: 0,
       readTotal: 0,
+      attachments: body.attachments ?? [],
       operatorId: 1,
       operatorName: '超级管理员',
       createdAt: now,
@@ -500,6 +522,60 @@ export const handlers = [
     };
     notificationBatches.unshift(batch);
     return success(batch);
+  }),
+  http.put('/api/admin/notification-batches/:id', async ({ params, request }) => {
+    const batch = notificationBatches.find((item) => String(item.id) === String(params.id));
+    if (!batch) {
+      return fail('SYSTEM.NOTIFICATION_BATCH.NOT_FOUND', '通知批次不存在');
+    }
+    if (batch.status !== 'draft' && batch.status !== 'scheduled') {
+      return fail(
+        'SYSTEM.NOTIFICATION_BATCH.CANNOT_UPDATE',
+        '只有草稿或定时发布的通知批次可以编辑',
+      );
+    }
+
+    const body = (await request.json()) as {
+      title?: string;
+      content?: string;
+      level?: AdminMessageLevel;
+      type?: string;
+      targetType?: AdminNotificationTargetType;
+      targetRoleIds?: string[];
+      pinned?: boolean;
+      scheduledAt?: string | null;
+      attachments?: TrueAdminAttachmentValue[];
+    };
+    const isScheduled = Boolean(body.scheduledAt);
+    batch.title = body.title || batch.title;
+    batch.content = body.content || '';
+    batch.level = body.level || batch.level;
+    batch.type = body.type || batch.type;
+    batch.targetType = body.targetType || 'all';
+    batch.targetRoleIds = batch.targetType === 'role' ? (body.targetRoleIds ?? []) : [];
+    batch.targetSummary = getNotificationTargetSummary({
+      targetType: batch.targetType,
+      targetRoleIds: batch.targetRoleIds,
+    });
+    batch.pinned = Boolean(body.pinned);
+    batch.attachments = body.attachments ?? [];
+    batch.status = isScheduled ? 'scheduled' : 'draft';
+    batch.scheduledAt = body.scheduledAt ?? null;
+    batch.publishedAt = null;
+    batch.offlineAt = null;
+    batch.updatedAt = now;
+    return success(batch);
+  }),
+  http.delete('/api/admin/notification-batches/:id', ({ params }) => {
+    const index = notificationBatches.findIndex((item) => String(item.id) === String(params.id));
+    if (index < 0) {
+      return fail('SYSTEM.NOTIFICATION_BATCH.NOT_FOUND', '通知批次不存在');
+    }
+    if (notificationBatches[index]?.status !== 'draft') {
+      return fail('SYSTEM.NOTIFICATION_BATCH.CANNOT_DELETE', '只有草稿通知批次可以删除');
+    }
+    notificationBatches.splice(index, 1);
+    return success(null);
   }),
   http.post('/api/admin/notification-batches/:id/publish', ({ params }) => {
     const batch = notificationBatches.find((item) => String(item.id) === String(params.id));

@@ -1,4 +1,4 @@
-import { CloudUploadOutlined } from '@ant-design/icons';
+import { CloudUploadOutlined, SaveOutlined } from '@ant-design/icons';
 import {
   App,
   Button,
@@ -13,6 +13,7 @@ import {
   Tag,
   Typography,
 } from 'antd';
+import dayjs from 'dayjs';
 import { useMemo, useState } from 'react';
 import { TrueAdminConfirmAction } from '@/core/action';
 import { TrueAdminCrudPage, TrueAdminCrudTable } from '@/core/crud';
@@ -24,7 +25,7 @@ import type {
 } from '@/core/crud/types';
 import { TrueAdminQuickFilter } from '@/core/filter/TrueAdminQuickFilter';
 import { useI18n } from '@/core/i18n/I18nProvider';
-import { TrueAdminMarkdown } from '@/core/markdown';
+import { TrueAdminMarkdown, TrueAdminMarkdownEditor } from '@/core/markdown';
 import { TrueAdminModal } from '@/core/modal';
 import {
   type AdminMessageKind,
@@ -33,6 +34,7 @@ import {
   type AdminNotificationBatchCreatePayload,
   type AdminNotificationBatchListMeta,
   type AdminNotificationBatchStatus,
+  type AdminNotificationBatchUpdatePayload,
   type AdminNotificationDelivery,
   type AdminNotificationDeliveryStatus,
   type AdminNotificationTargetType,
@@ -44,6 +46,7 @@ import {
   resolveAdminMessageLabel,
 } from '@/core/notification';
 import { TrueAdminAuditTimeline, type TrueAdminAuditTimelineItem } from '@/core/timeline';
+import { TrueAdminAttachmentUpload } from '@/core/upload';
 
 const levelColor: Record<AdminMessageLevel, string> = {
   error: 'error',
@@ -72,7 +75,21 @@ const toPlainText = (value?: string) =>
     .replace(/\s+/g, ' ')
     .trim();
 
-const toMinuteDateTime = (value: AdminNotificationBatchCreatePayload['scheduledAt']) => {
+type AnnouncementFormValues = Partial<AdminNotificationBatchCreatePayload>;
+
+const getInitialAnnouncementValues = (): AnnouncementFormValues => ({
+  attachments: [],
+  content: undefined,
+  level: 'info',
+  pinned: false,
+  scheduledAt: null,
+  targetRoleIds: undefined,
+  targetType: 'all',
+  title: undefined,
+  type: 'announcement',
+});
+
+const toMinuteDateTime = (value: AnnouncementFormValues['scheduledAt']) => {
   if (!value) {
     return null;
   }
@@ -84,10 +101,11 @@ export default function AdminNotificationManagementPage() {
   const { message } = App.useApp();
   const { t } = useI18n();
   const [announcementOpen, setAnnouncementOpen] = useState(false);
+  const [editingBatch, setEditingBatch] = useState<AdminNotificationBatch>();
   const [detailBatch, setDetailBatch] = useState<AdminNotificationBatch>();
   const [deliveryBatch, setDeliveryBatch] = useState<AdminNotificationBatch>();
   const [refreshSeed, setRefreshSeed] = useState(0);
-  const [form] = Form.useForm<AdminNotificationBatchCreatePayload>();
+  const [form] = Form.useForm<AnnouncementFormValues>();
   const targetType = Form.useWatch('targetType', form);
 
   const roleOptions = useMemo(
@@ -317,21 +335,53 @@ export default function AdminNotificationManagementPage() {
     [batchStatusText, levelText, t, targetTypeText],
   );
 
+  const openCreateAnnouncementModal = () => {
+    setEditingBatch(undefined);
+    form.resetFields();
+    form.setFieldsValue(getInitialAnnouncementValues());
+    setAnnouncementOpen(true);
+  };
+
+  const openEditAnnouncementModal = (record: AdminNotificationBatch) => {
+    setEditingBatch(record);
+    form.setFieldsValue({
+      attachments: record.attachments ?? [],
+      content: record.content,
+      level: record.level,
+      pinned: record.pinned ?? false,
+      scheduledAt: record.scheduledAt ? dayjs(record.scheduledAt) : null,
+      targetRoleIds:
+        record.targetRoleIds ??
+        (record.targetType === 'role' ? record.targetSummary.split('、').filter(Boolean) : []),
+      targetType: record.targetType,
+      title: record.title,
+      type: record.type,
+    });
+    setAnnouncementOpen(true);
+  };
+
   const submitAnnouncement = async () => {
     const values = await form.validateFields();
-    await adminNotificationManagementApi
-      .createAnnouncement({
-        ...values,
-        scheduledAt: toMinuteDateTime(values.scheduledAt),
-      })
-      .send();
-    message.success(t('system.notificationManagement.success.createAnnouncement', '公告已创建'));
+    const payload = {
+      ...values,
+      scheduledAt: toMinuteDateTime(values.scheduledAt),
+    } as AdminNotificationBatchUpdatePayload;
+
+    if (editingBatch) {
+      await adminNotificationManagementApi.updateBatch(editingBatch.id, payload).send();
+      message.success(t('system.notificationManagement.success.updateAnnouncement', '公告已保存'));
+    } else {
+      await adminNotificationManagementApi.createAnnouncement(payload).send();
+      message.success(t('system.notificationManagement.success.createAnnouncement', '公告已创建'));
+    }
+
     closeAnnouncementModal();
     setRefreshSeed((seed) => seed + 1);
   };
 
   const closeAnnouncementModal = () => {
     setAnnouncementOpen(false);
+    setEditingBatch(undefined);
     form.resetFields();
   };
 
@@ -364,7 +414,7 @@ export default function AdminNotificationManagementPage() {
           <Button
             type="primary"
             icon={<CloudUploadOutlined />}
-            onClick={() => setAnnouncementOpen(true)}
+            onClick={openCreateAnnouncementModal}
           >
             {t('system.notificationManagement.action.createAnnouncement', '发布公告')}
           </Button>
@@ -379,6 +429,11 @@ export default function AdminNotificationManagementPage() {
               <Button size="small" type="link" onClick={() => setDeliveryBatch(record)}>
                 {t('system.notificationManagement.action.deliveries', '投递记录')}
               </Button>
+              {record.status === 'draft' || record.status === 'scheduled' ? (
+                <Button size="small" type="link" onClick={() => openEditAnnouncementModal(record)}>
+                  {t('system.notificationManagement.action.edit', '编辑')}
+                </Button>
+              ) : null}
               {record.status === 'draft' || record.status === 'scheduled' ? (
                 <TrueAdminConfirmAction
                   size="small"
@@ -418,6 +473,27 @@ export default function AdminNotificationManagementPage() {
                   }}
                 >
                   {t('system.notificationManagement.action.cancelScheduled', '取消')}
+                </TrueAdminConfirmAction>
+              ) : null}
+              {record.status === 'draft' ? (
+                <TrueAdminConfirmAction
+                  danger
+                  size="small"
+                  type="link"
+                  confirm={t(
+                    'system.notificationManagement.confirm.deleteDraft',
+                    '删除后不可恢复。',
+                  )}
+                  successMessage={t(
+                    'system.notificationManagement.success.deleteDraft',
+                    '草稿已删除',
+                  )}
+                  action={async () => {
+                    await adminNotificationManagementApi.deleteDraftBatch(record.id).send();
+                    action.reload();
+                  }}
+                >
+                  {t('system.notificationManagement.action.delete', '删除')}
                 </TrueAdminConfirmAction>
               ) : null}
               {record.status === 'published' ? (
@@ -489,26 +565,32 @@ export default function AdminNotificationManagementPage() {
       <TrueAdminModal
         destroyOnHidden
         open={announcementOpen}
-        title={t('system.notificationManagement.modal.createAnnouncement', '发布公告')}
+        title={
+          editingBatch
+            ? t('system.notificationManagement.modal.editAnnouncement', '编辑公告')
+            : t('system.notificationManagement.modal.createAnnouncement', '发布公告')
+        }
         width={760}
         footer={
           <Space>
             <Button onClick={closeAnnouncementModal}>{t('modal.action.close', '关闭')}</Button>
             <Button
               type="primary"
-              icon={<CloudUploadOutlined />}
+              icon={editingBatch ? <SaveOutlined /> : <CloudUploadOutlined />}
               onClick={() => void submitAnnouncement()}
             >
-              {t('system.notificationManagement.action.createAnnouncement', '发布公告')}
+              {editingBatch
+                ? t('system.notificationManagement.action.save', '保存')
+                : t('system.notificationManagement.action.createAnnouncement', '发布公告')}
             </Button>
           </Space>
         }
         onCancel={closeAnnouncementModal}
       >
-        <Form<AdminNotificationBatchCreatePayload>
+        <Form<AnnouncementFormValues>
           form={form}
           layout="vertical"
-          initialValues={{ level: 'info', pinned: false, targetType: 'all', type: 'announcement' }}
+          initialValues={getInitialAnnouncementValues()}
         >
           <Form.Item
             label={t('system.notificationManagement.form.title', '公告标题')}
@@ -522,7 +604,30 @@ export default function AdminNotificationManagementPage() {
             name="content"
             rules={[{ required: true }]}
           >
-            <Input.TextArea rows={6} />
+            <TrueAdminMarkdownEditor
+              rows={8}
+              placeholder={t(
+                'system.notificationManagement.form.content.placeholder',
+                '请输入 Markdown 公告正文',
+              )}
+            />
+          </Form.Item>
+          <Form.Item
+            label={t('system.notificationManagement.form.attachments', '附件')}
+            name="attachments"
+          >
+            <TrueAdminAttachmentUpload
+              multiple
+              maxCount={8}
+              title={t(
+                'system.notificationManagement.form.attachments.uploadTitle',
+                '拖拽公告附件到这里，或点击选择',
+              )}
+              hint={t(
+                'system.notificationManagement.form.attachments.uploadHint',
+                '附件会随公告一起展示，支持编辑展示名称。',
+              )}
+            />
           </Form.Item>
           <Space size={12} style={{ width: '100%' }} align="start">
             <Form.Item
@@ -716,6 +821,9 @@ function BatchDetailModal({
         <div className="trueadmin-message-detail-content">
           <TrueAdminMarkdown value={batch.content} />
         </div>
+        {batch.attachments?.length ? (
+          <TrueAdminAttachmentUpload readonly value={batch.attachments} />
+        ) : null}
         <div className="trueadmin-notification-management-audit">
           <Typography.Text strong>
             {t('system.notificationManagement.audit.title', '操作记录')}

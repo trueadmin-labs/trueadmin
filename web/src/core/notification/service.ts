@@ -8,6 +8,7 @@ import type {
   AdminNotificationBatchCreatePayload,
   AdminNotificationBatchListResult,
   AdminNotificationBatchQuery,
+  AdminNotificationBatchUpdatePayload,
   AdminNotificationDelivery,
   AdminNotificationDeliveryListResult,
   AdminNotificationDeliveryQuery,
@@ -41,6 +42,9 @@ export const adminNotificationManagementApi = {
     }),
   createAnnouncement: (payload: AdminNotificationBatchCreatePayload) =>
     http.Post<AdminNotificationBatch>('/admin/notification-batches/announcements', payload),
+  updateBatch: (id: number, payload: AdminNotificationBatchUpdatePayload) =>
+    http.Put<AdminNotificationBatch>(`/admin/notification-batches/${String(id)}`, payload),
+  deleteDraftBatch: (id: number) => http.Delete<null>(`/admin/notification-batches/${String(id)}`),
   publishBatch: (id: number) =>
     http.Post<AdminNotificationBatch>(`/admin/notification-batches/${String(id)}/publish`),
   cancelScheduledBatch: (id: number) =>
