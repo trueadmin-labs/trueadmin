@@ -20,6 +20,7 @@ AI 编码代理应先阅读根目录的 [AGENTS.md](../AGENTS.md)，再根据任
 
 - [overview](overview/index.md)：项目定位、技术栈、模块范围和演化路径。
 - [architecture](architecture/index.md)：Monorepo 总体架构、分层原则和前后端协作方式。
+- [Admin 站内消息通知方案](architecture/admin-notification.md)：后台管理员消息、公告、铃铛入口、消息中心、实时同步和管理后台设计。
 - [backend](backend/index.md)：Hyperf 后端、模块化目录、注解、迁移、接口元数据、插件系统和层级边界。
 - [frontend](frontend/index.md)：Web 管理端技术栈、模块系统、插件系统、CRUD、布局、主题、权限、国际化和质量规范。
 - [api](api/index.md)：API 响应、身份边界、多端 API、版本管理和复用边界。
