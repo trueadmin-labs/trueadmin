@@ -3,10 +3,15 @@
 declare(strict_types=1);
 
 return [
-    'paths' => [
-        BASE_PATH . '/plugins/*/*',
+    'installed' => [
+        // Example:
+        // 'true-admin.examples' => [
+        //     'path' => BASE_PATH . '/plugins/true-admin/examples',
+        //     'version' => '0.1.0',
+        //     'enabled' => true,
+        //     'defaults' => [],
+        // ],
     ],
-    'enabled' => [],
     'disabled' => [],
     'config' => [
         // Example:

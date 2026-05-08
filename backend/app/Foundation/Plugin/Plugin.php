@@ -7,13 +7,13 @@ namespace App\Foundation\Plugin;
 final class Plugin
 {
     /**
-     * @param array<string, mixed> $manifest
+     * @param array<string, mixed> $configDefaults
      */
     public function __construct(
         public readonly string $name,
         public readonly string $path,
-        public readonly string $manifestPath,
-        public readonly array $manifest,
+        public readonly string $version,
+        public readonly array $configDefaults,
         public readonly bool $enabled,
     ) {
     }
@@ -62,9 +62,7 @@ final class Plugin
      */
     public function defaultConfig(): array
     {
-        $config = $this->manifest['config']['defaults'] ?? [];
-
-        return is_array($config) ? $config : [];
+        return $this->configDefaults;
     }
 
     /**

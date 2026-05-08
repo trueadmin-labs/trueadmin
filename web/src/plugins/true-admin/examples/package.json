@@ -1,0 +1,7 @@
+{
+  "name": "@true-admin/plugin-examples-web",
+  "private": true,
+  "dependencies": {
+    "@ant-design/charts": "^2.6.7"
+  }
+}

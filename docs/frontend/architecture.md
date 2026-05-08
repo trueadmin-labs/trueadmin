@@ -140,25 +140,32 @@ export default defineModule({
 
 根目录 `plugins/` 是插件包仓库和安装源，不参与 Vite、TypeScript、Biome 或其他 Web 代码扫描。插件安装时，安装器把 `plugins/<vendor>/<plugin>/web` 复制到 `web/src/plugins/<vendor>/<plugin>`。Windows 下不使用软链，避免权限和文件监听兼容问题。
 
-插件包根目录的 `plugin.json` 是唯一插件清单。前端只扫描安装后的 `web/src/plugins/<vendor>/<plugin>/manifest.ts`，不在 `plugins/<vendor>/<plugin>/web` 或 `web/src/plugins/<vendor>/<plugin>` 中放置 `plugin.json`。
+插件包根目录的 `plugin.json` 是唯一包级插件清单，只声明插件身份、版本、插件依赖和兼容性。前端只扫描安装后的 `web/src/plugins/<vendor>/<plugin>/manifest.ts`，不在 `plugins/<vendor>/<plugin>/web` 或 `web/src/plugins/<vendor>/<plugin>` 中放置 `plugin.json`。
 
 TrueAdmin 第一阶段不做运行期动态插件。安装插件的含义是开发期把插件包放入 `plugins/<vendor>/<plugin>`，再由安装器复制 Web runtime 到 `web/src/plugins/<vendor>/<plugin>`，随后与主应用一起编译、类型检查和打包。插件组件、Hook 和类型可以被其他模块或插件静态 import，但必须通过安装后 runtime 的公开出口导入。不存在“生产运行中下载插件并动态注册组件”的机制。
 
-插件依赖写在根目录 `plugin.json`，不写在前端 `manifest.ts`。`plugin.json` 可以声明依赖的其他插件和 npm 包；这些依赖用于插件安装器、开发脚本或人工安装检查。项目执行 `pnpm install` 前，应先收集已启用插件的 `dependencies.npm` 并合并到 `web/package.json` 或生成临时安装计划，再由 pnpm 统一安装。插件源码不得假设宿主项目已经安装了自己额外使用的 npm 包。
+插件包依赖写在根目录 `plugin.json` 的 `dependencies.plugins`，不写在前端 `manifest.ts`。Web runtime 自己额外使用的 npm 依赖写在插件 `web/package.json`，由安装器合并到宿主 Web 安装计划。插件源码不得假设宿主项目已经安装了自己额外使用的 npm 包。
 
 ```json
 {
   "id": "acme.cms",
   "dependencies": {
-    "plugins": ["system"],
-    "npm": {
-      "@ant-design/charts": "^2.6.7"
-    }
+    "plugins": ["system"]
   }
 }
 ```
 
-`dependencies.plugins` 使用插件或内置模块的稳定 id。第一阶段只做开发期/安装期约束，不做运行期动态加载和依赖解析。`dependencies.npm` 使用 npm 包名到 semver range 的映射；如果多个插件声明同一 npm 包，安装器应按 pnpm/semver 规则合并或提示冲突。
+```json
+{
+  "name": "@acme/plugin-cms-web",
+  "private": true,
+  "dependencies": {
+    "@ant-design/charts": "^2.6.7"
+  }
+}
+```
+
+`dependencies.plugins` 使用插件或内置模块的稳定 id。第一阶段只做开发期/安装期约束，不做运行期动态加载和依赖解析。`web/package.json` 使用 npm 包名到 semver range 的映射；如果多个插件声明同一 npm 包，安装器应按 pnpm/semver 规则合并或提示冲突。
 
 安装后的插件 `web/src/plugins/<vendor>/<plugin>/manifest.ts` 声明 Web runtime 能力；插件启用和项目级配置覆盖由根插件清单和后端配置负责，`web/config/plugin.ts` 只保留前端侧覆盖开关。
 

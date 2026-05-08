@@ -8,10 +8,8 @@ use Hyperf\Contract\ConfigInterface;
 
 final class PluginRepository
 {
-    public function __construct(
-        private readonly ConfigInterface $config,
-        private readonly PluginManifestReader $reader,
-    ) {
+    public function __construct(private readonly ConfigInterface $config)
+    {
     }
 
     /**
@@ -20,14 +18,29 @@ final class PluginRepository
     public function all(): array
     {
         $plugins = [];
+        $disabled = $this->stringList('plugins.disabled');
 
-        foreach ($this->pluginPaths() as $pluginPath) {
-            $plugin = $this->reader->read($pluginPath);
-            if ($plugin === null) {
+        foreach ($this->installedPlugins() as $name => $definition) {
+            $path = $definition['path'] ?? null;
+            if (! is_string($name) || $name === '' || ! is_string($path) || $path === '') {
                 continue;
             }
 
-            $plugins[] = $this->withRuntimeEnabled($plugin);
+            $isEnabled = (bool) ($definition['enabled'] ?? true);
+            if (in_array($name, $disabled, true)) {
+                $isEnabled = false;
+            }
+
+            $version = $definition['version'] ?? 'unknown';
+            $defaults = $definition['defaults'] ?? [];
+
+            $plugins[] = new Plugin(
+                name: $name,
+                path: rtrim($path, '/'),
+                version: is_string($version) && $version !== '' ? $version : 'unknown',
+                configDefaults: is_array($defaults) ? $defaults : [],
+                enabled: $isEnabled,
+            );
         }
 
         usort($plugins, static fn (Plugin $a, Plugin $b): int => $a->name <=> $b->name);
@@ -41,6 +54,14 @@ final class PluginRepository
     public function enabled(): array
     {
         return array_values(array_filter($this->all(), static fn (Plugin $plugin): bool => $plugin->enabled));
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function sourcePaths(): array
+    {
+        return $this->enabledPluginPaths(static fn (Plugin $plugin): ?string => $plugin->sourcePath());
     }
 
     /**
@@ -76,46 +97,36 @@ final class PluginRepository
     }
 
     /**
+     * @return array<string, array<string, mixed>>
+     */
+    private function installedPlugins(): array
+    {
+        $installed = $this->config->get('plugins.installed', []);
+        if (! is_array($installed)) {
+            return [];
+        }
+
+        return array_filter($installed, static fn ($definition): bool => is_array($definition));
+    }
+
+    /**
+     * @param callable(Plugin): ?string $resolver
      * @return list<string>
      */
-    private function pluginPaths(): array
+    private function enabledPluginPaths(callable $resolver): array
     {
         $paths = [];
-        $patterns = $this->config->get('plugins.paths', []);
 
-        foreach (is_array($patterns) ? $patterns : [] as $pattern) {
-            if (! is_string($pattern)) {
-                continue;
+        foreach ($this->enabled() as $plugin) {
+            $path = $resolver($plugin);
+            if ($path !== null) {
+                $paths[] = $path;
             }
-
-            $paths = [...$paths, ...glob($pattern, GLOB_ONLYDIR) ?: []];
         }
 
         sort($paths);
 
         return array_values(array_unique($paths));
-    }
-
-    private function withRuntimeEnabled(Plugin $plugin): Plugin
-    {
-        $enabled = $this->stringList('plugins.enabled');
-        $disabled = $this->stringList('plugins.disabled');
-
-        $isEnabled = $plugin->enabled;
-        if ($enabled !== []) {
-            $isEnabled = in_array($plugin->name, $enabled, true);
-        }
-        if (in_array($plugin->name, $disabled, true)) {
-            $isEnabled = false;
-        }
-
-        return new Plugin(
-            name: $plugin->name,
-            path: $plugin->path,
-            manifestPath: $plugin->manifestPath,
-            manifest: $plugin->manifest,
-            enabled: $isEnabled,
-        );
     }
 
     /**
