@@ -1,10 +1,4 @@
-import {
-  DeleteOutlined,
-  InboxOutlined,
-  PlusOutlined,
-  SaveOutlined,
-  SendOutlined,
-} from '@ant-design/icons';
+import { DeleteOutlined, PlusOutlined, SaveOutlined, SendOutlined } from '@ant-design/icons';
 import {
   Button,
   Card,
@@ -20,13 +14,13 @@ import {
   Table,
   Tag,
   Typography,
-  Upload,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useMemo, useState } from 'react';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { TrueAdminPageModal } from '@/core/modal/TrueAdminPageModal';
 import { TrueAdminFormPage } from '@/core/page/TrueAdminFormPage';
+import { TrueAdminAttachmentUpload } from '@/core/upload';
 
 type SalesItem = {
   key: string;
@@ -207,6 +201,24 @@ function SalesOrderFormBody({ variant = 'page' }: SalesOrderFormBodyProps) {
         logisticsFee,
         discount,
         prepaidAmount,
+        attachments: [
+          {
+            id: 'demo-contract-1',
+            name: '销售合同-客户已盖章',
+            url: '/mock/attachments/sales-contract.pdf',
+            extension: 'pdf',
+            size: 245760,
+            mimeType: 'application/pdf',
+          },
+          {
+            id: 'demo-quote-1',
+            name: '报价单-最终版',
+            url: '/mock/attachments/quotation.xlsx',
+            extension: 'xlsx',
+            size: 98304,
+            mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          },
+        ],
       }}
     >
       <Row gutter={[12, 12]} align="top">
@@ -435,26 +447,19 @@ function SalesOrderFormBody({ variant = 'page' }: SalesOrderFormBodyProps) {
                   <Form.Item
                     label={t('examples.complexForm.other.attachment', '附件')}
                     name="attachments"
-                    valuePropName="fileList"
-                    getValueFromEvent={(event) => (Array.isArray(event) ? event : event?.fileList)}
                   >
-                    <Upload.Dragger beforeUpload={() => false} maxCount={5} multiple>
-                      <p className="ant-upload-drag-icon">
-                        <InboxOutlined />
-                      </p>
-                      <p className="ant-upload-text">
-                        {t(
-                          'examples.complexForm.other.uploadTitle',
-                          '拖拽合同、报价单或附件到这里',
-                        )}
-                      </p>
-                      <p className="ant-upload-hint">
-                        {t(
-                          'examples.complexForm.other.uploadHint',
-                          '支持多文件上传，提交前不会真实上传。',
-                        )}
-                      </p>
-                    </Upload.Dragger>
+                    <TrueAdminAttachmentUpload
+                      multiple
+                      maxCount={5}
+                      title={t(
+                        'examples.complexForm.other.uploadTitle',
+                        '拖拽合同、报价单或附件到这里',
+                      )}
+                      hint={t(
+                        'examples.complexForm.other.uploadHint',
+                        '支持多文件上传，提交前不会真实上传。',
+                      )}
+                    />
                   </Form.Item>
                 </Col>
               </Row>

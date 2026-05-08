@@ -1,5 +1,4 @@
 import { App, Button, Card, Col, Form, Row, Space, Typography } from 'antd';
-import type { UploadFile } from 'antd/es/upload/interface';
 import { useState } from 'react';
 import { TrueAdminDescriptionSection } from '@/core/description';
 import { TrueAdminDictSelect, TrueAdminEnumTag } from '@/core/dict';
@@ -7,7 +6,7 @@ import { useI18n } from '@/core/i18n/I18nProvider';
 import { TrueAdminImportExport } from '@/core/import-export';
 import { TrueAdminPage } from '@/core/page/TrueAdminPage';
 import { TrueAdminAuditTimeline } from '@/core/timeline';
-import { TrueAdminAttachmentUpload } from '@/core/upload';
+import { TrueAdminAttachmentUpload, type TrueAdminAttachmentValue } from '@/core/upload';
 import { TrueAdminDepartmentSelect, TrueAdminUserSelect } from '@/modules/system/components';
 import { departmentApi } from '@/modules/system/services/department.api';
 
@@ -17,7 +16,7 @@ export default function ComponentsExamplePage() {
   const [status, setStatus] = useState('enabled');
   const [departmentId, setDepartmentId] = useState<number>();
   const [userId, setUserId] = useState<number>();
-  const [files, setFiles] = useState<UploadFile[]>([]);
+  const [files, setFiles] = useState<TrueAdminAttachmentValue[]>([]);
 
   const statusOptions = [
     {

@@ -134,6 +134,34 @@ GET /api/admin/system/users?sort=created_at&order=desc
 - 数据库字段使用 snake_case。
 - 权限标识使用模块加动作，例如 `system:user:create`。
 
+## 附件字段契约
+
+业务表中的附件字段使用 JSON/JSONB 数组保存附件快照，而不是保存前端上传组件的临时对象，也不是只保存文件 ID。快照只保留业务展示和再次访问所需的必要字段：
+
+```json
+[
+  {
+    "id": "file_202605080001",
+    "name": "销售合同-客户已盖章",
+    "url": "/api/admin/files/file_202605080001/download",
+    "extension": "pdf",
+    "size": 245760,
+    "mimeType": "application/pdf"
+  }
+]
+```
+
+字段含义：
+
+- `id`：文件表主键或稳定文件 ID，必填，用于后端校验文件是否存在、是否有权限、是否可关联到当前业务数据。
+- `name`：业务展示名，必填，不含扩展名，允许前端在业务表单中编辑。
+- `url`：下载或预览地址，必填，由后端按当前部署和权限策略生成或规范化。
+- `extension`：扩展名，不含点，推荐返回。
+- `size`：文件大小，单位 byte，推荐返回。
+- `mimeType`：文件 MIME 类型，推荐返回。
+
+后端保存业务数据时，应使用 `id` 回查文件表并规范化 `url`、`extension`、`size`、`mimeType` 等可信字段；`name` 作为业务展示名保留前端传入值，但需要做长度、空值和安全字符校验。文件存储内部字段，例如磁盘、hash、路径、上传人、上传时间、存储桶等，不应复制进业务表附件 JSON。
+
 ## 常用接口示例
 
 ```text
