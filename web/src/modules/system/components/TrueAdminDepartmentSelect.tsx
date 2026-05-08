@@ -19,11 +19,15 @@ const toTreeData = (departments: DepartmentTreeNode[]): TreeSelectProps['treeDat
     children: department.children ? toTreeData(department.children) : undefined,
   }));
 
+const emptyDepartments: DepartmentTreeNode[] = [];
+
 export function TrueAdminDepartmentSelect({
   autoLoad = true,
-  departments = [],
+  departments = emptyDepartments,
   fetchDepartments,
   onLoadError,
+  onDropdownVisibleChange,
+  onOpenChange,
   treeDefaultExpandAll = true,
   treeNodeFilterProp = 'title',
   showSearch = true,
@@ -73,8 +77,9 @@ export function TrueAdminDepartmentSelect({
       treeData={treeData}
       treeDefaultExpandAll={treeDefaultExpandAll}
       treeNodeFilterProp={treeNodeFilterProp}
-      onDropdownVisibleChange={(open) => {
-        treeSelectProps.onDropdownVisibleChange?.(open);
+      onOpenChange={(open) => {
+        onOpenChange?.(open);
+        onDropdownVisibleChange?.(open);
         if (open) {
           void loadDepartments();
         }

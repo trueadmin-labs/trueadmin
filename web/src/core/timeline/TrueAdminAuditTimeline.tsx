@@ -31,9 +31,7 @@ export function TrueAdminAuditTimeline({
       {...timelineProps}
       items={items.map((item, index) => ({
         color: item.color,
-        dot: item.dot,
-        key: item.key ?? index,
-        children: (
+        content: (
           <div className="trueadmin-audit-timeline-item">
             <div className="trueadmin-audit-timeline-title">{item.title}</div>
             {item.description ? (
@@ -47,6 +45,8 @@ export function TrueAdminAuditTimeline({
             ) : null}
           </div>
         ),
+        dot: item.dot,
+        key: item.key ?? index,
       }))}
     />
   );

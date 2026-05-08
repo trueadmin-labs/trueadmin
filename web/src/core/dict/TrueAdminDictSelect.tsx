@@ -12,6 +12,8 @@ export type TrueAdminDictOption<TValue extends TrueAdminDictValue = TrueAdminDic
     disabled?: boolean;
   };
 
+const emptyOptions: Array<TrueAdminDictOption> = [];
+
 export type TrueAdminDictSelectProps<TValue extends TrueAdminDictValue = TrueAdminDictValue> = Omit<
   SelectProps<TValue | TValue[]>,
   'loading' | 'options'
@@ -28,8 +30,9 @@ export function TrueAdminDictSelect<TValue extends TrueAdminDictValue = TrueAdmi
   emptyText,
   fetchOptions,
   onLoadError,
-  options = [],
+  options = emptyOptions as Array<TrueAdminDictOption<TValue>>,
   onDropdownVisibleChange,
+  onOpenChange,
   ...selectProps
 }: TrueAdminDictSelectProps<TValue>) {
   const [innerOptions, setInnerOptions] = useState<Array<TrueAdminDictOption<TValue>>>(options);
@@ -82,7 +85,8 @@ export function TrueAdminDictSelect<TValue extends TrueAdminDictValue = TrueAdmi
       loading={loading}
       notFoundContent={loading ? selectProps.notFoundContent : emptyText}
       options={selectOptions}
-      onDropdownVisibleChange={(open) => {
+      onOpenChange={(open) => {
+        onOpenChange?.(open);
         onDropdownVisibleChange?.(open);
         if (open) {
           void loadOptions();

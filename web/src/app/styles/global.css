@@ -2913,6 +2913,12 @@ body,
   background: var(--ant-color-bg-container, #141414);
 }
 
+.trueadmin-attachment-upload-frame {
+  min-width: 0;
+  overflow: hidden;
+  transition: height 0.22s ease;
+}
+
 .trueadmin-attachment-upload {
   display: flex;
   min-width: 0;
@@ -2923,6 +2929,49 @@ body,
 .trueadmin-attachment-upload-trigger .ant-upload-wrapper,
 .trueadmin-attachment-upload-trigger .ant-upload-drag {
   width: 100%;
+}
+
+.trueadmin-attachment-upload-trigger .ant-upload-drag {
+  min-height: 44px;
+}
+
+.trueadmin-attachment-upload-trigger .ant-upload-drag .ant-upload {
+  padding: 8px 12px;
+}
+
+.trueadmin-attachment-upload-content {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--ant-color-text-secondary);
+  line-height: 20px;
+}
+
+.trueadmin-attachment-upload-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  color: var(--trueadmin-color-primary, #1677ff);
+  font-size: 16px;
+}
+
+.trueadmin-attachment-upload-text {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ant-color-text, rgba(0, 0, 0, 0.88));
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trueadmin-attachment-upload-hint {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ant-color-text-tertiary, rgba(0, 0, 0, 0.45));
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .trueadmin-attachment-uploading {
@@ -2936,6 +2985,38 @@ body,
   min-width: 0;
   flex-direction: column;
   gap: 6px;
+}
+
+.trueadmin-attachment-item-shell {
+  min-width: 0;
+  overflow: hidden;
+  transition:
+    max-height 0.22s ease,
+    opacity 0.18s ease,
+    transform 0.22s ease;
+}
+
+.trueadmin-attachment-item-shell.is-enter {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.trueadmin-attachment-item-shell.is-active {
+  max-height: 56px;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.trueadmin-attachment-item-shell.is-leave {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.trueadmin-attachment-item-clip {
+  min-width: 0;
+  padding-block: 0;
 }
 
 .trueadmin-attachment-item {
