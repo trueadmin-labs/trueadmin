@@ -2846,6 +2846,135 @@ body,
   flex-wrap: wrap;
 }
 
+.trueadmin-audit-panel.ant-card > .ant-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.trueadmin-audit-panel-header {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.trueadmin-audit-panel-main {
+  min-width: 0;
+}
+
+.trueadmin-audit-panel-main .ant-typography {
+  margin: 0;
+}
+
+.trueadmin-audit-panel-main h5.ant-typography {
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.trueadmin-audit-panel-actions {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.trueadmin-audit-panel-body {
+  min-width: 0;
+}
+
+.trueadmin-action-bar {
+  min-width: 0;
+}
+
+.trueadmin-action-bar .ant-space-item {
+  display: inline-flex;
+}
+
+.trueadmin-permission-button-tooltip-wrap {
+  display: inline-flex;
+}
+
+.trueadmin-result-state {
+  min-width: 0;
+}
+
+.trueadmin-result-state.is-compact.ant-result {
+  padding: 24px 12px;
+}
+
+.trueadmin-result-state.is-compact .ant-result-icon {
+  margin-bottom: 12px;
+}
+
+.trueadmin-result-state.is-compact .ant-result-title {
+  font-size: 16px;
+}
+
+.trueadmin-result-state.is-compact .ant-result-subtitle {
+  font-size: 13px;
+}
+
+.trueadmin-result-state.is-compact .ant-empty {
+  margin-block: 24px;
+}
+
+.trueadmin-upload-preview-trigger {
+  display: inline-flex;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+
+.trueadmin-upload-preview .ant-modal-body {
+  padding: 0;
+}
+
+.trueadmin-upload-preview-body {
+  display: flex;
+  min-height: 360px;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--ant-color-fill-quaternary, rgba(0, 0, 0, 0.02));
+}
+
+.trueadmin-upload-preview-image {
+  max-width: 100%;
+  max-height: min(70vh, 720px);
+  object-fit: contain;
+}
+
+.trueadmin-upload-preview-frame {
+  width: 100%;
+  height: min(70vh, 720px);
+  border: 0;
+  background: var(--ant-color-bg-container, #fff);
+}
+
+.trueadmin-upload-preview-file {
+  display: flex;
+  min-height: 260px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+  color: var(--ant-color-text-secondary);
+}
+
+.trueadmin-upload-preview-file-icon {
+  color: var(--trueadmin-color-primary, #1677ff);
+  font-size: 36px;
+}
+
+.trueadmin-shell.is-dark .trueadmin-upload-preview-body {
+  background: var(--ant-color-fill-quaternary, rgba(255, 255, 255, 0.04));
+}
+
 .trueadmin-remote-select-loading {
   display: flex;
   min-height: 48px;
