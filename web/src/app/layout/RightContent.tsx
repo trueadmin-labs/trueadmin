@@ -9,6 +9,7 @@ import type { MenuProps } from 'antd';
 import { Avatar, Button, Dropdown } from 'antd';
 import { useNavigate } from 'react-router';
 import { useCurrentUserQuery, useLogoutMutation } from '@/core/auth/hooks';
+import { TrueAdminNotificationBell } from '@/core/notification';
 import { queryClient } from '@/core/query/client';
 import { useLayoutStore } from '@/core/store/layoutStore';
 import { type Locale, useLocaleStore } from '@/core/store/localeStore';
@@ -54,6 +55,7 @@ export function useHeaderActions() {
       icon={darkMode ? <SunOutlined /> : <MoonOutlined />}
       onClick={toggleDarkMode}
     />,
+    <TrueAdminNotificationBell key="notifications" />,
     <LayoutSettingsDrawer key="settings" />,
     <Dropdown
       key="user"

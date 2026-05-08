@@ -43,6 +43,76 @@ const departmentTree = [
   },
 ];
 
+const now = '2026-05-09 10:30:00';
+
+const messageItems = [
+  {
+    id: 1,
+    kind: 'announcement',
+    title: '系统维护公告',
+    content:
+      '## 系统维护公告\n\n本周五 22:00 将进行后台服务维护，预计影响 30 分钟。\n\n- 维护期间仍可查看历史数据\n- 新增、编辑、导入任务会暂时暂停',
+    level: 'warning',
+    type: 'announcement',
+    source: 'system',
+    targetUrl: '/workbench',
+    payload: { maintenanceWindow: '2026-05-10 22:00' },
+    attachments: [],
+    readAt: null,
+    archivedAt: null,
+    pinned: true,
+    createdAt: now,
+  },
+  {
+    id: 2,
+    kind: 'notification',
+    title: '配置项等待确认',
+    content: '配置项 **系统参数 01** 已提交变更，请进入 CRUD 示例页面查看处理。',
+    level: 'info',
+    type: 'system',
+    source: 'plugin.true-admin.examples',
+    targetUrl: '/examples/crud',
+    payload: { recordId: 1 },
+    attachments: [],
+    readAt: null,
+    archivedAt: null,
+    pinned: false,
+    createdAt: '2026-05-09 09:45:00',
+  },
+  {
+    id: 3,
+    kind: 'notification',
+    title: '导入任务完成',
+    content: '示例导入任务已完成，成功 128 条，失败 0 条。',
+    level: 'success',
+    type: 'system',
+    source: 'system',
+    attachments: [],
+    readAt: '2026-05-09 09:20:00',
+    archivedAt: null,
+    pinned: false,
+    createdAt: '2026-05-09 09:18:00',
+  },
+];
+
+const getMessageKey = (message: { id: number; kind: string }) => `${message.kind}:${message.id}`;
+
+const readMessageKeys = new Set(
+  messageItems.filter((message) => message.readAt).map((message) => getMessageKey(message)),
+);
+
+const archivedMessageKeys = new Set<string>();
+
+const withMessageState = () =>
+  messageItems.map((message) => {
+    const key = getMessageKey(message);
+    return {
+      ...message,
+      archivedAt: archivedMessageKeys.has(key) ? now : null,
+      readAt: readMessageKeys.has(key) ? (message.readAt ?? now) : null,
+    };
+  });
+
 export const handlers = [
   http.post('/api/admin/auth/login', async () =>
     success({ tokenType: 'Bearer', accessToken: 'mock-token', expiresIn: 7200 }),
@@ -98,6 +168,73 @@ export const handlers = [
     const page = Number(url.searchParams.get('page') || 1);
     const pageSize = Number(url.searchParams.get('pageSize') || 20);
     return success({ items: users, total: users.length, page, pageSize });
+  }),
+  http.get('/api/admin/messages', ({ request }) => {
+    const url = new URL(request.url);
+    const page = Number(url.searchParams.get('page') || 1);
+    const pageSize = Number(url.searchParams.get('pageSize') || 5);
+    const kind = url.searchParams.get('kind') || 'all';
+    const status = url.searchParams.get('status') || 'all';
+    const items = withMessageState().filter((message) => {
+      if (kind !== 'all' && message.kind !== kind) {
+        return false;
+      }
+      if (status === 'unread') {
+        return !message.readAt && !message.archivedAt;
+      }
+      if (status === 'read') {
+        return Boolean(message.readAt) && !message.archivedAt;
+      }
+      if (status === 'archived') {
+        return Boolean(message.archivedAt);
+      }
+      return !message.archivedAt;
+    });
+
+    return success({ items: items.slice(0, pageSize), total: items.length, page, pageSize });
+  }),
+  http.get('/api/admin/messages/unread-count', () => {
+    const unreadItems = withMessageState().filter(
+      (message) => !message.readAt && !message.archivedAt,
+    );
+    return success({
+      announcement: unreadItems.filter((message) => message.kind === 'announcement').length,
+      notification: unreadItems.filter((message) => message.kind === 'notification').length,
+      total: unreadItems.length,
+    });
+  }),
+  http.get('/api/admin/messages/:kind/:id', ({ params }) => {
+    const item = withMessageState().find(
+      (message) => message.kind === params.kind && String(message.id) === String(params.id),
+    );
+    return item ? success(item) : fail('SYSTEM.MESSAGE.NOT_FOUND', '消息不存在');
+  }),
+  http.post('/api/admin/messages/read', async ({ request }) => {
+    const body = (await request.json()) as { messages?: Array<{ id: number; kind: string }> };
+    body.messages?.forEach((message) => {
+      readMessageKeys.add(getMessageKey(message));
+    });
+    return success(null);
+  }),
+  http.post('/api/admin/messages/archive', async ({ request }) => {
+    const body = (await request.json()) as { messages?: Array<{ id: number; kind: string }> };
+    body.messages?.forEach((message) => {
+      archivedMessageKeys.add(getMessageKey(message));
+    });
+    return success(null);
+  }),
+  http.post('/api/admin/messages/restore', async ({ request }) => {
+    const body = (await request.json()) as { messages?: Array<{ id: number; kind: string }> };
+    body.messages?.forEach((message) => {
+      archivedMessageKeys.delete(getMessageKey(message));
+    });
+    return success(null);
+  }),
+  http.post('/api/admin/messages/read-all', async () => {
+    withMessageState().forEach((message) => {
+      readMessageKeys.add(getMessageKey(message));
+    });
+    return success(null);
   }),
   http.delete('/api/admin/system/users/:id', () =>
     fail('SYSTEM.USER.NOT_FOUND', '管理员用户不存在或已被删除', {
