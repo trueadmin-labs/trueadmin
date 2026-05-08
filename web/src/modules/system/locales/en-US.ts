@@ -4,6 +4,8 @@ export default {
   'system.users.title': 'Admin Users',
   'system.users.description': 'Maintain admin accounts, statuses, and role assignments.',
   'system.users.quickSearch.placeholder': 'Search username / nickname',
+  'system.users.select.placeholder': 'Search users',
+  'system.users.select.modalTitle': 'Select user',
   'system.users.column.username': 'Username',
   'system.users.column.nickname': 'Nickname',
   'system.users.column.status': 'Status',

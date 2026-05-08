@@ -25,6 +25,11 @@ export default defineModule({
       meta: { title: 'examples.crud.title', auth: true },
     },
     {
+      path: '/examples/components',
+      component: lazy(() => import('./pages/ComponentsExamplePage')),
+      meta: { title: 'examples.components.title', auth: true },
+    },
+    {
       path: '/examples/selector',
       component: lazy(() => import('./pages/SelectorExamplePage')),
       meta: { title: 'examples.selector.title', auth: true },
@@ -104,6 +109,16 @@ export default defineModule({
           type: 'menu',
           status: 'enabled',
           sort: 40,
+        },
+        {
+          code: 'true-admin.examples.components',
+          title: 'Components Demo',
+          i18n: 'menu.examples.components',
+          path: '/examples/components',
+          icon: 'app',
+          type: 'menu',
+          status: 'enabled',
+          sort: 43,
         },
         {
           code: 'true-admin.examples.selector',

@@ -1,14 +1,8 @@
-import {
-  DownloadOutlined,
-  FilterOutlined,
-  ReloadOutlined,
-  SearchOutlined,
-  UploadOutlined,
-} from '@ant-design/icons';
-import { Badge, Button, Dropdown, Input, Space, Tooltip } from 'antd';
+import { FilterOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons';
+import { Badge, Button, Input, Space, Tooltip } from 'antd';
 import { type ChangeEvent, type ReactNode, useEffect, useState } from 'react';
+import { TrueAdminImportExport } from '@/core/import-export';
 import type {
-  CrudExportType,
   CrudImportConfig,
   CrudImportExportConfig,
   CrudQuickSearchConfig,
@@ -54,8 +48,6 @@ export type TrueAdminTableToolbarProps = {
   onToggleFilters: () => void;
 };
 
-const DEFAULT_EXPORT_OPTIONS: CrudExportType[] = ['page', 'selected', 'all'];
-
 function ImportExportToolbar({
   config,
   context,
@@ -71,69 +63,58 @@ function ImportExportToolbar({
 
   const importConfig = config.import === true ? {} : config.import;
   const exportConfig = config.export === true ? {} : config.export;
-  const exportOptions = exportConfig ? (exportConfig.options ?? DEFAULT_EXPORT_OPTIONS) : [];
   const importText = locale?.importText ?? t('crud.action.import', '导入');
   const exportText = locale?.exportText ?? t('crud.action.export', '导出');
 
   return (
-    <Space
-      className={toolbarProps?.classNames?.importExport}
-      size={8}
-      style={toolbarProps?.styles?.importExport}
-      wrap={false}
-    >
-      {importConfig ? (
-        <Tooltip title={importText}>
-          <Button
-            {...toolbarProps?.importButtonProps}
-            aria-label={importText}
-            className={['trueadmin-crud-icon-button', toolbarProps?.classNames?.importButton]
-              .filter(Boolean)
-              .join(' ')}
-            disabled={importConfig.disabled || toolbarProps?.importButtonProps?.disabled}
-            icon={<UploadOutlined />}
-            style={{
-              ...toolbarProps?.styles?.importButton,
-              ...toolbarProps?.importButtonProps?.style,
-            }}
-            onClick={() => onOpenImport(config.import ?? true)}
-          />
-        </Tooltip>
-      ) : null}
-      {exportConfig ? (
-        <Dropdown
-          disabled={exportConfig.disabled}
-          menu={{
-            items: exportOptions.map((type) => ({
-              disabled: type === 'selected' && selectedCount === 0,
-              key: type,
-              label:
-                type === 'page'
-                  ? t('crud.export.currentPage', '导出当页')
-                  : type === 'selected'
-                    ? t('crud.export.selected', '导出选中')
-                    : t('crud.export.filteredAll', '导出全部结果'),
-            })),
-            onClick: ({ key }) => exportConfig.onExport?.(key as CrudExportType, context),
-          }}
-        >
-          <Tooltip title={exportText}>
-            <Button
-              {...toolbarProps?.exportButtonProps}
-              aria-label={exportText}
-              className={['trueadmin-crud-icon-button', toolbarProps?.classNames?.exportButton]
-                .filter(Boolean)
-                .join(' ')}
-              icon={<DownloadOutlined />}
-              style={{
-                ...toolbarProps?.styles?.exportButton,
-                ...toolbarProps?.exportButtonProps?.style,
-              }}
-            />
-          </Tooltip>
-        </Dropdown>
-      ) : null}
-    </Space>
+    <TrueAdminImportExport
+      spaceProps={{
+        className: toolbarProps?.classNames?.importExport,
+        size: 8,
+        style: toolbarProps?.styles?.importExport,
+        wrap: false,
+      }}
+      importConfig={
+        importConfig
+          ? {
+              disabled: importConfig.disabled || toolbarProps?.importButtonProps?.disabled,
+              tooltip: importText,
+              buttonProps: {
+                ...toolbarProps?.importButtonProps,
+                className: ['trueadmin-crud-icon-button', toolbarProps?.classNames?.importButton]
+                  .filter(Boolean)
+                  .join(' '),
+                style: {
+                  ...toolbarProps?.styles?.importButton,
+                  ...toolbarProps?.importButtonProps?.style,
+                },
+              },
+              onClick: () => onOpenImport(config.import ?? true),
+            }
+          : false
+      }
+      exportConfig={
+        exportConfig
+          ? {
+              disabled: exportConfig.disabled,
+              tooltip: exportText,
+              options: exportConfig.options,
+              selectedDisabled: selectedCount === 0,
+              buttonProps: {
+                ...toolbarProps?.exportButtonProps,
+                className: ['trueadmin-crud-icon-button', toolbarProps?.classNames?.exportButton]
+                  .filter(Boolean)
+                  .join(' '),
+                style: {
+                  ...toolbarProps?.styles?.exportButton,
+                  ...toolbarProps?.exportButtonProps?.style,
+                },
+              },
+              onExport: (type) => exportConfig.onExport?.(type, context),
+            }
+          : false
+      }
+    />
   );
 }
 

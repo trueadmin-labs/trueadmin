@@ -2812,6 +2812,29 @@ body,
   overscroll-behavior: contain;
 }
 
+.trueadmin-audit-timeline-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.trueadmin-audit-timeline-title {
+  color: var(--ant-color-text);
+  font-weight: 500;
+}
+
+.trueadmin-audit-timeline-description,
+.trueadmin-audit-timeline-meta {
+  color: var(--ant-color-text-secondary);
+  font-size: 12px;
+}
+
+.trueadmin-audit-timeline-meta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .trueadmin-remote-select-loading {
   display: flex;
   min-height: 48px;

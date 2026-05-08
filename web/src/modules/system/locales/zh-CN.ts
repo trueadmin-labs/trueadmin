@@ -4,6 +4,8 @@ export default {
   'system.users.title': '管理员用户',
   'system.users.description': '维护后台管理员账号、状态和角色信息。',
   'system.users.quickSearch.placeholder': '搜索用户名 / 昵称',
+  'system.users.select.placeholder': '搜索用户',
+  'system.users.select.modalTitle': '选择用户',
   'system.users.column.username': '用户名',
   'system.users.column.nickname': '昵称',
   'system.users.column.status': '状态',

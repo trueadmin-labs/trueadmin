@@ -1,0 +1,188 @@
+import { ApartmentOutlined, TeamOutlined } from '@ant-design/icons';
+import { Space, Tag, Typography } from 'antd';
+import type { Key } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { CrudColumns, CrudService } from '@/core/crud/types';
+import {
+  TrueAdminTreeFilter,
+  type TrueAdminTreeFilterItem,
+} from '@/core/filter/TrueAdminTreeFilter';
+import { useI18n } from '@/core/i18n/I18nProvider';
+import {
+  type TrueAdminRemoteSelectValue,
+  TrueAdminRemoteTableSelect,
+  type TrueAdminRemoteTableSelectProps,
+} from '@/core/selector';
+import { adminUserApi } from '../services/admin-user.api';
+import { departmentApi } from '../services/department.api';
+import type { AdminUser } from '../types/admin-user';
+import type { DepartmentTreeNode } from '../types/department';
+
+export type TrueAdminUserSelectProps<
+  TValue extends TrueAdminRemoteSelectValue = number,
+  TMultiple extends boolean = false,
+> = Omit<
+  TrueAdminRemoteTableSelectProps<AdminUser, TValue, TMultiple>,
+  'fetchByValues' | 'fetchOptions' | 'getLabel' | 'getValue' | 'optionRender' | 'picker'
+> & {
+  picker?: Partial<TrueAdminRemoteTableSelectProps<AdminUser, TValue, TMultiple>['picker']>;
+  fetchDepartments?: () => Promise<DepartmentTreeNode[]>;
+  getValue?: (user: AdminUser) => TValue;
+  showDepartmentAside?: boolean;
+};
+
+const ALL_DEPARTMENTS_VALUE = 'all';
+
+const toDepartmentTreeItems = (
+  departments: DepartmentTreeNode[],
+): Array<TrueAdminTreeFilterItem<string>> =>
+  departments.map((department) => ({
+    children: department.children ? toDepartmentTreeItems(department.children) : undefined,
+    label: department.name,
+    searchText: [department.name, department.code].filter(Boolean).join(' '),
+    value: String(department.id),
+  }));
+
+export function TrueAdminUserSelect<
+  TValue extends TrueAdminRemoteSelectValue = number,
+  TMultiple extends boolean = false,
+>({
+  fetchDepartments = departmentApi.tree,
+  getValue = (user) => user.id as TValue,
+  picker,
+  showDepartmentAside = true,
+  ...selectProps
+}: TrueAdminUserSelectProps<TValue, TMultiple>) {
+  const { t } = useI18n();
+  const [department, setDepartment] = useState(ALL_DEPARTMENTS_VALUE);
+  const [departments, setDepartments] = useState<DepartmentTreeNode[]>([]);
+  const [departmentLoading, setDepartmentLoading] = useState(false);
+
+  const loadDepartments = useCallback(async () => {
+    setDepartmentLoading(true);
+    try {
+      setDepartments(await fetchDepartments());
+    } finally {
+      setDepartmentLoading(false);
+    }
+  }, [fetchDepartments]);
+
+  useEffect(() => {
+    if (showDepartmentAside) {
+      void loadDepartments();
+    }
+  }, [loadDepartments, showDepartmentAside]);
+
+  const departmentItems = useMemo<Array<TrueAdminTreeFilterItem<string>>>(
+    () => [
+      {
+        icon: <ApartmentOutlined />,
+        label: t('system.users.department.all', '全部组织'),
+        value: ALL_DEPARTMENTS_VALUE,
+      },
+      ...toDepartmentTreeItems(departments),
+    ],
+    [departments, t],
+  );
+
+  const service = useMemo<CrudService<AdminUser>>(
+    () => ({
+      list: (params) =>
+        adminUserApi.list({
+          ...params,
+          ...(department === ALL_DEPARTMENTS_VALUE ? {} : { deptId: department }),
+        }),
+    }),
+    [department],
+  );
+
+  const columns = useMemo<CrudColumns<AdminUser>>(
+    () => [
+      { dataIndex: 'id', title: 'ID', width: 72 },
+      {
+        dataIndex: 'username',
+        title: t('system.users.column.username', '用户名'),
+        render: (_, record) => (
+          <Space size={6}>
+            <TeamOutlined />
+            <span>{record.username}</span>
+          </Space>
+        ),
+      },
+      { dataIndex: 'nickname', title: t('system.users.column.nickname', '昵称') },
+      {
+        dataIndex: 'status',
+        title: t('system.users.column.status', '状态'),
+        width: 96,
+        render: (_, record) => (
+          <Tag color={record.status === 'enabled' ? 'success' : 'default'}>
+            {record.status === 'enabled'
+              ? t('system.users.status.enabled', '启用')
+              : t('system.users.status.disabled', '禁用')}
+          </Tag>
+        ),
+      },
+    ],
+    [t],
+  );
+
+  const fetchUsers = async ({
+    keyword,
+    page,
+    pageSize,
+  }: {
+    keyword: string;
+    page?: number;
+    pageSize?: number;
+  }) => {
+    const result = await adminUserApi.list({ keyword, page, pageSize });
+    return result.items ?? [];
+  };
+
+  const fetchUsersByValues = async (values: TValue[]) => {
+    const result = await adminUserApi.list({ page: 1, pageSize: Math.max(values.length, 20) });
+    const valueSet = new Set(values.map(String));
+    return (result.items ?? []).filter((user) => valueSet.has(String(getValue(user))));
+  };
+
+  return (
+    <TrueAdminRemoteTableSelect<AdminUser, TValue, TMultiple>
+      placeholder={t('system.users.select.placeholder', '搜索用户')}
+      {...selectProps}
+      fetchByValues={fetchUsersByValues}
+      fetchOptions={fetchUsers}
+      getLabel={(user) => user.nickname || user.username}
+      getValue={getValue}
+      optionRender={(user) => (
+        <Space size={8}>
+          <span>{user.nickname || user.username}</span>
+          <Typography.Text type="secondary">{user.username}</Typography.Text>
+        </Space>
+      )}
+      picker={{
+        title: t('system.users.select.modalTitle', '选择用户'),
+        rowKey: (record) => getValue(record) as Key,
+        resource: 'system.user.select',
+        columns,
+        service,
+        quickSearch: {
+          placeholder: t('system.users.quickSearch.placeholder', '搜索用户名 / 昵称'),
+        },
+        aside: showDepartmentAside ? (
+          <TrueAdminTreeFilter<string>
+            title={t('system.users.department.title', '组织架构')}
+            value={department}
+            items={departmentItems}
+            loading={departmentLoading}
+            placeholder={t('system.users.department.placeholder', '搜索部门')}
+            onReload={() => {
+              void loadDepartments();
+            }}
+            onChange={(value) => setDepartment(String(value))}
+          />
+        ) : undefined,
+        ...picker,
+      }}
+    />
+  );
+}
