@@ -1525,7 +1525,7 @@ body,
 }
 
 .trueadmin-example-stack {
-  width: min(100%, 920px);
+  width: 100%;
 }
 
 .trueadmin-workbench-stack {
@@ -1955,6 +1955,29 @@ body,
 
 .trueadmin-page-loading .ant-spin {
   line-height: 1;
+}
+
+.trueadmin-page.has-content-width {
+  align-items: stretch;
+}
+
+.trueadmin-page.has-content-width > .trueadmin-page-header,
+.trueadmin-page.has-content-width > .trueadmin-page-body,
+.trueadmin-page.has-content-width > .trueadmin-page-loading {
+  width: 100%;
+  max-width: min(100%, var(--trueadmin-page-content-width, 100%));
+}
+
+.trueadmin-page.content-align-center > .trueadmin-page-header,
+.trueadmin-page.content-align-center > .trueadmin-page-body,
+.trueadmin-page.content-align-center > .trueadmin-page-loading {
+  margin-inline: auto;
+}
+
+.trueadmin-page.content-align-start > .trueadmin-page-header,
+.trueadmin-page.content-align-start > .trueadmin-page-body,
+.trueadmin-page.content-align-start > .trueadmin-page-loading {
+  margin-inline-end: auto;
 }
 
 .trueadmin-loading-container.is-dark .trueadmin-loading-container-spin,

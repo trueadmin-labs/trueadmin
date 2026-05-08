@@ -196,7 +196,11 @@ export default function LoadingExamplePage() {
   const effectiveLoading = disableLoading ? false : detailLoading || refreshing;
 
   return (
-    <TrueAdminPage title={t('examples.loading.title', '加载态示例')}>
+    <TrueAdminPage
+      title={t('examples.loading.title', '加载态示例')}
+      contentAlign="center"
+      contentWidth={920}
+    >
       <Space orientation="vertical" size={16} className="trueadmin-example-stack">
         <Card title={t('examples.loading.strategy.title', '容器级加载策略')} size="small">
           <Paragraph>

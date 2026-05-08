@@ -164,7 +164,7 @@ export function TrueAdminRemoteSelect<
   useEffect(() => {
     const values = toValueArray(value ?? defaultValue);
     if (!fetchByValues || values.length === 0) {
-      setSelectedRecords([]);
+      setSelectedRecords((currentRecords) => (currentRecords.length === 0 ? currentRecords : []));
       return;
     }
 

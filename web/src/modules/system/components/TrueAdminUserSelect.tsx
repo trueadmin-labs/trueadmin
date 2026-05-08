@@ -33,6 +33,9 @@ export type TrueAdminUserSelectProps<
 
 const ALL_DEPARTMENTS_VALUE = 'all';
 
+const defaultGetUserValue = <TValue extends TrueAdminRemoteSelectValue>(user: AdminUser) =>
+  user.id as TValue;
+
 const toDepartmentTreeItems = (
   departments: DepartmentTreeNode[],
 ): Array<TrueAdminTreeFilterItem<string>> =>
@@ -48,7 +51,7 @@ export function TrueAdminUserSelect<
   TMultiple extends boolean = false,
 >({
   fetchDepartments = departmentApi.tree,
-  getValue = (user) => user.id as TValue,
+  getValue = defaultGetUserValue,
   picker,
   showDepartmentAside = true,
   ...selectProps
@@ -126,24 +129,22 @@ export function TrueAdminUserSelect<
     [t],
   );
 
-  const fetchUsers = async ({
-    keyword,
-    page,
-    pageSize,
-  }: {
-    keyword: string;
-    page?: number;
-    pageSize?: number;
-  }) => {
-    const result = await adminUserApi.list({ keyword, page, pageSize });
-    return result.items ?? [];
-  };
+  const fetchUsers = useCallback(
+    async ({ keyword, page, pageSize }: { keyword: string; page?: number; pageSize?: number }) => {
+      const result = await adminUserApi.list({ keyword, page, pageSize });
+      return result.items ?? [];
+    },
+    [],
+  );
 
-  const fetchUsersByValues = async (values: TValue[]) => {
-    const result = await adminUserApi.list({ page: 1, pageSize: Math.max(values.length, 20) });
-    const valueSet = new Set(values.map(String));
-    return (result.items ?? []).filter((user) => valueSet.has(String(getValue(user))));
-  };
+  const fetchUsersByValues = useCallback(
+    async (values: TValue[]) => {
+      const result = await adminUserApi.list({ page: 1, pageSize: Math.max(values.length, 20) });
+      const valueSet = new Set(values.map(String));
+      return (result.items ?? []).filter((user) => valueSet.has(String(getValue(user))));
+    },
+    [getValue],
+  );
 
   return (
     <TrueAdminRemoteTableSelect<AdminUser, TValue, TMultiple>

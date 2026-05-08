@@ -130,6 +130,8 @@ export default function SelectorExamplePage() {
     <TrueAdminPage
       title={t('examples.selector.title', '选择器示例')}
       description={t('examples.selector.description', '展示远程下拉选择和弹窗表格选择底座。')}
+      contentAlign="center"
+      contentWidth={920}
     >
       <Space orientation="vertical" size={12} className="trueadmin-example-stack">
         <Card size="small" title={t('examples.selector.remote.title', '远程下拉筛选')}>
@@ -137,7 +139,7 @@ export default function SelectorExamplePage() {
             <TrueAdminRemoteSelect<SelectorExampleUser, number>
               allowClear
               placeholder={t('examples.selector.remote.placeholder', '搜索姓名或账号')}
-              style={{ maxWidth: 360, width: '100%' }}
+              style={{ maxWidth: 360, width: '100%', marginInline: 'auto' }}
               value={selectValue}
               fetchByValues={async (values) => {
                 await wait(160);
@@ -182,7 +184,7 @@ export default function SelectorExamplePage() {
             <TrueAdminRemoteTableSelect<SelectorExampleUser, number>
               allowClear
               placeholder={t('examples.selector.combo.placeholder', '搜索用户，或打开表格选择')}
-              style={{ maxWidth: 420, width: '100%' }}
+              style={{ maxWidth: 420, width: '100%', marginInline: 'auto' }}
               value={comboValue}
               fetchByValues={async (values) => {
                 await wait(160);

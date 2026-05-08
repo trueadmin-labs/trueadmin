@@ -27,7 +27,11 @@ export default function PermissionExamplePage() {
   };
 
   return (
-    <TrueAdminPage title={t('examples.permission.title', '权限展示示例')}>
+    <TrueAdminPage
+      title={t('examples.permission.title', '权限展示示例')}
+      contentAlign="center"
+      contentWidth={920}
+    >
       <Space orientation="vertical" size={16} className="trueadmin-example-stack">
         <Alert
           showIcon

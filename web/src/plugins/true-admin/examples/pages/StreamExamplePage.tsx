@@ -169,6 +169,8 @@ export default function StreamExamplePage() {
         'examples.stream.description',
         '验证同一个后端接口在普通 JSON 和 SSE 流式响应下的数据一致性。',
       )}
+      contentAlign="center"
+      contentWidth={1180}
       extra={
         <Space wrap>
           <Button icon={<ApiOutlined />} loading={normalLoading} onClick={runNormal}>

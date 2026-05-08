@@ -8,6 +8,7 @@ import { LoadingContainer } from '@/core/loading/LoadingContainer';
 import { PageTransition } from './PageTransition';
 
 export type TrueAdminPageLayout = 'natural' | 'workspace';
+export type TrueAdminPageContentAlign = 'start' | 'center' | 'stretch';
 
 export type TrueAdminPageProps = {
   children: ReactNode;
@@ -27,7 +28,17 @@ export type TrueAdminPageProps = {
   contentPadding?: boolean;
   layout?: TrueAdminPageLayout;
   fullHeight?: boolean;
+  contentAlign?: TrueAdminPageContentAlign;
+  contentWidth?: number | string;
 };
+
+function toCssSize(value?: number | string) {
+  if (typeof value === 'number') {
+    return `${String(value)}px`;
+  }
+
+  return value;
+}
 
 function PageErrorFallback() {
   return (
@@ -75,6 +86,8 @@ export function TrueAdminPage({
   bodyClassName,
   bodyStyle,
   fullHeight = false,
+  contentAlign = 'stretch',
+  contentWidth,
 }: TrueAdminPageProps) {
   const location = useLocation();
   const viewport = useOptionalWorkspaceViewport();
@@ -87,6 +100,8 @@ export function TrueAdminPage({
     shouldUsePadding ? 'has-padding' : '',
     fullHeight ? 'is-full-height' : '',
     isWorkspaceLayout ? 'is-workspace' : '',
+    contentAlign !== 'stretch' || contentWidth ? 'has-content-width' : '',
+    contentAlign !== 'stretch' ? `content-align-${contentAlign}` : '',
     className,
   ]
     .filter(Boolean)
@@ -101,6 +116,7 @@ export function TrueAdminPage({
     ...style,
     '--trueadmin-page-workspace-height':
       isWorkspaceLayout && viewport ? `${String(viewport.pageHeight)}px` : undefined,
+    '--trueadmin-page-content-width': toCssSize(contentWidth),
   } as CSSProperties;
 
   return (

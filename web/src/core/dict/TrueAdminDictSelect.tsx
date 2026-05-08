@@ -35,16 +35,21 @@ export function TrueAdminDictSelect<TValue extends TrueAdminDictValue = TrueAdmi
   onOpenChange,
   ...selectProps
 }: TrueAdminDictSelectProps<TValue>) {
+  const hasRemoteOptions = Boolean(fetchOptions);
   const [innerOptions, setInnerOptions] = useState<Array<TrueAdminDictOption<TValue>>>(options);
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(options.length > 0);
 
   useEffect(() => {
+    if (!hasRemoteOptions) {
+      return;
+    }
+
     setInnerOptions(options);
     if (options.length > 0) {
       setLoaded(true);
     }
-  }, [options]);
+  }, [hasRemoteOptions, options]);
 
   const loadOptions = async () => {
     if (!fetchOptions || loading || loaded) {
@@ -71,12 +76,12 @@ export function TrueAdminDictSelect<TValue extends TrueAdminDictValue = TrueAdmi
 
   const selectOptions = useMemo(
     () =>
-      innerOptions.map((option) => ({
+      (hasRemoteOptions ? innerOptions : options).map((option) => ({
         disabled: option.disabled,
         label: option.label,
         value: option.value,
       })),
-    [innerOptions],
+    [hasRemoteOptions, innerOptions, options],
   );
 
   return (

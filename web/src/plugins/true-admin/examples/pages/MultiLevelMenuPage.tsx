@@ -9,7 +9,11 @@ export default function MultiLevelMenuPage() {
   const { t } = useI18n();
 
   return (
-    <TrueAdminPage title={t('examples.multilevel.title', '多级菜单示例')}>
+    <TrueAdminPage
+      title={t('examples.multilevel.title', '多级菜单示例')}
+      contentAlign="center"
+      contentWidth={920}
+    >
       <Space orientation="vertical" size={16} className="trueadmin-example-stack">
         <Card
           size="small"
