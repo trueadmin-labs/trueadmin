@@ -1,3 +1,4 @@
+import type { Dayjs } from 'dayjs';
 import type { ReactNode } from 'react';
 import type { PageResult } from '@/core/http/types';
 import type { TransText } from '@/core/i18n/trans';
@@ -46,6 +47,17 @@ export type AdminMessageUnreadCount = {
 };
 
 export type AdminMessageListResult = PageResult<AdminMessageItem>;
+
+export type AdminNotificationBatchListMeta = {
+  statusStats?: Partial<Record<AdminNotificationBatchStatus, number>>;
+};
+
+export type AdminNotificationBatchListResult = PageResult<
+  AdminNotificationBatch,
+  AdminNotificationBatchListMeta
+>;
+
+export type AdminNotificationDeliveryListResult = PageResult<AdminNotificationDelivery>;
 
 export type AdminMessageTypeClickContext = {
   defaultOpen: () => void;
@@ -99,4 +111,79 @@ export type AdminNotificationRealtimeConfig = {
   hiddenPollingIntervalMs?: number;
   sseRetryIntervalMs?: number;
   maxSseFailures?: number;
+};
+
+export type AdminNotificationBatchStatus = 'draft' | 'scheduled' | 'published' | 'offline';
+
+export type AdminNotificationDeliveryStatus = 'pending' | 'sent' | 'failed';
+
+export type AdminNotificationTargetType = 'all' | 'role' | 'user';
+
+export type AdminNotificationBatch = {
+  id: number;
+  title: string;
+  content?: string;
+  kind: AdminMessageKind;
+  level: AdminMessageLevel;
+  type: string;
+  source: string;
+  status: AdminNotificationBatchStatus;
+  targetType: AdminNotificationTargetType;
+  targetSummary: string;
+  pinned?: boolean;
+  scheduledAt?: string | null;
+  publishedAt?: string | null;
+  offlineAt?: string | null;
+  deliveryTotal: number;
+  sentTotal: number;
+  failedTotal: number;
+  readTotal: number;
+  operatorId?: number;
+  operatorName?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AdminNotificationDelivery = {
+  id: number;
+  batchId: number;
+  receiverId: number;
+  receiverName: string;
+  status: AdminNotificationDeliveryStatus;
+  readAt?: string | null;
+  archivedAt?: string | null;
+  sentAt?: string | null;
+  failedReason?: string | null;
+  retryCount: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AdminNotificationBatchQuery = {
+  page?: number;
+  pageSize?: number;
+  keyword?: string;
+  kind?: AdminMessageKind;
+  level?: AdminMessageLevel;
+  type?: string;
+  source?: string;
+  status?: AdminNotificationBatchStatus;
+};
+
+export type AdminNotificationDeliveryQuery = {
+  page?: number;
+  pageSize?: number;
+  status?: AdminNotificationDeliveryStatus;
+  keyword?: string;
+};
+
+export type AdminNotificationBatchCreatePayload = {
+  title: string;
+  content?: string;
+  level: AdminMessageLevel;
+  type: string;
+  targetType: AdminNotificationTargetType;
+  targetRoleIds?: string[];
+  pinned?: boolean;
+  scheduledAt?: string | Dayjs | null;
 };

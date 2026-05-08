@@ -4,6 +4,13 @@ import type {
   AdminMessageListResult,
   AdminMessageQuery,
   AdminMessageUnreadCount,
+  AdminNotificationBatch,
+  AdminNotificationBatchCreatePayload,
+  AdminNotificationBatchListResult,
+  AdminNotificationBatchQuery,
+  AdminNotificationDelivery,
+  AdminNotificationDeliveryListResult,
+  AdminNotificationDeliveryQuery,
 } from './types';
 
 export type AdminMessageIdentity = {
@@ -25,4 +32,26 @@ export const adminMessageApi = {
     http.Post<null>('/admin/messages/restore', { messages }),
   readAll: (kind?: AdminMessageItem['kind'] | 'all') =>
     http.Post<null>('/admin/messages/read-all', { kind }),
+};
+
+export const adminNotificationManagementApi = {
+  listBatches: (params?: AdminNotificationBatchQuery) =>
+    http.Get<AdminNotificationBatchListResult>('/admin/notification-batches', {
+      params,
+    }),
+  createAnnouncement: (payload: AdminNotificationBatchCreatePayload) =>
+    http.Post<AdminNotificationBatch>('/admin/notification-batches/announcements', payload),
+  publishBatch: (id: number) =>
+    http.Post<AdminNotificationBatch>(`/admin/notification-batches/${String(id)}/publish`),
+  offlineBatch: (id: number) =>
+    http.Post<AdminNotificationBatch>(`/admin/notification-batches/${String(id)}/offline`),
+  listDeliveries: (batchId: number, params?: AdminNotificationDeliveryQuery) =>
+    http.Get<AdminNotificationDeliveryListResult>(
+      `/admin/notification-batches/${String(batchId)}/deliveries`,
+      { params },
+    ),
+  resendDelivery: (batchId: number, deliveryId: number) =>
+    http.Post<AdminNotificationDelivery>(
+      `/admin/notification-batches/${String(batchId)}/deliveries/${String(deliveryId)}/resend`,
+    ),
 };
