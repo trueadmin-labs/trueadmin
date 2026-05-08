@@ -4,7 +4,7 @@ import type { ColumnsType } from 'antd/es/table';
 import { useMemo, useState } from 'react';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { TrueAdminPageModal } from '@/core/modal/TrueAdminPageModal';
-import { TrueAdminPage } from '@/core/page/TrueAdminPage';
+import { TrueAdminFormPage } from '@/core/page/TrueAdminFormPage';
 
 type SalesDetailItem = {
   key: string;
@@ -350,7 +350,7 @@ export default function ComplexDetailExamplePage() {
 
   return (
     <>
-      <TrueAdminPage
+      <TrueAdminFormPage
         showHeader
         title={t('demo.complexDetail.title', '复杂详情示例')}
         description={t(
@@ -360,7 +360,7 @@ export default function ComplexDetailExamplePage() {
         extra={actions}
       >
         <SalesOrderDetailBody />
-      </TrueAdminPage>
+      </TrueAdminFormPage>
       <TrueAdminPageModal
         title={t('demo.complexDetail.modal.title', '销售订单详情')}
         open={modalOpen}

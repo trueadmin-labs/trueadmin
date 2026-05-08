@@ -37,7 +37,12 @@ export default defineModule({
     {
       path: '/examples/complex-detail',
       component: lazy(() => import('./pages/ComplexDetailExamplePage')),
-      meta: { title: 'demo.complexDetail.title', pageType: 'custom-page', auth: true },
+      meta: {
+        title: 'demo.complexDetail.title',
+        pageType: 'custom-page',
+        auth: true,
+        layout: { showFooter: false },
+      },
     },
     {
       path: '/examples/multilevel/second/third',
