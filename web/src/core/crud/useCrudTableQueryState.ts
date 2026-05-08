@@ -1,7 +1,13 @@
 import { useCallback, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import { updateRawSearchParams } from '@/core/url/searchParams';
-import type { CrudFilterSchema, CrudListParams, CrudQuickSearchConfig } from './types';
+import type {
+  CrudExtraQuerySchema,
+  CrudFilterSchema,
+  CrudListParams,
+  CrudQueryController,
+  CrudQuickSearchConfig,
+} from './types';
 
 export type CrudOrder = 'asc' | 'desc';
 
@@ -13,6 +19,7 @@ export type CrudTableQueryState = {
   values: Record<string, string>;
   activeFilterCount: number;
   quickSearchName?: string;
+  query: CrudQueryController;
   requestParams: CrudListParams;
   submitQuickSearch: (value: string) => void;
   clearQuickSearch: () => void;
@@ -23,6 +30,7 @@ export type CrudTableQueryState = {
 };
 
 type UseCrudTableQueryStateOptions = {
+  extraQuery?: CrudExtraQuerySchema[];
   filters?: CrudFilterSchema[];
   quickSearch?: CrudQuickSearchConfig;
   defaultPageSize?: number;
@@ -57,6 +65,9 @@ const getQuickSearchName = (quickSearch?: CrudQuickSearchConfig) =>
 
 const getFilterNames = (filters: CrudFilterSchema[] = []) =>
   new Set(filters.map((filter) => filter.name));
+
+const getExtraQueryNames = (extraQuery: CrudExtraQuerySchema[] = []) =>
+  new Set(extraQuery.map((item) => item.name));
 
 const createParamsObject = (searchParams: URLSearchParams, keys: Iterable<string>) => {
   const keySet = new Set(keys);
@@ -103,6 +114,7 @@ const setPageSize = (params: URLSearchParams, pageSize: number, defaultPageSize:
 
 const getRequestParams = ({
   filters,
+  extraQuery,
   order,
   page,
   pageSize,
@@ -110,6 +122,7 @@ const getRequestParams = ({
   values,
 }: {
   filters: CrudFilterSchema[];
+  extraQuery: CrudExtraQuerySchema[];
   order?: CrudOrder;
   page: number;
   pageSize: number;
@@ -135,10 +148,26 @@ const getRequestParams = ({
     Object.assign(params, filter.transform({ name: filter.name, value, values }));
   });
 
+  extraQuery.forEach((item) => {
+    const value = values[item.name] ?? item.defaultValue;
+    delete params[item.name];
+    if (value === undefined) {
+      return;
+    }
+    if (item.transform) {
+      Object.assign(params, item.transform({ name: item.name, value, values }));
+      return;
+    }
+    if (item.requestName !== false) {
+      params[item.requestName ?? item.name] = value;
+    }
+  });
+
   return params;
 };
 
 export function useCrudTableQueryState({
+  extraQuery = [],
   filters = [],
   quickSearch,
   defaultPageSize = DEFAULT_PAGE_SIZE,
@@ -147,13 +176,17 @@ export function useCrudTableQueryState({
   const [searchParams] = useSearchParams();
   const quickSearchName = getQuickSearchName(quickSearch);
   const filterNames = useMemo(() => getFilterNames(filters), [filters]);
+  const extraQueryNames = useMemo(() => getExtraQueryNames(extraQuery), [extraQuery]);
   const valueKeys = useMemo(() => {
     const keys = new Set(filterNames);
     if (quickSearchName) {
       keys.add(quickSearchName);
     }
+    extraQueryNames.forEach((name) => {
+      keys.add(name);
+    });
     return keys;
-  }, [filterNames, quickSearchName]);
+  }, [extraQueryNames, filterNames, quickSearchName]);
 
   const current = toPositiveInteger(searchParams.get(PAGE_PARAM), DEFAULT_PAGE);
   const pageSize = toPositiveInteger(searchParams.get(PAGE_SIZE_PARAM), defaultPageSize);
@@ -213,12 +246,66 @@ export function useCrudTableQueryState({
 
   const resetFilters = useCallback(() => {
     updateQuery((params) => {
-      removeQueryKeys(params, valueKeys);
+      removeQueryKeys(
+        params,
+        new Set([...filterNames, ...(quickSearchName ? [quickSearchName] : [])]),
+      );
       params.delete(SORT_PARAM);
       params.delete(ORDER_PARAM);
       setPage(params, DEFAULT_PAGE);
     });
-  }, [updateQuery, valueKeys]);
+  }, [filterNames, quickSearchName, updateQuery]);
+
+  const setExtraQueryValue = useCallback(
+    (name: string, value?: string) => {
+      if (!extraQueryNames.has(name)) {
+        return;
+      }
+      updateQuery((params) => {
+        setQueryValue(params, name, value);
+        setPage(params, DEFAULT_PAGE);
+      });
+    },
+    [extraQueryNames, updateQuery],
+  );
+
+  const setExtraQueryValues = useCallback(
+    (nextValues: Record<string, string | undefined>) => {
+      updateQuery((params) => {
+        Object.entries(nextValues).forEach(([name, value]) => {
+          if (extraQueryNames.has(name)) {
+            setQueryValue(params, name, value);
+          }
+        });
+        setPage(params, DEFAULT_PAGE);
+      });
+    },
+    [extraQueryNames, updateQuery],
+  );
+
+  const resetExtraQueryValues = useCallback(
+    (names: string[]) => {
+      updateQuery((params) => {
+        names.forEach((name) => {
+          if (extraQueryNames.has(name)) {
+            params.delete(name);
+          }
+        });
+        setPage(params, DEFAULT_PAGE);
+      });
+    },
+    [extraQueryNames, updateQuery],
+  );
+
+  const query = useMemo<CrudQueryController>(
+    () => ({
+      resetValues: resetExtraQueryValues,
+      setValue: setExtraQueryValue,
+      setValues: setExtraQueryValues,
+      values,
+    }),
+    [resetExtraQueryValues, setExtraQueryValue, setExtraQueryValues, values],
+  );
 
   const changePage = useCallback(
     (nextPage?: number, nextPageSize?: number) => {
@@ -246,8 +333,8 @@ export function useCrudTableQueryState({
   );
 
   const requestParams = useMemo(
-    () => getRequestParams({ filters, order, page: current, pageSize, sort, values }),
-    [current, filters, order, pageSize, sort, values],
+    () => getRequestParams({ extraQuery, filters, order, page: current, pageSize, sort, values }),
+    [current, extraQuery, filters, order, pageSize, sort, values],
   );
 
   return {
@@ -258,6 +345,7 @@ export function useCrudTableQueryState({
     values,
     activeFilterCount,
     quickSearchName,
+    query,
     requestParams,
     submitQuickSearch,
     clearQuickSearch,

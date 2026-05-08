@@ -74,6 +74,26 @@ export type CrudQuickSearchConfig = {
   placeholder?: string;
 };
 
+export type CrudExtraQueryTransformContext = {
+  name: string;
+  value: string;
+  values: Record<string, string>;
+};
+
+export type CrudExtraQuerySchema = {
+  name: string;
+  defaultValue?: string;
+  requestName?: string | false;
+  transform?: (context: CrudExtraQueryTransformContext) => Record<string, unknown>;
+};
+
+export type CrudQueryController = {
+  values: Record<string, string>;
+  setValue: (name: string, value?: string) => void;
+  setValues: (values: Record<string, string | undefined>) => void;
+  resetValues: (names: string[]) => void;
+};
+
 export type CrudTableClassNames = {
   root?: string;
   shell?: string;
@@ -299,6 +319,7 @@ export type CrudTableRenderContext<
   action: CrudTableAction<TRecord, TCreate, TUpdate>;
   dataSource: TRecord[];
   loading: boolean;
+  query: CrudQueryController;
   response?: CrudPageResult<TRecord, TMeta>;
   selectedRowKeys: React.Key[];
   selectedRows: TRecord[];
@@ -476,6 +497,7 @@ export type TrueAdminCrudTableProps<
   toolbarProps?: CrudToolbarProps;
   filters?: CrudFilterSchema[];
   quickSearch?: CrudQuickSearchConfig;
+  extraQuery?: CrudExtraQuerySchema[];
   defaultFiltersExpanded?: boolean;
 };
 
@@ -495,7 +517,9 @@ export type TrueAdminCrudPageProps<
   classNames?: CrudPageClassNames;
   styles?: CrudPageStyles;
   titleCardProps?: Omit<CardProps, 'children'>;
-  aside?: ReactNode;
+  aside?:
+    | ReactNode
+    | ((context: CrudTableRenderContext<TRecord, TMeta, TCreate, TUpdate>) => ReactNode);
   asideWidth?: number | string;
   asideGap?: number | string;
   asideClassName?: string;

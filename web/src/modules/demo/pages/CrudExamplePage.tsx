@@ -27,6 +27,7 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import { TrueAdminCrudPage } from '@/core/crud/TrueAdminCrudPage';
 import type {
   CrudColumns,
+  CrudExtraQuerySchema,
   CrudFilterSchema,
   CrudListParams,
   CrudLoadLifecycleContext,
@@ -198,8 +199,6 @@ export default function CrudExamplePage() {
   const [formOpen, setFormOpen] = useState(false);
   const [formSubmitting, setFormSubmitting] = useState(false);
   const [selectedRows, setSelectedRows] = useState<CrudExampleRecord[]>([]);
-  const [statusScope, setStatusScope] = useState<CrudExampleStatusFilter>('all');
-  const [categoryScope, setCategoryScope] = useState<CrudExampleCategoryFilter>('all');
   const [categoryFilterCollapsed, setCategoryFilterCollapsed] = useState(false);
   const [categoryTreeLoading, setCategoryTreeLoading] = useState(false);
   const statusText = useMemo<Record<CrudExampleRecord['status'], string>>(
@@ -258,6 +257,11 @@ export default function CrudExamplePage() {
       },
     ],
     [categoryText.business, categoryText.finance, categoryText.system, statusText, t],
+  );
+
+  const extraQuery = useMemo<CrudExtraQuerySchema[]>(
+    () => [{ name: 'categoryScope' }, { name: 'statusScope' }],
+    [],
   );
 
   const columns = useMemo<CrudColumns<CrudExampleRecord>>(
@@ -411,21 +415,6 @@ export default function CrudExamplePage() {
     [t],
   );
 
-  const scopedService = useMemo<
-    CrudService<
-      CrudExampleRecord,
-      Partial<CrudExampleRecord>,
-      Partial<CrudExampleRecord>,
-      CrudExampleMeta
-    >
-  >(
-    () => ({
-      ...service,
-      list: (params) => service.list({ ...params, categoryScope, statusScope }),
-    }),
-    [categoryScope, service, statusScope],
-  );
-
   const appendLifecycleLog = useCallback(
     (name: string, messageText: string, payload: Record<string, unknown>) => {
       console.info('[CRUD lifecycle]', name, messageText, payload);
@@ -560,7 +549,8 @@ export default function CrudExamplePage() {
       description={t('demo.crud.description', '展示分类目录、统计概览、高级筛选和标准表格组合。')}
       resource="demo.crud"
       columns={columns}
-      service={scopedService}
+      service={service}
+      extraQuery={extraQuery}
       beforeRequest={handleBeforeRequest}
       transformParams={handleTransformParams}
       transformResponse={handleTransformResponse}
@@ -602,49 +592,53 @@ export default function CrudExamplePage() {
           ? 'trueadmin-demo-crud-aside is-collapsed'
           : 'trueadmin-demo-crud-aside is-expanded'
       }
-      aside={
-        <>
-          <div className="trueadmin-demo-crud-aside-panel" aria-hidden={categoryFilterCollapsed}>
-            <TrueAdminTreeFilter<CrudExampleCategoryTreeValue>
-              title={t('demo.crud.category.tree.title', '分类目录')}
-              placeholder={t('demo.crud.category.tree.placeholder', '搜索分类')}
-              emptyText={t('demo.crud.category.tree.empty', '暂无匹配分类')}
-              value={categoryScope}
-              loading={categoryTreeLoading}
-              expandAllText={t('demo.crud.category.tree.expandAll', '展开全部')}
-              collapseAllText={t('demo.crud.category.tree.collapseAll', '收起全部')}
-              reloadText={t('demo.crud.category.tree.reload', '刷新分类目录')}
-              onReload={handleReloadCategoryTree}
-              extra={
-                <Tooltip title={t('demo.crud.category.tree.hide', '隐藏分类目录')}>
-                  <Button
-                    size="small"
-                    type="text"
-                    icon={<MenuFoldOutlined />}
-                    onClick={() => setCategoryFilterCollapsed(true)}
-                  />
-                </Tooltip>
-              }
-              items={categoryFilterItems}
-              onChange={(nextValue) => {
-                if (nextValue !== 'config') {
-                  setCategoryScope(nextValue);
-                  setSelectedRows([]);
+      aside={({ query }) => {
+        const categoryScope = (query.values.categoryScope as CrudExampleCategoryFilter) ?? 'all';
+
+        return (
+          <>
+            <div className="trueadmin-demo-crud-aside-panel" aria-hidden={categoryFilterCollapsed}>
+              <TrueAdminTreeFilter<CrudExampleCategoryTreeValue>
+                title={t('demo.crud.category.tree.title', '分类目录')}
+                placeholder={t('demo.crud.category.tree.placeholder', '搜索分类')}
+                emptyText={t('demo.crud.category.tree.empty', '暂无匹配分类')}
+                value={categoryScope}
+                loading={categoryTreeLoading}
+                expandAllText={t('demo.crud.category.tree.expandAll', '展开全部')}
+                collapseAllText={t('demo.crud.category.tree.collapseAll', '收起全部')}
+                reloadText={t('demo.crud.category.tree.reload', '刷新分类目录')}
+                onReload={handleReloadCategoryTree}
+                extra={
+                  <Tooltip title={t('demo.crud.category.tree.hide', '隐藏分类目录')}>
+                    <Button
+                      size="small"
+                      type="text"
+                      icon={<MenuFoldOutlined />}
+                      onClick={() => setCategoryFilterCollapsed(true)}
+                    />
+                  </Tooltip>
                 }
-              }}
-            />
-          </div>
-          <div className="trueadmin-demo-crud-aside-rail" aria-hidden={!categoryFilterCollapsed}>
-            <Tooltip title={t('demo.crud.category.tree.show', '显示分类目录')} placement="right">
-              <Button
-                type="text"
-                icon={<MenuUnfoldOutlined />}
-                onClick={() => setCategoryFilterCollapsed(false)}
+                items={categoryFilterItems}
+                onChange={(nextValue) => {
+                  if (nextValue !== 'config') {
+                    query.setValue('categoryScope', nextValue === 'all' ? undefined : nextValue);
+                    setSelectedRows([]);
+                  }
+                }}
               />
-            </Tooltip>
-          </div>
-        </>
-      }
+            </div>
+            <div className="trueadmin-demo-crud-aside-rail" aria-hidden={!categoryFilterCollapsed}>
+              <Tooltip title={t('demo.crud.category.tree.show', '显示分类目录')} placement="right">
+                <Button
+                  type="text"
+                  icon={<MenuUnfoldOutlined />}
+                  onClick={() => setCategoryFilterCollapsed(false)}
+                />
+              </Tooltip>
+            </div>
+          </>
+        );
+      }}
       rowActions={{
         render: ({ record }) => (
           <Button key="edit" type="link" size="small" onClick={() => openEditForm(record)}>
@@ -828,118 +822,125 @@ export default function CrudExamplePage() {
           </Row>
         );
       }}
-      toolbarRender={({ action, response }) => (
-        <>
-          <Space className="trueadmin-crud-toolbar-business" size={8} wrap>
-            <TrueAdminQuickFilter<CrudExampleStatusFilter>
-              value={statusScope}
-              items={statusFilterItems.map((item) => ({
-                ...item,
-                count: item.value === 'pending' ? response?.meta?.statusStats.pending : undefined,
-              }))}
-              onChange={setStatusScope}
-            />
-            <Dropdown
-              disabled={!hasSelectedRows}
-              menu={{
-                items: [
-                  {
-                    key: 'enable',
-                    icon: <CheckCircleOutlined />,
-                    label: t('demo.crud.batch.enable', '批量启用'),
+      toolbarRender={({ action, query, response }) => {
+        const statusScope = (query.values.statusScope as CrudExampleStatusFilter) ?? 'all';
+
+        return (
+          <>
+            <Space className="trueadmin-crud-toolbar-business" size={8} wrap>
+              <TrueAdminQuickFilter<CrudExampleStatusFilter>
+                value={statusScope}
+                items={statusFilterItems.map((item) => ({
+                  ...item,
+                  count: item.value === 'pending' ? response?.meta?.statusStats.pending : undefined,
+                }))}
+                onChange={(nextValue) => {
+                  query.setValue('statusScope', nextValue === 'all' ? undefined : nextValue);
+                  setSelectedRows([]);
+                }}
+              />
+              <Dropdown
+                disabled={!hasSelectedRows}
+                menu={{
+                  items: [
+                    {
+                      key: 'enable',
+                      icon: <CheckCircleOutlined />,
+                      label: t('demo.crud.batch.enable', '批量启用'),
+                    },
+                    {
+                      danger: true,
+                      key: 'delete',
+                      icon: <DeleteOutlined />,
+                      label: t('demo.crud.batch.delete', '批量删除'),
+                    },
+                  ],
+                  onClick: ({ key }) => {
+                    if (key === 'enable') {
+                      message.info(t('demo.crud.message.batchEnable', '已触发批量启用'));
+                      return;
+                    }
+                    if (key === 'delete') {
+                      message.info(t('demo.crud.message.batchDelete', '已触发批量删除'));
+                      setSelectedRows([]);
+                    }
                   },
-                  {
-                    danger: true,
-                    key: 'delete',
-                    icon: <DeleteOutlined />,
-                    label: t('demo.crud.batch.delete', '批量删除'),
-                  },
-                ],
-                onClick: ({ key }) => {
-                  if (key === 'enable') {
-                    message.info(t('demo.crud.message.batchEnable', '已触发批量启用'));
-                    return;
-                  }
-                  if (key === 'delete') {
-                    message.info(t('demo.crud.message.batchDelete', '已触发批量删除'));
-                    setSelectedRows([]);
-                  }
-                },
-              }}
-            >
-              <Button disabled={!hasSelectedRows} icon={<DownOutlined />}>
-                {t('demo.crud.batch.actions', '批量操作')}
-              </Button>
-            </Dropdown>
-          </Space>
-          <Modal
-            title={
-              editingRecord
-                ? t('demo.crud.form.editTitle', '编辑配置')
-                : t('demo.crud.form.createTitle', '新增配置')
-            }
-            open={formOpen}
-            confirmLoading={formSubmitting}
-            onCancel={closeForm}
-            onOk={() => form.submit()}
-          >
-            <Form
-              form={form}
-              layout="vertical"
-              onFinish={async (values) => {
-                setFormSubmitting(true);
-                try {
-                  if (editingRecord) {
-                    await action.update?.(editingRecord.id, values);
-                  } else {
-                    await action.create?.(values);
-                  }
-                  closeForm();
-                } finally {
-                  setFormSubmitting(false);
-                }
-              }}
-            >
-              <Form.Item
-                name="name"
-                label={t('demo.crud.column.name', '名称')}
-                rules={[
-                  { required: true, message: t('demo.crud.form.nameRequired', '请输入名称') },
-                ]}
+                }}
               >
-                <Input />
-              </Form.Item>
-              <Form.Item
-                name="owner"
-                label={t('demo.crud.column.owner', '负责人')}
-                rules={[
-                  { required: true, message: t('demo.crud.form.ownerRequired', '请输入负责人') },
-                ]}
+                <Button disabled={!hasSelectedRows} icon={<DownOutlined />}>
+                  {t('demo.crud.batch.actions', '批量操作')}
+                </Button>
+              </Dropdown>
+            </Space>
+            <Modal
+              title={
+                editingRecord
+                  ? t('demo.crud.form.editTitle', '编辑配置')
+                  : t('demo.crud.form.createTitle', '新增配置')
+              }
+              open={formOpen}
+              confirmLoading={formSubmitting}
+              onCancel={closeForm}
+              onOk={() => form.submit()}
+            >
+              <Form
+                form={form}
+                layout="vertical"
+                onFinish={async (values) => {
+                  setFormSubmitting(true);
+                  try {
+                    if (editingRecord) {
+                      await action.update?.(editingRecord.id, values);
+                    } else {
+                      await action.create?.(values);
+                    }
+                    closeForm();
+                  } finally {
+                    setFormSubmitting(false);
+                  }
+                }}
               >
-                <Input />
-              </Form.Item>
-              <Form.Item name="status" label={t('demo.crud.column.status', '状态')}>
-                <Select
-                  options={[
-                    { label: statusText.enabled, value: 'enabled' },
-                    { label: statusText.pending, value: 'pending' },
-                    { label: statusText.disabled, value: 'disabled' },
+                <Form.Item
+                  name="name"
+                  label={t('demo.crud.column.name', '名称')}
+                  rules={[
+                    { required: true, message: t('demo.crud.form.nameRequired', '请输入名称') },
                   ]}
-                />
-              </Form.Item>
-              <Form.Item name="category" label={t('demo.crud.column.category', '分类')}>
-                <Select
-                  options={[
-                    { label: categoryText.system, value: 'system' },
-                    { label: categoryText.business, value: 'business' },
-                    { label: categoryText.finance, value: 'finance' },
+                >
+                  <Input />
+                </Form.Item>
+                <Form.Item
+                  name="owner"
+                  label={t('demo.crud.column.owner', '负责人')}
+                  rules={[
+                    { required: true, message: t('demo.crud.form.ownerRequired', '请输入负责人') },
                   ]}
-                />
-              </Form.Item>
-            </Form>
-          </Modal>
-        </>
-      )}
+                >
+                  <Input />
+                </Form.Item>
+                <Form.Item name="status" label={t('demo.crud.column.status', '状态')}>
+                  <Select
+                    options={[
+                      { label: statusText.enabled, value: 'enabled' },
+                      { label: statusText.pending, value: 'pending' },
+                      { label: statusText.disabled, value: 'disabled' },
+                    ]}
+                  />
+                </Form.Item>
+                <Form.Item name="category" label={t('demo.crud.column.category', '分类')}>
+                  <Select
+                    options={[
+                      { label: categoryText.system, value: 'system' },
+                      { label: categoryText.business, value: 'business' },
+                      { label: categoryText.finance, value: 'finance' },
+                    ]}
+                  />
+                </Form.Item>
+              </Form>
+            </Modal>
+          </>
+        );
+      }}
     />
   );
 }

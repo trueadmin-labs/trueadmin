@@ -6,7 +6,7 @@ import { Permission } from '@/core/auth/Permission';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { TrueAdminPage } from '@/core/page/TrueAdminPage';
 import { TrueAdminCrudTable } from './TrueAdminCrudTable';
-import type { TrueAdminCrudPageProps } from './types';
+import type { CrudTableRenderContext, TrueAdminCrudPageProps } from './types';
 
 const toSizeValue = (value: number | string) =>
   typeof value === 'number' ? `${String(value)}px` : value;
@@ -55,6 +55,7 @@ export function TrueAdminCrudPage<
   asideBodyStyle,
   resource,
   service,
+  tableRender,
   ...tableProps
 }: TrueAdminCrudPageProps<TRecord, TCreate, TUpdate, TMeta>) {
   const { t } = useI18n();
@@ -76,6 +77,54 @@ export function TrueAdminCrudPage<
     </Permission>
   ) : null;
   const pageExtra = extra ?? defaultExtra;
+
+  const renderAside = (context: CrudTableRenderContext<TRecord, TMeta, TCreate, TUpdate>) =>
+    typeof aside === 'function' ? aside(context) : aside;
+
+  const renderCrudLayout = (
+    context: CrudTableRenderContext<TRecord, TMeta, TCreate, TUpdate>,
+    defaultDom: React.ReactNode,
+    domList: Parameters<NonNullable<typeof tableRender>>[2],
+  ) => {
+    const tableDom = tableRender ? tableRender(context, defaultDom, domList) : defaultDom;
+
+    return (
+      <div
+        className={['trueadmin-crud-page-layout', hasAside ? 'has-aside' : '', classNames?.layout]
+          .filter(Boolean)
+          .join(' ')}
+        style={contentStyle}
+      >
+        {hasAside ? (
+          <aside
+            className={['trueadmin-crud-page-aside', classNames?.aside, asideClassName]
+              .filter(Boolean)
+              .join(' ')}
+            style={{ ...styles?.aside, ...asideStyle }}
+          >
+            <div
+              className={[
+                'trueadmin-crud-page-aside-body',
+                classNames?.asideBody,
+                asideBodyClassName,
+              ]
+                .filter(Boolean)
+                .join(' ')}
+              style={{ ...styles?.asideBody, ...asideBodyStyle }}
+            >
+              {renderAside(context)}
+            </div>
+          </aside>
+        ) : null}
+        <div
+          className={['trueadmin-crud-page-main', classNames?.main].filter(Boolean).join(' ')}
+          style={styles?.main}
+        >
+          {tableDom}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <TrueAdminPage
@@ -144,40 +193,12 @@ export function TrueAdminCrudPage<
             ) : null}
           </div>
         </Card>
-        <div
-          className={['trueadmin-crud-page-layout', hasAside ? 'has-aside' : '', classNames?.layout]
-            .filter(Boolean)
-            .join(' ')}
-          style={contentStyle}
-        >
-          {hasAside ? (
-            <aside
-              className={['trueadmin-crud-page-aside', classNames?.aside, asideClassName]
-                .filter(Boolean)
-                .join(' ')}
-              style={{ ...styles?.aside, ...asideStyle }}
-            >
-              <div
-                className={[
-                  'trueadmin-crud-page-aside-body',
-                  classNames?.asideBody,
-                  asideBodyClassName,
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
-                style={{ ...styles?.asideBody, ...asideBodyStyle }}
-              >
-                {aside}
-              </div>
-            </aside>
-          ) : null}
-          <div
-            className={['trueadmin-crud-page-main', classNames?.main].filter(Boolean).join(' ')}
-            style={styles?.main}
-          >
-            <TrueAdminCrudTable resource={resource} service={service} {...tableProps} />
-          </div>
-        </div>
+        <TrueAdminCrudTable
+          resource={resource}
+          service={service}
+          tableRender={renderCrudLayout}
+          {...tableProps}
+        />
       </div>
     </TrueAdminPage>
   );

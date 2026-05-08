@@ -21,6 +21,28 @@ const users = [
   },
 ];
 
+const departmentTree = [
+  {
+    id: 1,
+    name: '总部',
+    code: 'HQ',
+    children: [
+      { id: 11, name: '产品研发部', code: 'RD' },
+      { id: 12, name: '运营中心', code: 'OPS' },
+      { id: 13, name: '财务部', code: 'FIN' },
+    ],
+  },
+  {
+    id: 2,
+    name: '华东分公司',
+    code: 'EAST',
+    children: [
+      { id: 21, name: '杭州办事处', code: 'HZ' },
+      { id: 22, name: '上海办事处', code: 'SH' },
+    ],
+  },
+];
+
 export const handlers = [
   http.post('/api/admin/auth/login', async () =>
     success({ tokenType: 'Bearer', accessToken: 'mock-token', expiresIn: 7200 }),
@@ -70,6 +92,7 @@ export const handlers = [
       },
     ]),
   ),
+  http.get('/api/admin/system/departments/tree', () => success(departmentTree)),
   http.get('/api/admin/system/users', ({ request }) => {
     const url = new URL(request.url);
     const page = Number(url.searchParams.get('page') || 1);

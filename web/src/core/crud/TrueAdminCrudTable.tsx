@@ -61,6 +61,7 @@ export function TrueAdminCrudTable<
   defaultFiltersExpanded,
   filterPanelProps,
   filters = [],
+  extraQuery,
   quickSearch,
   resource,
   rowKey,
@@ -102,6 +103,7 @@ export function TrueAdminCrudTable<
   | 'defaultFiltersExpanded'
   | 'filterPanelProps'
   | 'filters'
+  | 'extraQuery'
   | 'quickSearch'
   | 'resource'
   | 'rowKey'
@@ -144,6 +146,7 @@ export function TrueAdminCrudTable<
     CrudImportConfig<TRecord, TMeta, TCreate, TUpdate> | undefined
   >();
   const queryState = useCrudTableQueryState({
+    extraQuery,
     filters,
     quickSearch,
     defaultPageSize: DEFAULT_PAGE_SIZE,
@@ -197,12 +200,23 @@ export function TrueAdminCrudTable<
       dataSource,
       error,
       loading,
+      query: queryState.query,
       response,
       selectedRowKeys,
       selectedRows,
       total,
     }),
-    [action, dataSource, error, loading, response, selectedRowKeys, selectedRows, total],
+    [
+      action,
+      dataSource,
+      error,
+      loading,
+      queryState.query,
+      response,
+      selectedRowKeys,
+      selectedRows,
+      total,
+    ],
   );
 
   const getRecordKey = useCallback(
