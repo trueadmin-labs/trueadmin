@@ -1,5 +1,5 @@
 import type { Key, ReactNode } from 'react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { TrueAdminCrudTable } from '@/core/crud/TrueAdminCrudTable';
 import type { TrueAdminCrudTableProps } from '@/core/crud/types';
 import { useI18n } from '@/core/i18n/I18nProvider';
@@ -29,6 +29,7 @@ export type TrueAdminTablePickerProps<
   title?: ReactNode;
   value?: Key[];
   defaultValue?: Key[];
+  selectedRows?: TRecord[];
   multiple?: boolean;
   aside?: ReactNode;
   asideWidth?: number | string;
@@ -77,6 +78,7 @@ export function TrueAdminTablePicker<
   onConfirm,
   open,
   rowSelection,
+  selectedRows: controlledSelectedRows = [],
   styles,
   style,
   title,
@@ -87,6 +89,27 @@ export function TrueAdminTablePicker<
   const [innerSelectedRowKeys, setInnerSelectedRowKeys] = useState<Key[]>(defaultValue);
   const [selectedRowMap, setSelectedRowMap] = useState<Map<string, TRecord>>(() => new Map());
   const selectedRowKeys = value ?? innerSelectedRowKeys;
+  useEffect(() => {
+    if (controlledSelectedRows.length === 0) {
+      return;
+    }
+    setSelectedRowMap((currentMap) => {
+      const nextMap = new Map(currentMap);
+      let changed = false;
+      controlledSelectedRows.forEach((record) => {
+        const key =
+          typeof crudTableProps.rowKey === 'function'
+            ? crudTableProps.rowKey(record)
+            : (record[(crudTableProps.rowKey ?? 'id') as keyof TRecord] as Key);
+        const keyString = toKeyString(key);
+        if (nextMap.get(keyString) !== record) {
+          nextMap.set(keyString, record);
+          changed = true;
+        }
+      });
+      return changed ? nextMap : currentMap;
+    });
+  }, [controlledSelectedRows, crudTableProps.rowKey]);
   const selectedRows = useMemo(
     () =>
       selectedRowKeys

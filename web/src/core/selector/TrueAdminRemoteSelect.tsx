@@ -53,6 +53,7 @@ export type TrueAdminRemoteSelectProps<
   searchDelay?: number;
   defaultKeyword?: string;
   defaultOptions?: TRecord[];
+  selectedOptions?: TRecord[];
   pageSize?: number;
   searchOnFocus?: boolean;
   loadingText?: ReactNode;
@@ -97,6 +98,7 @@ export function TrueAdminRemoteSelect<
   onChange,
   onLoadOptionsError,
   optionRender,
+  selectedOptions = [],
   pageSize = DEFAULT_PAGE_SIZE,
   searchDelay = DEFAULT_SEARCH_DELAY,
   searchOnFocus = true,
@@ -186,11 +188,11 @@ export function TrueAdminRemoteSelect<
 
   const recordMap = useMemo(() => {
     const map = new Map<string, TRecord>();
-    for (const record of [...records, ...selectedRecords]) {
+    for (const record of [...records, ...selectedRecords, ...selectedOptions]) {
       map.set(toValueKey(getValue(record)), record);
     }
     return map;
-  }, [getValue, records, selectedRecords]);
+  }, [getValue, records, selectedOptions, selectedRecords]);
 
   const options = useMemo(
     () =>

@@ -8,7 +8,11 @@ import {
 } from '@/core/filter/TrueAdminTreeFilter';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { TrueAdminPage } from '@/core/page/TrueAdminPage';
-import { TrueAdminRemoteSelect, TrueAdminTablePicker } from '@/core/selector';
+import {
+  TrueAdminRemoteSelect,
+  TrueAdminRemoteTableSelect,
+  TrueAdminTablePicker,
+} from '@/core/selector';
 
 const wait = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
 
@@ -86,6 +90,8 @@ export default function SelectorExamplePage() {
   const [department, setDepartment] = useState('all');
   const [pickerValues, setPickerValues] = useState<React.Key[]>([]);
   const [pickerUsers, setPickerUsers] = useState<SelectorExampleUser[]>([]);
+  const [comboValue, setComboValue] = useState<number>();
+  const [comboUser, setComboUser] = useState<SelectorExampleUser>();
 
   const columns = useMemo<CrudColumns<SelectorExampleUser>>(
     () => [
@@ -167,6 +173,71 @@ export default function SelectorExamplePage() {
                     `${selectUser.name} / ${selectUser.username}`,
                   )
                 : t('examples.selector.remote.empty', '暂未选择用户')}
+            </Typography.Text>
+          </Space>
+        </Card>
+
+        <Card size="small" title={t('examples.selector.combo.title', '下拉 + 表格选择')}>
+          <Space orientation="vertical" size={12} style={{ width: '100%' }}>
+            <TrueAdminRemoteTableSelect<SelectorExampleUser, number>
+              allowClear
+              placeholder={t('examples.selector.combo.placeholder', '搜索用户，或打开表格选择')}
+              style={{ maxWidth: 420, width: '100%' }}
+              value={comboValue}
+              fetchByValues={async (values) => {
+                await wait(160);
+                return users.filter((user) => values.includes(user.id));
+              }}
+              fetchOptions={async ({ keyword }) => {
+                await wait(220);
+                const normalizedKeyword = keyword.trim().toLowerCase();
+                return users
+                  .filter((user) =>
+                    `${user.name} ${user.username}`.toLowerCase().includes(normalizedKeyword),
+                  )
+                  .slice(0, 12);
+              }}
+              getLabel={(user) => `${user.name} / ${user.username}`}
+              getValue={(user) => user.id}
+              optionRender={(user) => (
+                <Space size={8}>
+                  <span>{user.name}</span>
+                  <Typography.Text type="secondary">{user.username}</Typography.Text>
+                  <Tag>{departmentText[user.department]}</Tag>
+                </Space>
+              )}
+              pickerButtonTooltip={t('examples.selector.combo.openPicker', '打开表格选择')}
+              picker={{
+                title: t('examples.selector.combo.modalTitle', '选择用户'),
+                rowKey: 'id',
+                resource: 'true-admin.examples.selector.combo',
+                columns,
+                service,
+                quickSearch: {
+                  placeholder: t('examples.selector.table.quickSearch', '搜索姓名 / 账号'),
+                },
+                aside: (
+                  <TrueAdminTreeFilter<string>
+                    title={t('examples.selector.department.title', '组织目录')}
+                    value={department}
+                    items={departmentItems}
+                    placeholder={t('examples.selector.department.placeholder', '搜索组织')}
+                    onChange={(value) => setDepartment(value)}
+                  />
+                ),
+              }}
+              onChange={(value, record) => {
+                setComboValue(value);
+                setComboUser(record);
+              }}
+            />
+            <Typography.Text type="secondary">
+              {comboUser
+                ? t('examples.selector.combo.selected', '已选择：{{name}}').replace(
+                    '{{name}}',
+                    `${comboUser.name} / ${comboUser.username}`,
+                  )
+                : t('examples.selector.combo.empty', '暂未选择用户')}
             </Typography.Text>
           </Space>
         </Card>
