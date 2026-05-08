@@ -1,23 +1,10 @@
 import { FileTextOutlined } from '@ant-design/icons';
-import {
-  Button,
-  Card,
-  Col,
-  Descriptions,
-  Divider,
-  Modal,
-  Row,
-  Space,
-  Table,
-  Tag,
-  Typography,
-} from 'antd';
+import { Button, Card, Col, Descriptions, Divider, Row, Space, Table, Tag, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import type { CSSProperties } from 'react';
 import { useMemo, useState } from 'react';
 import { useI18n } from '@/core/i18n/I18nProvider';
+import { TrueAdminPageModal } from '@/core/modal/TrueAdminPageModal';
 import { TrueAdminPage } from '@/core/page/TrueAdminPage';
-import { TrueAdminScrollShadow } from '@/core/scroll/TrueAdminScrollShadow';
 
 type SalesDetailItem = {
   key: string;
@@ -374,20 +361,12 @@ export default function ComplexDetailExamplePage() {
       >
         <SalesOrderDetailBody />
       </TrueAdminPage>
-      <Modal
-        centered
+      <TrueAdminPageModal
         title={t('demo.complexDetail.modal.title', '销售订单详情')}
         open={modalOpen}
-        width="min(1440px, calc(100vw - 48px))"
-        className="trueadmin-page-modal trueadmin-complex-form-modal"
-        style={
-          {
-            '--trueadmin-modal-content-bg': 'var(--trueadmin-shell-bg)',
-            '--trueadmin-modal-content-padding-block': '20px',
-            '--trueadmin-modal-content-padding-inline': '24px',
-          } as CSSProperties
-        }
-        styles={{ body: { overflow: 'hidden', padding: 0 } }}
+        className="trueadmin-complex-form-modal"
+        scrollClassName="trueadmin-complex-form-modal-shadow"
+        scrollContentClassName="trueadmin-complex-form-modal-body"
         footer={
           <Space size={8} wrap>
             <Button onClick={() => setModalOpen(false)}>
@@ -397,15 +376,9 @@ export default function ComplexDetailExamplePage() {
           </Space>
         }
         onCancel={() => setModalOpen(false)}
-        destroyOnHidden
       >
-        <TrueAdminScrollShadow
-          className="trueadmin-complex-form-modal-shadow"
-          contentClassName="trueadmin-complex-form-modal-body"
-        >
-          <SalesOrderDetailBody variant="modal" />
-        </TrueAdminScrollShadow>
-      </Modal>
+        <SalesOrderDetailBody variant="modal" />
+      </TrueAdminPageModal>
     </>
   );
 }

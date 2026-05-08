@@ -1,4 +1,13 @@
-import type { TableColumnsType, TableProps } from 'antd';
+import type {
+  ButtonProps,
+  CardProps,
+  FormProps,
+  InputProps,
+  PaginationProps,
+  SpaceProps,
+  TableColumnsType,
+  TableProps,
+} from 'antd';
 import type { CSSProperties, ReactNode } from 'react';
 import type { PageResult } from '@/core/http/types';
 
@@ -63,6 +72,173 @@ export type CrudFilterSchema =
 export type CrudQuickSearchConfig = {
   name?: string;
   placeholder?: string;
+};
+
+export type CrudTableClassNames = {
+  root?: string;
+  shell?: string;
+  summary?: string;
+  search?: string;
+  extra?: string;
+  card?: string;
+  toolbar?: string;
+  toolbarLeft?: string;
+  toolbarRight?: string;
+  tableMain?: string;
+  pagination?: string;
+  paginationLeft?: string;
+  paginationRight?: string;
+  selectedStatus?: string;
+  selectedStatusContent?: string;
+  selectedStatusOptions?: string;
+};
+
+export type CrudTableStyles = {
+  root?: CSSProperties;
+  shell?: CSSProperties;
+  summary?: CSSProperties;
+  search?: CSSProperties;
+  extra?: CSSProperties;
+  card?: CSSProperties;
+  toolbar?: CSSProperties;
+  toolbarLeft?: CSSProperties;
+  toolbarRight?: CSSProperties;
+  tableMain?: CSSProperties;
+  pagination?: CSSProperties;
+  paginationLeft?: CSSProperties;
+  paginationRight?: CSSProperties;
+  selectedStatus?: CSSProperties;
+  selectedStatusContent?: CSSProperties;
+  selectedStatusOptions?: CSSProperties;
+};
+
+export type CrudToolbarClassNames = {
+  root?: string;
+  quickSearchGroup?: string;
+  quickSearch?: string;
+  searchAddon?: string;
+  searchButton?: string;
+  filterButton?: string;
+  importExport?: string;
+  importButton?: string;
+  exportButton?: string;
+  reloadButton?: string;
+};
+
+export type CrudToolbarStyles = {
+  root?: CSSProperties;
+  quickSearchGroup?: CSSProperties;
+  quickSearch?: CSSProperties;
+  searchAddon?: CSSProperties;
+  searchButton?: CSSProperties;
+  filterButton?: CSSProperties;
+  importExport?: CSSProperties;
+  importButton?: CSSProperties;
+  exportButton?: CSSProperties;
+  reloadButton?: CSSProperties;
+};
+
+export type CrudToolbarProps = {
+  className?: string;
+  style?: CSSProperties;
+  classNames?: CrudToolbarClassNames;
+  styles?: CrudToolbarStyles;
+  spaceProps?: Omit<SpaceProps, 'children'>;
+  quickSearchInputProps?: Omit<InputProps, 'className' | 'onChange' | 'onPressEnter' | 'value'>;
+  searchButtonProps?: Omit<ButtonProps, 'className' | 'icon' | 'onClick'>;
+  filterButtonProps?: Omit<ButtonProps, 'className' | 'icon' | 'onClick'>;
+  importButtonProps?: Omit<ButtonProps, 'className' | 'icon' | 'onClick'>;
+  exportButtonProps?: Omit<ButtonProps, 'className' | 'icon'>;
+  reloadButtonProps?: Omit<ButtonProps, 'className' | 'icon' | 'onClick'>;
+};
+
+export type CrudFilterPanelClassNames = {
+  root?: string;
+  inner?: string;
+  form?: string;
+  layout?: string;
+  content?: string;
+  grid?: string;
+  actions?: string;
+  actionSpace?: string;
+  searchButton?: string;
+  resetButton?: string;
+};
+
+export type CrudFilterPanelStyles = {
+  root?: CSSProperties;
+  inner?: CSSProperties;
+  form?: CSSProperties;
+  layout?: CSSProperties;
+  content?: CSSProperties;
+  grid?: CSSProperties;
+  actions?: CSSProperties;
+  actionSpace?: CSSProperties;
+  searchButton?: CSSProperties;
+  resetButton?: CSSProperties;
+};
+
+export type CrudFilterPanelProps = {
+  className?: string;
+  style?: CSSProperties;
+  classNames?: CrudFilterPanelClassNames;
+  styles?: CrudFilterPanelStyles;
+  formProps?: Omit<FormProps, 'children' | 'form' | 'layout' | 'onFinish'>;
+  searchButtonProps?: Omit<ButtonProps, 'children' | 'htmlType' | 'icon' | 'onClick' | 'type'>;
+  resetButtonProps?: Omit<ButtonProps, 'children' | 'htmlType' | 'icon' | 'onClick'>;
+};
+
+export type CrudTableLocale = {
+  actionColumnTitle?: ReactNode;
+  deleteText?: ReactNode;
+  deleteConfirmTitle?: ReactNode;
+  deleteSuccessMessage?: string;
+  emptyText?: ReactNode;
+  errorTitle?: ReactNode;
+  errorDescription?: ReactNode;
+  reloadText?: ReactNode;
+  selectedCountText?: (count: number) => ReactNode;
+  clearSelectedText?: ReactNode;
+  paginationTotalText?: (total: number) => ReactNode;
+  quickSearchPlaceholder?: string;
+  searchText?: string;
+  advancedFilterText?: string;
+  filterSearchText?: ReactNode;
+  filterResetText?: ReactNode;
+  importText?: string;
+  exportText?: string;
+};
+
+export type CrudPageClassNames = {
+  root?: string;
+  body?: string;
+  stack?: string;
+  titleCard?: string;
+  titleCardContent?: string;
+  titleCardMain?: string;
+  title?: string;
+  description?: string;
+  titleExtra?: string;
+  layout?: string;
+  aside?: string;
+  asideBody?: string;
+  main?: string;
+};
+
+export type CrudPageStyles = {
+  root?: CSSProperties;
+  body?: CSSProperties;
+  stack?: CSSProperties;
+  titleCard?: CSSProperties;
+  titleCardContent?: CSSProperties;
+  titleCardMain?: CSSProperties;
+  title?: CSSProperties;
+  description?: CSSProperties;
+  titleExtra?: CSSProperties;
+  layout?: CSSProperties;
+  aside?: CSSProperties;
+  asideBody?: CSSProperties;
+  main?: CSSProperties;
 };
 
 export type CrudPageResult<TRecord, TMeta = Record<string, unknown>> = PageResult<TRecord, TMeta>;
@@ -269,10 +445,35 @@ export type TrueAdminCrudTableProps<
   tableAlertOptionRender?:
     | false
     | ((context: CrudTableRenderContext<TRecord, TMeta, TCreate, TUpdate>) => ReactNode);
+  className?: string;
+  style?: CSSProperties;
+  classNames?: CrudTableClassNames;
+  styles?: CrudTableStyles;
+  cardProps?: Omit<CardProps, 'children'>;
+  filterPanelProps?: CrudFilterPanelProps;
+  locale?: CrudTableLocale;
+  paginationProps?: Omit<PaginationProps, 'current' | 'pageSize' | 'total'>;
   rowSelection?: TableProps<TRecord>['rowSelection'];
   rowActions?: false | CrudRowActionsConfig<TRecord, TMeta, TCreate, TUpdate>;
   importExport?: false | CrudImportExportConfig<TRecord, TMeta, TCreate, TUpdate>;
+  tableProps?: Omit<
+    TableProps<TRecord>,
+    | 'columns'
+    | 'dataSource'
+    | 'loading'
+    | 'locale'
+    | 'onChange'
+    | 'pagination'
+    | 'rowKey'
+    | 'rowSelection'
+    | 'scroll'
+  > & {
+    locale?: TableProps<TRecord>['locale'];
+    onChange?: TableProps<TRecord>['onChange'];
+    scroll?: TableProps<TRecord>['scroll'];
+  };
   tableScrollX?: number | string;
+  toolbarProps?: CrudToolbarProps;
   filters?: CrudFilterSchema[];
   quickSearch?: CrudQuickSearchConfig;
   defaultFiltersExpanded?: boolean;
@@ -287,6 +488,13 @@ export type TrueAdminCrudPageProps<
   title: string;
   description?: ReactNode;
   extra?: ReactNode;
+  className?: string;
+  style?: CSSProperties;
+  bodyClassName?: string;
+  bodyStyle?: CSSProperties;
+  classNames?: CrudPageClassNames;
+  styles?: CrudPageStyles;
+  titleCardProps?: Omit<CardProps, 'children'>;
   aside?: ReactNode;
   asideWidth?: number | string;
   asideGap?: number | string;

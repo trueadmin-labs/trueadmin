@@ -1,9 +1,29 @@
-import type { HTMLAttributes, ReactNode, UIEvent } from 'react';
+import type { CSSProperties, HTMLAttributes, ReactNode, UIEvent } from 'react';
 import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 
-type TrueAdminScrollShadowProps = HTMLAttributes<HTMLDivElement> & {
+export type TrueAdminScrollShadowClassNames = {
+  root?: string;
+  scroller?: string;
+};
+
+export type TrueAdminScrollShadowStyles = {
+  root?: CSSProperties;
+  scroller?: CSSProperties;
+};
+
+export type TrueAdminScrollShadowProps = HTMLAttributes<HTMLDivElement> & {
   children?: ReactNode;
+  classNames?: TrueAdminScrollShadowClassNames;
+  styles?: TrueAdminScrollShadowStyles;
   contentClassName?: string;
+  contentStyle?: CSSProperties;
+  disabled?: boolean;
+  shadow?:
+    | boolean
+    | {
+        bottom?: boolean;
+        top?: boolean;
+      };
 };
 
 const getShadowState = (element: HTMLDivElement | null) => {
@@ -19,19 +39,45 @@ const getShadowState = (element: HTMLDivElement | null) => {
   };
 };
 
+const canShowShadow = (
+  shadow: TrueAdminScrollShadowProps['shadow'],
+  placement: 'bottom' | 'top',
+) => {
+  if (shadow === false) {
+    return false;
+  }
+
+  if (typeof shadow === 'object') {
+    return shadow[placement] !== false;
+  }
+
+  return true;
+};
+
 export function TrueAdminScrollShadow({
   children,
   className,
+  classNames,
   contentClassName,
+  contentStyle,
+  disabled = false,
   onScroll,
+  shadow = true,
+  style,
+  styles,
   ...restProps
 }: TrueAdminScrollShadowProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [shadowState, setShadowState] = useState({ bottom: false, top: false });
 
   const updateShadowState = useCallback(() => {
+    if (disabled) {
+      setShadowState({ bottom: false, top: false });
+      return;
+    }
+
     setShadowState(getShadowState(scrollRef.current));
-  }, []);
+  }, [disabled]);
 
   useLayoutEffect(() => {
     const element = scrollRef.current;
@@ -60,13 +106,17 @@ export function TrueAdminScrollShadow({
   return (
     <div
       {...restProps}
-      className={['trueadmin-scroll-shadow', className].filter(Boolean).join(' ')}
-      data-shadow-bottom={shadowState.bottom ? 'true' : 'false'}
-      data-shadow-top={shadowState.top ? 'true' : 'false'}
+      className={['trueadmin-scroll-shadow', classNames?.root, className].filter(Boolean).join(' ')}
+      style={{ ...styles?.root, ...style }}
+      data-shadow-bottom={shadowState.bottom && canShowShadow(shadow, 'bottom') ? 'true' : 'false'}
+      data-shadow-top={shadowState.top && canShowShadow(shadow, 'top') ? 'true' : 'false'}
     >
       <div
         ref={scrollRef}
-        className={['trueadmin-scroll-shadow-scroller', contentClassName].filter(Boolean).join(' ')}
+        className={['trueadmin-scroll-shadow-scroller', classNames?.scroller, contentClassName]
+          .filter(Boolean)
+          .join(' ')}
+        style={{ ...styles?.scroller, ...contentStyle }}
         onScroll={handleScroll}
       >
         {children}

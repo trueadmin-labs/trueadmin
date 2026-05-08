@@ -1,6 +1,7 @@
 import type { TableProps } from 'antd';
 import { App, Button, Card, Empty, Pagination, Popconfirm, Result, Table, Typography } from 'antd';
-import type { SorterResult, TablePaginationConfig } from 'antd/es/table/interface';
+import type { CardProps, CardSemanticStyles, CardStylesType } from 'antd/es/card/Card';
+import type { SorterResult } from 'antd/es/table/interface';
 import type { Key } from 'react';
 import { useCallback, useMemo, useState } from 'react';
 import { Permission } from '@/core/auth/Permission';
@@ -23,6 +24,25 @@ import { useCrudTableQueryState } from './useCrudTableQueryState';
 
 const DEFAULT_PAGE_SIZE = 20;
 
+const joinClassNames = (...classNames: Array<string | undefined | false>) =>
+  classNames.filter(Boolean).join(' ');
+
+const mergeCardBodyStyles = (
+  cardStyles: CardStylesType | undefined,
+  bodyStyle: React.CSSProperties,
+): CardStylesType => {
+  const mergeBodyStyle = (nextStyles?: CardSemanticStyles): CardSemanticStyles => ({
+    ...nextStyles,
+    body: { ...bodyStyle, ...nextStyles?.body },
+  });
+
+  if (typeof cardStyles === 'function') {
+    return (info: { props: CardProps }) => mergeBodyStyle(cardStyles(info));
+  }
+
+  return mergeBodyStyle(cardStyles);
+};
+
 type RowSelectionOnChange<TRecord extends Record<string, unknown>> = NonNullable<
   NonNullable<TableProps<TRecord>['rowSelection']>['onChange']
 >;
@@ -33,7 +53,13 @@ export function TrueAdminCrudTable<
   TUpdate = Partial<TRecord>,
   TMeta = Record<string, unknown>,
 >({
+  className,
+  style,
+  classNames,
+  styles,
+  cardProps,
   defaultFiltersExpanded,
+  filterPanelProps,
   filters = [],
   quickSearch,
   resource,
@@ -60,11 +86,21 @@ export function TrueAdminCrudTable<
   tableAlertOptionRender,
   rowActions,
   importExport,
+  locale,
+  paginationProps,
   rowSelection,
+  tableProps,
   tableScrollX,
+  toolbarProps,
 }: Pick<
   TrueAdminCrudTableProps<TRecord, TCreate, TUpdate, TMeta>,
+  | 'className'
+  | 'style'
+  | 'classNames'
+  | 'styles'
+  | 'cardProps'
   | 'defaultFiltersExpanded'
+  | 'filterPanelProps'
   | 'filters'
   | 'quickSearch'
   | 'resource'
@@ -91,8 +127,12 @@ export function TrueAdminCrudTable<
   | 'tableAlertOptionRender'
   | 'rowActions'
   | 'importExport'
+  | 'locale'
+  | 'paginationProps'
   | 'rowSelection'
+  | 'tableProps'
   | 'tableScrollX'
+  | 'toolbarProps'
 >) {
   const { message } = App.useApp();
   const { t } = useI18n();
@@ -180,7 +220,8 @@ export function TrueAdminCrudTable<
       rowActions !== false && (service.delete || rowActions?.render)
         ? [
             {
-              title: rowActions?.title ?? t('crud.column.action', '操作'),
+              title:
+                rowActions?.title ?? locale?.actionColumnTitle ?? t('crud.column.action', '操作'),
               key: '__actions',
               fixed: 'right',
               width: rowActions?.width ?? 120,
@@ -190,12 +231,18 @@ export function TrueAdminCrudTable<
                   {service.delete && rowActions?.delete !== false ? (
                     <Permission code={toPermissionCode(resource, 'delete')}>
                       <Popconfirm
-                        title={t('crud.action.deleteConfirm', '确认删除这条记录吗？')}
+                        title={
+                          locale?.deleteConfirmTitle ??
+                          t('crud.action.deleteConfirm', '确认删除这条记录吗？')
+                        }
                         onConfirm={async () => {
                           try {
                             await deleteRecord(getRecordKey(record));
                             if (!onDeleteSuccess) {
-                              message.success(t('crud.action.deleteSuccess', '删除成功'));
+                              message.success(
+                                locale?.deleteSuccessMessage ??
+                                  t('crud.action.deleteSuccess', '删除成功'),
+                              );
                             }
                           } catch (error) {
                             errorCenter.emit(error);
@@ -203,7 +250,7 @@ export function TrueAdminCrudTable<
                         }}
                       >
                         <Button danger type="link" size="small">
-                          {t('crud.action.delete', '删除')}
+                          {locale?.deleteText ?? t('crud.action.delete', '删除')}
                         </Button>
                       </Popconfirm>
                     </Permission>
@@ -223,6 +270,7 @@ export function TrueAdminCrudTable<
       service.delete,
       t,
       tableRenderContext,
+      locale,
     ],
   );
 
@@ -248,16 +296,18 @@ export function TrueAdminCrudTable<
   const toolbarTitle = toolbarRender?.(tableRenderContext) ?? null;
   const toolbarExtra = toolbarExtraRender?.(tableRenderContext) ?? null;
 
-  const handleTableChange = (
-    _pagination: TablePaginationConfig,
-    _filters: Record<string, unknown>,
-    sorter: SorterResult<TRecord> | SorterResult<TRecord>[],
+  const handleTableChange: TableProps<TRecord>['onChange'] = (
+    pagination,
+    filters,
+    sorter,
+    extra,
   ) => {
-    const sorterResult = getSorterResult(sorter);
+    const sorterResult = getSorterResult(sorter as SorterResult<TRecord> | SorterResult<TRecord>[]);
     queryState.changeSort(
       sorterResult ? getSorterKey(sorterResult) : undefined,
       toCrudOrder(sorterResult?.order),
     );
+    tableProps?.onChange?.(pagination, filters, sorter, extra);
   };
 
   const mergedRowSelection = rowSelection
@@ -288,22 +338,45 @@ export function TrueAdminCrudTable<
       values={queryState.values}
       onReset={resetQuery}
       onSubmit={queryState.submitFilters}
+      locale={locale}
+      panelProps={filterPanelProps}
       onTransitionEnd={finishFilterPanelTransition}
     />
   ) : null;
 
   const summaryDom = summaryRender ? (
-    <div className="trueadmin-crud-table-summary">{summaryRender(tableRenderContext)}</div>
+    <div
+      className={joinClassNames('trueadmin-crud-table-summary', classNames?.summary)}
+      style={styles?.summary}
+    >
+      {summaryRender(tableRenderContext)}
+    </div>
   ) : null;
 
   const extraDom = tableExtraRender ? (
-    <div className="trueadmin-crud-table-extra">{tableExtraRender(tableRenderContext)}</div>
+    <div
+      className={joinClassNames('trueadmin-crud-table-extra', classNames?.extra)}
+      style={styles?.extra}
+    >
+      {tableExtraRender(tableRenderContext)}
+    </div>
   ) : null;
 
   const toolbarDom = (
-    <div className="trueadmin-crud-table-toolbar">
-      <div className="trueadmin-crud-table-toolbar-left">{toolbarTitle}</div>
-      <div className="trueadmin-crud-table-toolbar-right">
+    <div
+      className={joinClassNames('trueadmin-crud-table-toolbar', classNames?.toolbar)}
+      style={styles?.toolbar}
+    >
+      <div
+        className={joinClassNames('trueadmin-crud-table-toolbar-left', classNames?.toolbarLeft)}
+        style={styles?.toolbarLeft}
+      >
+        {toolbarTitle}
+      </div>
+      <div
+        className={joinClassNames('trueadmin-crud-table-toolbar-right', classNames?.toolbarRight)}
+        style={styles?.toolbarRight}
+      >
         <TrueAdminTableToolbar
           activeFilterCount={queryState.activeFilterCount}
           filtersExpanded={filtersExpanded}
@@ -311,8 +384,10 @@ export function TrueAdminCrudTable<
           loading={loading}
           extra={toolbarExtra}
           importExport={importExport as never}
+          locale={locale}
           renderContext={tableRenderContext as never}
           selectedCount={selectedCount}
+          toolbarProps={toolbarProps as never}
           t={t}
           quickSearch={quickSearch}
           quickSearchName={queryState.quickSearchName}
@@ -336,96 +411,170 @@ export function TrueAdminCrudTable<
     tableAlertRender(tableRenderContext)
   ) : (
     <Typography.Text type="secondary">
-      {t('crud.selection.count', '已选择 {{count}} 项').replace('{{count}}', String(selectedCount))}
+      {locale?.selectedCountText?.(selectedCount) ??
+        t('crud.selection.count', '已选择 {{count}} 项').replace(
+          '{{count}}',
+          String(selectedCount),
+        )}
     </Typography.Text>
   );
   const selectedStatusOptionContent = tableAlertOptionRender ? (
     tableAlertOptionRender(tableRenderContext)
   ) : (
     <Button type="link" size="small" onClick={clearSelected}>
-      {t('crud.selection.clear', '清空')}
+      {locale?.clearSelectedText ?? t('crud.selection.clear', '清空')}
     </Button>
   );
   const selectedStatusDom = hasSelectedStatus ? (
-    <div className="trueadmin-crud-table-selected-status">
-      <div className="trueadmin-crud-table-selected-status-content">{selectedStatusContent}</div>
+    <div
+      className={joinClassNames('trueadmin-crud-table-selected-status', classNames?.selectedStatus)}
+      style={styles?.selectedStatus}
+    >
+      <div
+        className={joinClassNames(
+          'trueadmin-crud-table-selected-status-content',
+          classNames?.selectedStatusContent,
+        )}
+        style={styles?.selectedStatusContent}
+      >
+        {selectedStatusContent}
+      </div>
       {tableAlertOptionRender !== false ? (
-        <div className="trueadmin-crud-table-selected-status-options">
+        <div
+          className={joinClassNames(
+            'trueadmin-crud-table-selected-status-options',
+            classNames?.selectedStatusOptions,
+          )}
+          style={styles?.selectedStatusOptions}
+        >
           {selectedStatusOptionContent}
         </div>
       ) : null}
     </div>
   ) : null;
 
-  const emptyContent = emptyRender?.(tableRenderContext) ?? (
-    <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
-  );
+  const emptyContent = locale?.emptyText ??
+    emptyRender?.(tableRenderContext) ??
+    tableProps?.locale?.emptyText ?? <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />;
   const tableDom = error ? (
     (errorRender?.(tableRenderContext) ?? (
       <Result
         status="error"
-        title={t('crud.error.loadFailed', '数据加载失败')}
-        subTitle={t('crud.error.loadFailedDescription', '请稍后重试或联系管理员。')}
+        title={locale?.errorTitle ?? t('crud.error.loadFailed', '数据加载失败')}
+        subTitle={
+          locale?.errorDescription ??
+          t('crud.error.loadFailedDescription', '请稍后重试或联系管理员。')
+        }
         extra={
           <Button type="primary" onClick={reload}>
-            {t('crud.action.reload', '刷新')}
+            {locale?.reloadText ?? t('crud.action.reload', '刷新')}
           </Button>
         }
       />
     ))
   ) : (
     <Table<TRecord>
+      {...tableProps}
       rowKey={rowKey as TableProps<TRecord>['rowKey']}
       columns={mergedColumns}
       dataSource={dataSource}
       loading={loading}
-      locale={{ emptyText: emptyContent }}
+      locale={{ ...tableProps?.locale, emptyText: emptyContent }}
       pagination={false}
       rowSelection={mergedRowSelection}
-      scroll={{ x: tableScrollX, y: tableBodyScrollY }}
+      scroll={{
+        ...tableProps?.scroll,
+        x: tableProps?.scroll?.x ?? tableScrollX,
+        y: tableProps?.scroll?.y ?? tableBodyScrollY,
+      }}
       onChange={handleTableChange}
     />
   );
   const tableViewDom = tableViewRender ? tableViewRender(tableRenderContext, tableDom) : tableDom;
   const paginationDom = (
-    <div className="trueadmin-crud-table-pagination">
-      <div className="trueadmin-crud-table-pagination-left">{selectedStatusDom}</div>
-      <div className="trueadmin-crud-table-pagination-right">
+    <div
+      className={joinClassNames('trueadmin-crud-table-pagination', classNames?.pagination)}
+      style={styles?.pagination}
+    >
+      <div
+        className={joinClassNames(
+          'trueadmin-crud-table-pagination-left',
+          classNames?.paginationLeft,
+        )}
+        style={styles?.paginationLeft}
+      >
+        {selectedStatusDom}
+      </div>
+      <div
+        className={joinClassNames(
+          'trueadmin-crud-table-pagination-right',
+          classNames?.paginationRight,
+        )}
+        style={styles?.paginationRight}
+      >
         <Pagination
+          {...paginationProps}
           current={queryState.current}
           pageSize={queryState.pageSize}
           total={total}
-          showSizeChanger
-          showTotal={(nextTotal) =>
-            t('crud.pagination.total', '共 {{total}} 条').replace('{{total}}', String(nextTotal))
+          showSizeChanger={paginationProps?.showSizeChanger ?? true}
+          showTotal={
+            paginationProps?.showTotal ??
+            ((nextTotal) =>
+              locale?.paginationTotalText?.(nextTotal) ??
+              t('crud.pagination.total', '共 {{total}} 条').replace('{{total}}', String(nextTotal)))
           }
-          onChange={(current, pageSize) => queryState.changePage(current, pageSize)}
+          onChange={(current, pageSize) => {
+            queryState.changePage(current, pageSize);
+            paginationProps?.onChange?.(current, pageSize);
+          }}
         />
       </div>
     </div>
   );
   const tableAreaDom = (
-    <Card className="trueadmin-crud-table-card" styles={{ body: { padding: 0 } }}>
+    <Card
+      {...cardProps}
+      className={joinClassNames(
+        'trueadmin-crud-table-card',
+        classNames?.card,
+        cardProps?.className,
+      )}
+      style={{ ...styles?.card, ...cardProps?.style }}
+      styles={mergeCardBodyStyles(cardProps?.styles, { padding: 0 })}
+    >
       {toolbarDom}
-      <div ref={tableMainRef} className="trueadmin-crud-table-main" style={tableMainStyle}>
+      <div
+        ref={tableMainRef}
+        className={joinClassNames('trueadmin-crud-table-main', classNames?.tableMain)}
+        style={{ ...tableMainStyle, ...styles?.tableMain }}
+      >
         {tableViewDom}
       </div>
       {paginationDom}
     </Card>
   );
+  const wrappedSearchDom = searchDom ? (
+    <div className={joinClassNames(classNames?.search)} style={styles?.search}>
+      {searchDom}
+    </div>
+  ) : null;
   const domList = {
     alert: selectedStatusDom,
     extra: extraDom,
     pagination: paginationDom,
-    search: searchDom,
+    search: wrappedSearchDom,
     summary: summaryDom,
     table: tableViewDom,
     toolbar: toolbarDom,
   };
   const defaultDom = (
-    <div className="trueadmin-crud-shell">
+    <div
+      className={joinClassNames('trueadmin-crud-shell', classNames?.shell, className)}
+      style={{ ...styles?.shell, ...style }}
+    >
       {summaryDom}
-      {searchDom}
+      {wrappedSearchDom}
       {extraDom}
       {tableAreaDom}
     </div>

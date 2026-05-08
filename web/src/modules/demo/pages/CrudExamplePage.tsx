@@ -572,6 +572,29 @@ export default function CrudExamplePage() {
       rowKey="id"
       quickSearch={{ placeholder: t('demo.crud.quickSearch.placeholder', '搜索名称 / 负责人') }}
       filters={filters}
+      locale={{
+        actionColumnTitle: t('crud.column.action', '操作'),
+        advancedFilterText: t('crud.filter.advanced', '高级筛选'),
+        filterResetText: t('crud.filter.reset', '重置'),
+        filterSearchText: t('crud.filter.search', '查询'),
+        paginationTotalText: (total) =>
+          t('crud.pagination.total', '共 {{total}} 条').replace('{{total}}', String(total)),
+        quickSearchPlaceholder: t('demo.crud.quickSearch.placeholder', '搜索名称 / 负责人'),
+        searchText: t('crud.action.search', '搜索'),
+      }}
+      toolbarProps={{
+        quickSearchInputProps: { allowClear: true },
+        reloadButtonProps: { title: t('crud.action.reload', '刷新') },
+      }}
+      filterPanelProps={{
+        formProps: { colon: false },
+      }}
+      tableProps={{
+        size: 'middle',
+      }}
+      paginationProps={{
+        showQuickJumper: true,
+      }}
       tableScrollX={1280}
       asideWidth={categoryFilterCollapsed ? 44 : 260}
       asideBodyClassName={
