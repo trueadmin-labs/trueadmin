@@ -741,11 +741,14 @@ body,
   min-height: 0;
   flex: 1 1 auto;
   overflow: auto;
-  padding-inline: var(--trueadmin-form-page-padding);
+  padding: var(--trueadmin-form-page-padding);
 }
 
 .trueadmin-form-page-body.is-footer-overlay .trueadmin-form-page-content {
-  padding-block-end: var(--trueadmin-form-page-footer-safe-area);
+  padding-block-end: calc(
+    var(--trueadmin-form-page-padding) +
+    var(--trueadmin-form-page-footer-safe-area)
+  );
 }
 
 .trueadmin-form-page-footer {
