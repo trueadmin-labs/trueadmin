@@ -107,8 +107,8 @@ php bin/hyperf.php trueadmin:metadata-sync
 ```text
 backend/app/Module/*/Database/Migrations
 backend/app/Module/*/Database/Seeders
-backend/plugin/*/*/Database/Migrations
-backend/plugin/*/*/Database/Seeders
+backend/plugins/*/*/Database/Migrations
+backend/plugins/*/*/Database/Seeders
 ```
 
 默认数据库是 PostgreSQL，MySQL 保持兼容。第一版不保留 `backend/database` 根级迁移目录；模块种子数据可直接通过 `php bin/hyperf.php db:seed --force` 或 `php bin/hyperf.php migrate --seed` 执行。

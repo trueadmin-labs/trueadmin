@@ -1,117 +1,91 @@
 # 插件系统规范
 
-TrueAdmin 第一版就预留插件系统基线。插件系统采用 Composer 作为唯一包清单：`composer.json` 负责插件名称、版本、依赖、冲突、autoload 和仓库来源；`extra.trueadmin` 负责 TrueAdmin 的插件元数据、资产路径和生命周期。
-
-不再单独设计 `plugin.json` 或 `trueadmin.plugin.json`。如果后续需要运行时缓存，可以从 `composer.json` 导出缓存文件，但源文件仍以 `composer.json` 为准。
+TrueAdmin 插件是前后端一体的扩展包。插件包清单使用插件根目录的 `plugin.json`，不绑定 Composer、npm、pnpm 或其他单一语言生态。Composer、pnpm 等工具只是具体 runtime 的依赖安装工具。
 
 ## 设计目标
 
-- 本地插件、市场插件和未来私有插件使用同一标准。
-- 插件通过代码、Composer 和配置完成安装、卸载、升级、启用、禁用，不提供后台运行时动态维护。
-- 插件可以携带后端注解路由、迁移、种子数据、菜单、权限、OpenAPI、Web 页面、Mobile 页面和 AI 上下文。
+- 本地插件、官方插件、市场插件和私有插件使用同一包结构。
+- 插件可以携带后端代码、数据库迁移、种子数据、菜单、权限、OpenAPI、Web 页面、Mobile 页面、文档和 AI 上下文。
+- 插件安装、升级、启用、禁用、卸载发生在开发期或部署期，不提供生产运行时动态下载并执行插件代码。
+- 插件依赖先由 `plugin.json` 描述，再由安装器分发给 Composer、pnpm 或未来其他 runtime 工具处理。
 - 插件生命周期可审计、可回滚、可灰度。
-- 尽量复用 Composer 生态，不自研包管理器。
 
 ## 目录结构
 
-本地插件统一放在后端应用目录下：
+插件包源统一放在项目根目录 `plugins/<vendor>/<name>`，与 `backend/`、`web/`、`mobile/` 同级。根目录 `plugins/` 只作为插件包仓库和安装源，不参与宿主项目代码扫描。
 
 ```text
-backend/plugin/{vendor}/{name}/
-  composer.json
-  src/
-  Database/
-    Migrations/
-    Seeders/
-  resources/
-    menus.php
-    permissions.php
-    openapi.json
-    metadata.json
+plugins/{vendor}/{name}/
+  plugin.json
+  backend/
+    php/
+      composer.json
+      src/
+      Database/
+        Migrations/
+        Seeders/
+      resources/
+        lang/
+        menus.php
+        permissions.php
+        openapi.json
+        metadata.json
   web/
+    manifest.ts
+    pages/
+    components/
+    hooks/
+    services/
+    types/
+    locales/
+    index.ts
   mobile/
   docs/
   llms.txt
 ```
 
-插件内部后端代码仍采用模块内 MineAdmin 分层：
+`backend/php/composer.json` 只描述 PHP runtime 自己的依赖和 autoload，不是 TrueAdmin 插件包清单。Web runtime 不允许再放自己的 `plugin.json`；`web/manifest.ts` 只负责前端运行时注册。安装器复制 runtime 到各端运行时目录，Windows 下不使用软链。
 
-```text
-src/
-  Http/Admin/Controller
-  Http/Client/Controller/V1
-  Http/Open/Controller/V1
-  Service
-  Repository
-  Model
-  Event
-  Listener
-  Library
-```
+## plugin.json 标准
 
-## composer.json 标准
-
-插件包必须满足：
-
-- `type` 必须是 `trueadmin-plugin`。
-- `name` 使用 Composer 包名格式，例如 `trueadmin/product`。
-- PHP 依赖、TrueAdmin 依赖、第三方库依赖必须写在 `require`。
-- PHP autoload 必须写在 `autoload`。
-- TrueAdmin 插件元数据必须写在 `extra.trueadmin`。
-
-示例：
+插件根目录必须提供 `plugin.json`。示例：
 
 ```json
 {
-  "name": "trueadmin/product",
-  "type": "trueadmin-plugin",
-  "description": "TrueAdmin product plugin.",
-  "version": "1.0.0",
-  "license": "MIT",
-  "require": {
-    "php": ">=8.1",
-    "trueadmin/kernel": "^1.0"
+  "id": "true-admin.examples",
+  "vendor": "true-admin",
+  "name": "examples",
+  "displayName": "Development Examples",
+  "description": "Official TrueAdmin examples.",
+  "official": true,
+  "version": "0.1.0",
+  "enabled": true,
+  "dependencies": {
+    "plugins": [],
+    "npm": {
+      "@ant-design/charts": "^2.6.7"
+    },
+    "composer": {}
   },
-  "autoload": {
-    "psr-4": {
-      "TrueAdmin\\Product\\": "src/"
-    }
+  "config": {
+    "defaults": {}
   },
-  "extra": {
-    "trueadmin": {
-      "displayName": "商品管理",
-      "enabled": true,
-      "config": {
-        "defaults": {
-          "features": {
-            "export": true,
-            "import": false
-          },
-          "pageSize": 20
-        }
-      },
-      "assets": {
-        "source": "src",
-        "lang": "resources/lang",
-        "migrations": "Database/Migrations",
-        "seeders": "Database/Seeders",
-        "menus": "resources/menus.php",
-        "permissions": "resources/permissions.php",
-        "openapi": "resources/openapi.json",
-        "metadata": "resources/metadata.json",
-        "web": "web",
-        "mobile": "mobile",
-        "llms": "llms.txt"
-      },
-      "lifecycle": {
-        "install": "TrueAdmin\\Product\\Plugin\\Installer::install",
-        "uninstall": "TrueAdmin\\Product\\Plugin\\Installer::uninstall",
-        "upgrade": "TrueAdmin\\Product\\Plugin\\Installer::upgrade"
-      }
-    }
+  "lifecycle": {
+    "install": "Acme\\Plugin\\Installer::install",
+    "uninstall": "Acme\\Plugin\\Installer::uninstall",
+    "upgrade": "Acme\\Plugin\\Installer::upgrade"
   }
 }
 ```
+
+字段规则：
+
+- `id` 使用 `<vendor>.<name>`，例如 `true-admin.examples`。
+- `vendor` 和 `name` 对应目录 `plugins/<vendor>/<name>`。
+- `dependencies.plugins` 声明依赖的其他 TrueAdmin 插件 id。
+- `dependencies.npm` 声明 Web runtime 需要的 npm 包版本。
+- `dependencies.composer` 声明 PHP runtime 需要的 Composer 包版本。
+- `config.defaults` 是插件默认配置；宿主项目覆盖配置写在 `backend/config/autoload/plugins.php`。
 
 ## 当前第一版已落地能力
 
@@ -119,7 +93,7 @@ src/
 
 ```text
 backend/app/Foundation/Plugin/Plugin.php
-backend/app/Foundation/Plugin/PluginComposerReader.php
+backend/app/Foundation/Plugin/PluginManifestReader.php
 backend/app/Foundation/Plugin/PluginConfigRepository.php
 backend/app/Foundation/Plugin/PluginRepository.php
 backend/config/autoload/plugins.php
@@ -127,28 +101,26 @@ backend/config/autoload/plugins.php
 
 已接入的运行能力：
 
-- 扫描 `backend/plugin/*/*/composer.json`。
-- 只识别 `type=trueadmin-plugin` 的包。
-- 读取 `extra.trueadmin` 作为插件元数据。
-- 读取 `extra.trueadmin.config.defaults` 作为插件默认配置。
-- 通过 `config/autoload/plugins.php` 覆盖插件配置，避免修改插件源码。
+- 扫描安装后的 `backend/plugins/*/*/plugin.json`。
+- 读取 `plugin.json` 作为插件包清单。
+- 读取 `config.defaults` 作为插件默认配置。
+- 通过 `backend/config/autoload/plugins.php` 覆盖插件配置，避免修改插件源码。
 - `enabled` / `disabled` 配置控制插件是否参与本次应用启动。
-- 启用插件的 `src/` 会加入 Hyperf 注解扫描路径，插件路由通过 Controller Attribute 自动注册。
-- 插件错误码按代码契约声明，不进入框架级收集；如需文案多语言，继续使用 Hyperf `#[Message]` 和插件 `resources/lang`。
-- 插件 `resources/lang` 自动加入后端多语言加载路径。
-- 插件 `Database/Migrations` 自动加入 Hyperf 原生迁移扫描。
-- 插件 `Database/Seeders` 自动加入种子路径查看。
-- 插件目录加入 Composer classmap 兜底 autoload。
+- 启用插件的 `backend/plugins/<vendor>/<name>/src` 会加入 Hyperf 注解扫描路径，插件路由通过 Controller Attribute 自动注册。
+- 插件错误码按代码契约声明，不进入框架级收集；如需文案多语言，继续使用 Hyperf `#[Message]` 和插件 runtime 语言包。
+- 插件 `backend/plugins/<vendor>/<name>/resources/lang` 自动加入后端多语言加载路径。
+- 插件 `backend/plugins/<vendor>/<name>/Database/Migrations` 自动加入 Hyperf 原生迁移扫描。
+- 插件 `backend/plugins/<vendor>/<name>/Database/Seeders` 自动加入种子路径查看。
 - `php bin/hyperf.php trueadmin:plugin:list` 查看本地插件。
 
 ## 代码化启停
 
-第一版插件主要面向开发者，不做后台动态插件管理，也不设计插件状态表。插件是否启用由代码、Composer lock 和配置共同决定，变更后通过正常发布流程上线。
+第一版插件主要面向开发者，不做后台动态插件管理，也不设计插件状态表。插件是否启用由插件清单和项目配置决定，变更后通过正常发布流程上线。
 
 ```php
 return [
     'paths' => [
-        BASE_PATH . '/plugin/*/*',
+        BASE_PATH . '/plugins/*/*',
     ],
     'enabled' => [],
     'disabled' => [],
@@ -157,7 +129,7 @@ return [
 
 规则：
 
-- `enabled` 为空时，默认启用 `extra.trueadmin.enabled=true` 的插件。
+- `enabled` 为空时，默认启用 `plugin.json` 中 `enabled=true` 的插件。
 - `enabled` 非空时，作为插件白名单。
 - `disabled` 优先级最高，用于强制禁用插件。
 - 修改启停配置后需要重新部署或重启应用，不追求运行时热切换。
@@ -169,8 +141,8 @@ return [
 配置分两层：
 
 ```text
-extra.trueadmin.config.defaults  插件出厂默认配置，随插件升级。
-config/autoload/plugins.php      项目覆盖配置，归宿主项目维护。
+plugin.json config.defaults       插件出厂默认配置，随插件升级。
+backend/config/autoload/plugins.php 项目覆盖配置，归宿主项目维护。
 ```
 
 项目覆盖示例：
@@ -178,11 +150,10 @@ config/autoload/plugins.php      项目覆盖配置，归宿主项目维护。
 ```php
 return [
     'config' => [
-        'trueadmin/product' => [
+        'true-admin.examples' => [
             'features' => [
-                'export' => false,
+                'crudDemo' => false,
             ],
-            'pageSize' => 50,
         ],
     ],
 ];
@@ -191,17 +162,42 @@ return [
 插件代码读取配置时，应通过 `PluginConfigRepository` 获取合并后的配置：
 
 ```php
-$config = $pluginConfig->get('trueadmin/product');
-$pageSize = $pluginConfig->value('trueadmin/product', 'pageSize', 20);
+$config = $pluginConfig->get('true-admin.examples');
+$enabled = $pluginConfig->value('true-admin.examples', 'features.crudDemo', true);
 ```
 
 配置原则：
 
-- 插件默认配置写在插件 `composer.json` 的 `extra.trueadmin.config.defaults`。
-- 项目差异写在宿主项目 `config/autoload/plugins.php` 的 `config`。
+- 插件默认配置写在插件根目录 `plugin.json` 的 `config.defaults`。
+- 项目差异写在宿主项目 `backend/config/autoload/plugins.php` 的 `config`。
 - 不把项目私有配置写回插件目录。
 - 配置结构必须向后兼容，插件升级不能随意删除已有配置键。
-- 敏感配置不直接写死在 `composer.json`，应支持从宿主项目 env/config 注入。
+- 敏感配置不直接写死在 `plugin.json`，应支持从宿主项目 env/config 注入。
+
+## 依赖安装
+
+TrueAdmin 插件安装器负责读取 `plugin.json` 并生成依赖安装计划。
+
+安装器同时负责复制 runtime 资产：
+
+```text
+plugins/<vendor>/<name>/web
+  -> web/src/plugins/<vendor>/<name>
+
+plugins/<vendor>/<name>/backend/php
+  -> backend/plugins/<vendor>/<name>
+```
+
+复制后端 runtime 时，安装器还需要把插件根目录 `plugin.json` 一并复制到 `backend/plugins/<vendor>/<name>/plugin.json`，用于后端启停、配置覆盖和插件列表读取。
+
+复制目标是宿主项目唯一会参与运行时扫描的插件代码目录；根目录 `plugins/` 不进入 TypeScript、Vite、Biome、PHPStan 或 Hyperf 注解扫描。
+
+- `dependencies.plugins` 用于校验插件依赖是否存在且版本兼容。
+- `dependencies.npm` 由安装器合并到 `web/package.json` 或生成 pnpm 安装计划，再统一执行 `pnpm --dir web install`。
+- `dependencies.composer` 由安装器合并到 PHP runtime 的 Composer 安装计划，再统一执行 Composer。
+- `backend/php/composer.json` 可保留该 runtime 的 autoload 和更细的 PHP 包声明，但 TrueAdmin 插件系统的入口仍是根 `plugin.json`。
+
+第一版可以先只做人工或脚本提示，不要求自动修改 `package.json` / `composer.json`。
 
 ## 生命周期
 
@@ -212,8 +208,10 @@ $pageSize = $pluginConfig->value('trueadmin/product', 'pageSize', 20);
 ```text
 download
 verify checksum/signature
-composer require or path repository install
-composer dump-autoload
+validate plugin.json
+install runtime dependencies
+copy web assets into web/src/plugins
+copy backend assets into backend/plugins
 ```
 
 应用层生命周期：
@@ -241,28 +239,27 @@ php bin/hyperf.php trueadmin:plugin:upgrade vendor/name
 php bin/hyperf.php trueadmin:plugin:uninstall vendor/name
 ```
 
-当前只落地 `trueadmin:plugin:list`。安装、卸载、升级命令应基于本规范继续实现；启用和禁用优先通过 `config/autoload/plugins.php` 修改代码配置完成。
+当前只落地 `trueadmin:plugin:list`。安装、卸载、升级命令应基于本规范继续实现；启用和禁用优先通过 `backend/config/autoload/plugins.php` 修改代码配置完成。
 
 ## 插件市场
 
-插件市场不直接执行远程代码。市场只提供索引、版本、下载地址、校验信息和兼容性信息。优先兼容 Composer repository、Satis、私有 Composer 仓库，也可以提供 TrueAdmin 官方市场索引作为 UI 展示层。
+插件市场不直接执行远程代码。市场只提供索引、版本、下载地址、校验信息和兼容性信息。
 
 市场索引最小信息：
 
 ```json
 {
-  "packages": {
-    "trueadmin/product": {
+  "plugins": {
+    "true-admin.examples": {
       "versions": {
-        "1.0.0": {
+        "0.1.0": {
           "dist": {
             "type": "zip",
-            "url": "https://plugins.trueadmin.dev/trueadmin/product/1.0.0.zip",
+            "url": "https://plugins.trueadmin.dev/true-admin/examples/0.1.0.zip",
             "shasum": "..."
           },
           "require": {
-            "trueadmin": ">=1.0.0",
-            "php": ">=8.1"
+            "trueadmin": ">=1.0.0"
           }
         }
       }
@@ -274,41 +271,28 @@ php bin/hyperf.php trueadmin:plugin:uninstall vendor/name
 安全要求：
 
 - 下载包必须校验 hash，后续支持签名。
-- 安装前必须校验 `composer.json`、`type` 和 `extra.trueadmin`。
+- 安装前必须校验 `plugin.json`。
 - 升级前必须记录当前版本、迁移状态和资产同步状态。
 - 卸载默认不删除业务数据，只移除代码接入并提示是否清理数据。
 - 生产环境不建议直接从未知市场安装插件。
 
-## 前端和移动端预留
+## Web 和 Mobile runtime
 
-Web 和 Mobile 还未初始化，但插件清单必须提前预留资产入口。
-
-Web 插件资产建议：
+Web 插件资产源放在插件包的 `web/` 目录。安装器复制 `plugins/<vendor>/<name>/web` 到 `web/src/plugins/<vendor>/<name>`，当前第一阶段由 Vite 只扫描安装后的目录：
 
 ```text
-web/
-  package.json
-  src/routes.ts
-  src/menu.ts
-  src/pages/
-  src/api/
+web/src/plugins/*/*/manifest.ts
 ```
 
-Mobile 插件资产建议：
+安装后的 `web/src/plugins/<vendor>/<name>/manifest.ts` 只负责 Web runtime 注册：路由、前端菜单、locales、图标、错误解释和其他前端扩展能力。它不声明插件名称、版本、依赖、启停或安装生命周期。
 
-```text
-mobile/
-  pages.json
-  src/pages/
-  src/api/
-```
-
-第一版后端只记录资产路径，不执行前端构建。Web/Mobile 初始化后，再实现插件资产发布、路由合并、菜单同步和类型生成。
+Mobile 插件资产预留在 `mobile/` 目录。Mobile 初始化后，再实现插件页面合并、菜单同步和类型生成。
 
 ## 禁止事项
 
-- 不允许插件直接修改 `backend/app` 源码。
-- 不允许插件绕过 `composer.json` 和 `extra.trueadmin` 直接写全局配置。
+- 不允许插件安装器之外的代码直接修改 `backend/app`、`web/src` 或 `mobile` 源码。
+- 不允许 Web runtime 目录放置自己的 `plugin.json`。
+- 不允许插件绕过根 `plugin.json` 直接写全局配置。
 - 不允许插件卸载时默认硬删业务表。
 - 不允许插件市场下载后不校验直接执行。
 - 不允许插件依赖未声明的其他插件内部实现。

@@ -10,7 +10,7 @@ final class PluginRepository
 {
     public function __construct(
         private readonly ConfigInterface $config,
-        private readonly PluginComposerReader $reader,
+        private readonly PluginManifestReader $reader,
     ) {
     }
 
@@ -112,9 +112,8 @@ final class PluginRepository
         return new Plugin(
             name: $plugin->name,
             path: $plugin->path,
-            composerPath: $plugin->composerPath,
-            composer: $plugin->composer,
-            metadata: $plugin->metadata,
+            manifestPath: $plugin->manifestPath,
+            manifest: $plugin->manifest,
             enabled: $isEnabled,
         );
     }

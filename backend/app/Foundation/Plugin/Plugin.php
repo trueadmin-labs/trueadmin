@@ -7,15 +7,13 @@ namespace App\Foundation\Plugin;
 final class Plugin
 {
     /**
-     * @param array<string, mixed> $composer
-     * @param array<string, mixed> $metadata
+     * @param array<string, mixed> $manifest
      */
     public function __construct(
         public readonly string $name,
         public readonly string $path,
-        public readonly string $composerPath,
-        public readonly array $composer,
-        public readonly array $metadata,
+        public readonly string $manifestPath,
+        public readonly array $manifest,
         public readonly bool $enabled,
     ) {
     }
@@ -27,16 +25,16 @@ final class Plugin
 
     public function sourcePath(): ?string
     {
-        $sourcePath = $this->assetPath('source', 'src');
+        $sourcePath = $this->path . '/src';
 
-        return $sourcePath !== null && is_dir($sourcePath) ? $sourcePath : null;
+        return is_dir($sourcePath) ? $sourcePath : null;
     }
 
     public function languagePath(): ?string
     {
-        $languagePath = $this->assetPath('lang', 'resources/lang');
+        $languagePath = $this->path . '/resources/lang';
 
-        return $languagePath !== null && is_dir($languagePath) ? $languagePath : null;
+        return is_dir($languagePath) ? $languagePath : null;
     }
 
     /**
@@ -45,7 +43,7 @@ final class Plugin
     public function migrationPaths(): array
     {
         return $this->existingDirectories([
-            $this->assetPath('migrations', 'Database/Migrations'),
+            $this->path . '/Database/Migrations',
         ]);
     }
 
@@ -55,7 +53,7 @@ final class Plugin
     public function seederPaths(): array
     {
         return $this->existingDirectories([
-            $this->assetPath('seeders', 'Database/Seeders'),
+            $this->path . '/Database/Seeders',
         ]);
     }
 
@@ -64,20 +62,9 @@ final class Plugin
      */
     public function defaultConfig(): array
     {
-        $config = $this->metadata['config']['defaults'] ?? [];
+        $config = $this->manifest['config']['defaults'] ?? [];
 
         return is_array($config) ? $config : [];
-    }
-
-    private function assetPath(string $key, string $default): ?string
-    {
-        $assets = $this->metadata['assets'] ?? [];
-        $relative = is_array($assets) && is_string($assets[$key] ?? null) ? $assets[$key] : $default;
-        if ($relative === '') {
-            return null;
-        }
-
-        return $this->path . '/' . ltrim($relative, '/');
     }
 
     /**

@@ -226,12 +226,12 @@ backend/app/Module/Order
 迁移为：
 
 ```text
-backend/plugin/trueadmin/order
+plugins/true-admin/order
 ```
 
 模块内部结构保持一致，迁移成本会比较低。
 
-插件不是简单复制模块目录。插件必须提供 `composer.json`，并通过 `type=trueadmin-plugin` 与 `extra.trueadmin` 描述 TrueAdmin 资产和生命周期。完整规范见 [插件系统规范](plugin-system.md)。
+插件不是简单复制模块目录。插件必须提供根目录 `plugin.json` 描述插件身份、依赖和生命周期；PHP 后端如需 Composer 依赖，再在 `backend/php/composer.json` 中声明。安装器把 runtime 复制到各端运行时目录，根目录 `plugins/` 不参与宿主代码扫描。完整规范见 [插件系统规范](plugin-system.md)。
 
 ## AI 新增模块检查清单
 

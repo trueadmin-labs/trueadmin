@@ -2,6 +2,7 @@ import type { TreeSelectProps } from 'antd';
 import { TreeSelect } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { errorCenter } from '@/core/error/errorCenter';
+import { departmentApi } from '../services/department.api';
 import type { DepartmentTreeNode } from '../types/department';
 
 export type TrueAdminDepartmentSelectProps = Omit<TreeSelectProps, 'treeData'> & {
@@ -24,7 +25,7 @@ const emptyDepartments: DepartmentTreeNode[] = [];
 export function TrueAdminDepartmentSelect({
   autoLoad = true,
   departments = emptyDepartments,
-  fetchDepartments,
+  fetchDepartments = departmentApi.tree,
   onLoadError,
   onDropdownVisibleChange,
   onOpenChange,

@@ -21,7 +21,7 @@ final class TrueAdminPluginListCommand extends Command
 
         foreach ($this->plugins->all() as $plugin) {
             $status = $plugin->enabled ? 'enabled' : 'disabled';
-            $version = is_string($plugin->composer['version'] ?? null) ? $plugin->composer['version'] : 'unknown';
+            $version = is_string($plugin->manifest['version'] ?? null) ? $plugin->manifest['version'] : 'unknown';
             $this->line(sprintf(' - %s:%s [%s] %s', $plugin->name, $version, $status, $plugin->path));
         }
 

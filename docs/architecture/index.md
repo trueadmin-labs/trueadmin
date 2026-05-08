@@ -9,6 +9,7 @@ TrueAdmin/
   backend/            Hyperf 后端应用
   web/                Vite + React + Ant Design 6 + ProComponents 3 管理端
   mobile/             uni-app + Wot UI 移动端
+  plugins/            前后端一体插件包，根目录 plugin.json 为唯一插件清单
   packages/kernel     TrueAdmin 可复用 Composer 核心原语
   deploy/             本地开发和部署编排
   docs/               项目文档中心
@@ -45,7 +46,7 @@ web/
   src/app/          应用启动、Provider、Router、Layout 装配
   src/core/         前端框架能力：模块、插件、请求、权限、菜单、布局、页面、CRUD、国际化、错误
   src/modules/      内置模块和项目业务模块，统一通过 manifest.ts 暴露前端能力
-  src/plugins/      vendor/plugin 插件目录，统一通过 manifest.ts 暴露前端能力
+  src/plugins/      插件 Web 运行时目录，由安装器从根 plugins 复制生成，Vite 只扫描这里
   src/shared/       普通跨模块复用组件、Hooks、工具
   src/generated/    生成代码目录，第一版可为空
 ```

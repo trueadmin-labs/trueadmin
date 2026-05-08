@@ -14,6 +14,9 @@ export default defineConfig(({ mode }) => {
       alias: {
         '@': path.resolve(__dirname, 'src'),
         '@config': path.resolve(__dirname, 'config'),
+        '@core': path.resolve(__dirname, 'src/core'),
+        '@modules': path.resolve(__dirname, 'src/modules'),
+        '@plugins': path.resolve(__dirname, 'src/plugins'),
       },
     },
     server: {

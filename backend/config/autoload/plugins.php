@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 return [
     'paths' => [
-        BASE_PATH . '/plugin/*/*',
+        BASE_PATH . '/plugins/*/*',
     ],
     'enabled' => [],
     'disabled' => [],
     'config' => [
         // Example:
-        // 'trueadmin/product' => [
+        // 'true-admin.examples' => [
         //     'features' => [
         //         'export' => false,
         //     ],

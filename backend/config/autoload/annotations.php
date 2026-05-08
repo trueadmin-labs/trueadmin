@@ -23,27 +23,21 @@ $enabledPluginSourcePaths = static function (): array {
         }
 
         foreach (glob($pattern, GLOB_ONLYDIR) ?: [] as $pluginPath) {
-            $composerPath = $pluginPath . '/composer.json';
-            if (! is_file($composerPath)) {
+            $manifestPath = $pluginPath . '/plugin.json';
+            if (! is_file($manifestPath)) {
                 continue;
             }
 
-            $composer = json_decode(file_get_contents($composerPath) ?: '', true);
-            if (! is_array($composer) || ($composer['type'] ?? null) !== 'trueadmin-plugin') {
-                continue;
-            }
-
-            $name = $composer['name'] ?? null;
+            $manifest = json_decode(file_get_contents($manifestPath) ?: '', true);
+            $name = is_array($manifest) ? ($manifest['id'] ?? null) : null;
             if (! is_string($name) || $name === '') {
-                throw new RuntimeException(sprintf('插件 composer.json 缺少 name: %s', $composerPath));
+                throw new RuntimeException(sprintf('插件 plugin.json 缺少 id: %s', $manifestPath));
+            }
+            if (! is_array($manifest)) {
+                throw new RuntimeException(sprintf('插件 plugin.json 必须是对象: %s', $manifestPath));
             }
 
-            $metadata = $composer['extra']['trueadmin'] ?? [];
-            if (! is_array($metadata)) {
-                throw new RuntimeException(sprintf('插件 extra.trueadmin 必须是对象: %s', $composerPath));
-            }
-
-            $isEnabled = (bool) ($metadata['enabled'] ?? true);
+            $isEnabled = (bool) ($manifest['enabled'] ?? true);
             if ($enabled !== []) {
                 $isEnabled = in_array($name, $enabled, true);
             }
@@ -54,9 +48,7 @@ $enabledPluginSourcePaths = static function (): array {
                 continue;
             }
 
-            $assets = $metadata['assets'] ?? [];
-            $source = is_array($assets) && is_string($assets['source'] ?? null) ? $assets['source'] : 'src';
-            $sourcePath = $pluginPath . '/' . ltrim($source, '/');
+            $sourcePath = $pluginPath . '/src';
             if (is_dir($sourcePath)) {
                 $paths[] = $sourcePath;
             }

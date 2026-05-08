@@ -944,17 +944,19 @@ backend/app/Module/Order
 迁移为：
 
 ```text
-backend/plugin/trueadmin/product
+plugins/true-admin/product
 ```
 
 插件结构建议：
 
 ```text
-plugin/trueadmin/product/
-  composer.json
-  src/
-  Database/Migrations/
-  Database/Seeders/
+plugins/true-admin/product/
+  plugin.json
+  backend/php/
+    composer.json
+    src/
+    Database/Migrations/
+    Database/Seeders/
   docs/
   resources/
     menus.php
@@ -966,9 +968,9 @@ plugin/trueadmin/product/
   llms.txt
 ```
 
-插件不再单独设计 `plugin.json` 或 `trueadmin.plugin.json`。`composer.json` 是唯一包清单：`type=trueadmin-plugin` 表示 TrueAdmin 插件，`extra.trueadmin` 描述路由、迁移、菜单、权限、OpenAPI、Web、Mobile、llms 和生命周期。完整规范见 [插件系统规范](plugin-system.md)。
+插件根目录 `plugin.json` 是唯一插件包清单，描述插件身份、依赖和生命周期。Composer 只作为 PHP 后端 runtime 的依赖工具，PHP 插件可在 `backend/php/composer.json` 中声明 autoload 和 PHP 包依赖。安装器把插件包内的 runtime 目录复制到各端运行时目录，根目录 `plugins/` 不参与宿主代码扫描。完整规范见 [插件系统规范](plugin-system.md)。
 
-插件可变行为必须优先设计为配置项。插件默认配置写在 `extra.trueadmin.config.defaults`，宿主项目覆盖配置写在 `config/autoload/plugins.php`，插件代码通过 `PluginConfigRepository` 获取合并后的配置。这样开发者可以调整插件能力而不修改插件源码，后续升级插件时保留项目配置即可。
+插件可变行为必须优先设计为配置项。插件默认配置写在 `plugin.json` 的 `config.defaults`，宿主项目覆盖配置写在 `config/autoload/plugins.php`，插件代码通过 `PluginConfigRepository` 获取合并后的配置。这样开发者可以调整插件能力而不修改插件源码，后续升级插件时保留项目配置即可。
 
 插件生命周期：
 
@@ -983,7 +985,7 @@ sync menu
 sync permissions
 ```
 
-第一版插件主要面向开发者，不做后台运行时动态插件管理。启用和禁用通过 `composer.json`、`extra.trueadmin.enabled` 和 `config/autoload/plugins.php` 控制，变更后走正常发布流程。
+第一版插件主要面向开发者，不做后台运行时动态插件管理。启用和禁用通过根 `plugin.json` 和 `config/autoload/plugins.php` 控制，变更后走正常发布流程。
 
 ## 18. Web 管理端架构
 

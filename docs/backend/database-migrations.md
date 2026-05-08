@@ -15,8 +15,8 @@ backend/app/Module/System/Database/Seeders
 backend/app/Module/Product/Database/Migrations
 backend/app/Module/Product/Database/Seeders
 
-backend/plugin/*/*/Database/Migrations
-backend/plugin/*/*/Database/Seeders
+backend/plugins/*/*/Database/Migrations
+backend/plugins/*/*/Database/Seeders
 ```
 
 ## 放置规则
