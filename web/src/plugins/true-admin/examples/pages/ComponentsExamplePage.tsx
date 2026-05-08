@@ -1,5 +1,5 @@
 import { DeleteOutlined, EyeOutlined, SaveOutlined, SendOutlined } from '@ant-design/icons';
-import { TrueAdminActionBar } from '@core/action';
+import { TrueAdminActionBar, TrueAdminConfirmAction } from '@core/action';
 import { TrueAdminPermissionButton } from '@core/auth';
 import { TrueAdminResultState } from '@core/result';
 import { TrueAdminDepartmentSelect, TrueAdminUserSelect } from '@modules/system';
@@ -278,6 +278,25 @@ export default function ComponentsExamplePage() {
               >
                 {t('examples.components.permission.disabledButton', '无权限禁用')}
               </TrueAdminPermissionButton>
+              <TrueAdminConfirmAction
+                danger
+                icon={<DeleteOutlined />}
+                confirm={{
+                  title: t('examples.components.confirm.title', '确认删除这条记录吗？'),
+                  description: t(
+                    'examples.components.confirm.description',
+                    '删除后数据将无法恢复，请谨慎操作。',
+                  ),
+                  okText: t('examples.components.confirm.ok', '确认删除'),
+                  cancelText: t('examples.components.confirm.cancel', '取消'),
+                }}
+                successMessage={t('examples.components.confirm.success', '记录已删除')}
+                action={async () => {
+                  await new Promise((resolve) => window.setTimeout(resolve, 600));
+                }}
+              >
+                {t('examples.components.confirm.button', '确认操作')}
+              </TrueAdminConfirmAction>
             </Space>
           </Space>
         </Card>
