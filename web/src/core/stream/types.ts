@@ -17,8 +17,13 @@ export type StreamEventPayload = {
 
 export type StreamRequestMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
-export type StreamRequestOptions<TBody = unknown> = {
+export type StreamRequestParams = Record<string, unknown> | URLSearchParams;
+
+export type StreamRequestBody = Record<string, unknown>;
+
+export type StreamRequestOptions<TBody = StreamRequestBody> = {
   method?: StreamRequestMethod;
+  params?: StreamRequestParams;
   body?: TBody;
   headers?: HeadersInit;
   signal?: AbortSignal;

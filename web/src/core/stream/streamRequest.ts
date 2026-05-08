@@ -2,9 +2,16 @@ import { requestConfig } from '@config/index';
 import { ApiError } from '@/core/error/ApiError';
 import type { ApiEnvelope } from '@/core/http/types';
 import { useLocaleStore } from '@/core/store/localeStore';
+import { stringifyRawSearchParams } from '@/core/url/searchParams';
 import { StreamError } from './StreamError';
 import { SseDataParser } from './streamParser';
-import type { StreamEventPayload, StreamRequestOptions, StreamRequestResult } from './types';
+import type {
+  StreamEventPayload,
+  StreamRequestBody,
+  StreamRequestOptions,
+  StreamRequestParams,
+  StreamRequestResult,
+} from './types';
 
 const isSuccessCode = (code: string | number): boolean =>
   code === 0 || code === '0' || code === 'SUCCESS' || code === 'KERNEL.SUCCESS';
@@ -12,12 +19,36 @@ const isSuccessCode = (code: string | number): boolean =>
 const isEnvelope = <TData = unknown>(value: unknown): value is ApiEnvelope<TData> =>
   typeof value === 'object' && value !== null && 'code' in value && 'message' in value;
 
-const buildUrl = (url: string): string => {
-  if (/^https?:\/\//.test(url)) {
+const appendSearchParams = (url: string, params?: StreamRequestParams): string => {
+  if (!params) {
     return url;
   }
 
-  return `${requestConfig.baseURL}${url.startsWith('/') ? url : `/${url}`}`;
+  const searchParams = params instanceof URLSearchParams ? params : new URLSearchParams();
+  if (!(params instanceof URLSearchParams)) {
+    Object.entries(params).forEach(([key, value]) => {
+      if (value === undefined || value === null || value === '') {
+        return;
+      }
+
+      searchParams.set(key, Array.isArray(value) ? value.join(',') : String(value));
+    });
+  }
+
+  const query = stringifyRawSearchParams(searchParams);
+  if (query === '') {
+    return url;
+  }
+
+  return `${url}${url.includes('?') ? '&' : '?'}${query}`;
+};
+
+const buildUrl = (url: string, params?: StreamRequestParams): string => {
+  const baseUrl = /^https?:\/\//.test(url)
+    ? url
+    : `${requestConfig.baseURL}${url.startsWith('/') ? url : `/${url}`}`;
+
+  return appendSearchParams(baseUrl, params);
 };
 
 const createHeaders = (headers?: HeadersInit, hasBody = false): Headers => {
@@ -40,7 +71,26 @@ const createHeaders = (headers?: HeadersInit, hasBody = false): Headers => {
   return result;
 };
 
-export const streamRequest = async <TData = unknown, TBody = unknown>(
+const parseErrorEnvelope = async (
+  response: Response,
+): Promise<ApiEnvelope<unknown> | undefined> => {
+  const contentType = response.headers.get('content-type') ?? '';
+  if (!contentType.includes('application/json')) {
+    return undefined;
+  }
+
+  try {
+    const body = (await response.clone().json()) as unknown;
+    return isEnvelope(body) ? body : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+export const streamRequest = async <
+  TData = unknown,
+  TBody extends StreamRequestBody = StreamRequestBody,
+>(
   url: string,
   options: StreamRequestOptions<TBody> = {},
 ): Promise<StreamRequestResult<TData>> => {
@@ -51,7 +101,7 @@ export const streamRequest = async <TData = unknown, TBody = unknown>(
 
   let response: Response;
   try {
-    response = await fetch(buildUrl(url), {
+    response = await fetch(buildUrl(url, options.params), {
       method,
       headers,
       body: hasBody ? JSON.stringify(options.body) : undefined,
@@ -67,6 +117,16 @@ export const streamRequest = async <TData = unknown, TBody = unknown>(
   }
 
   if (!response.ok) {
+    const envelope = await parseErrorEnvelope(response);
+    if (envelope) {
+      throw new ApiError(
+        String(envelope.code),
+        envelope.message || response.statusText || '流式请求失败',
+        response.status,
+        envelope,
+      );
+    }
+
     throw new StreamError(
       'network',
       response.statusText || '流式请求失败',

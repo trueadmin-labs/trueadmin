@@ -94,6 +94,12 @@ php bin/hyperf.php migrate:fresh --seed
 composer start
 ```
 
+修改注解、AOP、插件扫描路径或执行 `composer dump-autoload` 后，必须重启 Hyperf。`composer dump-autoload` 会清理 `runtime/container`，运行中的 worker 如果继续引用旧代理文件，可能出现偶发 `KERNEL.SERVER.INTERNAL_ERROR`。本地可用以下命令重启：
+
+```bash
+composer restart
+```
+
 默认服务地址：
 
 ```text

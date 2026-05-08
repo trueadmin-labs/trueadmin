@@ -90,6 +90,7 @@
         "test": "rm -rf runtime/container && co-phpunit --prepend test/bootstrap.php --colors=always",
         "cs-fix": "php-cs-fixer fix $1",
         "analyse": "phpstan analyse --memory-limit 300M",
+        "restart": "if [ -f runtime/hyperf.pid ]; then kill $(cat runtime/hyperf.pid) 2>/dev/null || true; sleep 1; fi; php ./bin/hyperf.php start",
         "start": [
             "Composer\\Config::disableProcessTimeout",
             "php ./bin/hyperf.php start"

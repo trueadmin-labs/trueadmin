@@ -1,19 +1,16 @@
 import { http } from '@/core/http/client';
 import { streamRequest } from './streamRequest';
-import type { StreamEventPayload, StreamRequestMethod } from './types';
-
-type RequestBody =
-  | Record<string, unknown>
-  | string
-  | FormData
-  | Blob
-  | ArrayBuffer
-  | URLSearchParams;
+import type {
+  StreamEventPayload,
+  StreamRequestBody,
+  StreamRequestMethod,
+  StreamRequestParams,
+} from './types';
 
 type RequestMaybeStreamOptions = {
   method?: StreamRequestMethod;
-  body?: RequestBody;
-  params?: Record<string, unknown>;
+  body?: StreamRequestBody;
+  params?: StreamRequestParams;
   stream?: boolean;
   signal?: AbortSignal;
   onEvent?: (event: StreamEventPayload) => void;
@@ -26,8 +23,9 @@ export const requestMaybeStream = async <TData = unknown>(
   const method = options.method ?? 'POST';
 
   if (options.stream) {
-    const result = await streamRequest<TData, RequestBody>(url, {
+    const result = await streamRequest<TData>(url, {
       method,
+      params: options.params,
       body: options.body,
       signal: options.signal,
       onEvent: options.onEvent,

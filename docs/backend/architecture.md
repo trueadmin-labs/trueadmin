@@ -1110,6 +1110,8 @@ data: [DONE]
 
 编码规范：执行步骤较多、耗时较长、需要日志或调试可观测性的业务方法，应优先使用 `StreamProgress::progress()` 暴露内部状态。这个事件不只服务 SSE，也会分发到 Hyperf 事件系统，后续日志、调试面板或插件可以监听同一个 `StreamProgressEvent`。没有流式监听器时，进度事件应退化为无副作用调用，监听器异常也不应改变原业务方法结果。
 
+运行规范：`#[Streamable]` 依赖 Hyperf AOP 代理文件。`composer dump-autoload` 会通过脚本清理 `runtime/container`，因此不要在 Hyperf 服务运行中执行该命令。修改注解、Aspect、插件扫描路径或执行 `composer dump-autoload` 后，必须重启 Hyperf，避免运行中的 worker 引用已被删除的代理文件而出现偶发 `KERNEL.SERVER.INTERNAL_ERROR`。
+
 ## 22. 演进路线
 
 ### 阶段一：后端基础架构稳定
