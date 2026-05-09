@@ -74,7 +74,6 @@ export default function AdminMenusPage() {
     setEditing(record);
     form.setFieldsValue({
       code: record.code,
-      component: record.component,
       icon: record.icon,
       name: record.name,
       parentId: record.parentId,
@@ -222,10 +221,7 @@ export default function AdminMenusPage() {
                 <Form.Item label={t('system.menus.form.name', '菜单名称')} name="name" style={{ flex: 1 }} rules={[{ required: true, message: t('system.menus.form.nameRequired', '请输入菜单名称') }]}><Input maxLength={64} /></Form.Item>
                 <Form.Item label={t('system.menus.form.code', '编码')} name="code" style={{ flex: 1 }}><Input maxLength={128} /></Form.Item>
               </Space>
-              <Space size={12} style={{ width: '100%' }} align="start">
-                <Form.Item label={t('system.menus.form.path', '路由路径')} name="path" style={{ flex: 1 }}><Input maxLength={255} /></Form.Item>
-                <Form.Item label={t('system.menus.form.component', '组件路径')} name="component" style={{ flex: 1 }}><Input maxLength={255} placeholder="./system/users" /></Form.Item>
-              </Space>
+              <Form.Item label={t('system.menus.form.path', '路由路径')} name="path"><Input maxLength={255} /></Form.Item>
               <Space size={12} style={{ width: '100%' }} align="start">
                 <Form.Item label={t('system.menus.form.icon', '图标')} name="icon" style={{ flex: 1 }}><Input maxLength={64} placeholder="setting" /></Form.Item>
                 <Form.Item label={t('system.menus.form.permission', '权限标识')} name="permission" style={{ flex: 1 }}><Input maxLength={128} placeholder="system:menu:list" /></Form.Item>

@@ -79,7 +79,6 @@ export default {
   'system.menus.form.name': 'Menu Name',
   'system.menus.form.code': 'Code',
   'system.menus.form.path': 'Route Path',
-  'system.menus.form.component': 'Component Path',
   'system.menus.form.icon': 'Icon',
   'system.menus.form.permission': 'Permission',
   'system.menus.form.sort': 'Sort',

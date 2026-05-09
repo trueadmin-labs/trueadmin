@@ -16,7 +16,6 @@ final class AdminMenu extends Model
         'type',
         'name',
         'path',
-        'component',
         'icon',
         'permission',
         'sort',

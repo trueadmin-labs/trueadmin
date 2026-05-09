@@ -45,7 +45,6 @@ final class InterfaceMetadataScanner
                 'parent' => $annotation->parent,
                 'permission' => $annotation->permission,
                 'icon' => $annotation->icon,
-                'component' => $annotation->component,
                 'sort' => $annotation->sort,
                 'type' => $annotation->type,
             ];

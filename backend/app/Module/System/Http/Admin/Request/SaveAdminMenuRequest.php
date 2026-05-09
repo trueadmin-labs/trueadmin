@@ -17,7 +17,6 @@ final class SaveAdminMenuRequest extends FormRequest
             'type' => ['sometimes', 'string', 'in:directory,menu,button'],
             'name' => ['required', 'string', 'max:64'],
             'path' => ['sometimes', 'string', 'max:255'],
-            'component' => ['sometimes', 'string', 'max:255'],
             'icon' => ['sometimes', 'string', 'max:64'],
             'permission' => ['sometimes', 'string', 'max:128'],
             'sort' => ['sometimes', 'integer'],
@@ -34,7 +33,7 @@ final class SaveAdminMenuRequest extends FormRequest
         if (array_key_exists('parentId', $data) || array_key_exists('parent_id', $data)) {
             $normalized['parentId'] = (int) ($data['parentId'] ?? $data['parent_id']);
         }
-        foreach (['code', 'path', 'component', 'icon', 'permission'] as $field) {
+        foreach (['code', 'path', 'icon', 'permission'] as $field) {
             if (array_key_exists($field, $data)) {
                 $normalized[$field] = trim((string) $data[$field]);
             }

@@ -9,7 +9,6 @@ export type AdminMenu = {
   type: AdminMenuType;
   name: string;
   path: string;
-  component: string;
   icon: string;
   permission: string;
   sort: number;
@@ -23,7 +22,6 @@ export type AdminMenuPayload = {
   type?: AdminMenuType;
   name: string;
   path?: string;
-  component?: string;
   icon?: string;
   permission?: string;
   sort?: number;

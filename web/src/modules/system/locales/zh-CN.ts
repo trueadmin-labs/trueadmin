@@ -79,7 +79,6 @@ export default {
   'system.menus.form.name': '菜单名称',
   'system.menus.form.code': '编码',
   'system.menus.form.path': '路由路径',
-  'system.menus.form.component': '组件路径',
   'system.menus.form.icon': '图标',
   'system.menus.form.permission': '权限标识',
   'system.menus.form.sort': '排序',

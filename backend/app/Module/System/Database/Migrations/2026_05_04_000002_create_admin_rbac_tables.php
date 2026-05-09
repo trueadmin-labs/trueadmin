@@ -29,7 +29,6 @@ return new class extends Migration {
             $table->string('type', 32)->default('menu');
             $table->string('name', 64);
             $table->string('path', 255)->default('');
-            $table->string('component', 255)->default('');
             $table->string('icon', 64)->default('');
             $table->string('permission', 128)->default('');
             $table->integer('sort')->default(0);

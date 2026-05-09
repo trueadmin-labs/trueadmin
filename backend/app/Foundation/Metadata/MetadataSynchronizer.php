@@ -54,7 +54,6 @@ final class MetadataSynchronizer
                     'type' => 'button',
                     'sort' => 0,
                     'icon' => '',
-                    'component' => '',
                 ], $parentId, $now);
                 ++$synced['permissions'];
             }
@@ -69,7 +68,6 @@ final class MetadataSynchronizer
                     'type' => 'button',
                     'sort' => $button['sort'],
                     'icon' => '',
-                    'component' => '',
                 ], $parentId, $now);
                 ++$synced['buttons'];
             }

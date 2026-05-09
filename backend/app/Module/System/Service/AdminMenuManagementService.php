@@ -85,7 +85,6 @@ final class AdminMenuManagementService extends AbstractService
             'type' => (string) ($payload['type'] ?? $current?->getAttribute('type') ?? 'menu'),
             'name' => (string) $payload['name'],
             'path' => (string) ($payload['path'] ?? $current?->getAttribute('path') ?? ''),
-            'component' => (string) ($payload['component'] ?? $current?->getAttribute('component') ?? ''),
             'icon' => (string) ($payload['icon'] ?? $current?->getAttribute('icon') ?? ''),
             'permission' => (string) ($payload['permission'] ?? $current?->getAttribute('permission') ?? ''),
             'sort' => (int) ($payload['sort'] ?? $current?->getAttribute('sort') ?? 0),
