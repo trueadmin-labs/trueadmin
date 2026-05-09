@@ -24,6 +24,11 @@ type MenuItem = Required<MenuProps>['items'][number];
 type RuntimeMenuNode = {
   key: string;
   path: string;
+  id?: number;
+  code: string;
+  type?: BackendMenu['type'];
+  url?: string;
+  openMode?: BackendMenu['openMode'];
   label: string;
   icon?: ReactNode;
   children?: RuntimeMenuNode[];
@@ -44,8 +49,13 @@ const toRuntimeMenus = (
   (menus ?? [])
     .filter((menu) => menu.type !== 'button' && menu.status !== 'disabled')
     .map((menu) => ({
-      key: menu.path || menu.code,
+      key: String(menu.id ?? (menu.path || menu.code)),
+      id: menu.id,
+      code: menu.code,
+      type: menu.type,
       path: menu.path,
+      url: menu.url,
+      openMode: menu.openMode,
       label: t(menu.i18n, menu.title),
       icon: <IconRenderer name={menu.icon || menu.code} />,
       children: toRuntimeMenus(menu.children, t),
@@ -66,29 +76,65 @@ const toRootMenuItems = (menus: RuntimeMenuNode[]): MenuItem[] =>
     label: menu.label,
   }));
 
-const toMenuPathMap = (menus: RuntimeMenuNode[], pathMap = new Map<string, string>()) => {
+const toMenuNodeMap = (menus: RuntimeMenuNode[], nodeMap = new Map<string, RuntimeMenuNode>()) => {
   for (const menu of menus) {
-    pathMap.set(menu.key, menu.path || menu.key);
-    toMenuPathMap(menu.children ?? [], pathMap);
+    nodeMap.set(menu.key, menu);
+    toMenuNodeMap(menu.children ?? [], nodeMap);
   }
 
-  return pathMap;
+  return nodeMap;
 };
 
-const getFirstNavigablePath = (menu: RuntimeMenuNode): string => {
-  const firstChild = menu.children?.[0];
+const getFirstNavigableMenu = (menu: RuntimeMenuNode): RuntimeMenuNode => {
+  const firstChild = menu.children?.find((child) => child.type === 'link' || child.path || child.children?.length);
 
-  return firstChild ? getFirstNavigablePath(firstChild) : menu.path || menu.key;
+  return firstChild ? getFirstNavigableMenu(firstChild) : menu;
 };
 
-const toRootMenuPathMap = (menus: RuntimeMenuNode[]) => {
-  const pathMap = new Map<string, string>();
+const toRootMenuNodeMap = (menus: RuntimeMenuNode[]) => {
+  const nodeMap = new Map<string, RuntimeMenuNode>();
 
   for (const menu of menus) {
-    pathMap.set(menu.key, getFirstNavigablePath(menu));
+    nodeMap.set(menu.key, getFirstNavigableMenu(menu));
   }
 
-  return pathMap;
+  return nodeMap;
+};
+
+const toIframeLinkPath = (menu: RuntimeMenuNode): string =>
+  `/system/link-frame/${encodeURIComponent(String(menu.id ?? menu.code))}`;
+
+const openRuntimeMenu = (menu: RuntimeMenuNode | undefined, navigate: ReturnType<typeof useNavigate>) => {
+  if (!menu) {
+    return;
+  }
+
+  if (menu.type === 'link') {
+    const url = menu.url ?? '';
+    if (!url) {
+      return;
+    }
+    if (menu.openMode === 'self') {
+      window.location.assign(url);
+      return;
+    }
+    if (menu.openMode === 'iframe') {
+      if (menu.id !== undefined) {
+        navigate(toIframeLinkPath(menu));
+        return;
+      }
+      window.open(url, '_blank', 'noopener,noreferrer');
+      return;
+    }
+    window.open(url, '_blank', 'noopener,noreferrer');
+    return;
+  }
+
+  if (!menu.path) {
+    return;
+  }
+
+  navigate(menu.path || menu.key);
 };
 
 const findMenuMatch = (
@@ -101,7 +147,7 @@ const findMenuMatch = (
 
   for (const menu of menus) {
     const nextLabels = [...labels, menu.label];
-    if (normalizePath(menu.path) === currentPath) {
+    if ((menu.path && normalizePath(menu.path) === currentPath) || (menu.type === 'link' && menu.openMode === 'iframe' && normalizePath(toIframeLinkPath(menu)) === currentPath)) {
       return {
         selectedKey: menu.key,
         openKeys: parents,
@@ -183,7 +229,7 @@ function AppMenu({
   const darkMode = useLayoutStore((state) => state.darkMode);
   const [openKeys, setOpenKeys] = useState<string[]>(selectedOpenKeys);
   const rootSubmenuKeys = useMemo(() => getRootSubmenuKeys(menus), [menus]);
-  const menuPathMap = useMemo(() => toMenuPathMap(menus), [menus]);
+  const menuNodeMap = useMemo(() => toMenuNodeMap(menus), [menus]);
   const selectedOpenKeysKey = selectedOpenKeys.join('\0');
 
   useEffect(() => {
@@ -214,7 +260,7 @@ function AppMenu({
         selectedKeys={selectedKey ? [selectedKey] : []}
         openKeys={openKeys}
         onOpenChange={handleOpenChange}
-        onClick={({ key }) => navigate(menuPathMap.get(String(key)) ?? String(key))}
+        onClick={({ key }) => openRuntimeMenu(menuNodeMap.get(String(key)), navigate)}
       />
     </div>
   );
@@ -231,7 +277,7 @@ function AppRootMenu({
 }) {
   const navigate = useNavigate();
   const darkMode = useLayoutStore((state) => state.darkMode);
-  const menuPathMap = useMemo(() => toRootMenuPathMap(menus), [menus]);
+  const menuNodeMap = useMemo(() => toRootMenuNodeMap(menus), [menus]);
 
   return (
     <Menu
@@ -240,7 +286,7 @@ function AppRootMenu({
       theme={darkMode ? 'dark' : 'light'}
       items={toRootMenuItems(menus)}
       selectedKeys={selectedKey ? [selectedKey] : []}
-      onClick={({ key }) => navigate(menuPathMap.get(String(key)) ?? String(key))}
+      onClick={({ key }) => openRuntimeMenu(menuNodeMap.get(String(key)), navigate)}
     />
   );
 }
@@ -253,7 +299,7 @@ function AppColumnRootMenu({
   selectedKey?: string;
 }) {
   const navigate = useNavigate();
-  const menuPathMap = useMemo(() => toRootMenuPathMap(menus), [menus]);
+  const menuNodeMap = useMemo(() => toRootMenuNodeMap(menus), [menus]);
 
   return (
     <nav className="trueadmin-shell-column-root-menu" aria-label="一级菜单">
@@ -268,7 +314,7 @@ function AppColumnRootMenu({
               data-selected={selected}
               aria-label={menu.label}
               aria-current={selected ? 'page' : undefined}
-              onClick={() => navigate(menuPathMap.get(menu.key) ?? menu.path ?? menu.key)}
+              onClick={() => openRuntimeMenu(menuNodeMap.get(menu.key), navigate)}
             >
               <span className="trueadmin-shell-column-root-icon" aria-hidden="true">
                 {menu.icon}

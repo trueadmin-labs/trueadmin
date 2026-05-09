@@ -26,6 +26,16 @@ export default defineModule({
       meta: { title: 'system.menus.title', auth: true },
     },
     {
+      path: '/system/link-frame/:id',
+      component: lazy(() => import('./pages/link-frame')),
+      meta: {
+        title: 'system.menus.type.link',
+        auth: true,
+        layout: { contentPadding: false },
+        tab: { enabled: true, keyMode: 'fullPath' },
+      },
+    },
+    {
       path: '/system/messages',
       component: lazy(() => import('./pages/messages')),
       meta: { title: 'system.messages.title', auth: true },

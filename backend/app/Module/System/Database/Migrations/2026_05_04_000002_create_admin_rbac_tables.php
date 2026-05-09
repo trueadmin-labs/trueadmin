@@ -29,8 +29,11 @@ return new class extends Migration {
             $table->string('type', 32)->default('menu');
             $table->string('name', 64);
             $table->string('path', 255)->default('');
+            $table->string('url', 1024)->default('');
+            $table->string('open_mode', 32)->default('');
             $table->string('icon', 64)->default('');
             $table->string('permission', 128)->default('');
+            $table->string('source', 32)->default('custom');
             $table->integer('sort')->default(0);
             $table->string('status', 32)->default('enabled');
             $table->timestamp('metadata_synced_at')->nullable();

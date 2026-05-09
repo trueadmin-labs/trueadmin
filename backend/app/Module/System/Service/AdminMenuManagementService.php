@@ -13,6 +13,14 @@ use TrueAdmin\Kernel\Exception\BusinessException;
 
 final class AdminMenuManagementService extends AbstractService
 {
+    private const TYPE_DIRECTORY = 'directory';
+
+    private const TYPE_LINK = 'link';
+
+    private const SOURCE_CODE = 'code';
+
+    private const SOURCE_CUSTOM = 'custom';
+
     public function __construct(private readonly AdminMenuRepository $menus)
     {
     }
@@ -34,7 +42,12 @@ final class AdminMenuManagementService extends AbstractService
 
     public function create(array $payload): array
     {
-        $menu = $this->menus->create($this->data($payload));
+        $type = (string) ($payload['type'] ?? self::TYPE_DIRECTORY);
+        if (! in_array($type, [self::TYPE_DIRECTORY, self::TYPE_LINK], true)) {
+            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'type', 'reason' => 'custom_menu_only_supports_directory_or_link']);
+        }
+
+        $menu = $this->menus->create($this->data([...$payload, 'type' => $type], null, true));
 
         return $this->detail((int) $menu->getAttribute('id'));
     }
@@ -50,6 +63,9 @@ final class AdminMenuManagementService extends AbstractService
     public function delete(int $id): void
     {
         $menu = $this->mustFind($id);
+        if ((string) $menu->getAttribute('source') === self::SOURCE_CODE) {
+            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['reason' => 'cannot_delete_code_menu']);
+        }
         if ($this->menus->childCount($id) > 0) {
             throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['reason' => 'cannot_delete_menu_with_children']);
         }
@@ -67,26 +83,55 @@ final class AdminMenuManagementService extends AbstractService
         return $menu;
     }
 
-    private function data(array $payload, ?AdminMenu $current = null): array
+    private function data(array $payload, ?AdminMenu $current = null, bool $creating = false): array
     {
         $parentId = (int) ($payload['parentId'] ?? $payload['parent_id'] ?? $current?->getAttribute('parent_id') ?? 0);
         $this->assertParent($parentId, $current === null ? null : (int) $current->getAttribute('id'));
 
-        $code = (string) ($payload['code'] ?? $current?->getAttribute('code') ?? '');
+        $isCodeMenu = $current !== null && (string) $current->getAttribute('source') === self::SOURCE_CODE;
+        $type = $isCodeMenu
+            ? (string) $current->getAttribute('type')
+            : (string) ($payload['type'] ?? $current?->getAttribute('type') ?? self::TYPE_DIRECTORY);
+        if ($type === self::TYPE_LINK) {
+            $this->assertUrl((string) ($payload['url'] ?? $current?->getAttribute('url') ?? ''));
+        }
+        if (! in_array($type, [self::TYPE_DIRECTORY, 'menu', 'button', self::TYPE_LINK], true)) {
+            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'type', 'reason' => 'unsupported_menu_type']);
+        }
+
+        $code = $isCodeMenu ? (string) $current->getAttribute('code') : (string) ($payload['code'] ?? $current?->getAttribute('code') ?? '');
+        if ($creating && $code === '') {
+            $code = $this->generateCustomCode($type);
+        }
         if ($code !== '') {
             $exists = $this->menus->findByCode($code);
             $currentId = $current === null ? 0 : (int) $current->getAttribute('id');
             $this->assertUnique($exists !== null && (int) $exists->getAttribute('id') !== $currentId, 'code');
         }
 
+        $permission = $isCodeMenu ? (string) $current->getAttribute('permission') : (string) ($payload['permission'] ?? $current?->getAttribute('permission') ?? '');
+        if ($creating && $type === self::TYPE_LINK && $permission === '') {
+            $permission = str_replace('custom:link:', 'custom:link:view:', $code);
+        }
+
+        $openMode = $type === self::TYPE_LINK
+            ? (string) ($payload['openMode'] ?? $payload['open_mode'] ?? $current?->getAttribute('open_mode') ?? 'blank')
+            : '';
+        if ($type === self::TYPE_LINK && ! in_array($openMode, ['blank', 'self', 'iframe'], true)) {
+            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'openMode', 'reason' => 'unsupported_open_mode']);
+        }
+
         return [
             'parent_id' => $parentId,
             'code' => $code,
-            'type' => (string) ($payload['type'] ?? $current?->getAttribute('type') ?? 'menu'),
+            'type' => $type,
             'name' => (string) $payload['name'],
-            'path' => (string) ($payload['path'] ?? $current?->getAttribute('path') ?? ''),
+            'path' => $isCodeMenu ? (string) $current->getAttribute('path') : '',
+            'url' => $type === self::TYPE_LINK ? (string) ($payload['url'] ?? $current?->getAttribute('url') ?? '') : '',
+            'open_mode' => $openMode,
             'icon' => (string) ($payload['icon'] ?? $current?->getAttribute('icon') ?? ''),
-            'permission' => (string) ($payload['permission'] ?? $current?->getAttribute('permission') ?? ''),
+            'permission' => $permission,
+            'source' => $isCodeMenu ? self::SOURCE_CODE : self::SOURCE_CUSTOM,
             'sort' => (int) ($payload['sort'] ?? $current?->getAttribute('sort') ?? 0),
             'status' => (string) ($payload['status'] ?? $current?->getAttribute('status') ?? 'enabled'),
         ];
@@ -104,5 +149,26 @@ final class AdminMenuManagementService extends AbstractService
         if ($currentMenuId !== null && ($parentId === $currentMenuId || $this->menus->hasAncestor($parentId, $currentMenuId))) {
             throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'parentId', 'reason' => 'cannot_move_menu_to_self_or_descendant']);
         }
+    }
+
+    private function assertUrl(string $url): void
+    {
+        if ($url === '') {
+            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'url', 'reason' => 'required']);
+        }
+
+        $scheme = strtolower((string) parse_url($url, PHP_URL_SCHEME));
+        if (! in_array($scheme, ['http', 'https'], true) || filter_var($url, FILTER_VALIDATE_URL) === false) {
+            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'url', 'reason' => 'invalid_url']);
+        }
+    }
+
+    private function generateCustomCode(string $type): string
+    {
+        do {
+            $code = sprintf('custom:%s:%s', $type, bin2hex(random_bytes(4)));
+        } while ($this->menus->findByCode($code) !== null);
+
+        return $code;
     }
 }

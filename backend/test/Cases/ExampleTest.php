@@ -136,15 +136,19 @@ class ExampleTest extends TestCase
         $deptBId = $deptB['data']['id'];
 
         $menu = $this->json('/api/admin/system/menus', [
-            'name' => '测试菜单' . $suffix,
-            'path' => '/tests/' . $suffix,
-            'permission' => 'test:' . $suffix . ':list',
-            'type' => 'menu',
+            'name' => '测试链接' . $suffix,
+            'permission' => 'test:' . $suffix . ':link',
+            'type' => 'link',
+            'url' => 'https://example.com/tests/' . $suffix,
+            'openMode' => 'iframe',
             'sort' => 99,
             'status' => 'enabled',
         ], $headers);
         $this->assertSame('SUCCESS', $menu['code']);
-        $this->assertSame('测试菜单' . $suffix, $menu['data']['name']);
+        $this->assertSame('测试链接' . $suffix, $menu['data']['name']);
+        $this->assertSame('link', $menu['data']['type']);
+        $this->assertSame('custom', $menu['data']['source']);
+        $this->assertSame('iframe', $menu['data']['openMode']);
 
         $role = $this->json('/api/admin/system/roles', [
             'code' => 'test-role-' . $suffix,
@@ -160,10 +164,11 @@ class ExampleTest extends TestCase
         $this->assertContains($menu['data']['id'], $role['data']['menuIds']);
 
         $menuOutsideParent = $this->json('/api/admin/system/menus', [
-            'name' => '父角色外菜单' . $suffix,
-            'path' => '/tests/outside-' . $suffix,
+            'name' => '父角色外链接' . $suffix,
             'permission' => 'test:' . $suffix . ':outside',
-            'type' => 'menu',
+            'type' => 'link',
+            'url' => 'https://example.com/tests/outside-' . $suffix,
+            'openMode' => 'blank',
             'sort' => 101,
             'status' => 'enabled',
         ], $headers);
@@ -222,15 +227,17 @@ class ExampleTest extends TestCase
         $this->assertEqualsCanonicalizing([$deptAId, $deptBId], $user['data']['deptIds']);
 
         $updatedMenu = $this->put('/api/admin/system/menus/' . $menu['data']['id'], [
-            'name' => '测试菜单更新' . $suffix,
-            'path' => '/tests/' . $suffix,
+            'name' => '测试链接更新' . $suffix,
             'permission' => 'test:' . $suffix . ':list',
-            'type' => 'menu',
+            'type' => 'link',
+            'url' => 'https://example.com/tests/updated-' . $suffix,
+            'openMode' => 'self',
             'sort' => 100,
             'status' => 'enabled',
         ], $headers);
         $this->assertSame('SUCCESS', $updatedMenu['code']);
-        $this->assertSame('测试菜单更新' . $suffix, $updatedMenu['data']['name']);
+        $this->assertSame('测试链接更新' . $suffix, $updatedMenu['data']['name']);
+        $this->assertSame('self', $updatedMenu['data']['openMode']);
 
         $updatedRole = $this->put('/api/admin/system/roles/' . $role['data']['id'], [
             'code' => 'test-role-' . $suffix,

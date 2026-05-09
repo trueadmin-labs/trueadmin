@@ -4,8 +4,10 @@ export type BackendMenu = {
   title: string;
   i18n?: string;
   path: string;
+  url?: string;
+  openMode?: 'blank' | 'self' | 'iframe' | '';
   icon?: string;
-  type?: 'directory' | 'menu' | 'button';
+  type?: 'directory' | 'menu' | 'button' | 'link';
   status?: string;
   sort?: number;
   children?: BackendMenu[];

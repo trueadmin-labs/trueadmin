@@ -15,7 +15,7 @@ final class AdminMenuRepository extends AbstractRepository implements MetadataMe
 {
     protected ?string $modelClass = AdminMenu::class;
 
-    protected array $keywordFields = ['code', 'name', 'path', 'permission'];
+    protected array $keywordFields = ['code', 'name', 'path', 'url', 'permission'];
 
     protected array $filterable = [
         'id' => ['=', 'in'],
@@ -24,7 +24,10 @@ final class AdminMenuRepository extends AbstractRepository implements MetadataMe
         'type' => ['=', 'in'],
         'name' => ['=', 'like'],
         'path' => ['=', 'like'],
+        'url' => ['=', 'like'],
+        'open_mode' => ['=', 'in'],
         'permission' => ['=', 'like'],
+        'source' => ['=', 'in'],
         'status' => ['=', 'in'],
     ];
 
@@ -120,8 +123,11 @@ final class AdminMenuRepository extends AbstractRepository implements MetadataMe
             'type' => (string) $menu->getAttribute('type'),
             'name' => (string) $menu->getAttribute('name'),
             'path' => (string) $menu->getAttribute('path'),
+            'url' => (string) $menu->getAttribute('url'),
+            'openMode' => (string) $menu->getAttribute('open_mode'),
             'icon' => (string) $menu->getAttribute('icon'),
             'permission' => (string) $menu->getAttribute('permission'),
+            'source' => (string) $menu->getAttribute('source'),
             'sort' => (int) $menu->getAttribute('sort'),
             'status' => (string) $menu->getAttribute('status'),
         ];
@@ -135,6 +141,8 @@ final class AdminMenuRepository extends AbstractRepository implements MetadataMe
             'code' => (string) $menu->getAttribute('code'),
             'title' => (string) $menu->getAttribute('name'),
             'path' => (string) $menu->getAttribute('path'),
+            'url' => (string) $menu->getAttribute('url'),
+            'openMode' => (string) $menu->getAttribute('open_mode'),
             'icon' => (string) $menu->getAttribute('icon'),
             'type' => (string) $menu->getAttribute('type'),
             'status' => (string) $menu->getAttribute('status'),
@@ -147,7 +155,7 @@ final class AdminMenuRepository extends AbstractRepository implements MetadataMe
     {
         return AdminMenu::query()
             ->where('status', 'enabled')
-            ->whereIn('type', ['directory', 'menu'])
+            ->whereIn('type', ['directory', 'menu', 'link'])
             ->orderBy('sort')
             ->orderBy('id')
             ->get()
@@ -210,8 +218,11 @@ final class AdminMenuRepository extends AbstractRepository implements MetadataMe
             'type' => (string) ($menu['type'] ?? 'menu'),
             'name' => (string) ($menu['title'] ?? $code),
             'path' => (string) ($menu['path'] ?? ''),
+            'url' => '',
+            'open_mode' => '',
             'icon' => (string) ($menu['icon'] ?? ''),
             'permission' => (string) ($menu['permission'] ?? ''),
+            'source' => 'code',
             'sort' => (int) ($menu['sort'] ?? 0),
             'status' => 'enabled',
             'metadata_synced_at' => $syncedAt,
@@ -224,10 +235,15 @@ final class AdminMenuRepository extends AbstractRepository implements MetadataMe
             return (int) $created->getAttribute('id');
         }
 
-        $updates = ['code' => $code, 'metadata_synced_at' => $syncedAt, 'updated_at' => $syncedAt];
-        foreach (['permission', 'type', 'path', 'icon', 'parent_id'] as $field) {
+        $updates = ['code' => $code, 'source' => 'code', 'metadata_synced_at' => $syncedAt, 'updated_at' => $syncedAt];
+        foreach (['permission', 'type', 'path', 'url', 'open_mode'] as $field) {
             $current = $exists->getAttribute($field);
-            if ($current === null || $current === '' || ($field === 'parent_id' && (int) $current === 0 && $parentId > 0)) {
+            if (
+                $field === 'url'
+                || $field === 'open_mode'
+                || $current === null
+                || $current === ''
+            ) {
                 $updates[$field] = $defaults[$field];
             }
         }
