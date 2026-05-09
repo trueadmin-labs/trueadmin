@@ -250,6 +250,8 @@ const showModal = (nextPayload: Payload) => {
 
 如果需要关闭后销毁复杂内容，优先使用 Ant Design 的 `destroyOnHidden`，让 Ant Design 在隐藏完成后销毁子内容，不要由外层条件渲染提前卸载整个弹窗。错误弹窗、表单弹窗、详情弹窗、确认弹窗和模块自定义弹窗都必须遵守这一规则。
 
+复发问题记录：通知管理、公告管理这类详情弹窗禁止用 `setDetail(undefined)` 直接关闭。正确做法是 `setDetail(record); setDetailOpen(true)` 打开，关闭时只 `setDetailOpen(false)`，并在 `afterOpenChange(false)` 中清理 `detail`。否则详情弹窗会被 React 立即卸载，关闭过渡动画会消失。
+
 ## 权限展示分层
 
 权限相关展示分为页面级、局部组件级和接口级三层，不要混用。

@@ -1,6 +1,7 @@
 import type { CrudListParams } from '@/core/crud/types';
+import { ApiError } from '@/core/error/ApiError';
 import { http } from '@/core/http/client';
-import type { PageResult } from '@/core/http/types';
+import type { ApiEnvelope, PageResult } from '@/core/http/types';
 
 export type AdminRoleOption = {
   id: number;
@@ -17,8 +18,39 @@ export type AdminRoleTreeNode = AdminRoleOption & {
   children?: AdminRoleTreeNode[];
 };
 
+type RoleListResponse<TRole> = TRole[] | ApiEnvelope<TRole[]>;
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const describeValue = (value: unknown) => ({
+  receivedType: Array.isArray(value) ? 'array' : typeof value,
+  receivedKeys: isRecord(value) ? Object.keys(value) : [],
+  received: value,
+});
+
+const unwrapRoleList = <TRole>(value: RoleListResponse<TRole> | unknown): TRole[] => {
+  if (Array.isArray(value)) {
+    return value as TRole[];
+  }
+
+  if (isRecord(value) && Array.isArray(value.data)) {
+    return value.data as TRole[];
+  }
+
+  throw new ApiError(
+    'SYSTEM.ROLE_OPTIONS.INVALID_RESPONSE',
+    '角色接口返回结构异常',
+    undefined,
+    describeValue(value),
+  );
+};
+
+const roleListMethod = <TRole>(url: string, params?: CrudListParams) =>
+  http.Get<RoleListResponse<TRole>>(url, params ? { params } : undefined);
+
 export const roleApi = {
   list: (params: CrudListParams) => http.Get<PageResult<AdminRoleOption>>('/admin/system/roles', { params }).send(),
-  tree: (params?: CrudListParams) => http.Get<AdminRoleTreeNode[]>('/admin/system/roles/tree', { params }).send(),
-  options: () => http.Get<AdminRoleOption[]>('/admin/system/roles/options').send(),
+  tree: async (params?: CrudListParams) => unwrapRoleList<AdminRoleTreeNode>(await roleListMethod<AdminRoleTreeNode>('/admin/system/roles/tree', params).send()),
+  options: async () => unwrapRoleList<AdminRoleOption>(await roleListMethod<AdminRoleOption>('/admin/system/roles/options').send()),
 };

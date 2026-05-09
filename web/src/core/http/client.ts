@@ -35,7 +35,7 @@ export const http = createAlova({
         : JSON.stringify(elements.data ?? undefined);
 
     let responsePromise: Promise<Response> | undefined;
-    const response = () => {
+    const rawResponse = () => {
       responsePromise ??= fetch(elements.url, {
         method: elements.type,
         headers,
@@ -45,10 +45,11 @@ export const http = createAlova({
       });
       return responsePromise;
     };
+    const response = async () => (await rawResponse()).clone();
 
     return {
       response,
-      headers: async () => (await response()).headers,
+      headers: async () => (await rawResponse()).headers,
       abort: () => controller.abort(),
     };
   },

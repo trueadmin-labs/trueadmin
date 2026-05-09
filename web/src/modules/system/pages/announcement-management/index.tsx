@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { TrueAdminConfirmAction } from '@/core/action';
 import { TrueAdminCrudPage } from '@/core/crud';
 import type { CrudColumns, CrudExtraQuerySchema, CrudFilterSchema, CrudService } from '@/core/crud/types';
+import { errorCenter } from '@/core/error/errorCenter';
 import { TrueAdminQuickFilter } from '@/core/filter/TrueAdminQuickFilter';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { TrueAdminMarkdown, TrueAdminMarkdownEditor } from '@/core/markdown';
@@ -78,6 +79,7 @@ export default function AdminAnnouncementManagementPage() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<AdminAnnouncement>();
   const [detail, setDetail] = useState<AdminAnnouncement>();
+  const [detailOpen, setDetailOpen] = useState(false);
   const [refreshSeed, setRefreshSeed] = useState(0);
   const [roleOptions, setRoleOptions] = useState<Array<{ label: string; value: number }>>([]);
   const [roleOptionsLoading, setRoleOptionsLoading] = useState(false);
@@ -95,9 +97,9 @@ export default function AdminAnnouncementManagementPage() {
           setRoleOptions(roles.map((role) => ({ label: role.name, value: role.id })));
         }
       })
-      .catch(() => {
+      .catch((error) => {
         if (mounted) {
-          message.error(t('system.announcementManagement.roleOptions.loadFailed', '角色选项加载失败'));
+          errorCenter.emit(error);
         }
       })
       .finally(() => {
@@ -317,7 +319,7 @@ export default function AdminAnnouncementManagementPage() {
           width: 190,
           render: ({ record, action }) => (
             <Space size={4} wrap>
-              <Button size="small" type="link" onClick={() => setDetail(record)}>{t('system.announcementManagement.action.detail', '详情')}</Button>
+              <Button size="small" type="link" onClick={() => { setDetail(record); setDetailOpen(true); }}>{t('system.announcementManagement.action.detail', '详情')}</Button>
               {['draft', 'scheduled', 'active', 'expired'].includes(record.status) ? (
                 <Button size="small" type="link" onClick={() => openEdit(record)}>{t('system.announcementManagement.action.edit', '编辑')}</Button>
               ) : null}
@@ -388,20 +390,22 @@ export default function AdminAnnouncementManagementPage() {
         </Form>
       </TrueAdminModal>
 
-      <AnnouncementDetailModal announcement={detail} statusText={statusText} levelText={levelText} targetTypeText={targetTypeText} onClose={() => setDetail(undefined)} />
+      <AnnouncementDetailModal open={detailOpen} announcement={detail} statusText={statusText} levelText={levelText} targetTypeText={targetTypeText} onClose={() => setDetailOpen(false)} afterOpenChange={(nextOpen) => { if (!nextOpen) { setDetail(undefined); } }} />
     </>
   );
 }
 
 type AnnouncementDetailModalProps = {
+  open: boolean;
   announcement?: AdminAnnouncement;
   statusText: Record<AdminAnnouncementStatus, string>;
   levelText: Record<AdminMessageLevel, string>;
   targetTypeText: Record<AdminAnnouncementTargetType, string>;
   onClose: () => void;
+  afterOpenChange?: (open: boolean) => void;
 };
 
-function AnnouncementDetailModal({ announcement, statusText, levelText, targetTypeText, onClose }: AnnouncementDetailModalProps) {
+function AnnouncementDetailModal({ open, announcement, statusText, levelText, targetTypeText, onClose, afterOpenChange }: AnnouncementDetailModalProps) {
   const { t } = useI18n();
   const auditItems = useMemo<TrueAdminAuditTimelineItem[]>(() => {
     if (!announcement) {
@@ -415,12 +419,9 @@ function AnnouncementDetailModal({ announcement, statusText, levelText, targetTy
     ].filter(Boolean) as TrueAdminAuditTimelineItem[];
   }, [announcement, t]);
 
-  if (!announcement) {
-    return null;
-  }
-
   return (
-    <TrueAdminModal destroyOnHidden open={Boolean(announcement)} title={announcement.title} width={920} footer={<Button onClick={onClose}>{t('modal.action.close', '关闭')}</Button>} onCancel={onClose}>
+    <TrueAdminModal destroyOnHidden open={open} title={announcement?.title ?? ''} width={920} footer={<Button onClick={onClose}>{t('modal.action.close', '关闭')}</Button>} onCancel={onClose} afterOpenChange={afterOpenChange}>
+      {announcement ? (
       <Space orientation="vertical" size={16} style={{ width: '100%' }}>
         <Space size={8} wrap>
           <Tag color={announcementStatusColor[announcement.status]}>{statusText[announcement.status]}</Tag>
@@ -461,6 +462,7 @@ function AnnouncementDetailModal({ announcement, statusText, levelText, targetTy
           <TrueAdminAuditTimeline items={auditItems} />
         </div>
       </Space>
+      ) : null}
     </TrueAdminModal>
   );
 }

@@ -1,6 +1,9 @@
 import { tokenStorage } from '@/shared/utils/storage';
 
-const UNAUTHORIZED_CODE = 'KERNEL.AUTH.UNAUTHORIZED';
+const AUTH_UNAUTHORIZED_CODES = new Set([
+  'KERNEL.AUTH.UNAUTHORIZED',
+  'KERNEL.AUTH.TOKEN_EXPIRED',
+]);
 let redirecting = false;
 
 const isLoginPath = (pathname: string) => pathname === '/login';
@@ -15,7 +18,7 @@ const toLoginUrl = () => {
 };
 
 export const isAuthUnauthorizedCode = (code?: string | number | null): boolean =>
-  String(code ?? '') === UNAUTHORIZED_CODE;
+  AUTH_UNAUTHORIZED_CODES.has(String(code ?? ''));
 
 export const handleAuthUnauthorized = () => {
   tokenStorage.clear();

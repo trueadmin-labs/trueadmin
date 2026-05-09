@@ -57,7 +57,9 @@ export default function AdminNotificationManagementPage() {
   const { message } = App.useApp();
   const { t } = useI18n();
   const [detail, setDetail] = useState<AdminNotificationBatch>();
+  const [detailOpen, setDetailOpen] = useState(false);
   const [deliveryBatch, setDeliveryBatch] = useState<AdminNotificationBatch>();
+  const [deliveryOpen, setDeliveryOpen] = useState(false);
   const [refreshSeed, setRefreshSeed] = useState(0);
 
   const levelText = useMemo<Record<AdminMessageLevel, string>>(
@@ -243,8 +245,8 @@ export default function AdminNotificationManagementPage() {
           width: 190,
           render: ({ record, action }) => (
             <Space size={4} wrap>
-              <Button size="small" type="link" onClick={() => setDetail(record)}>{t('system.notificationManagement.action.detail', '详情')}</Button>
-              <Button size="small" type="link" onClick={() => setDeliveryBatch(record)}>{t('system.notificationManagement.action.deliveries', '投递记录')}</Button>
+              <Button size="small" type="link" onClick={() => { setDetail(record); setDetailOpen(true); }}>{t('system.notificationManagement.action.detail', '详情')}</Button>
+              <Button size="small" type="link" onClick={() => { setDeliveryBatch(record); setDeliveryOpen(true); }}>{t('system.notificationManagement.action.deliveries', '投递记录')}</Button>
               {record.failedTotal > 0 ? (
                 <TrueAdminConfirmAction size="small" type="link" icon={<RedoOutlined />} confirm={t('system.notificationManagement.confirm.resend', '确认重发失败投递吗？')} successMessage={t('system.notificationManagement.success.resend', '投递记录已重发')} action={async () => { const result = await adminNotificationManagementApi.resendNotification(record.id).send(); message.success(t('system.notificationManagement.success.resendCount', '已重发 {{count}} 条').replace('{{count}}', String(result.resent))); action.reload(); setRefreshSeed((seed) => seed + 1); }}>
                   {t('system.notificationManagement.action.resend', '重发')}
@@ -273,28 +275,28 @@ export default function AdminNotificationManagementPage() {
         tableScrollX={1320}
       />
 
-      <NotificationDetailModal batch={detail} statusText={statusText} levelText={levelText} targetTypeText={targetTypeText} onClose={() => setDetail(undefined)} />
-      <DeliveryRecordsModal batch={deliveryBatch} deliveryStatusText={deliveryStatusText} onClose={() => setDeliveryBatch(undefined)} />
+      <NotificationDetailModal open={detailOpen} batch={detail} statusText={statusText} levelText={levelText} targetTypeText={targetTypeText} onClose={() => setDetailOpen(false)} afterOpenChange={(nextOpen) => { if (!nextOpen) { setDetail(undefined); } }} />
+      <DeliveryRecordsModal open={deliveryOpen} batch={deliveryBatch} deliveryStatusText={deliveryStatusText} onClose={() => setDeliveryOpen(false)} afterOpenChange={(nextOpen) => { if (!nextOpen) { setDeliveryBatch(undefined); } }} />
     </>
   );
 }
 
 type NotificationDetailModalProps = {
+  open: boolean;
   batch?: AdminNotificationBatch;
   statusText: Record<AdminNotificationBatchStatus, string>;
   levelText: Record<AdminMessageLevel, string>;
   targetTypeText: Record<AdminNotificationTargetType, string>;
   onClose: () => void;
+  afterOpenChange?: (open: boolean) => void;
 };
 
-function NotificationDetailModal({ batch, statusText, levelText, targetTypeText, onClose }: NotificationDetailModalProps) {
+function NotificationDetailModal({ open, batch, statusText, levelText, targetTypeText, onClose, afterOpenChange }: NotificationDetailModalProps) {
   const { t } = useI18n();
-  if (!batch) {
-    return null;
-  }
-  const typeConfig = getAdminMessageTypeConfig(batch.type);
+  const typeConfig = batch ? getAdminMessageTypeConfig(batch.type) : undefined;
   return (
-    <TrueAdminModal destroyOnHidden open={Boolean(batch)} title={batch.title} width={920} footer={<Button onClick={onClose}>{t('modal.action.close', '关闭')}</Button>} onCancel={onClose}>
+    <TrueAdminModal destroyOnHidden open={open} title={batch?.title ?? ''} width={920} footer={<Button onClick={onClose}>{t('modal.action.close', '关闭')}</Button>} onCancel={onClose} afterOpenChange={afterOpenChange}>
+      {batch && typeConfig ? (
       <Space orientation="vertical" size={16} style={{ width: '100%' }}>
         <Space size={8} wrap>
           <Tag color={batchStatusColor[batch.status]}>{statusText[batch.status]}</Tag>
@@ -330,17 +332,20 @@ function NotificationDetailModal({ batch, statusText, levelText, targetTypeText,
           />
         ) : null}
       </Space>
+      ) : null}
     </TrueAdminModal>
   );
 }
 
 type DeliveryRecordsModalProps = {
+  open: boolean;
   batch?: AdminNotificationBatch;
   deliveryStatusText: Record<AdminNotificationDeliveryStatus, string>;
   onClose: () => void;
+  afterOpenChange?: (open: boolean) => void;
 };
 
-function DeliveryRecordsModal({ batch, deliveryStatusText, onClose }: DeliveryRecordsModalProps) {
+function DeliveryRecordsModal({ open, batch, deliveryStatusText, onClose, afterOpenChange }: DeliveryRecordsModalProps) {
   const { t } = useI18n();
   const deliveryExtraQuery = useMemo<CrudExtraQuerySchema[]>(() => [{ name: 'status' }], []);
   const deliveryService = useMemo<CrudService<AdminNotificationDelivery>>(
@@ -365,7 +370,7 @@ function DeliveryRecordsModal({ batch, deliveryStatusText, onClose }: DeliveryRe
   );
 
   return (
-    <TrueAdminModal destroyOnHidden className="trueadmin-notification-delivery-modal" open={Boolean(batch)} title={batch ? `${t('system.notificationManagement.modal.deliveries', '投递记录')} - ${batch.title}` : ''} width={980} footer={<Button onClick={onClose}>{t('modal.action.close', '关闭')}</Button>} onCancel={onClose}>
+    <TrueAdminModal destroyOnHidden className="trueadmin-notification-delivery-modal" open={open} title={batch ? `${t('system.notificationManagement.modal.deliveries', '投递记录')} - ${batch.title}` : ''} width={980} footer={<Button onClick={onClose}>{t('modal.action.close', '关闭')}</Button>} onCancel={onClose} afterOpenChange={afterOpenChange}>
       {batch ? (
         <div className="trueadmin-notification-delivery-modal-body">
           <div className="trueadmin-notification-management-stats">
