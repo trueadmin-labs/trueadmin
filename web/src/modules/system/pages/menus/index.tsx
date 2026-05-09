@@ -1,5 +1,5 @@
 import { PlusOutlined } from '@ant-design/icons';
-import { App, Button, Dropdown, Form, Input, InputNumber, Popconfirm, Select, Space, Tag, TreeSelect, Typography } from 'antd';
+import { App, Button, Checkbox, Col, Dropdown, Form, Input, InputNumber, Popconfirm, Row, Select, Space, Tag, TreeSelect, Typography } from 'antd';
 import type { TreeSelectProps } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { TrueAdminCrudPage } from '@/core/crud';
@@ -13,6 +13,8 @@ import type { AdminMenu, AdminMenuOpenMode, AdminMenuPayload, AdminMenuSource, A
 type MenuFormValues = AdminMenuPayload;
 
 const ROOT_PARENT_ID = 0;
+
+const FORM_GUTTER: [number, number] = [16, 0];
 
 const toTreeSelectData = (
   menus: AdminMenu[],
@@ -93,6 +95,7 @@ export default function AdminMenusPage() {
       status: 'enabled',
       type,
       openMode: type === 'link' ? 'blank' : undefined,
+      showLinkHeader: false,
     });
     setOpen(true);
   };
@@ -107,6 +110,7 @@ export default function AdminMenusPage() {
       parentId: record.parentId,
       path: record.path,
       permission: record.permission,
+      showLinkHeader: record.showLinkHeader,
       sort: record.sort,
       status: record.status,
       type: record.type,
@@ -297,39 +301,80 @@ export default function AdminMenusPage() {
       tableRender={({ action }, defaultDom) => (
         <>
           {defaultDom}
-          <TrueAdminModal destroyOnHidden confirmLoading={submitting} open={open} title={editing ? t('system.menus.modal.edit', '编辑资源') : t('system.menus.modal.create', '新增资源')} width={760} onCancel={closeForm} onOk={() => void submit(action)}>
+          <TrueAdminModal destroyOnHidden confirmLoading={submitting} open={open} title={editing ? t('system.menus.modal.edit', '编辑资源') : t('system.menus.modal.create', '新增资源')} width={820} onCancel={closeForm} onOk={() => void submit(action)}>
             <Form<MenuFormValues> form={form} layout="vertical" initialValues={{ parentId: ROOT_PARENT_ID, sort: 0, status: 'enabled', type: 'directory' }}>
-              <Space size={12} style={{ width: '100%' }} align="start">
-                <Form.Item label={t('system.menus.form.parentId', '上级菜单')} name="parentId" style={{ flex: 1 }}>
-                  <TreeSelect treeData={parentTreeData} treeDefaultExpandAll showSearch treeNodeFilterProp="title" />
-                </Form.Item>
-                <Form.Item label={t('system.menus.form.type', '类型')} name="type" style={{ width: 180 }}>
-                  <Select disabled={Boolean(editing)} options={editing ? [{ label: typeText[editing.type], value: editing.type }] : [{ label: typeText.directory, value: 'directory' }, { label: typeText.link, value: 'link' }]} />
-                </Form.Item>
-              </Space>
-              <Space size={12} style={{ width: '100%' }} align="start">
-                <Form.Item label={t('system.menus.form.name', '菜单名称')} name="name" style={{ flex: 1 }} rules={[{ required: true, message: t('system.menus.form.nameRequired', '请输入菜单名称') }]}><Input maxLength={64} /></Form.Item>
-                <Form.Item label={t('system.menus.form.code', '编码')} name="code" style={{ flex: 1 }}><Input disabled={isEditingCodeMenu} maxLength={128} placeholder={t('system.menus.form.code.placeholder', '留空自动生成')} /></Form.Item>
-              </Space>
-              {watchedType === 'link' ? (
-                <Space size={12} style={{ width: '100%' }} align="start">
-                  <Form.Item label={t('system.menus.form.url', '链接地址')} name="url" style={{ flex: 1 }} rules={[{ required: true, message: t('system.menus.form.urlRequired', '请输入链接地址') }, { type: 'url', message: t('system.menus.form.urlInvalid', '请输入有效链接地址') }]}><Input maxLength={1024} placeholder="https://example.com" /></Form.Item>
-                  <Form.Item label={t('system.menus.form.openMode', '打开方式')} name="openMode" style={{ width: 180 }} rules={[{ required: watchedType === 'link', message: t('system.menus.form.openModeRequired', '请选择打开方式') }]}>
-                    <Select options={[{ label: openModeText.blank, value: 'blank' }, { label: openModeText.self, value: 'self' }, { label: openModeText.iframe, value: 'iframe' }]} />
+              <Row gutter={FORM_GUTTER}>
+                <Col xs={24} md={16}>
+                  <Form.Item label={t('system.menus.form.parentId', '上级菜单')} name="parentId">
+                    <TreeSelect treeData={parentTreeData} treeDefaultExpandAll showSearch treeNodeFilterProp="title" />
                   </Form.Item>
-                </Space>
-              ) : null}
+                </Col>
+                <Col xs={24} md={8}>
+                  <Form.Item label={t('system.menus.form.type', '类型')} name="type">
+                    <Select disabled={Boolean(editing)} options={editing ? [{ label: typeText[editing.type], value: editing.type }] : [{ label: typeText.directory, value: 'directory' }, { label: typeText.link, value: 'link' }]} />
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Row gutter={FORM_GUTTER}>
+                <Col xs={24} md={12}>
+                  <Form.Item label={t('system.menus.form.name', '菜单名称')} name="name" rules={[{ required: true, message: t('system.menus.form.nameRequired', '请输入菜单名称') }]}>
+                    <Input maxLength={64} />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} md={12}>
+                  <Form.Item label={t('system.menus.form.code', '编码')} name="code">
+                    <Input disabled={isEditingCodeMenu} maxLength={128} placeholder={t('system.menus.form.code.placeholder', '留空自动生成')} />
+                  </Form.Item>
+                </Col>
+              </Row>
               {isEditingCodeMenu ? (
-                <Form.Item label={t('system.menus.form.path', '路由路径')} name="path"><Input disabled maxLength={255} /></Form.Item>
+                <Form.Item label={t('system.menus.form.path', '路由路径')} name="path">
+                  <Input disabled maxLength={255} />
+                </Form.Item>
               ) : null}
-              <Space size={12} style={{ width: '100%' }} align="start">
-                <Form.Item label={t('system.menus.form.icon', '图标')} name="icon" style={{ flex: 1 }}><Input maxLength={64} placeholder="setting" /></Form.Item>
-                <Form.Item label={t('system.menus.form.permission', '权限标识')} name="permission" style={{ flex: 1 }}><Input disabled={isEditingCodeMenu} maxLength={128} placeholder={watchedType === 'link' ? t('system.menus.form.permission.placeholder', '留空自动生成') : 'system:menu:list'} /></Form.Item>
-              </Space>
-              <Space size={12} style={{ width: '100%' }} align="start">
-                <Form.Item label={t('system.menus.form.sort', '排序')} name="sort"><InputNumber style={{ width: 160 }} /></Form.Item>
-                <Form.Item label={t('system.menus.form.status', '状态')} name="status"><Select style={{ width: 180 }} options={[{ label: statusText.enabled, value: 'enabled' }, { label: statusText.disabled, value: 'disabled' }]} /></Form.Item>
-              </Space>
+              {watchedType === 'link' ? (
+                <Row gutter={FORM_GUTTER}>
+                  <Col xs={24} md={16}>
+                    <Form.Item label={t('system.menus.form.url', '链接地址')} name="url" rules={[{ required: true, message: t('system.menus.form.urlRequired', '请输入链接地址') }, { type: 'url', message: t('system.menus.form.urlInvalid', '请输入有效链接地址') }]}>
+                      <Input maxLength={1024} placeholder="https://example.com" />
+                    </Form.Item>
+                  </Col>
+                  <Col xs={24} md={8}>
+                    <Form.Item label={t('system.menus.form.openMode', '打开方式')} name="openMode" rules={[{ required: watchedType === 'link', message: t('system.menus.form.openModeRequired', '请选择打开方式') }]}>
+                      <Select options={[{ label: openModeText.blank, value: 'blank' }, { label: openModeText.self, value: 'self' }, { label: openModeText.iframe, value: 'iframe' }]} />
+                    </Form.Item>
+                  </Col>
+                  <Col xs={24} md={8}>
+                    <Form.Item name="showLinkHeader" valuePropName="checked">
+                      <Checkbox>{t('system.menus.form.showLinkHeader', '显示顶部链接栏')}</Checkbox>
+                    </Form.Item>
+                  </Col>
+                </Row>
+              ) : null}
+              <Row gutter={FORM_GUTTER}>
+                <Col xs={24} md={12}>
+                  <Form.Item label={t('system.menus.form.icon', '图标')} name="icon">
+                    <Input maxLength={64} placeholder="setting" />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} md={12}>
+                  <Form.Item label={t('system.menus.form.permission', '权限标识')} name="permission">
+                    <Input disabled={isEditingCodeMenu} maxLength={128} placeholder={watchedType === 'link' ? t('system.menus.form.permission.placeholder', '留空自动生成') : 'system:menu:list'} />
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Row gutter={FORM_GUTTER}>
+                <Col xs={24} md={8}>
+                  <Form.Item label={t('system.menus.form.sort', '排序')} name="sort">
+                    <InputNumber style={{ width: '100%' }} />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} md={8}>
+                  <Form.Item label={t('system.menus.form.status', '状态')} name="status">
+                    <Select options={[{ label: statusText.enabled, value: 'enabled' }, { label: statusText.disabled, value: 'disabled' }]} />
+                  </Form.Item>
+                </Col>
+              </Row>
             </Form>
           </TrueAdminModal>
         </>

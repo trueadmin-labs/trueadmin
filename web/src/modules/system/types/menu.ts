@@ -15,6 +15,7 @@ export type AdminMenu = {
   path: string;
   url: string;
   openMode: AdminMenuOpenMode | '';
+  showLinkHeader: boolean;
   icon: string;
   permission: string;
   source: AdminMenuSource;
@@ -31,6 +32,7 @@ export type AdminMenuPayload = {
   path?: string;
   url?: string;
   openMode?: AdminMenuOpenMode;
+  showLinkHeader?: boolean;
   icon?: string;
   permission?: string;
   sort?: number;

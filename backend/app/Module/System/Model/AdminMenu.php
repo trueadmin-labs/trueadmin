@@ -18,6 +18,7 @@ final class AdminMenu extends Model
         'path',
         'url',
         'open_mode',
+        'show_link_header',
         'icon',
         'permission',
         'source',

@@ -29,6 +29,7 @@ type RuntimeMenuNode = {
   type?: BackendMenu['type'];
   url?: string;
   openMode?: BackendMenu['openMode'];
+  showLinkHeader?: boolean;
   label: string;
   icon?: ReactNode;
   children?: RuntimeMenuNode[];
@@ -56,6 +57,7 @@ const toRuntimeMenus = (
       path: menu.path,
       url: menu.url,
       openMode: menu.openMode,
+      showLinkHeader: menu.showLinkHeader,
       label: t(menu.i18n, menu.title),
       icon: <IconRenderer name={menu.icon || menu.code} />,
       children: toRuntimeMenus(menu.children, t),
@@ -111,21 +113,20 @@ const openRuntimeMenu = (menu: RuntimeMenuNode | undefined, navigate: ReturnType
 
   if (menu.type === 'link') {
     const url = menu.url ?? '';
+    if (menu.openMode === 'iframe') {
+      navigate(toIframeLinkPath(menu));
+      return;
+    }
+
     if (!url) {
+      navigate(toIframeLinkPath(menu));
       return;
     }
     if (menu.openMode === 'self') {
       window.location.assign(url);
       return;
     }
-    if (menu.openMode === 'iframe') {
-      if (menu.id !== undefined) {
-        navigate(toIframeLinkPath(menu));
-        return;
-      }
-      window.open(url, '_blank', 'noopener,noreferrer');
-      return;
-    }
+
     window.open(url, '_blank', 'noopener,noreferrer');
     return;
   }

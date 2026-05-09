@@ -132,6 +132,7 @@ final class AdminMenuManagementService extends AbstractService
             'path' => $isCodeMenu ? (string) $current->getAttribute('path') : '',
             'url' => $type === self::TYPE_LINK ? (string) ($payload['url'] ?? $current?->getAttribute('url') ?? '') : '',
             'open_mode' => $openMode,
+            'show_link_header' => $type === self::TYPE_LINK ? (bool) ($payload['showLinkHeader'] ?? $current?->getAttribute('show_link_header') ?? false) : false,
             'icon' => (string) ($payload['icon'] ?? $current?->getAttribute('icon') ?? ''),
             'permission' => $permission,
             'source' => $isCodeMenu ? self::SOURCE_CODE : self::SOURCE_CUSTOM,

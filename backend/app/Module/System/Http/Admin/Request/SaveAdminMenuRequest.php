@@ -20,6 +20,8 @@ final class SaveAdminMenuRequest extends FormRequest
             'url' => ['sometimes', 'string', 'max:1024'],
             'openMode' => ['sometimes', 'string', 'in:blank,self,iframe'],
             'open_mode' => ['sometimes', 'string', 'in:blank,self,iframe'],
+            'showLinkHeader' => ['sometimes', 'boolean'],
+            'show_link_header' => ['sometimes', 'boolean'],
             'icon' => ['sometimes', 'string', 'max:64'],
             'permission' => ['sometimes', 'string', 'max:128'],
             'sort' => ['sometimes', 'integer'],
@@ -43,6 +45,12 @@ final class SaveAdminMenuRequest extends FormRequest
         }
         if (array_key_exists('openMode', $data) || array_key_exists('open_mode', $data)) {
             $normalized['openMode'] = (string) ($data['openMode'] ?? $data['open_mode']);
+        }
+        if (array_key_exists('showLinkHeader', $data) || array_key_exists('show_link_header', $data)) {
+            $normalized['showLinkHeader'] = filter_var(
+                $data['showLinkHeader'] ?? $data['show_link_header'],
+                FILTER_VALIDATE_BOOLEAN,
+            );
         }
         if (array_key_exists('type', $data)) {
             $normalized['type'] = (string) $data['type'];

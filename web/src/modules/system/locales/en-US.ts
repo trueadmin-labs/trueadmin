@@ -90,6 +90,7 @@ export default {
   'system.menus.form.path': 'Route Path',
   'system.menus.form.url': 'URL',
   'system.menus.form.openMode': 'Open Mode',
+  'system.menus.form.showLinkHeader': 'Show link header',
   'system.menus.form.icon': 'Icon',
   'system.menus.form.permission': 'Permission',
   'system.menus.form.permission.placeholder': 'Auto-generated when empty',
@@ -107,6 +108,7 @@ export default {
   'system.menus.deleteSuccess': 'Resource deleted',
   'system.linkFrame.notFound': 'Link resource not found',
   'system.linkFrame.invalid': 'Invalid link URL',
+  'system.linkFrame.openExternal': 'Open in new tab',
   'system.users.title': 'Admin Users',
   'system.messages.title': 'Message Center',
   'system.messages.description':

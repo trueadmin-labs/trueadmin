@@ -142,16 +142,6 @@ class AdminNotificationTest extends TestCase
 
     private function ensureNotificationTables(): void
     {
-        if (Schema::hasTable('admin_notification_batches') && ! Schema::hasColumn('admin_notification_batches', 'targets')) {
-            Schema::dropIfExists('admin_notification_deliveries');
-            Schema::dropIfExists('admin_notification_batches');
-        }
-
-        if (Schema::hasTable('admin_announcements') && ! Schema::hasColumn('admin_announcements', 'scope')) {
-            Schema::dropIfExists('admin_announcement_reads');
-            Schema::dropIfExists('admin_announcements');
-        }
-
         if (! Schema::hasTable('admin_notification_batches')) {
             Schema::create('admin_notification_batches', function (Blueprint $table): void {
                 $table->bigIncrements('id');
@@ -225,10 +215,6 @@ class AdminNotificationTest extends TestCase
                 $table->string('operator_name', 64)->default('');
                 $table->datetimes();
             });
-        }
-
-        if (Schema::hasTable('admin_announcement_reads') && ! Schema::hasColumn('admin_announcement_reads', 'announcement_id')) {
-            Schema::dropIfExists('admin_announcement_reads');
         }
 
         if (! Schema::hasTable('admin_announcement_reads')) {

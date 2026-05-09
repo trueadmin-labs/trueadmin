@@ -1980,6 +1980,52 @@ body,
   margin-inline-end: auto;
 }
 
+.trueadmin-system-link-frame-page-body,
+.trueadmin-system-link-frame-loading,
+.trueadmin-system-link-frame-loading .trueadmin-loading-container-layer,
+.trueadmin-system-link-frame-loading .trueadmin-loading-container-measure,
+.trueadmin-system-link-frame {
+  height: 100%;
+  min-height: 0;
+}
+
+.trueadmin-system-link-frame {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  background: #fff;
+}
+
+.trueadmin-system-link-frame-header {
+  display: flex;
+  min-width: 0;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--ant-color-border-secondary);
+  background: var(--ant-color-bg-container);
+}
+
+.trueadmin-system-link-frame-title {
+  max-width: 180px;
+  flex: 0 0 auto;
+}
+
+.trueadmin-system-link-frame-url {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.trueadmin-system-link-frame-iframe {
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  border: 0;
+  background: #fff;
+}
+
 .trueadmin-loading-container.is-dark .trueadmin-loading-container-spin,
 .trueadmin-loading-container.is-dark .trueadmin-loading-container-spin .ant-typography {
   color: rgba(255, 255, 255, 0.72);

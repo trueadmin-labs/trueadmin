@@ -6,6 +6,7 @@ export type BackendMenu = {
   path: string;
   url?: string;
   openMode?: 'blank' | 'self' | 'iframe' | '';
+  showLinkHeader?: boolean;
   icon?: string;
   type?: 'directory' | 'menu' | 'button' | 'link';
   status?: string;

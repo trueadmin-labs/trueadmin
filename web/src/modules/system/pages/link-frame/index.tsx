@@ -1,4 +1,5 @@
-import { Alert, Result } from 'antd';
+import { ExportOutlined } from '@ant-design/icons';
+import { Button, Result, Typography } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router';
 import { LoadingContainer } from '@/core/loading/LoadingContainer';
@@ -43,29 +44,41 @@ export default function LinkFramePage() {
 
   const url = menu?.url ?? '';
   const valid = useMemo(() => isHttpUrl(url), [url]);
+  const showHeader = Boolean(menu?.showLinkHeader);
 
   return (
-    <TrueAdminPage layout="workspace" fullHeight contentPadding={false}>
-      <LoadingContainer loading={loading} keepChildren={false} className="trueadmin-system-link-frame-loading">
+    <TrueAdminPage layout="workspace" fullHeight contentPadding={false} bodyClassName="trueadmin-system-link-frame-page-body">
+      <LoadingContainer loading={loading} keepChildren={false} layout="viewport" className="trueadmin-system-link-frame-loading">
         {!menu ? (
           <Result status="404" title={t('system.linkFrame.notFound', '链接资源不存在')} />
         ) : !valid ? (
           <Result status="warning" title={t('system.linkFrame.invalid', '链接地址无效')} />
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
-            <Alert
-              type="info"
-              showIcon
-              message={menu.name}
-              description={url}
-              style={{ borderRadius: 0, borderInline: 0, borderTop: 0 }}
-            />
+          <div className="trueadmin-system-link-frame">
+            {showHeader ? (
+              <div className="trueadmin-system-link-frame-header">
+                <Typography.Text strong ellipsis className="trueadmin-system-link-frame-title">
+                  {menu.name}
+                </Typography.Text>
+                <Typography.Text code ellipsis className="trueadmin-system-link-frame-url">
+                  {url}
+                </Typography.Text>
+                <Button
+                  icon={<ExportOutlined />}
+                  href={url}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {t('system.linkFrame.openExternal', '新标签页打开')}
+                </Button>
+              </div>
+            ) : null}
             <iframe
               title={menu.name}
               src={url}
               sandbox="allow-forms allow-popups allow-same-origin allow-scripts"
               referrerPolicy="no-referrer-when-downgrade"
-              style={{ flex: 1, width: '100%', minHeight: 0, border: 0, background: '#fff' }}
+              className="trueadmin-system-link-frame-iframe"
             />
           </div>
         )}
