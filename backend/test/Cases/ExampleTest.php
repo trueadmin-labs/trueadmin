@@ -370,7 +370,7 @@ class ExampleTest extends TestCase
             ->get(\App\Foundation\Metadata\MetadataSynchronizer::class)
             ->sync();
 
-        $this->assertSame(6, $sync['menus']);
+        $this->assertGreaterThanOrEqual(9, $sync['menus']);
         $this->assertGreaterThanOrEqual(10, $sync['permissions']);
 
         $roleId = (int) \Hyperf\DbConnection\Db::table('admin_roles')->where('code', 'super-admin')->value('id');
@@ -386,6 +386,9 @@ class ExampleTest extends TestCase
         $this->assertSame(1, \Hyperf\DbConnection\Db::table('admin_menus')->where('code', 'system.departments')->count());
         $this->assertSame(1, \Hyperf\DbConnection\Db::table('admin_menus')->where('code', 'system.users')->count());
         $this->assertSame(1, \Hyperf\DbConnection\Db::table('admin_menus')->where('code', 'system.client-users')->count());
+        $this->assertSame(1, \Hyperf\DbConnection\Db::table('admin_menus')->where('code', 'system.messages')->count());
+        $this->assertSame(1, \Hyperf\DbConnection\Db::table('admin_menus')->where('code', 'system.notificationManagement')->count());
+        $this->assertSame(1, \Hyperf\DbConnection\Db::table('admin_menus')->where('code', 'system.announcementManagement')->count());
         $this->assertSame('system:user:create', \Hyperf\DbConnection\Db::table('admin_menus')
             ->where('code', 'system:user:create')
             ->value('permission'));

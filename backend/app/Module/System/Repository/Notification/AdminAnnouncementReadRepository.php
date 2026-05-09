@@ -11,25 +11,25 @@ final class AdminAnnouncementReadRepository extends AbstractRepository
 {
     protected ?string $modelClass = AdminAnnouncementRead::class;
 
-    public function findForReceiver(int $batchId, int $receiverId): ?AdminAnnouncementRead
+    public function findForReceiver(int $announcementId, int $adminId): ?AdminAnnouncementRead
     {
         return AdminAnnouncementRead::query()
-            ->where('batch_id', $batchId)
-            ->where('receiver_id', $receiverId)
+            ->where('announcement_id', $announcementId)
+            ->where('admin_id', $adminId)
             ->first();
     }
 
-    public function ensureForReceiver(int $batchId, int $receiverId): AdminAnnouncementRead
+    public function ensureForReceiver(int $announcementId, int $adminId): AdminAnnouncementRead
     {
-        $read = $this->findForReceiver($batchId, $receiverId);
+        $read = $this->findForReceiver($announcementId, $adminId);
         if ($read !== null) {
             return $read;
         }
 
         /** @var AdminAnnouncementRead $read */
         $read = $this->createModel([
-            'batch_id' => $batchId,
-            'receiver_id' => $receiverId,
+            'announcement_id' => $announcementId,
+            'admin_id' => $adminId,
         ]);
 
         return $read;

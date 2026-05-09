@@ -3616,6 +3616,29 @@ body,
   line-height: 20px;
 }
 
+.trueadmin-attachment-empty {
+  margin: 0 !important;
+  padding: 10px 12px;
+  border: 1px dashed var(--ant-color-border-secondary, rgba(5, 5, 5, 0.06));
+  border-radius: 6px;
+  background: var(--ant-color-fill-quaternary, rgba(0, 0, 0, 0.02));
+}
+
+.trueadmin-attachment-empty.ant-empty-normal {
+  margin-block: 0 !important;
+  margin-inline: 0 !important;
+}
+
+.trueadmin-attachment-empty .ant-empty-image {
+  height: 32px;
+  margin-bottom: 4px;
+}
+
+.trueadmin-attachment-empty .ant-empty-description {
+  color: var(--ant-color-text-tertiary, rgba(0, 0, 0, 0.45));
+  font-size: 12px;
+}
+
 .trueadmin-attachment-list {
   display: flex;
   min-width: 0;

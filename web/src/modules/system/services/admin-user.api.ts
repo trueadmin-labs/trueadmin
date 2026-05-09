@@ -20,8 +20,10 @@ const normalizePageResult = (result: PageResult<AdminUser>): PageResult<AdminUse
 });
 
 export const adminUserApi = {
-  list: async (params: CrudListParams) => {
-    const result = await http.Get<PageResult<AdminUser>>('/admin/system/users', { params }).send();
+  list: async (params: CrudListParams, options?: { force?: boolean }) => {
+    const result = await http
+      .Get<PageResult<AdminUser>>('/admin/system/users', { params })
+      .send(options?.force);
     return normalizePageResult(result);
   },
   detail: (id: React.Key) => http.Get<AdminUser>(`/admin/system/users/${id}`).send(),

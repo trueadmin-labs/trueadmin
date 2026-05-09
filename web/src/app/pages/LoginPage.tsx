@@ -3,13 +3,22 @@ import { LoginForm, ProFormText } from '@ant-design/pro-components';
 import { appConfig } from '@config/index';
 import { App, Card, Typography } from 'antd';
 import { motion } from 'motion/react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 import { useLoginMutation } from '@/core/auth/hooks';
 import { queryClient } from '@/core/query/client';
 import { tokenStorage } from '@/shared/utils/storage';
 
+const normalizeRedirectPath = (value: string | null) => {
+  if (!value?.startsWith('/') || value.startsWith('//') || value.startsWith('/login')) {
+    return appConfig.defaultHome;
+  }
+
+  return value;
+};
+
 export default function LoginPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const login = useLoginMutation();
   const { message } = App.useApp();
 
@@ -35,12 +44,12 @@ export default function LoginPage() {
               }
               await queryClient.invalidateQueries();
               message.success('登录成功');
-              navigate(appConfig.defaultHome, { replace: true });
+              navigate(normalizeRedirectPath(searchParams.get('redirect')), { replace: true });
               return true;
             }}
           >
             <Typography.Paragraph type="secondary" className="trueadmin-login-hint">
-              开发环境默认账号通常为 admin / 123456，请以实际种子数据为准。
+              开发环境默认账号通常为 admin / trueadmin，请以实际种子数据为准。
             </Typography.Paragraph>
             <ProFormText
               name="username"

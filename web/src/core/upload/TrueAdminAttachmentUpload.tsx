@@ -7,7 +7,7 @@ import {
   InboxOutlined,
 } from '@ant-design/icons';
 import type { UploadProps } from 'antd';
-import { Button, Input, message, Space, Tooltip, Upload } from 'antd';
+import { Button, Empty, Input, message, Space, Tooltip, Upload } from 'antd';
 import type { RcFile, UploadFile } from 'antd/es/upload/interface';
 import type { ReactNode } from 'react';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
@@ -63,6 +63,7 @@ export type TrueAdminAttachmentUploadProps = Omit<
   upload?: (file: File) => Promise<TrueAdminAttachmentUploadResult>;
   readonly?: boolean;
   editableName?: boolean;
+  emptyText?: ReactNode;
 };
 
 const imageExtensions = new Set(['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp']);
@@ -144,6 +145,7 @@ export function TrueAdminAttachmentUpload({
   upload,
   readonly = false,
   editableName = true,
+  emptyText,
   multiple,
   maxCount,
   disabled,
@@ -176,6 +178,7 @@ export function TrueAdminAttachmentUpload({
   );
 
   const canUpload = !readonly && !disabled && (!maxCount || value.length < maxCount);
+  const showEmpty = !canUpload && animatedFiles.length === 0 && !uploading;
 
   useLayoutEffect(() => {
     const element = contentRef.current;
@@ -450,6 +453,13 @@ export function TrueAdminAttachmentUpload({
             </div>
           ) : null}
           {canUpload ? <div className="trueadmin-attachment-upload-trigger">{uploader}</div> : null}
+          {showEmpty ? (
+            <Empty
+              className="trueadmin-attachment-empty"
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              description={emptyText ?? t('upload.attachment.empty', '暂无附件')}
+            />
+          ) : null}
           {uploading ? (
             <div className="trueadmin-attachment-uploading">
               {t('upload.attachment.uploading', '正在上传...')}

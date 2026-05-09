@@ -1,4 +1,7 @@
-import { lazy } from 'react';
+import { BellOutlined } from '@ant-design/icons';
+import { Descriptions, Tag } from 'antd';
+import { createElement, lazy } from 'react';
+import { trans } from '@/core/i18n/trans';
 import { defineModule } from '@/core/module/types';
 
 export default defineModule({
@@ -38,6 +41,11 @@ export default defineModule({
       path: '/examples/stream',
       component: lazy(() => import('./pages/StreamExamplePage')),
       meta: { title: 'examples.stream.title', auth: true },
+    },
+    {
+      path: '/examples/notification',
+      component: lazy(() => import('./pages/NotificationExamplePage')),
+      meta: { title: 'examples.notification.title', auth: true },
     },
     {
       path: '/examples/complex-form',
@@ -146,6 +154,16 @@ export default defineModule({
           sort: 47,
         },
         {
+          code: 'true-admin.examples.notification',
+          title: 'Notification Demo',
+          i18n: 'menu.examples.notification',
+          path: '/examples/notification',
+          icon: 'bell',
+          type: 'menu',
+          status: 'enabled',
+          sort: 48,
+        },
+        {
           code: 'true-admin.examples.complexForm',
           title: 'Complex Form',
           i18n: 'menu.examples.complexForm',
@@ -205,5 +223,30 @@ export default defineModule({
   locales: {
     'zh-CN': () => import('./locales/zh-CN'),
     'en-US': () => import('./locales/en-US'),
+  },
+  notification: {
+    sources: {
+      'plugin.true-admin.examples': {
+        label: trans('examples.name', '开发示例'),
+      },
+    },
+    types: {
+      example_task: {
+        label: trans('examples.notification.type.task', '示例任务'),
+        color: 'cyan',
+        icon: createElement(BellOutlined),
+        payloadRender: ({ payload }) => (
+          createElement(
+            Descriptions,
+            { bordered: true, column: 1, size: 'small' },
+            Object.entries(payload).map(([key, value]) => createElement(
+              Descriptions.Item,
+              { key, label: key },
+              key === 'status' ? createElement(Tag, { color: 'processing' }, String(value)) : String(value),
+            )),
+          )
+        ),
+      },
+    },
   },
 });

@@ -8,13 +8,13 @@ use App\Foundation\Pagination\PageResult;
 use App\Foundation\Query\AdminQuery;
 use App\Foundation\Service\AbstractService;
 use App\Module\System\Model\AdminAnnouncementRead;
-use App\Module\System\Model\AdminNotificationBatch;
 use App\Module\System\Model\AdminNotificationDelivery;
-use App\Module\System\Repository\Notification\AdminAnnouncementReadRepository;
-use App\Module\System\Repository\Notification\AdminNotificationBatchRepository;
 use App\Module\System\Repository\AdminUserRepository;
+use App\Module\System\Repository\Notification\AdminAnnouncementReadRepository;
+use App\Module\System\Repository\Notification\AdminAnnouncementRepository;
 use App\Module\System\Repository\Notification\AdminNotificationDeliveryRepository;
 use Hyperf\DbConnection\Db;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use TrueAdmin\Kernel\Constant\ErrorCode;
 use TrueAdmin\Kernel\Context\ActorContext;
 use TrueAdmin\Kernel\Exception\BusinessException;
@@ -22,10 +22,11 @@ use TrueAdmin\Kernel\Exception\BusinessException;
 final class AdminMessageCenterService extends AbstractService
 {
     public function __construct(
-        private readonly AdminNotificationBatchRepository $batches,
         private readonly AdminNotificationDeliveryRepository $deliveries,
+        private readonly AdminAnnouncementRepository $announcements,
         private readonly AdminAnnouncementReadRepository $announcementReads,
         private readonly AdminUserRepository $users,
+        private readonly EventDispatcherInterface $dispatcher,
     ) {
     }
 
@@ -34,20 +35,19 @@ final class AdminMessageCenterService extends AbstractService
         $receiverId = $this->receiverId();
         $messages = [];
         $kind = (string) $query->param('kind', 'all');
-        $aggregateQuery = $this->aggregationQuery($query);
+        $candidateQuery = $this->candidateQuery($query);
 
         if ($kind === 'all' || $kind === 'notification') {
-            $deliveryPage = $this->deliveries->paginateForReceiver($receiverId, $this->withoutKind($aggregateQuery));
-            $messages = array_merge($messages, array_filter($deliveryPage->items));
+            $messages = array_merge($messages, $this->deliveries->listForReceiver($receiverId, $this->withoutKind($candidateQuery)));
         }
 
         if ($kind === 'all' || $kind === 'announcement') {
-            foreach ($this->batches->visibleAnnouncementsForReceiver($receiverId, $this->roleIds(), $this->withoutKind($aggregateQuery)) as $batch) {
-                $state = $this->announcementReads->findForReceiver((int) $batch->getAttribute('id'), $receiverId);
+            foreach ($this->announcements->visibleForReceiver($receiverId, $this->roleIds(), $this->withoutKind($candidateQuery)) as $announcement) {
+                $state = $this->announcementReads->findForReceiver((int) $announcement->getAttribute('id'), $receiverId);
                 if (! $this->matchesState($state, (string) $query->param('status', 'all'))) {
                     continue;
                 }
-                $messages[] = $this->batches->toAnnouncementMessageArray($batch, $state);
+                $messages[] = $this->announcements->toMessageArray($announcement, $state);
             }
         }
 
@@ -61,11 +61,9 @@ final class AdminMessageCenterService extends AbstractService
             return strcmp((string) ($right['createdAt'] ?? ''), (string) ($left['createdAt'] ?? ''));
         });
 
-        $page = $query->page;
-        $pageSize = $query->pageSize;
-        $offset = ($page - 1) * $pageSize;
+        $offset = ($query->page - 1) * $query->pageSize;
 
-        return new PageResult(array_slice($messages, $offset, $pageSize), count($messages), $page, $pageSize);
+        return new PageResult(array_slice($messages, $offset, $query->pageSize), count($messages), $query->page, $query->pageSize);
     }
 
     public function unreadCount(): array
@@ -73,12 +71,10 @@ final class AdminMessageCenterService extends AbstractService
         $receiverId = $this->receiverId();
         $notification = $this->deliveries->unreadCount($receiverId);
         $announcementUnread = 0;
-        foreach ($this->batches->visibleAnnouncementsForReceiver($receiverId, $this->roleIds(), new AdminQuery(page: 1, pageSize: 1000)) as $batch) {
-            $state = $this->announcementReads->findForReceiver((int) $batch->getAttribute('id'), $receiverId);
-            if ($state === null || $state->getAttribute('read_at') === null) {
-                if ($state === null || $state->getAttribute('archived_at') === null) {
-                    ++$announcementUnread;
-                }
+        foreach ($this->announcements->visibleForReceiver($receiverId, $this->roleIds(), new AdminQuery(page: 1, pageSize: 1000)) as $announcement) {
+            $state = $this->announcementReads->findForReceiver((int) $announcement->getAttribute('id'), $receiverId);
+            if (($state === null || $state->getAttribute('read_at') === null) && ($state === null || $state->getAttribute('archived_at') === null)) {
+                ++$announcementUnread;
             }
         }
 
@@ -93,7 +89,7 @@ final class AdminMessageCenterService extends AbstractService
     {
         $receiverId = $this->receiverId();
         if ($kind === 'notification') {
-            $delivery = $this->deliveries->findForReceiver($id, $receiverId);
+            $delivery = $this->deliveries->findMessageForReceiver($id, $receiverId);
             if ($delivery === null) {
                 throw $this->notFound('admin_message', $id);
             }
@@ -102,27 +98,30 @@ final class AdminMessageCenterService extends AbstractService
             return $this->deliveries->toMessageArray($delivery->refresh());
         }
 
-        $batch = $this->batches->findById($id);
-        if ($batch === null || (string) $batch->getAttribute('kind') !== 'announcement') {
+        if ($kind !== 'announcement') {
             throw $this->notFound('admin_message', $id);
         }
+
+        $announcement = $this->visibleAnnouncement($id, $receiverId);
         $state = $this->announcementReads->ensureForReceiver($id, $receiverId);
         $this->markAnnouncementRead($state);
 
-        return $this->batches->toAnnouncementMessageArray($batch, $state->refresh());
+        return $this->announcements->toMessageArray($announcement, $state->refresh());
     }
 
     public function markRead(array $messages): void
     {
         $this->forEachMessage($messages, function (string $kind, int $id): void {
             if ($kind === 'notification') {
-                $delivery = $this->deliveries->findForReceiver($id, $this->receiverId());
+                $delivery = $this->deliveries->findMessageForReceiver($id, $this->receiverId());
                 if ($delivery !== null) {
                     $this->markDeliveryRead($delivery);
                 }
                 return;
             }
-            $this->markAnnouncementRead($this->announcementReads->ensureForReceiver($id, $this->receiverId()));
+            $receiverId = $this->receiverId();
+            $this->visibleAnnouncement($id, $receiverId);
+            $this->markAnnouncementRead($this->announcementReads->ensureForReceiver($id, $receiverId));
         });
     }
 
@@ -145,6 +144,42 @@ final class AdminMessageCenterService extends AbstractService
         ], $messages->items));
     }
 
+    public function changeVersion(): string
+    {
+        $receiverId = $this->receiverId();
+        $deliveryVersion = $this->timestamp(Db::table('admin_notification_deliveries')
+            ->where('receiver_id', $receiverId)
+            ->max('updated_at'));
+        $deliveryCount = (int) Db::table('admin_notification_deliveries')
+            ->where('receiver_id', $receiverId)
+            ->count();
+        $announcementVersion = $this->timestamp(Db::table('admin_announcements')
+            ->whereIn('status', ['active', 'scheduled', 'expired', 'offline'])
+            ->max('updated_at'));
+        $announcementCount = (int) Db::table('admin_announcements')
+            ->whereIn('status', ['active', 'scheduled', 'expired', 'offline'])
+            ->count();
+        $readVersion = $this->timestamp(Db::table('admin_announcement_reads')
+            ->where('admin_id', $receiverId)
+            ->max('updated_at'));
+        $readCount = (int) Db::table('admin_announcement_reads')
+            ->where('admin_id', $receiverId)
+            ->count();
+
+        return implode(':', [$deliveryVersion, $deliveryCount, $announcementVersion, $announcementCount, $readVersion, $readCount]);
+    }
+
+    private function timestamp(mixed $value): int
+    {
+        if ($value === null || $value === '') {
+            return 0;
+        }
+
+        $timestamp = strtotime((string) $value);
+
+        return $timestamp === false ? 0 : $timestamp;
+    }
+
     private function forEachMessage(array $messages, callable $callback): void
     {
         Db::transaction(function () use ($messages, $callback): void {
@@ -156,6 +191,7 @@ final class AdminMessageCenterService extends AbstractService
                 }
                 $callback($kind, $id);
             }
+            $this->dispatcher->dispatch(new AdminMessageChangedEvent('message_state_changed'));
         });
     }
 
@@ -164,13 +200,14 @@ final class AdminMessageCenterService extends AbstractService
         $receiverId = $this->receiverId();
         $archivedAt = $archived ? date('Y-m-d H:i:s') : null;
         if ($kind === 'notification') {
-            $delivery = $this->deliveries->findForReceiver($id, $receiverId);
+            $delivery = $this->deliveries->findMessageForReceiver($id, $receiverId);
             if ($delivery !== null) {
                 $this->deliveries->update($delivery, ['archived_at' => $archivedAt]);
             }
             return null;
         }
 
+        $this->visibleAnnouncement($id, $receiverId);
         $state = $this->announcementReads->ensureForReceiver($id, $receiverId);
         $this->announcementReads->update($state, ['archived_at' => $archivedAt]);
 
@@ -183,6 +220,7 @@ final class AdminMessageCenterService extends AbstractService
             return;
         }
         $this->deliveries->update($delivery, ['read_at' => date('Y-m-d H:i:s')]);
+        $this->dispatcher->dispatch(new AdminMessageChangedEvent('message_read'));
     }
 
     private function markAnnouncementRead(AdminAnnouncementRead $state): void
@@ -191,6 +229,7 @@ final class AdminMessageCenterService extends AbstractService
             return;
         }
         $this->announcementReads->update($state, ['read_at' => date('Y-m-d H:i:s')]);
+        $this->dispatcher->dispatch(new AdminMessageChangedEvent('message_read'));
     }
 
     private function matchesState(?AdminAnnouncementRead $state, string $status): bool
@@ -211,11 +250,13 @@ final class AdminMessageCenterService extends AbstractService
         return true;
     }
 
-    private function aggregationQuery(AdminQuery $query): AdminQuery
+    private function candidateQuery(AdminQuery $query): AdminQuery
     {
+        $candidateSize = max($query->page * $query->pageSize, $query->pageSize);
+
         return new AdminQuery(
             page: 1,
-            pageSize: 1000,
+            pageSize: $candidateSize,
             keyword: $query->keyword,
             filters: $query->filters,
             operators: $query->operators,
@@ -242,6 +283,27 @@ final class AdminMessageCenterService extends AbstractService
         );
     }
 
+
+    private function visibleAnnouncement(int $id, int $receiverId): object
+    {
+        $announcement = $this->announcements->findVisibleForReceiver($id, $receiverId, $this->roleIdsForReceiver($receiverId));
+        if ($announcement === null) {
+            throw $this->notFound('admin_message', $id);
+        }
+
+        return $announcement;
+    }
+
+    private function roleIdsForReceiver(int $receiverId): array
+    {
+        $user = $this->users->findById($receiverId);
+        if ($user === null) {
+            return [];
+        }
+
+        return $this->users->roleIds($user);
+    }
+
     private function receiverId(): int
     {
         $actor = ActorContext::principal();
@@ -254,11 +316,6 @@ final class AdminMessageCenterService extends AbstractService
 
     private function roleIds(): array
     {
-        $user = $this->users->findById($this->receiverId());
-        if ($user === null) {
-            return [];
-        }
-
-        return $this->users->roleIds($user);
+        return $this->roleIdsForReceiver($this->receiverId());
     }
 }

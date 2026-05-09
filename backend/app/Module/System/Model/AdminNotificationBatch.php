@@ -12,33 +12,33 @@ final class AdminNotificationBatch extends Model
     protected ?string $table = 'admin_notification_batches';
 
     protected array $fillable = [
-        'kind',
-        'level',
         'type',
+        'level',
         'source',
-        'title',
-        'content',
+        'targets',
+        'template_key',
+        'template_variables',
+        'fallback_title',
+        'fallback_content',
         'payload',
         'attachments',
         'target_url',
-        'target_type',
-        'target_role_ids',
-        'target_user_ids',
-        'pinned',
+        'dedupe_key',
+        'dedupe_ttl_seconds',
+        'expires_at',
         'status',
-        'scheduled_at',
-        'published_at',
-        'offline_at',
+        'operator_type',
         'operator_id',
         'operator_name',
+        'impersonator_id',
+        'error_message',
     ];
 
     protected array $casts = [
+        'targets' => 'array',
+        'template_variables' => 'array',
         'payload' => 'array',
         'attachments' => 'array',
-        'target_role_ids' => 'array',
-        'target_user_ids' => 'array',
-        'pinned' => 'boolean',
     ];
 
     public function deliveries(): HasMany

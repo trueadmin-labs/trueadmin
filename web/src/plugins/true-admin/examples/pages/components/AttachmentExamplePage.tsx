@@ -29,6 +29,9 @@ export default function AttachmentExamplePage() {
         <Card size="small" title={t('examples.attachment.readonly', '只读附件')}>
           <TrueAdminAttachmentUpload readonly value={files} />
         </Card>
+        <Card size="small" title={t('examples.attachment.emptyReadonly', '只读空状态')}>
+          <TrueAdminAttachmentUpload readonly value={[]} />
+        </Card>
       </Space>
     </TrueAdminPage>
   );

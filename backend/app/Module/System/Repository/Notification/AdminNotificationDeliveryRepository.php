@@ -7,7 +7,6 @@ namespace App\Module\System\Repository\Notification;
 use App\Foundation\Pagination\PageResult;
 use App\Foundation\Query\AdminQuery;
 use App\Foundation\Repository\AbstractRepository;
-use App\Module\System\Model\AdminNotificationBatch;
 use App\Module\System\Model\AdminNotificationDelivery;
 use Hyperf\Database\Model\Builder;
 use Hyperf\DbConnection\Db;
@@ -16,7 +15,7 @@ final class AdminNotificationDeliveryRepository extends AbstractRepository
 {
     protected ?string $modelClass = AdminNotificationDelivery::class;
 
-    protected array $keywordFields = ['receiver_name', 'failed_reason'];
+    protected array $keywordFields = ['receiver_name', 'title', 'content', 'error_message'];
 
     protected array $filterable = [
         'id' => ['=', 'in'],
@@ -43,20 +42,31 @@ final class AdminNotificationDeliveryRepository extends AbstractRepository
 
     public function paginateForReceiver(int $receiverId, AdminQuery $adminQuery): PageResult
     {
+        $items = $this->listForReceiver($receiverId, $adminQuery);
+
+        return new PageResult($items, count($items), $adminQuery->page, $adminQuery->pageSize);
+    }
+
+    public function listForReceiver(int $receiverId, AdminQuery $adminQuery): array
+    {
+        $now = date('Y-m-d H:i:s');
         $query = AdminNotificationDelivery::query()
             ->join('admin_notification_batches', 'admin_notification_batches.id', '=', 'admin_notification_deliveries.batch_id')
             ->where('admin_notification_deliveries.receiver_id', $receiverId)
             ->where('admin_notification_deliveries.status', 'sent')
-            ->where('admin_notification_batches.status', 'published')
+            ->where(static function (Builder $query) use ($now): void {
+                $query->whereNull('admin_notification_deliveries.expires_at')
+                    ->orWhere('admin_notification_deliveries.expires_at', '>', $now);
+            })
             ->select('admin_notification_deliveries.*');
 
         $this->applyMessageFilters($query, $adminQuery);
 
-        return $this->pageQuery(
-            $query,
-            $this->messageSearchQuery($adminQuery),
-            fn (AdminNotificationDelivery $delivery): array => $this->toMessageArray($delivery),
-        );
+        $this->applySort($query, $this->messageSearchQuery($adminQuery));
+
+        return $query->get()
+            ->map(fn (AdminNotificationDelivery $delivery): array => $this->toMessageArray($delivery))
+            ->all();
     }
 
     public function findById(int $id): ?AdminNotificationDelivery
@@ -71,6 +81,14 @@ final class AdminNotificationDeliveryRepository extends AbstractRepository
     {
         return AdminNotificationDelivery::query()
             ->where('batch_id', $batchId)
+            ->where('receiver_id', $receiverId)
+            ->first();
+    }
+
+    public function findMessageForReceiver(int $deliveryId, int $receiverId): ?AdminNotificationDelivery
+    {
+        return AdminNotificationDelivery::query()
+            ->where('id', $deliveryId)
             ->where('receiver_id', $receiverId)
             ->first();
     }
@@ -93,28 +111,18 @@ final class AdminNotificationDeliveryRepository extends AbstractRepository
 
     public function unreadCount(int $receiverId): array
     {
-        $rows = AdminNotificationDelivery::query()
-            ->join('admin_notification_batches', 'admin_notification_batches.id', '=', 'admin_notification_deliveries.batch_id')
-            ->where('admin_notification_deliveries.receiver_id', $receiverId)
-            ->where('admin_notification_deliveries.status', 'sent')
-            ->whereNull('admin_notification_deliveries.read_at')
-            ->whereNull('admin_notification_deliveries.archived_at')
-            ->where('admin_notification_batches.status', 'published')
-            ->select('admin_notification_batches.kind', Db::raw('count(*) as total'))
-            ->groupBy('admin_notification_batches.kind')
-            ->get();
+        $now = date('Y-m-d H:i:s');
+        $total = AdminNotificationDelivery::query()
+            ->where('receiver_id', $receiverId)
+            ->where('status', 'sent')
+            ->whereNull('read_at')
+            ->whereNull('archived_at')
+            ->where(static function (Builder $query) use ($now): void {
+                $query->whereNull('expires_at')->orWhere('expires_at', '>', $now);
+            })
+            ->count();
 
-        $result = ['total' => 0, 'notification' => 0, 'announcement' => 0];
-        foreach ($rows as $row) {
-            $kind = (string) $row->kind;
-            $total = (int) $row->total;
-            $result['total'] += $total;
-            if (array_key_exists($kind, $result)) {
-                $result[$kind] = $total;
-            }
-        }
-
-        return $result;
+        return ['total' => (int) $total, 'notification' => (int) $total, 'announcement' => 0];
     }
 
     public function toArray(AdminNotificationDelivery $delivery): array
@@ -125,10 +133,13 @@ final class AdminNotificationDeliveryRepository extends AbstractRepository
             'receiverId' => (int) $delivery->getAttribute('receiver_id'),
             'receiverName' => (string) $delivery->getAttribute('receiver_name'),
             'status' => (string) $delivery->getAttribute('status'),
+            'skipReason' => $delivery->getAttribute('skip_reason'),
             'readAt' => $this->formatDate($delivery->getAttribute('read_at')),
             'archivedAt' => $this->formatDate($delivery->getAttribute('archived_at')),
             'sentAt' => $this->formatDate($delivery->getAttribute('sent_at')),
-            'failedReason' => $delivery->getAttribute('failed_reason'),
+            'expiresAt' => $this->formatDate($delivery->getAttribute('expires_at')),
+            'failedReason' => $delivery->getAttribute('error_message'),
+            'errorMessage' => $delivery->getAttribute('error_message'),
             'retryCount' => (int) $delivery->getAttribute('retry_count'),
             'createdAt' => $this->formatDate($delivery->getAttribute('created_at')),
             'updatedAt' => $this->formatDate($delivery->getAttribute('updated_at')),
@@ -137,28 +148,23 @@ final class AdminNotificationDeliveryRepository extends AbstractRepository
 
     public function toMessageArray(AdminNotificationDelivery $delivery): array
     {
-        /** @var AdminNotificationBatch|null $batch */
-        $batch = $delivery->batch()->first();
-        if ($batch === null) {
-            return [];
-        }
-
         return [
-            'id' => (int) $batch->getAttribute('id'),
+            'id' => (int) $delivery->getAttribute('id'),
             'deliveryId' => (int) $delivery->getAttribute('id'),
-            'kind' => (string) $batch->getAttribute('kind'),
-            'title' => (string) $batch->getAttribute('title'),
-            'content' => $batch->getAttribute('content'),
-            'level' => (string) $batch->getAttribute('level'),
-            'type' => (string) $batch->getAttribute('type'),
-            'source' => (string) $batch->getAttribute('source'),
-            'targetUrl' => $batch->getAttribute('target_url'),
-            'payload' => $batch->getAttribute('payload') ?? [],
-            'attachments' => $batch->getAttribute('attachments') ?? [],
+            'batchId' => (int) $delivery->getAttribute('batch_id'),
+            'kind' => 'notification',
+            'title' => (string) $delivery->getAttribute('title'),
+            'content' => $delivery->getAttribute('content'),
+            'level' => (string) ($delivery->batch?->level ?? 'info'),
+            'type' => (string) ($delivery->batch?->type ?? 'system'),
+            'source' => (string) ($delivery->batch?->source ?? 'system'),
+            'targetUrl' => $delivery->getAttribute('target_url'),
+            'payload' => $delivery->getAttribute('payload') ?? [],
+            'attachments' => $delivery->getAttribute('attachments') ?? [],
             'readAt' => $this->formatDate($delivery->getAttribute('read_at')),
             'archivedAt' => $this->formatDate($delivery->getAttribute('archived_at')),
-            'pinned' => (bool) $batch->getAttribute('pinned'),
-            'createdAt' => $this->formatDate($batch->getAttribute('published_at') ?? $batch->getAttribute('created_at')),
+            'pinned' => false,
+            'createdAt' => $this->formatDate($delivery->getAttribute('sent_at') ?? $delivery->getAttribute('created_at')),
         ];
     }
 
@@ -189,23 +195,23 @@ final class AdminNotificationDeliveryRepository extends AbstractRepository
             $query->whereNull('admin_notification_deliveries.archived_at');
         }
 
-        foreach (['kind', 'level', 'type', 'source'] as $field) {
+        foreach (['level', 'type', 'source'] as $field) {
             if ($adminQuery->hasParam($field)) {
                 $query->where('admin_notification_batches.' . $field, $adminQuery->param($field));
             }
         }
 
         if ($adminQuery->hasParam('startAt')) {
-            $query->where('admin_notification_batches.published_at', '>=', $adminQuery->param('startAt'));
+            $query->where('admin_notification_deliveries.sent_at', '>=', $adminQuery->param('startAt'));
         }
         if ($adminQuery->hasParam('endAt')) {
-            $query->where('admin_notification_batches.published_at', '<=', $adminQuery->param('endAt'));
+            $query->where('admin_notification_deliveries.sent_at', '<=', $adminQuery->param('endAt'));
         }
         if ($adminQuery->keyword !== '') {
             $keyword = '%' . $adminQuery->keyword . '%';
             $query->where(static function ($query) use ($keyword): void {
-                $query->where('admin_notification_batches.title', 'like', $keyword)
-                    ->orWhere('admin_notification_batches.content', 'like', $keyword)
+                $query->where('admin_notification_deliveries.title', 'like', $keyword)
+                    ->orWhere('admin_notification_deliveries.content', 'like', $keyword)
                     ->orWhere('admin_notification_batches.source', 'like', $keyword)
                     ->orWhere('admin_notification_batches.type', 'like', $keyword)
                     ->orWhere('admin_notification_deliveries.receiver_name', 'like', $keyword);

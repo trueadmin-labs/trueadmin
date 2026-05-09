@@ -74,12 +74,18 @@ const parseEventData = ({
 
   try {
     const payload = JSON.parse(data) as { reason?: string; type?: string };
+    if (payload.type !== 'sync_required' && event !== 'sync_required') {
+      return undefined;
+    }
+
     return {
       reason: payload.reason ?? event ?? 'sse_event',
       type: 'sync_required',
     };
   } catch {
-    return { reason: data || event || 'sse_event', type: 'sync_required' };
+    return event === 'sync_required'
+      ? { reason: data || event || 'sse_event', type: 'sync_required' }
+      : undefined;
   }
 };
 

@@ -1,6 +1,7 @@
 import { App } from 'antd';
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
+import { isAuthUnauthorizedCode } from '@/core/auth/session';
 import type { ApiError } from './ApiError';
 import { ApiErrorModal } from './ApiErrorModal';
 import { errorCenter } from './errorCenter';
@@ -13,6 +14,9 @@ export function ErrorModalProvider({ children }: { children: ReactNode }) {
   useEffect(
     () =>
       errorCenter.subscribe(({ error, policy }) => {
+        if (isAuthUnauthorizedCode(error.code)) {
+          return;
+        }
         if (policy?.mode === 'silent' || policy?.mode === 'form' || policy?.mode === 'page') {
           return;
         }

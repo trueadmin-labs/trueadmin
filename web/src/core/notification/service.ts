@@ -4,12 +4,13 @@ import type {
   AdminMessageListResult,
   AdminMessageQuery,
   AdminMessageUnreadCount,
-  AdminNotificationBatch,
-  AdminNotificationBatchCreatePayload,
+  AdminAnnouncement,
+  AdminAnnouncementCreatePayload,
+  AdminAnnouncementListResult,
+  AdminAnnouncementQuery,
+  AdminAnnouncementUpdatePayload,
   AdminNotificationBatchListResult,
   AdminNotificationBatchQuery,
-  AdminNotificationBatchUpdatePayload,
-  AdminNotificationDelivery,
   AdminNotificationDeliveryListResult,
   AdminNotificationDeliveryQuery,
 } from './types';
@@ -36,28 +37,30 @@ export const adminMessageApi = {
 };
 
 export const adminNotificationManagementApi = {
-  listBatches: (params?: AdminNotificationBatchQuery) =>
-    http.Get<AdminNotificationBatchListResult>('/admin/notification-batches', {
+  listNotifications: (params?: AdminNotificationBatchQuery) =>
+    http.Get<AdminNotificationBatchListResult>('/admin/notifications', {
       params,
     }),
-  createAnnouncement: (payload: AdminNotificationBatchCreatePayload) =>
-    http.Post<AdminNotificationBatch>('/admin/notification-batches/announcements', payload),
-  updateBatch: (id: number, payload: AdminNotificationBatchUpdatePayload) =>
-    http.Put<AdminNotificationBatch>(`/admin/notification-batches/${String(id)}`, payload),
-  deleteDraftBatch: (id: number) => http.Delete<null>(`/admin/notification-batches/${String(id)}`),
-  publishBatch: (id: number) =>
-    http.Post<AdminNotificationBatch>(`/admin/notification-batches/${String(id)}/publish`),
-  cancelScheduledBatch: (id: number) =>
-    http.Post<AdminNotificationBatch>(`/admin/notification-batches/${String(id)}/cancel-scheduled`),
-  offlineBatch: (id: number) =>
-    http.Post<AdminNotificationBatch>(`/admin/notification-batches/${String(id)}/offline`),
+  listAnnouncements: (params?: AdminAnnouncementQuery) =>
+    http.Get<AdminAnnouncementListResult>('/admin/announcements', { params }),
+  createAnnouncement: (payload: AdminAnnouncementCreatePayload) =>
+    http.Post<AdminAnnouncement>('/admin/announcements', payload),
+  updateAnnouncement: (id: number, payload: AdminAnnouncementUpdatePayload) =>
+    http.Put<AdminAnnouncement>(`/admin/announcements/${String(id)}`, payload),
+  deleteDraftAnnouncement: (id: number) => http.Delete<null>(`/admin/announcements/${String(id)}`),
+  publishAnnouncement: (id: number) =>
+    http.Post<AdminAnnouncement>(`/admin/announcements/${String(id)}/publish`),
+  cancelScheduledAnnouncement: (id: number) =>
+    http.Post<AdminAnnouncement>(`/admin/announcements/${String(id)}/cancel-scheduled`),
+  offlineAnnouncement: (id: number) =>
+    http.Post<AdminAnnouncement>(`/admin/announcements/${String(id)}/offline`),
+  restoreAnnouncement: (id: number) =>
+    http.Post<AdminAnnouncement>(`/admin/announcements/${String(id)}/restore`),
   listDeliveries: (batchId: number, params?: AdminNotificationDeliveryQuery) =>
     http.Get<AdminNotificationDeliveryListResult>(
-      `/admin/notification-batches/${String(batchId)}/deliveries`,
+      `/admin/notifications/${String(batchId)}/deliveries`,
       { params },
     ),
-  resendDelivery: (batchId: number, deliveryId: number) =>
-    http.Post<AdminNotificationDelivery>(
-      `/admin/notification-batches/${String(batchId)}/deliveries/${String(deliveryId)}/resend`,
-    ),
+  resendNotification: (batchId: number) =>
+    http.Post<{ resent: number }>(`/admin/notifications/${String(batchId)}/resend`),
 };

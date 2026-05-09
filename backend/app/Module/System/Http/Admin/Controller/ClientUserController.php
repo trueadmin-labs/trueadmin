@@ -21,7 +21,7 @@ use TrueAdmin\Kernel\Http\Attribute\Menu;
 use TrueAdmin\Kernel\Http\Attribute\Permission;
 use TrueAdmin\Kernel\OperationLog\Attribute\OperationLog;
 
-#[Menu(code: 'system.client-users', title: '用户端账号', path: '/system/client-users', parent: 'system', permission: 'system:client-user:list', component: './system/client-users', sort: 25)]
+#[Menu(code: 'system.client-users', title: '用户端账号', path: '/system/client-users', parent: 'system', permission: 'system:client-user:list', component: './system/client-users', icon: 'client-user', sort: 25)]
 #[AdminRouteController(path: '/api/admin/system/client-users', middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
 final class ClientUserController extends AdminController
 {

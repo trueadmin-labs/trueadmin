@@ -15,12 +15,25 @@ final class AdminNotificationDelivery extends Model
         'batch_id',
         'receiver_id',
         'receiver_name',
+        'locale',
+        'title',
+        'content',
+        'payload',
+        'attachments',
+        'target_url',
         'status',
+        'skip_reason',
         'sent_at',
         'read_at',
         'archived_at',
-        'failed_reason',
+        'expires_at',
+        'error_message',
         'retry_count',
+    ];
+
+    protected array $casts = [
+        'payload' => 'array',
+        'attachments' => 'array',
     ];
 
     public function batch(): BelongsTo

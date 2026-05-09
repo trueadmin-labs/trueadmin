@@ -251,8 +251,9 @@ GET    /api/admin/notifications
 GET    /api/admin/notifications/{id}
 POST   /api/admin/notifications/{id}/resend
 GET    /api/admin/notifications/{id}/deliveries
-GET    /api/admin/notifications/export
 ```
+
+当前版本不提供通知管理导出接口；后续确有审计导出需求时再按独立导出任务设计。
 
 公告管理：
 
@@ -262,8 +263,10 @@ POST   /api/admin/announcements
 PUT    /api/admin/announcements/{id}
 POST   /api/admin/announcements/{id}/publish
 POST   /api/admin/announcements/{id}/offline
-GET    /api/admin/announcements/export
+POST   /api/admin/announcements/{id}/restore
 ```
+
+当前版本不提供公告管理导出接口。
 
 ## 前端体验
 
@@ -323,7 +326,7 @@ GET    /api/admin/announcements/export
 - 投递明细通过抽屉或详情表格承接。
 - 支持状态、来源、类型、等级、时间等筛选。
 - 支持手动重发。
-- 支持按当前筛选条件导出批次和投递明细。
+- 当前版本不提供导出；后续确有审计导出需求时再按独立导出任务设计。
 - 不允许管理后台代用户标记已读或归档。
 - 详情中以 JSON 只读展示 payload。
 
@@ -403,7 +406,7 @@ type AdminNotificationSendInput = {
 - 发送时可以直接传 `title/content`。
 - 也可以传 `templateKey + variables`。
 - 模板第一版由代码注册，不做模板管理后台。
-- 模板按接收管理员当前语言分别渲染。
+- 模板第一版不做多语言渲染，按注册模板和变量直接渲染。
 - 批次表保存模板和变量，投递表保存最终 `title/content/locale`。
 - 历史消息不因模板后续修改而变化。
 
@@ -488,13 +491,11 @@ AdminMessageChangedEvent
 system.message.view
 system.notification.view
 system.notification.resend
-system.notification.export
 system.announcement.view
 system.announcement.create
 system.announcement.update
 system.announcement.publish
 system.announcement.offline
-system.announcement.export
 ```
 
 ## 状态枚举

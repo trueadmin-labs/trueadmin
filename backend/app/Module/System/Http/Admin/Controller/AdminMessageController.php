@@ -6,6 +6,7 @@ namespace App\Module\System\Http\Admin\Controller;
 
 use App\Foundation\Http\Controller\AdminController;
 use App\Foundation\Http\Middleware\PermissionMiddleware;
+use App\Foundation\Stream\StreamProgress;
 use App\Foundation\Support\ApiResponse;
 use App\Module\Auth\Http\Admin\Middleware\AdminAuthMiddleware;
 use App\Module\System\Http\Admin\Request\Notification\AdminMessageActionRequest;
@@ -18,7 +19,7 @@ use TrueAdmin\Kernel\Http\Attribute\AdminPost;
 use TrueAdmin\Kernel\Http\Attribute\Menu;
 use TrueAdmin\Kernel\Http\Attribute\Permission;
 
-#[Menu(code: 'system.messages', title: '消息中心', path: '/system/messages', parent: 'system', permission: 'system:message:list', component: './system/messages', sort: 70)]
+#[Menu(code: 'system.messages', title: '消息中心', path: '/system/messages', parent: 'system', permission: 'system:message:list', component: './system/messages', icon: 'message', sort: 70)]
 #[AdminRouteController(path: '/api/admin/messages', middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
 final class AdminMessageController extends AdminController
 {
@@ -38,6 +39,30 @@ final class AdminMessageController extends AdminController
     public function unreadCount(): array
     {
         return ApiResponse::success($this->messages->unreadCount());
+    }
+
+    #[AdminGet('stream')]
+    #[Permission('system:message:list', title: '消息实时同步', group: '系统管理')]
+    public function messageStream(): mixed
+    {
+        return $this->stream(function (): array {
+            $startVersion = $this->messages->changeVersion();
+            $deadline = time() + 30;
+
+            while (time() < $deadline) {
+                usleep(1_000_000);
+                $currentVersion = $this->messages->changeVersion();
+                if ($currentVersion !== $startVersion) {
+                    StreamProgress::emit('sync_required', '消息状态已变化', 'system.notification', payload: ['reason' => 'message_changed']);
+
+                    return ['changed' => true, 'version' => $currentVersion];
+                }
+            }
+
+            StreamProgress::emit('heartbeat', '消息同步心跳', 'system.notification');
+
+            return ['changed' => false, 'version' => $startVersion];
+        }, '消息同步完成');
     }
 
     #[AdminGet('{kind}/{id}')]

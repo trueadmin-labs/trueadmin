@@ -102,7 +102,7 @@ export default function AdminMessagesPage() {
 
   const service = useMemo<CrudService<AdminMessageItem>>(
     () => ({
-      list: async (params) => adminMessageApi.list(params).send(),
+      list: async (params, options) => adminMessageApi.list(params).send(options?.force),
     }),
     [],
   );

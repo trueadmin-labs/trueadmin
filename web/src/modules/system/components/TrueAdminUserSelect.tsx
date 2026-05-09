@@ -90,11 +90,11 @@ export function TrueAdminUserSelect<
 
   const service = useMemo<CrudService<AdminUser>>(
     () => ({
-      list: (params) =>
+      list: (params, options) =>
         adminUserApi.list({
           ...params,
           ...(department === ALL_DEPARTMENTS_VALUE ? {} : { deptId: department }),
-        }),
+        }, options),
     }),
     [department],
   );

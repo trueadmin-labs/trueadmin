@@ -1,5 +1,6 @@
 import { requestConfig } from '@config/index';
 import { createAlova } from 'alova';
+import { handleAuthUnauthorized, isAuthUnauthorizedCode } from '@/core/auth/session';
 import { ApiError } from '@/core/error/ApiError';
 import { useLocaleStore } from '@/core/store/localeStore';
 import type { ApiEnvelope } from './types';
@@ -9,6 +10,7 @@ const isSuccessCode = (code: string | number): boolean =>
 
 export const http = createAlova({
   baseURL: requestConfig.baseURL,
+  cacheFor: null,
   timeout: requestConfig.timeout,
   requestAdapter: (elements) => {
     const controller = new AbortController();
@@ -32,14 +34,17 @@ export const http = createAlova({
         ? elements.data
         : JSON.stringify(elements.data ?? undefined);
 
-    const response = () =>
-      fetch(elements.url, {
+    let responsePromise: Promise<Response> | undefined;
+    const response = () => {
+      responsePromise ??= fetch(elements.url, {
         method: elements.type,
         headers,
         body: ['GET', 'HEAD'].includes(elements.type) ? undefined : body,
         credentials: 'include',
         signal: controller.signal,
       });
+      return responsePromise;
+    };
 
     return {
       response,
@@ -63,6 +68,9 @@ export const http = createAlova({
           typeof payload === 'object' && payload !== null && 'code' in payload
             ? String(payload.code)
             : `HTTP.${response.status}`;
+        if (response.status === 401 || isAuthUnauthorizedCode(code)) {
+          handleAuthUnauthorized();
+        }
         throw new ApiError(code, message, response.status, payload);
       }
 
@@ -73,6 +81,9 @@ export const http = createAlova({
         'code' in envelope &&
         !isSuccessCode(envelope.code)
       ) {
+        if (isAuthUnauthorizedCode(envelope.code)) {
+          handleAuthUnauthorized();
+        }
         throw new ApiError(
           String(envelope.code),
           envelope.message || '请求失败',

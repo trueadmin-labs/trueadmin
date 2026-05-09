@@ -263,13 +263,21 @@ export type CrudPageStyles = {
 
 export type CrudPageResult<TRecord, TMeta = Record<string, unknown>> = PageResult<TRecord, TMeta>;
 
+export type CrudListRequestOptions = {
+  force?: boolean;
+  reloadSeed?: number;
+};
+
 export type CrudService<
   TRecord,
   TCreate = Partial<TRecord>,
   TUpdate = Partial<TRecord>,
   TMeta = Record<string, unknown>,
 > = {
-  list: (params: CrudListParams) => Promise<CrudPageResult<TRecord, TMeta>>;
+  list: (
+    params: CrudListParams,
+    options?: CrudListRequestOptions,
+  ) => Promise<CrudPageResult<TRecord, TMeta>>;
   create?: (payload: TCreate) => Promise<TRecord>;
   update?: (id: React.Key, payload: TUpdate) => Promise<TRecord>;
   delete?: (id: React.Key) => Promise<unknown>;

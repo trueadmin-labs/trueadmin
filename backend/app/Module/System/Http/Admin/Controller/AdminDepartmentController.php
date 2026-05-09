@@ -20,7 +20,7 @@ use TrueAdmin\Kernel\Http\Attribute\Menu;
 use TrueAdmin\Kernel\Http\Attribute\Permission;
 use TrueAdmin\Kernel\OperationLog\Attribute\OperationLog;
 
-#[Menu(code: 'system.departments', title: '部门管理', path: '/system/departments', parent: 'system', permission: 'system:department:list', component: './system/departments', sort: 15)]
+#[Menu(code: 'system.departments', title: '部门管理', path: '/system/departments', parent: 'system', permission: 'system:department:list', component: './system/departments', icon: 'team', sort: 15)]
 #[AdminRouteController(path: '/api/admin/system/departments', middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
 final class AdminDepartmentController extends AdminController
 {
@@ -31,6 +31,13 @@ final class AdminDepartmentController extends AdminController
     #[AdminGet('')]
     #[Permission('system:department:list', title: '部门列表', group: '系统管理')]
     public function list(AdminQueryRequest $request): array
+    {
+        return ApiResponse::success($this->departments->tree($request->adminQuery()));
+    }
+
+    #[AdminGet('tree')]
+    #[Permission('system:department:list', title: '部门树', group: '系统管理')]
+    public function tree(AdminQueryRequest $request): array
     {
         return ApiResponse::success($this->departments->tree($request->adminQuery()));
     }

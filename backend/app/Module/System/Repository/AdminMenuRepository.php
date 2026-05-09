@@ -89,7 +89,6 @@ final class AdminMenuRepository extends AbstractRepository implements MetadataMe
         return [
             'id' => (int) $menu->getAttribute('id'),
             'parentId' => (int) $menu->getAttribute('parent_id'),
-            'parent_id' => (int) $menu->getAttribute('parent_id'),
             'code' => (string) $menu->getAttribute('code'),
             'type' => (string) $menu->getAttribute('type'),
             'name' => (string) $menu->getAttribute('name'),
@@ -100,6 +99,39 @@ final class AdminMenuRepository extends AbstractRepository implements MetadataMe
             'sort' => (int) $menu->getAttribute('sort'),
             'status' => (string) $menu->getAttribute('status'),
         ];
+    }
+
+    public function toRuntimeArray(AdminMenu $menu): array
+    {
+        return [
+            'id' => (int) $menu->getAttribute('id'),
+            'parentId' => (int) $menu->getAttribute('parent_id'),
+            'code' => (string) $menu->getAttribute('code'),
+            'title' => (string) $menu->getAttribute('name'),
+            'path' => (string) $menu->getAttribute('path'),
+            'icon' => (string) $menu->getAttribute('icon'),
+            'type' => (string) $menu->getAttribute('type'),
+            'status' => (string) $menu->getAttribute('status'),
+            'sort' => (int) $menu->getAttribute('sort'),
+            'permission' => (string) $menu->getAttribute('permission'),
+        ];
+    }
+
+    public function allEnabledRuntimeMenus(): array
+    {
+        return AdminMenu::query()
+            ->where('status', 'enabled')
+            ->whereIn('type', ['directory', 'menu'])
+            ->orderBy('sort')
+            ->orderBy('id')
+            ->get()
+            ->map(fn (AdminMenu $menu): array => $this->toRuntimeArray($menu))
+            ->all();
+    }
+
+    public function runtimeTree(): array
+    {
+        return $this->tree($this->allEnabledRuntimeMenus());
     }
 
     public function allEnabled(): array

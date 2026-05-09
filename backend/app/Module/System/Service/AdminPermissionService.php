@@ -41,11 +41,12 @@ final class AdminPermissionService implements AdminPermissionProviderInterface
             return [];
         }
 
-        if (in_array('*', $permissions, true)) {
-            return $this->menus->enabledTree();
+        $menus = $this->menus->runtimeTree();
+        if (! in_array('*', $permissions, true)) {
+            $menus = $this->filterVisibleMenus($menus, $permissions);
         }
 
-        return $this->filterVisibleMenus($this->menus->enabledTree(), $permissions);
+        return $this->withoutRuntimePrivateFields($menus);
     }
 
     public function permissionCodes(): array
@@ -77,5 +78,17 @@ final class AdminPermissionService implements AdminPermissionProviderInterface
         }
 
         return $visible;
+    }
+
+    private function withoutRuntimePrivateFields(array $menus): array
+    {
+        return array_map(function (array $menu): array {
+            unset($menu['permission']);
+            if (isset($menu['children']) && is_array($menu['children'])) {
+                $menu['children'] = $this->withoutRuntimePrivateFields($menu['children']);
+            }
+
+            return $menu;
+        }, $menus);
     }
 }

@@ -20,18 +20,10 @@ export default defineModule({
       component: lazy(() => import('./pages/notification-management')),
       meta: { title: 'system.notificationManagement.title', auth: true },
     },
-  ],
-  menus: [
     {
-      code: 'system.notificationManagement',
-      title: 'Notification Management',
-      i18n: 'menu.system.notificationManagement',
-      path: '/system/notification-management',
-      icon: 'bell',
-      type: 'menu',
-      status: 'enabled',
-      sort: 90,
-      parentPath: '/system',
+      path: '/system/announcement-management',
+      component: lazy(() => import('./pages/announcement-management')),
+      meta: { title: 'system.announcementManagement.title', auth: true },
     },
   ],
   notification: {

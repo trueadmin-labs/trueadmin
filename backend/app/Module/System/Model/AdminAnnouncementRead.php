@@ -12,14 +12,14 @@ final class AdminAnnouncementRead extends Model
     protected ?string $table = 'admin_announcement_reads';
 
     protected array $fillable = [
-        'batch_id',
-        'receiver_id',
+        'announcement_id',
+        'admin_id',
         'read_at',
         'archived_at',
     ];
 
-    public function batch(): BelongsTo
+    public function announcement(): BelongsTo
     {
-        return $this->belongsTo(AdminNotificationBatch::class, 'batch_id', 'id');
+        return $this->belongsTo(AdminAnnouncement::class, 'announcement_id', 'id');
     }
 }

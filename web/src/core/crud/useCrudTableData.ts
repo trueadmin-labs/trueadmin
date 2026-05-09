@@ -145,7 +145,10 @@ export const useCrudTableData = <
           return;
         }
 
-        const result = await service.list(finalRequestParams);
+        const result = await service.list(finalRequestParams, {
+          force: reloadSeed > 0,
+          reloadSeed,
+        });
         if (cancelled) {
           return;
         }

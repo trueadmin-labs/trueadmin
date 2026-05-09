@@ -113,9 +113,13 @@ export type AdminNotificationRealtimeConfig = {
   maxSseFailures?: number;
 };
 
-export type AdminNotificationBatchStatus = 'draft' | 'scheduled' | 'published' | 'offline';
+export type AdminNotificationBatchStatus = 'sending' | 'completed' | 'partial_failed' | 'failed';
 
-export type AdminNotificationDeliveryStatus = 'pending' | 'sent' | 'failed';
+export type AdminAnnouncementStatus = 'draft' | 'scheduled' | 'active' | 'expired' | 'offline';
+
+export type AdminAnnouncementTargetType = 'all' | 'role';
+
+export type AdminNotificationDeliveryStatus = 'pending' | 'sent' | 'failed' | 'skipped';
 
 export type AdminNotificationTargetType = 'all' | 'role' | 'user';
 
@@ -123,7 +127,7 @@ export type AdminNotificationBatch = {
   id: number;
   title: string;
   content?: string;
-  kind: AdminMessageKind;
+  kind: 'notification';
   level: AdminMessageLevel;
   type: string;
   source: string;
@@ -131,9 +135,42 @@ export type AdminNotificationBatch = {
   targetType: AdminNotificationTargetType;
   targetSummary: string;
   targetRoleIds?: number[];
+  targetUrl?: string | null;
+  payload?: Record<string, unknown>;
   pinned?: boolean;
   scheduledAt?: string | null;
   publishedAt?: string | null;
+  expireAt?: string | null;
+  offlineAt?: string | null;
+  deliveryTotal: number;
+  sentTotal: number;
+  failedTotal: number;
+  readTotal: number;
+  attachments?: TrueAdminAttachmentValue[];
+  operatorId?: number;
+  operatorName?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AdminAnnouncement = {
+  id: number;
+  title: string;
+  content?: string;
+  kind: 'announcement';
+  level: AdminMessageLevel;
+  type: string;
+  source: string;
+  status: AdminAnnouncementStatus;
+  targetType: AdminAnnouncementTargetType;
+  targetSummary: string;
+  targetRoleIds?: number[];
+  targetUrl?: string | null;
+  payload?: Record<string, unknown>;
+  pinned?: boolean;
+  scheduledAt?: string | null;
+  publishedAt?: string | null;
+  expireAt?: string | null;
   offlineAt?: string | null;
   deliveryTotal: number;
   sentTotal: number;
@@ -165,11 +202,20 @@ export type AdminNotificationBatchQuery = {
   page?: number;
   pageSize?: number;
   keyword?: string;
-  kind?: AdminMessageKind;
   level?: AdminMessageLevel;
   type?: string;
   source?: string;
   status?: AdminNotificationBatchStatus;
+};
+
+export type AdminAnnouncementListMeta = {
+  statusStats?: Partial<Record<AdminAnnouncementStatus, number>>;
+};
+
+export type AdminAnnouncementListResult = PageResult<AdminAnnouncement, AdminAnnouncementListMeta>;
+
+export type AdminAnnouncementQuery = Omit<AdminNotificationBatchQuery, 'status'> & {
+  status?: AdminAnnouncementStatus;
 };
 
 export type AdminNotificationDeliveryQuery = {
@@ -186,9 +232,18 @@ export type AdminNotificationBatchCreatePayload = {
   type: string;
   targetType: AdminNotificationTargetType;
   targetRoleIds?: number[];
+  payload?: Record<string, unknown>;
   pinned?: boolean;
   scheduledAt?: string | Dayjs | null;
+  expireAt?: string | Dayjs | null;
   attachments?: TrueAdminAttachmentValue[];
 };
 
 export type AdminNotificationBatchUpdatePayload = AdminNotificationBatchCreatePayload;
+
+export type AdminAnnouncementCreatePayload = Omit<AdminNotificationBatchCreatePayload, 'targetType'> & {
+  publishMode?: 'draft' | 'publish';
+  targetType: AdminAnnouncementTargetType;
+};
+
+export type AdminAnnouncementUpdatePayload = AdminAnnouncementCreatePayload;

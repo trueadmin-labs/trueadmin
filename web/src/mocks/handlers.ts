@@ -1,10 +1,11 @@
 import { HttpResponse, http } from 'msw';
 import type {
+  AdminAnnouncement,
+  AdminAnnouncementStatus,
+  AdminAnnouncementTargetType,
   AdminMessageLevel,
   AdminNotificationBatch,
-  AdminNotificationBatchStatus,
   AdminNotificationDelivery,
-  AdminNotificationTargetType,
 } from '@/core/notification';
 import type { TrueAdminAttachmentValue } from '@/core/upload';
 
@@ -113,6 +114,36 @@ const archivedMessageKeys = new Set<string>();
 
 const notificationBatches: AdminNotificationBatch[] = [
   {
+    id: 1002,
+    title: '配置项等待确认',
+    content: '配置项系统参数 01 已提交变更，请进入 CRUD 示例页面查看处理。',
+    kind: 'notification',
+    level: 'info',
+    type: 'system',
+    source: 'plugin.true-admin.examples',
+    status: 'partial_failed',
+    targetType: 'role',
+    targetSummary: '运营管理员',
+    targetRoleIds: [2],
+    pinned: false,
+    scheduledAt: null,
+    publishedAt: '2026-05-09 09:45:00',
+    expireAt: null,
+    offlineAt: null,
+    deliveryTotal: 2,
+    sentTotal: 1,
+    failedTotal: 1,
+    readTotal: 0,
+    attachments: [],
+    operatorId: 1,
+    operatorName: '超级管理员',
+    createdAt: '2026-05-09 09:40:00',
+    updatedAt: '2026-05-09 09:45:00',
+  },
+];
+
+const announcements: AdminAnnouncement[] = [
+  {
     id: 1001,
     title: '系统维护公告',
     content: '本周五 22:00 将进行后台服务维护，预计影响 30 分钟。',
@@ -120,13 +151,14 @@ const notificationBatches: AdminNotificationBatch[] = [
     level: 'warning',
     type: 'announcement',
     source: 'system',
-    status: 'published',
+    status: 'active',
     targetType: 'all',
     targetSummary: '全员',
     targetRoleIds: [],
     pinned: true,
     scheduledAt: null,
     publishedAt: '2026-05-09 10:30:00',
+    expireAt: null,
     offlineAt: null,
     deliveryTotal: 3,
     sentTotal: 3,
@@ -148,32 +180,6 @@ const notificationBatches: AdminNotificationBatch[] = [
     updatedAt: '2026-05-09 10:30:00',
   },
   {
-    id: 1002,
-    title: '配置项等待确认',
-    content: '配置项系统参数 01 已提交变更，请进入 CRUD 示例页面查看处理。',
-    kind: 'notification',
-    level: 'info',
-    type: 'system',
-    source: 'plugin.true-admin.examples',
-    status: 'published',
-    targetType: 'role',
-    targetSummary: '运营管理员',
-    targetRoleIds: [2],
-    pinned: false,
-    scheduledAt: null,
-    publishedAt: '2026-05-09 09:45:00',
-    offlineAt: null,
-    deliveryTotal: 2,
-    sentTotal: 1,
-    failedTotal: 1,
-    readTotal: 0,
-    attachments: [],
-    operatorId: 1,
-    operatorName: '超级管理员',
-    createdAt: '2026-05-09 09:40:00',
-    updatedAt: '2026-05-09 09:45:00',
-  },
-  {
     id: 1003,
     title: '端午节值班安排',
     content: '请各部门在本周内确认端午节值班人员。',
@@ -188,6 +194,7 @@ const notificationBatches: AdminNotificationBatch[] = [
     pinned: false,
     scheduledAt: '2026-05-10 09:00:00',
     publishedAt: null,
+    expireAt: null,
     offlineAt: null,
     deliveryTotal: 0,
     sentTotal: 0,
@@ -203,34 +210,6 @@ const notificationBatches: AdminNotificationBatch[] = [
 
 const notificationDeliveries: AdminNotificationDelivery[] = [
   {
-    id: 5001,
-    batchId: 1001,
-    receiverId: 1,
-    receiverName: '超级管理员',
-    status: 'sent',
-    readAt: '2026-05-09 10:35:00',
-    archivedAt: null,
-    sentAt: '2026-05-09 10:30:01',
-    failedReason: null,
-    retryCount: 0,
-    createdAt: '2026-05-09 10:30:01',
-    updatedAt: '2026-05-09 10:35:00',
-  },
-  {
-    id: 5002,
-    batchId: 1001,
-    receiverId: 2,
-    receiverName: '运营管理员',
-    status: 'sent',
-    readAt: null,
-    archivedAt: null,
-    sentAt: '2026-05-09 10:30:01',
-    failedReason: null,
-    retryCount: 0,
-    createdAt: '2026-05-09 10:30:01',
-    updatedAt: '2026-05-09 10:30:01',
-  },
-  {
     id: 5003,
     batchId: 1002,
     receiverId: 2,
@@ -244,10 +223,24 @@ const notificationDeliveries: AdminNotificationDelivery[] = [
     createdAt: '2026-05-09 09:45:01',
     updatedAt: '2026-05-09 09:46:00',
   },
+  {
+    id: 5004,
+    batchId: 1002,
+    receiverId: 1,
+    receiverName: '超级管理员',
+    status: 'sent',
+    readAt: null,
+    archivedAt: null,
+    sentAt: '2026-05-09 09:45:01',
+    failedReason: null,
+    retryCount: 0,
+    createdAt: '2026-05-09 09:45:01',
+    updatedAt: '2026-05-09 09:45:01',
+  },
 ];
 
 const getNotificationTargetSummary = (body: {
-  targetType?: AdminNotificationTargetType;
+  targetType?: AdminAnnouncementTargetType;
   targetRoleIds?: number[];
 }) => {
   if (body.targetType !== 'role' || !body.targetRoleIds?.length) {
@@ -442,20 +435,16 @@ export const handlers = [
     });
     return success(null);
   }),
-  http.get('/api/admin/notification-batches', ({ request }) => {
+  http.get('/api/admin/notifications', ({ request }) => {
     const url = new URL(request.url);
     const page = Number(url.searchParams.get('page') || 1);
     const pageSize = Number(url.searchParams.get('pageSize') || 20);
     const keyword = url.searchParams.get('keyword')?.trim().toLowerCase();
-    const kind = url.searchParams.get('kind') || '';
     const status = url.searchParams.get('status') || '';
     const level = url.searchParams.get('level') || '';
     const type = url.searchParams.get('type') || '';
     const source = url.searchParams.get('source') || '';
     const items = notificationBatches.filter((batch) => {
-      if (kind && batch.kind !== kind) {
-        return false;
-      }
       if (status && batch.status !== status) {
         return false;
       }
@@ -469,13 +458,7 @@ export const handlers = [
         return false;
       }
       if (keyword) {
-        const searchable = [
-          batch.title,
-          batch.content,
-          batch.source,
-          batch.type,
-          batch.operatorName,
-        ]
+        const searchable = [batch.title, batch.content, batch.source, batch.type, batch.operatorName]
           .filter(Boolean)
           .join(' ')
           .toLowerCase();
@@ -498,142 +481,7 @@ export const handlers = [
       pageSize,
     });
   }),
-  http.post('/api/admin/notification-batches/announcements', async ({ request }) => {
-    const body = (await request.json()) as {
-      title?: string;
-      content?: string;
-      level?: AdminMessageLevel;
-      type?: string;
-      targetType?: AdminNotificationTargetType;
-      targetRoleIds?: number[];
-      pinned?: boolean;
-      scheduledAt?: string | null;
-      attachments?: TrueAdminAttachmentValue[];
-    };
-    const nextId = Math.max(...notificationBatches.map((batch) => batch.id)) + 1;
-    const isScheduled = Boolean(body.scheduledAt);
-    const batch: AdminNotificationBatch = {
-      id: nextId,
-      title: body.title || '未命名公告',
-      content: body.content || '',
-      kind: 'announcement',
-      level: body.level || 'info',
-      type: body.type || 'announcement',
-      source: 'system',
-      status: (isScheduled ? 'scheduled' : 'published') satisfies AdminNotificationBatchStatus,
-      targetType: body.targetType || 'all',
-      targetSummary: getNotificationTargetSummary(body),
-      targetRoleIds: body.targetType === 'role' ? (body.targetRoleIds ?? []) : [],
-      pinned: Boolean(body.pinned),
-      scheduledAt: body.scheduledAt ?? null,
-      publishedAt: isScheduled ? null : now,
-      offlineAt: null,
-      deliveryTotal: isScheduled ? 0 : 1,
-      sentTotal: isScheduled ? 0 : 1,
-      failedTotal: 0,
-      readTotal: 0,
-      attachments: body.attachments ?? [],
-      operatorId: 1,
-      operatorName: '超级管理员',
-      createdAt: now,
-      updatedAt: now,
-    };
-    notificationBatches.unshift(batch);
-    return success(batch);
-  }),
-  http.put('/api/admin/notification-batches/:id', async ({ params, request }) => {
-    const batch = notificationBatches.find((item) => String(item.id) === String(params.id));
-    if (!batch) {
-      return fail('SYSTEM.NOTIFICATION_BATCH.NOT_FOUND', '通知批次不存在');
-    }
-    if (batch.status !== 'draft' && batch.status !== 'scheduled') {
-      return fail(
-        'SYSTEM.NOTIFICATION_BATCH.CANNOT_UPDATE',
-        '只有草稿或定时发布的通知批次可以编辑',
-      );
-    }
-
-    const body = (await request.json()) as {
-      title?: string;
-      content?: string;
-      level?: AdminMessageLevel;
-      type?: string;
-      targetType?: AdminNotificationTargetType;
-      targetRoleIds?: number[];
-      pinned?: boolean;
-      scheduledAt?: string | null;
-      attachments?: TrueAdminAttachmentValue[];
-    };
-    const isScheduled = Boolean(body.scheduledAt);
-    batch.title = body.title || batch.title;
-    batch.content = body.content || '';
-    batch.level = body.level || batch.level;
-    batch.type = body.type || batch.type;
-    batch.targetType = body.targetType || 'all';
-    batch.targetRoleIds = batch.targetType === 'role' ? (body.targetRoleIds ?? []) : [];
-    batch.targetSummary = getNotificationTargetSummary({
-      targetType: batch.targetType,
-      targetRoleIds: batch.targetRoleIds,
-    });
-    batch.pinned = Boolean(body.pinned);
-    batch.attachments = body.attachments ?? [];
-    batch.status = isScheduled ? 'scheduled' : 'draft';
-    batch.scheduledAt = body.scheduledAt ?? null;
-    batch.publishedAt = null;
-    batch.offlineAt = null;
-    batch.updatedAt = now;
-    return success(batch);
-  }),
-  http.delete('/api/admin/notification-batches/:id', ({ params }) => {
-    const index = notificationBatches.findIndex((item) => String(item.id) === String(params.id));
-    if (index < 0) {
-      return fail('SYSTEM.NOTIFICATION_BATCH.NOT_FOUND', '通知批次不存在');
-    }
-    if (notificationBatches[index]?.status !== 'draft') {
-      return fail('SYSTEM.NOTIFICATION_BATCH.CANNOT_DELETE', '只有草稿通知批次可以删除');
-    }
-    notificationBatches.splice(index, 1);
-    return success(null);
-  }),
-  http.post('/api/admin/notification-batches/:id/publish', ({ params }) => {
-    const batch = notificationBatches.find((item) => String(item.id) === String(params.id));
-    if (!batch) {
-      return fail('SYSTEM.NOTIFICATION_BATCH.NOT_FOUND', '通知批次不存在');
-    }
-    batch.status = 'published';
-    batch.publishedAt = now;
-    batch.offlineAt = null;
-    batch.updatedAt = now;
-    if (batch.deliveryTotal === 0) {
-      batch.deliveryTotal = 1;
-      batch.sentTotal = 1;
-    }
-    return success(batch);
-  }),
-  http.post('/api/admin/notification-batches/:id/offline', ({ params }) => {
-    const batch = notificationBatches.find((item) => String(item.id) === String(params.id));
-    if (!batch) {
-      return fail('SYSTEM.NOTIFICATION_BATCH.NOT_FOUND', '通知批次不存在');
-    }
-    batch.status = 'offline';
-    batch.offlineAt = now;
-    batch.updatedAt = now;
-    return success(batch);
-  }),
-  http.post('/api/admin/notification-batches/:id/cancel-scheduled', ({ params }) => {
-    const batch = notificationBatches.find((item) => String(item.id) === String(params.id));
-    if (!batch) {
-      return fail('SYSTEM.NOTIFICATION_BATCH.NOT_FOUND', '通知批次不存在');
-    }
-    if (batch.status !== 'scheduled') {
-      return fail('SYSTEM.NOTIFICATION_BATCH.NOT_SCHEDULED', '只有定时发布的通知批次可以取消');
-    }
-    batch.status = 'draft';
-    batch.scheduledAt = null;
-    batch.updatedAt = now;
-    return success(batch);
-  }),
-  http.get('/api/admin/notification-batches/:id/deliveries', ({ params, request }) => {
+  http.get('/api/admin/notifications/:id/deliveries', ({ params, request }) => {
     const url = new URL(request.url);
     const page = Number(url.searchParams.get('page') || 1);
     const pageSize = Number(url.searchParams.get('pageSize') || 20);
@@ -652,38 +500,215 @@ export const handlers = [
       return true;
     });
     const start = Math.max(0, (page - 1) * pageSize);
-    return success({
-      items: items.slice(start, start + pageSize),
-      total: items.length,
-      page,
-      pageSize,
-    });
+    return success({ items: items.slice(start, start + pageSize), total: items.length, page, pageSize });
   }),
-  http.post(
-    '/api/admin/notification-batches/:batchId/deliveries/:deliveryId/resend',
-    ({ params }) => {
-      const delivery = notificationDeliveries.find(
-        (item) =>
-          String(item.batchId) === String(params.batchId) &&
-          String(item.id) === String(params.deliveryId),
-      );
-      if (!delivery) {
-        return fail('SYSTEM.NOTIFICATION_DELIVERY.NOT_FOUND', '通知投递记录不存在');
+  http.post('/api/admin/notifications/:id/resend', ({ params }) => {
+    let resent = 0;
+    notificationDeliveries.forEach((delivery) => {
+      if (String(delivery.batchId) === String(params.id) && delivery.status === 'failed') {
+        delivery.status = 'sent';
+        delivery.sentAt = now;
+        delivery.failedReason = null;
+        delivery.retryCount += 1;
+        delivery.updatedAt = now;
+        resent += 1;
       }
-      delivery.status = 'sent';
-      delivery.sentAt = now;
-      delivery.failedReason = null;
-      delivery.retryCount += 1;
-      delivery.updatedAt = now;
-      const batch = notificationBatches.find((item) => item.id === delivery.batchId);
-      if (batch) {
-        batch.failedTotal = Math.max(0, batch.failedTotal - 1);
-        batch.sentTotal += 1;
-        batch.updatedAt = now;
+    });
+    const batch = notificationBatches.find((item) => String(item.id) === String(params.id));
+    if (batch) {
+      batch.failedTotal = Math.max(0, batch.failedTotal - resent);
+      batch.sentTotal += resent;
+      batch.status = batch.failedTotal > 0 ? 'partial_failed' : 'completed';
+      batch.updatedAt = now;
+    }
+    return success({ resent });
+  }),
+  http.get('/api/admin/announcements', ({ request }) => {
+    const url = new URL(request.url);
+    const page = Number(url.searchParams.get('page') || 1);
+    const pageSize = Number(url.searchParams.get('pageSize') || 20);
+    const keyword = url.searchParams.get('keyword')?.trim().toLowerCase();
+    const status = url.searchParams.get('status') || '';
+    const level = url.searchParams.get('level') || '';
+    const type = url.searchParams.get('type') || '';
+    const source = url.searchParams.get('source') || '';
+    const items = announcements.filter((announcement) => {
+      if (status && announcement.status !== status) {
+        return false;
       }
-      return success(delivery);
-    },
-  ),
+      if (level && announcement.level !== level) {
+        return false;
+      }
+      if (type && announcement.type !== type) {
+        return false;
+      }
+      if (source && announcement.source !== source) {
+        return false;
+      }
+      if (keyword) {
+        const searchable = [announcement.title, announcement.content, announcement.source, announcement.type, announcement.operatorName]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        if (!searchable.includes(keyword)) {
+          return false;
+        }
+      }
+      return true;
+    });
+    const start = Math.max(0, (page - 1) * pageSize);
+    const statusStats = announcements.reduce<Record<string, number>>((stats, announcement) => {
+      stats[announcement.status] = (stats[announcement.status] ?? 0) + 1;
+      return stats;
+    }, {});
+    return success({ items: items.slice(start, start + pageSize), meta: { statusStats }, total: items.length, page, pageSize });
+  }),
+  http.post('/api/admin/announcements', async ({ request }) => {
+    const body = (await request.json()) as {
+      title?: string;
+      content?: string;
+      level?: AdminMessageLevel;
+      type?: string;
+      targetType?: AdminAnnouncementTargetType;
+      targetRoleIds?: number[];
+      pinned?: boolean;
+      scheduledAt?: string | null;
+      expireAt?: string | null;
+      attachments?: TrueAdminAttachmentValue[];
+    };
+    const nextId = Math.max(...announcements.map((announcement) => announcement.id)) + 1;
+    const isScheduled = Boolean(body.scheduledAt);
+    const announcement: AdminAnnouncement = {
+      id: nextId,
+      title: body.title || '未命名公告',
+      content: body.content || '',
+      kind: 'announcement',
+      level: body.level || 'info',
+      type: body.type || 'announcement',
+      source: 'system',
+      status: (isScheduled ? 'scheduled' : 'active') satisfies AdminAnnouncementStatus,
+      targetType: body.targetType || 'all',
+      targetSummary: getNotificationTargetSummary(body),
+      targetRoleIds: body.targetType === 'role' ? (body.targetRoleIds ?? []) : [],
+      pinned: Boolean(body.pinned),
+      scheduledAt: body.scheduledAt ?? null,
+      publishedAt: isScheduled ? null : now,
+      expireAt: body.expireAt ?? null,
+      offlineAt: null,
+      deliveryTotal: isScheduled ? 0 : 1,
+      sentTotal: isScheduled ? 0 : 1,
+      failedTotal: 0,
+      readTotal: 0,
+      attachments: body.attachments ?? [],
+      operatorId: 1,
+      operatorName: '超级管理员',
+      createdAt: now,
+      updatedAt: now,
+    };
+    announcements.unshift(announcement);
+    return success(announcement);
+  }),
+  http.put('/api/admin/announcements/:id', async ({ params, request }) => {
+    const announcement = announcements.find((item) => String(item.id) === String(params.id));
+    if (!announcement) {
+      return fail('SYSTEM.ANNOUNCEMENT.NOT_FOUND', '公告不存在');
+    }
+    if (announcement.status !== 'draft' && announcement.status !== 'scheduled') {
+      return fail('SYSTEM.ANNOUNCEMENT.CANNOT_UPDATE', '只有草稿或定时发布的公告可以编辑');
+    }
+    const body = (await request.json()) as {
+      title?: string;
+      content?: string;
+      level?: AdminMessageLevel;
+      type?: string;
+      targetType?: AdminAnnouncementTargetType;
+      targetRoleIds?: number[];
+      pinned?: boolean;
+      scheduledAt?: string | null;
+      expireAt?: string | null;
+      attachments?: TrueAdminAttachmentValue[];
+    };
+    const isScheduled = Boolean(body.scheduledAt);
+    announcement.title = body.title || announcement.title;
+    announcement.content = body.content || '';
+    announcement.level = body.level || announcement.level;
+    announcement.type = body.type || announcement.type;
+    announcement.targetType = body.targetType || 'all';
+    announcement.targetRoleIds = announcement.targetType === 'role' ? (body.targetRoleIds ?? []) : [];
+    announcement.targetSummary = getNotificationTargetSummary({ targetType: announcement.targetType, targetRoleIds: announcement.targetRoleIds });
+    announcement.pinned = Boolean(body.pinned);
+    announcement.attachments = body.attachments ?? [];
+    announcement.status = isScheduled ? 'scheduled' : 'draft';
+    announcement.scheduledAt = body.scheduledAt ?? null;
+    announcement.publishedAt = null;
+    announcement.expireAt = body.expireAt ?? null;
+    announcement.offlineAt = null;
+    announcement.updatedAt = now;
+    return success(announcement);
+  }),
+  http.delete('/api/admin/announcements/:id', ({ params }) => {
+    const index = announcements.findIndex((item) => String(item.id) === String(params.id));
+    if (index < 0) {
+      return fail('SYSTEM.ANNOUNCEMENT.NOT_FOUND', '公告不存在');
+    }
+    if (announcements[index]?.status !== 'draft') {
+      return fail('SYSTEM.ANNOUNCEMENT.CANNOT_DELETE', '只有草稿公告可以删除');
+    }
+    announcements.splice(index, 1);
+    return success(null);
+  }),
+  http.post('/api/admin/announcements/:id/publish', ({ params }) => {
+    const announcement = announcements.find((item) => String(item.id) === String(params.id));
+    if (!announcement) {
+      return fail('SYSTEM.ANNOUNCEMENT.NOT_FOUND', '公告不存在');
+    }
+    announcement.status = 'active';
+    announcement.publishedAt = now;
+    announcement.scheduledAt = null;
+    announcement.offlineAt = null;
+    announcement.updatedAt = now;
+    if (announcement.deliveryTotal === 0) {
+      announcement.deliveryTotal = 1;
+      announcement.sentTotal = 1;
+    }
+    return success(announcement);
+  }),
+  http.post('/api/admin/announcements/:id/offline', ({ params }) => {
+    const announcement = announcements.find((item) => String(item.id) === String(params.id));
+    if (!announcement) {
+      return fail('SYSTEM.ANNOUNCEMENT.NOT_FOUND', '公告不存在');
+    }
+    announcement.status = 'offline';
+    announcement.offlineAt = now;
+    announcement.updatedAt = now;
+    return success(announcement);
+  }),
+  http.post('/api/admin/announcements/:id/restore', ({ params }) => {
+    const announcement = announcements.find((item) => String(item.id) === String(params.id));
+    if (!announcement) {
+      return fail('SYSTEM.ANNOUNCEMENT.NOT_FOUND', '公告不存在');
+    }
+    announcement.status = 'active';
+    announcement.publishedAt = announcement.publishedAt ?? now;
+    announcement.scheduledAt = null;
+    announcement.offlineAt = null;
+    announcement.expireAt = announcement.expireAt && new Date(announcement.expireAt).getTime() <= Date.now() ? null : announcement.expireAt;
+    announcement.updatedAt = now;
+    return success(announcement);
+  }),
+  http.post('/api/admin/announcements/:id/cancel-scheduled', ({ params }) => {
+    const announcement = announcements.find((item) => String(item.id) === String(params.id));
+    if (!announcement) {
+      return fail('SYSTEM.ANNOUNCEMENT.NOT_FOUND', '公告不存在');
+    }
+    if (announcement.status !== 'scheduled') {
+      return fail('SYSTEM.ANNOUNCEMENT.NOT_SCHEDULED', '只有定时发布的公告可以取消');
+    }
+    announcement.status = 'draft';
+    announcement.scheduledAt = null;
+    announcement.updatedAt = now;
+    return success(announcement);
+  }),
   http.delete('/api/admin/system/users/:id', () =>
     fail('SYSTEM.USER.NOT_FOUND', '管理员用户不存在或已被删除', {
       reason: 'record_missing',
