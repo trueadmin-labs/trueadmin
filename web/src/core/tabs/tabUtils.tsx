@@ -9,6 +9,10 @@ import type { TabDescriptor } from './types';
 export type TabMenuNode = {
   key: string;
   path: string;
+  id?: number;
+  code?: string;
+  type?: 'directory' | 'menu' | 'button' | 'link';
+  openMode?: 'blank' | 'self' | 'iframe' | '';
   label: string;
   icon?: ReactNode;
   children?: TabMenuNode[];
@@ -25,6 +29,9 @@ const appHomeConfig = appConfig as AppConfigWithHome;
 const normalizePath = (path: string) => path.replace(/\/+$/, '') || '/';
 
 export const getTabKey = (pathname: string) => normalizePath(pathname);
+
+const toIframeLinkPath = (menu: TabMenuNode): string =>
+  `/system/link-frame/${encodeURIComponent(String(menu.id ?? menu.code ?? menu.key))}`;
 
 const findFirstNavigableMenu = (menus: TabMenuNode[]): TabMenuNode | undefined => {
   for (const menu of menus) {
@@ -45,7 +52,10 @@ export const findMenuByPath = (menus: TabMenuNode[], pathname: string): TabMenuN
   const currentPath = normalizePath(pathname);
 
   for (const menu of menus) {
-    if (normalizePath(menu.path) === currentPath) {
+    if (
+      normalizePath(menu.path) === currentPath ||
+      (menu.type === 'link' && menu.openMode === 'iframe' && normalizePath(toIframeLinkPath(menu)) === currentPath)
+    ) {
       return menu;
     }
 
@@ -74,6 +84,16 @@ export const createDescriptorMap = (
 
   const visitMenu = (nodes: TabMenuNode[]) => {
     for (const menu of nodes) {
+      if (menu.type === 'link' && menu.openMode === 'iframe') {
+        const path = normalizePath(toIframeLinkPath(menu));
+        descriptors.set(getTabKey(path), {
+          key: getTabKey(path),
+          path,
+          title: menu.label,
+          icon: menu.icon,
+        });
+      }
+
       if (menu.path && findRouteByPath(menu.path)) {
         descriptors.set(getTabKey(menu.path), {
           key: getTabKey(menu.path),
