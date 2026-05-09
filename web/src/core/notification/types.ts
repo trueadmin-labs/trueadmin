@@ -130,7 +130,7 @@ export type AdminNotificationBatch = {
   status: AdminNotificationBatchStatus;
   targetType: AdminNotificationTargetType;
   targetSummary: string;
-  targetRoleIds?: string[];
+  targetRoleIds?: number[];
   pinned?: boolean;
   scheduledAt?: string | null;
   publishedAt?: string | null;
@@ -185,7 +185,7 @@ export type AdminNotificationBatchCreatePayload = {
   level: AdminMessageLevel;
   type: string;
   targetType: AdminNotificationTargetType;
-  targetRoleIds?: string[];
+  targetRoleIds?: number[];
   pinned?: boolean;
   scheduledAt?: string | Dayjs | null;
   attachments?: TrueAdminAttachmentValue[];

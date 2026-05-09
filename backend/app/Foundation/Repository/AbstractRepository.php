@@ -159,7 +159,11 @@ abstract class AbstractRepository
     protected function applyFilters(mixed $query, AdminQuery $adminQuery): void
     {
         foreach ($adminQuery->filters as $field => $value) {
-            if (! is_string($field) || ! $this->isFilterable($field, $adminQuery->operator($field))) {
+            if (! is_string($field)) {
+                continue;
+            }
+
+            if (! $this->isFilterable($field, $adminQuery->operator($field))) {
                 continue;
             }
 

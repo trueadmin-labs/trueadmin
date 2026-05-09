@@ -158,7 +158,7 @@ const notificationBatches: AdminNotificationBatch[] = [
     status: 'published',
     targetType: 'role',
     targetSummary: '运营管理员',
-    targetRoleIds: ['运营管理员'],
+    targetRoleIds: [2],
     pinned: false,
     scheduledAt: null,
     publishedAt: '2026-05-09 09:45:00',
@@ -184,7 +184,7 @@ const notificationBatches: AdminNotificationBatch[] = [
     status: 'scheduled',
     targetType: 'role',
     targetSummary: '超级管理员、运营管理员',
-    targetRoleIds: ['超级管理员', '运营管理员'],
+    targetRoleIds: [1, 2],
     pinned: false,
     scheduledAt: '2026-05-10 09:00:00',
     publishedAt: null,
@@ -248,9 +248,20 @@ const notificationDeliveries: AdminNotificationDelivery[] = [
 
 const getNotificationTargetSummary = (body: {
   targetType?: AdminNotificationTargetType;
-  targetRoleIds?: string[];
-}) =>
-  body.targetType === 'role' && body.targetRoleIds?.length ? body.targetRoleIds.join('、') : '全员';
+  targetRoleIds?: number[];
+}) => {
+  if (body.targetType !== 'role' || !body.targetRoleIds?.length) {
+    return '全员';
+  }
+
+  const roleNameMap = new Map([
+    [1, '超级管理员'],
+    [2, '运营管理员'],
+    [3, '审计员'],
+  ]);
+
+  return body.targetRoleIds.map((id) => roleNameMap.get(id) ?? String(id)).join('、');
+};
 
 const withMessageState = () =>
   messageItems.map((message) => {
@@ -318,6 +329,13 @@ export const handlers = [
     const pageSize = Number(url.searchParams.get('pageSize') || 20);
     return success({ items: users, total: users.length, page, pageSize });
   }),
+  http.get('/api/admin/system/users/role-options', () =>
+    success([
+      { id: 1, code: 'super-admin', name: '超级管理员', status: 'enabled' },
+      { id: 2, code: 'operator', name: '运营管理员', status: 'enabled' },
+      { id: 3, code: 'auditor', name: '审计员', status: 'enabled' },
+    ]),
+  ),
   http.get('/api/admin/messages', ({ request }) => {
     const url = new URL(request.url);
     const page = Number(url.searchParams.get('page') || 1);
@@ -487,7 +505,7 @@ export const handlers = [
       level?: AdminMessageLevel;
       type?: string;
       targetType?: AdminNotificationTargetType;
-      targetRoleIds?: string[];
+      targetRoleIds?: number[];
       pinned?: boolean;
       scheduledAt?: string | null;
       attachments?: TrueAdminAttachmentValue[];
@@ -541,7 +559,7 @@ export const handlers = [
       level?: AdminMessageLevel;
       type?: string;
       targetType?: AdminNotificationTargetType;
-      targetRoleIds?: string[];
+      targetRoleIds?: number[];
       pinned?: boolean;
       scheduledAt?: string | null;
       attachments?: TrueAdminAttachmentValue[];

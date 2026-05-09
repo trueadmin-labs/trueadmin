@@ -14,6 +14,13 @@ class AdminQueryRequest extends FormRequest
 
     protected int $maxFilterFields = 20;
 
+    /**
+     * Query keys used by CRUD infrastructure itself. Other scalar keys are treated as flat params.
+     *
+     * @var list<string>
+     */
+    protected array $reservedQueryKeys = ['page', 'pageSize', 'keyword', 'filter', 'op', 'sort', 'order'];
+
     public function rules(): array
     {
         return [
@@ -29,14 +36,16 @@ class AdminQueryRequest extends FormRequest
 
     protected function normalize(array $data): array
     {
-        $filters = $this->decodeMap($data['filter'] ?? []);
+        $params = $this->flatParams($this->all());
+        $filters = array_slice($this->decodeMap($data['filter'] ?? []), 0, $this->maxFilterFields, true);
 
         return [
             'page' => (int) ($data['page'] ?? 1),
             'pageSize' => (int) ($data['pageSize'] ?? $this->defaultPageSize),
             'keyword' => trim((string) ($data['keyword'] ?? '')),
-            'filter' => array_slice($filters, 0, $this->maxFilterFields, true),
+            'filter' => $filters,
             'op' => $this->decodeOperators($data['op'] ?? [], array_keys($filters)),
+            'params' => $params,
             'sort' => trim((string) ($data['sort'] ?? '')),
             'order' => strtolower((string) ($data['order'] ?? 'asc')),
         ];
@@ -52,9 +61,31 @@ class AdminQueryRequest extends FormRequest
             keyword: $validated['keyword'],
             filters: $validated['filter'],
             operators: $validated['op'],
+            params: $validated['params'],
             sort: $validated['sort'],
             order: $validated['order'],
         );
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function flatParams(array $data): array
+    {
+        $params = [];
+        foreach ($data as $field => $value) {
+            if (! is_string($field) || in_array($field, $this->reservedQueryKeys, true)) {
+                continue;
+            }
+            if (! preg_match('/^[A-Za-z0-9_.]+$/', $field) || $value === null || $value === '' || $value === 'all') {
+                continue;
+            }
+            if (is_scalar($value) || is_array($value)) {
+                $params[$field] = $value;
+            }
+        }
+
+        return $params;
     }
 
     /**

@@ -14,7 +14,7 @@ import {
   Typography,
 } from 'antd';
 import dayjs from 'dayjs';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { TrueAdminConfirmAction } from '@/core/action';
 import { TrueAdminCrudPage, TrueAdminCrudTable } from '@/core/crud';
 import type {
@@ -47,6 +47,7 @@ import {
 } from '@/core/notification';
 import { TrueAdminAuditTimeline, type TrueAdminAuditTimelineItem } from '@/core/timeline';
 import { TrueAdminAttachmentUpload } from '@/core/upload';
+import { adminUserApi } from '../../services/admin-user.api';
 
 const levelColor: Record<AdminMessageLevel, string> = {
   error: 'error',
@@ -105,17 +106,40 @@ export default function AdminNotificationManagementPage() {
   const [detailBatch, setDetailBatch] = useState<AdminNotificationBatch>();
   const [deliveryBatch, setDeliveryBatch] = useState<AdminNotificationBatch>();
   const [refreshSeed, setRefreshSeed] = useState(0);
+  const [roleOptions, setRoleOptions] = useState<Array<{ label: string; value: number }>>([]);
+  const [roleOptionsLoading, setRoleOptionsLoading] = useState(false);
   const [form] = Form.useForm<AnnouncementFormValues>();
   const targetType = Form.useWatch('targetType', form);
 
-  const roleOptions = useMemo(
-    () => [
-      { label: t('system.users.role.superAdmin', '超级管理员'), value: '超级管理员' },
-      { label: t('system.users.role.operator', '运营管理员'), value: '运营管理员' },
-      { label: t('system.users.role.auditor', '审计员'), value: '审计员' },
-    ],
-    [t],
-  );
+  useEffect(() => {
+    let mounted = true;
+
+    setRoleOptionsLoading(true);
+    adminUserApi
+      .roleOptions()
+      .then((roles) => {
+        if (!mounted) {
+          return;
+        }
+        setRoleOptions(roles.map((role) => ({ label: role.name, value: role.id })));
+      })
+      .catch(() => {
+        if (mounted) {
+          message.error(
+            t('system.notificationManagement.roleOptions.loadFailed', '角色选项加载失败'),
+          );
+        }
+      })
+      .finally(() => {
+        if (mounted) {
+          setRoleOptionsLoading(false);
+        }
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [message, t]);
 
   const kindText = useMemo<Record<AdminMessageKind, string>>(
     () => ({
@@ -350,9 +374,7 @@ export default function AdminNotificationManagementPage() {
       level: record.level,
       pinned: record.pinned ?? false,
       scheduledAt: record.scheduledAt ? dayjs(record.scheduledAt) : null,
-      targetRoleIds:
-        record.targetRoleIds ??
-        (record.targetType === 'role' ? record.targetSummary.split('、').filter(Boolean) : []),
+      targetRoleIds: record.targetRoleIds ?? [],
       targetType: record.targetType,
       title: record.title,
       type: record.type,
@@ -661,7 +683,7 @@ export default function AdminNotificationManagementPage() {
               name="targetRoleIds"
               rules={[{ required: true }]}
             >
-              <Select mode="multiple" options={roleOptions} />
+              <Select mode="multiple" loading={roleOptionsLoading} options={roleOptions} />
             </Form.Item>
           ) : null}
           <Form.Item
