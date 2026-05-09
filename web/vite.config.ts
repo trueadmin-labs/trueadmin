@@ -31,6 +31,10 @@ export default defineConfig(({ mode }) => {
           target: 'http://127.0.0.1:9501',
           changeOrigin: true,
         },
+        '/uploads': {
+          target: 'http://127.0.0.1:9501',
+          changeOrigin: true,
+        },
       },
     },
   };

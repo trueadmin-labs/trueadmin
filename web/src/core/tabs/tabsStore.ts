@@ -88,6 +88,7 @@ const isSameTabState = (left: AppTab, right: AppTab) =>
   left.key === right.key &&
   left.path === right.path &&
   left.title === right.title &&
+  left.icon === right.icon &&
   left.pinned === right.pinned &&
   left.home === right.home &&
   left.refreshKey === right.refreshKey &&
@@ -111,7 +112,7 @@ export const useTabsStore = create<TabsState>()(
               ...existed,
               path: descriptor.path,
               title: descriptor.title,
-              icon: existed.icon ?? descriptor.icon,
+              icon: descriptor.icon,
               home: existed.home || (descriptor.home ?? false),
               pinned: existed.pinned || descriptor.pinned || descriptor.home || false,
             };

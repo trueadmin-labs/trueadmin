@@ -36,7 +36,10 @@ export default function NotificationExamplePage() {
   return (
     <TrueAdminPage
       title={t('examples.notification.title', '站内消息示例')}
-      description={t('examples.notification.description', '演示插件如何发送后台通知、注册模板和扩展消息详情 payload 渲染。')}
+      description={t(
+        'examples.notification.description',
+        '演示插件如何发送后台通知、注册模板和扩展消息详情 payload 渲染。',
+      )}
       contentAlign="center"
       contentWidth={920}
     >
@@ -65,9 +68,15 @@ export default function NotificationExamplePage() {
           {result ? (
             <Descriptions size="small" column={{ xs: 1, sm: 2 }}>
               <Descriptions.Item label="ID">{result.id ?? '-'}</Descriptions.Item>
-              <Descriptions.Item label={t('examples.notification.result.status', '状态')}>{result.status ?? '-'}</Descriptions.Item>
-              <Descriptions.Item label={t('examples.notification.result.titleField', '标题')}>{result.title ?? '-'}</Descriptions.Item>
-              <Descriptions.Item label={t('examples.notification.result.delivery', '投递')}>{result.sentTotal ?? 0}/{result.deliveryTotal ?? 0}</Descriptions.Item>
+              <Descriptions.Item label={t('examples.notification.result.status', '状态')}>
+                {result.status ?? '-'}
+              </Descriptions.Item>
+              <Descriptions.Item label={t('examples.notification.result.titleField', '标题')}>
+                {result.title ?? '-'}
+              </Descriptions.Item>
+              <Descriptions.Item label={t('examples.notification.result.delivery', '投递')}>
+                {result.sentTotal ?? 0}/{result.deliveryTotal ?? 0}
+              </Descriptions.Item>
             </Descriptions>
           ) : (
             <Typography.Text type="secondary">

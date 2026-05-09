@@ -1,14 +1,14 @@
 import { http } from '@/core/http/client';
 import type {
-  AdminMessageItem,
-  AdminMessageListResult,
-  AdminMessageQuery,
-  AdminMessageUnreadCount,
   AdminAnnouncement,
   AdminAnnouncementCreatePayload,
   AdminAnnouncementListResult,
   AdminAnnouncementQuery,
   AdminAnnouncementUpdatePayload,
+  AdminMessageItem,
+  AdminMessageListResult,
+  AdminMessageQuery,
+  AdminMessageUnreadCount,
   AdminNotificationBatchListResult,
   AdminNotificationBatchQuery,
   AdminNotificationDeliveryListResult,

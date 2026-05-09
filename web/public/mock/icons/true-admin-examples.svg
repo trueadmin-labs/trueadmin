@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="TrueAdmin Examples">
+  <rect width="64" height="64" rx="14" fill="#1677ff"/>
+  <path d="M20 18h24v7H20zM20 29h15v7H20zM20 40h24v7H20z" fill="#fff"/>
+  <circle cx="45" cy="32" r="6" fill="#52c41a"/>
+</svg>

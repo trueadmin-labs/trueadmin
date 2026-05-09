@@ -2,9 +2,9 @@ import { CopyOutlined, ExportOutlined } from '@ant-design/icons';
 import { App, Button, Input, Result, Tooltip } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router';
+import { useI18n } from '@/core/i18n/I18nProvider';
 import { LoadingContainer } from '@/core/loading/LoadingContainer';
 import { TrueAdminPage } from '@/core/page';
-import { useI18n } from '@/core/i18n/I18nProvider';
 import { menuApi } from '../../services/menu.api';
 import type { AdminMenu } from '../../types/menu';
 
@@ -28,15 +28,18 @@ export default function LinkFramePage() {
       };
     }
 
-    void menuApi.detail(id).then((nextMenu) => {
-      if (active) {
-        setMenu(nextMenu);
-      }
-    }).finally(() => {
-      if (active) {
-        setLoading(false);
-      }
-    });
+    void menuApi
+      .detail(id)
+      .then((nextMenu) => {
+        if (active) {
+          setMenu(nextMenu);
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setLoading(false);
+        }
+      });
 
     return () => {
       active = false;
@@ -52,8 +55,18 @@ export default function LinkFramePage() {
   };
 
   return (
-    <TrueAdminPage layout="workspace" fullHeight contentPadding={false} bodyClassName="trueadmin-system-link-frame-page-body">
-      <LoadingContainer loading={loading} keepChildren={false} layout="viewport" className="trueadmin-system-link-frame-loading">
+    <TrueAdminPage
+      layout="workspace"
+      fullHeight
+      contentPadding={false}
+      bodyClassName="trueadmin-system-link-frame-page-body"
+    >
+      <LoadingContainer
+        loading={loading}
+        keepChildren={false}
+        layout="viewport"
+        className="trueadmin-system-link-frame-loading"
+      >
         {!menu ? (
           <Result status="404" title={t('system.linkFrame.notFound', '链接资源不存在')} />
         ) : !valid ? (
@@ -71,12 +84,24 @@ export default function LinkFramePage() {
                   onClick={() => void copyUrl()}
                   suffix={
                     <Tooltip title={t('system.linkFrame.copy', '复制链接')}>
-                      <Button aria-label={t('system.linkFrame.copy', '复制链接')} icon={<CopyOutlined />} size="small" type="text" onClick={() => void copyUrl()} />
+                      <Button
+                        aria-label={t('system.linkFrame.copy', '复制链接')}
+                        icon={<CopyOutlined />}
+                        size="small"
+                        type="text"
+                        onClick={() => void copyUrl()}
+                      />
                     </Tooltip>
                   }
                 />
                 <Tooltip title={t('system.linkFrame.openExternal', '新标签页打开')}>
-                  <Button aria-label={t('system.linkFrame.openExternal', '新标签页打开')} icon={<ExportOutlined />} href={url} target="_blank" rel="noreferrer" />
+                  <Button
+                    aria-label={t('system.linkFrame.openExternal', '新标签页打开')}
+                    icon={<ExportOutlined />}
+                    href={url}
+                    target="_blank"
+                    rel="noreferrer"
+                  />
                 </Tooltip>
               </div>
             ) : null}

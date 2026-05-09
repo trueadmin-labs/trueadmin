@@ -45,7 +45,8 @@ export default {
   'examples.stream.message.aborted': 'Request cancelled',
   'examples.stream.error.unknown': 'Request failed',
   'examples.notification.title': 'Notification Demo',
-  'examples.notification.description': 'Demonstrates plugin notification sending, template registration, and payload rendering in message details.',
+  'examples.notification.description':
+    'Demonstrates plugin notification sending, template registration, and payload rendering in message details.',
   'examples.notification.type.task': 'Demo task',
   'examples.notification.send.title': 'Send notification',
   'examples.notification.action.direct': 'Send direct notification',

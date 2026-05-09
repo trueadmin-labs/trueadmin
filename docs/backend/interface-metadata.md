@@ -161,7 +161,7 @@ permissionRules  接口权限规则，用于运行时校验、OpenAPI 和 AI 理
     path: '/product/orders',
     parent: 'product',
     permission: 'product:order:list',
-    icon: 'shopping-cart',
+    icon: 'ShoppingCartOutlined',
     sort: 20,
 )]
 final class OrderController extends AdminController

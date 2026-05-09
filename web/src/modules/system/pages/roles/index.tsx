@@ -1,9 +1,27 @@
 import { PlusOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
-import { App, Button, Form, Input, InputNumber, Select, Space, Tag, Tree, TreeSelect, Typography } from 'antd';
 import type { TreeProps, TreeSelectProps } from 'antd';
+import {
+  App,
+  Button,
+  Form,
+  Input,
+  InputNumber,
+  Select,
+  Space,
+  Tag,
+  Tree,
+  TreeSelect,
+  Typography,
+} from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { TrueAdminCrudPage } from '@/core/crud';
-import type { CrudColumns, CrudFilterSchema, CrudListParams, CrudTableAction, CrudService } from '@/core/crud/types';
+import type {
+  CrudColumns,
+  CrudFilterSchema,
+  CrudListParams,
+  CrudService,
+  CrudTableAction,
+} from '@/core/crud/types';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { TrueAdminModal } from '@/core/modal';
 import { menuApi } from '../../services/menu.api';
@@ -15,7 +33,8 @@ type RoleFormValues = AdminRolePayload;
 
 const ROOT_PARENT_ID = 0;
 
-const flattenRoles = (roles: AdminRole[]): AdminRole[] => roles.flatMap((role) => [role, ...flattenRoles(role.children ?? [])]);
+const flattenRoles = (roles: AdminRole[]): AdminRole[] =>
+  roles.flatMap((role) => [role, ...flattenRoles(role.children ?? [])]);
 
 const toPageResult = (items: AdminRole[], params: CrudListParams) => ({
   items,
@@ -43,7 +62,9 @@ const toRoleTreeSelectData = (
       value: role.id,
       key: role.id,
       disabled,
-      children: role.children ? toRoleTreeSelectData(role.children, disabledId, disabled) : undefined,
+      children: role.children
+        ? toRoleTreeSelectData(role.children, disabledId, disabled)
+        : undefined,
     };
   });
 
@@ -137,7 +158,11 @@ export default function AdminRolesPage() {
         title: t('system.roles.column.status', '状态'),
         dataIndex: 'status',
         width: 110,
-        render: (_, record) => <Tag color={record.status === 'enabled' ? 'success' : 'default'}>{statusText[record.status]}</Tag>,
+        render: (_, record) => (
+          <Tag color={record.status === 'enabled' ? 'success' : 'default'}>
+            {statusText[record.status]}
+          </Tag>
+        ),
       },
     ],
     [statusText, t],
@@ -159,7 +184,14 @@ export default function AdminRolesPage() {
   );
 
   const parentTreeData = useMemo<TreeSelectProps['treeData']>(
-    () => [{ title: t('system.common.rootNode', '根节点'), value: ROOT_PARENT_ID, key: ROOT_PARENT_ID, children: toRoleTreeSelectData(roleTree, editing?.id) }],
+    () => [
+      {
+        title: t('system.common.rootNode', '根节点'),
+        value: ROOT_PARENT_ID,
+        key: ROOT_PARENT_ID,
+        children: toRoleTreeSelectData(roleTree, editing?.id),
+      },
+    ],
     [editing?.id, roleTree, t],
   );
 
@@ -183,7 +215,9 @@ export default function AdminRolesPage() {
     }
   };
 
-  const submitAuthorize = async (action: CrudTableAction<AdminRole, AdminRolePayload, AdminRolePayload>) => {
+  const submitAuthorize = async (
+    action: CrudTableAction<AdminRole, AdminRolePayload, AdminRolePayload>,
+  ) => {
     if (!authorizeRole) {
       return;
     }
@@ -201,20 +235,38 @@ export default function AdminRolesPage() {
   return (
     <TrueAdminCrudPage<AdminRole, AdminRolePayload, AdminRolePayload>
       title={t('system.roles.title', '角色管理')}
-      description={t('system.roles.description', '维护后台角色和权限范围，角色层级仅用于管理边界。')}
+      description={t(
+        'system.roles.description',
+        '维护后台角色和权限范围，角色层级仅用于管理边界。',
+      )}
       resource="system.role"
       rowKey="id"
       columns={columns}
       service={roleTreeService}
-      quickSearch={{ placeholder: t('system.roles.quickSearch.placeholder', '搜索角色名称 / 编码') }}
+      quickSearch={{
+        placeholder: t('system.roles.quickSearch.placeholder', '搜索角色名称 / 编码'),
+      }}
       filters={filters}
-      extra={<Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>{t('system.roles.action.create', '新增角色')}</Button>}
+      extra={
+        <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
+          {t('system.roles.action.create', '新增角色')}
+        </Button>
+      }
       rowActions={{
         width: 210,
         render: ({ record }) => (
           <Space size={4} wrap>
-            <Button size="small" type="link" onClick={() => openEdit(record)}>{t('crud.action.edit', '编辑')}</Button>
-            <Button size="small" type="link" icon={<SafetyCertificateOutlined />} onClick={() => void openAuthorize(record)}>{t('system.roles.action.authorize', '授权')}</Button>
+            <Button size="small" type="link" onClick={() => openEdit(record)}>
+              {t('crud.action.edit', '编辑')}
+            </Button>
+            <Button
+              size="small"
+              type="link"
+              icon={<SafetyCertificateOutlined />}
+              onClick={() => void openAuthorize(record)}
+            >
+              {t('system.roles.action.authorize', '授权')}
+            </Button>
           </Space>
         ),
       }}
@@ -226,33 +278,123 @@ export default function AdminRolesPage() {
         deleteText: t('crud.action.delete', '删除'),
         filterResetText: t('crud.filter.reset', '重置'),
         filterSearchText: t('crud.filter.search', '查询'),
-        paginationTotalText: (total) => t('crud.pagination.total', '共 {{total}} 条').replace('{{total}}', String(total)),
+        paginationTotalText: (total) =>
+          t('crud.pagination.total', '共 {{total}} 条').replace('{{total}}', String(total)),
         searchText: t('crud.action.search', '搜索'),
       }}
-      toolbarProps={{ quickSearchInputProps: { allowClear: true }, reloadButtonProps: { title: t('crud.action.reload', '刷新') } }}
+      toolbarProps={{
+        quickSearchInputProps: { allowClear: true },
+        reloadButtonProps: { title: t('crud.action.reload', '刷新') },
+      }}
       tableProps={{ size: 'middle' }}
       paginationProps={{ showQuickJumper: true }}
       tableScrollX={980}
       tableRender={({ action }, defaultDom) => (
         <>
           {defaultDom}
-          <TrueAdminModal destroyOnHidden confirmLoading={submitting} open={open} title={editing ? t('system.roles.modal.edit', '编辑角色') : t('system.roles.modal.create', '新增角色')} width={560} onCancel={closeForm} onOk={() => void submit(action)}>
-            <Form<RoleFormValues> form={form} layout="vertical" initialValues={{ parentId: ROOT_PARENT_ID, sort: 0, status: 'enabled' }}>
-              <Form.Item label={t('system.roles.form.parentId', '上级角色')} name="parentId" extra={t('system.roles.form.parentId.extra', '上级角色用于限制子角色权限范围，不表示用户归属继承。')}>
-                <TreeSelect treeData={parentTreeData} treeDefaultExpandAll showSearch treeNodeFilterProp="title" />
+          <TrueAdminModal
+            destroyOnHidden
+            confirmLoading={submitting}
+            open={open}
+            title={
+              editing
+                ? t('system.roles.modal.edit', '编辑角色')
+                : t('system.roles.modal.create', '新增角色')
+            }
+            width={560}
+            onCancel={closeForm}
+            onOk={() => void submit(action)}
+          >
+            <Form<RoleFormValues>
+              form={form}
+              layout="vertical"
+              initialValues={{ parentId: ROOT_PARENT_ID, sort: 0, status: 'enabled' }}
+            >
+              <Form.Item
+                label={t('system.roles.form.parentId', '上级角色')}
+                name="parentId"
+                extra={t(
+                  'system.roles.form.parentId.extra',
+                  '上级角色用于限制子角色权限范围，不表示用户归属继承。',
+                )}
+              >
+                <TreeSelect
+                  treeData={parentTreeData}
+                  treeDefaultExpandAll
+                  showSearch
+                  treeNodeFilterProp="title"
+                />
               </Form.Item>
-              <Form.Item label={t('system.roles.form.name', '角色名称')} name="name" rules={[{ required: true, message: t('system.roles.form.nameRequired', '请输入角色名称') }]}><Input maxLength={64} /></Form.Item>
-              <Form.Item label={t('system.roles.form.code', '角色编码')} name="code" rules={[{ required: true, message: t('system.roles.form.codeRequired', '请输入角色编码') }]}><Input maxLength={64} /></Form.Item>
+              <Form.Item
+                label={t('system.roles.form.name', '角色名称')}
+                name="name"
+                rules={[
+                  {
+                    required: true,
+                    message: t('system.roles.form.nameRequired', '请输入角色名称'),
+                  },
+                ]}
+              >
+                <Input maxLength={64} />
+              </Form.Item>
+              <Form.Item
+                label={t('system.roles.form.code', '角色编码')}
+                name="code"
+                rules={[
+                  {
+                    required: true,
+                    message: t('system.roles.form.codeRequired', '请输入角色编码'),
+                  },
+                ]}
+              >
+                <Input maxLength={64} />
+              </Form.Item>
               <Space size={12} style={{ width: '100%' }} align="start">
-                <Form.Item label={t('system.roles.form.sort', '排序')} name="sort"><InputNumber style={{ width: 160 }} /></Form.Item>
-                <Form.Item label={t('system.roles.form.status', '状态')} name="status"><Select style={{ width: 180 }} options={[{ label: statusText.enabled, value: 'enabled' }, { label: statusText.disabled, value: 'disabled' }]} /></Form.Item>
+                <Form.Item label={t('system.roles.form.sort', '排序')} name="sort">
+                  <InputNumber style={{ width: 160 }} />
+                </Form.Item>
+                <Form.Item label={t('system.roles.form.status', '状态')} name="status">
+                  <Select
+                    style={{ width: 180 }}
+                    options={[
+                      { label: statusText.enabled, value: 'enabled' },
+                      { label: statusText.disabled, value: 'disabled' },
+                    ]}
+                  />
+                </Form.Item>
               </Space>
             </Form>
           </TrueAdminModal>
-          <TrueAdminModal destroyOnHidden confirmLoading={authorizing} open={authorizeOpen} title={authorizeRole ? t('system.roles.modal.authorizeWithName', '角色授权 - {{name}}').replace('{{name}}', authorizeRole.name) : t('system.roles.modal.authorize', '角色授权')} width={680} onCancel={closeAuthorize} onOk={() => void submitAuthorize(action)}>
+          <TrueAdminModal
+            destroyOnHidden
+            confirmLoading={authorizing}
+            open={authorizeOpen}
+            title={
+              authorizeRole
+                ? t('system.roles.modal.authorizeWithName', '角色授权 - {{name}}').replace(
+                    '{{name}}',
+                    authorizeRole.name,
+                  )
+                : t('system.roles.modal.authorize', '角色授权')
+            }
+            width={680}
+            onCancel={closeAuthorize}
+            onOk={() => void submitAuthorize(action)}
+          >
             <Space direction="vertical" size={12} style={{ width: '100%' }}>
-              <Typography.Text type="secondary">{t('system.roles.authorize.description', '勾选该角色可访问的目录、菜单和按钮权限。子角色不能超出父角色权限范围。')}</Typography.Text>
-              <Tree checkable defaultExpandAll treeData={menuTreeData} checkedKeys={checkedMenuIds} onCheck={(keys) => setCheckedMenuIds(Array.isArray(keys) ? keys : keys.checked)} />
+              <Typography.Text type="secondary">
+                {t(
+                  'system.roles.authorize.description',
+                  '勾选该角色可访问的目录、菜单和按钮权限。子角色不能超出父角色权限范围。',
+                )}
+              </Typography.Text>
+              <Tree
+                checkable
+                defaultExpandAll
+                treeData={menuTreeData}
+                checkedKeys={checkedMenuIds}
+                onCheck={(keys) => setCheckedMenuIds(Array.isArray(keys) ? keys : keys.checked)}
+              />
             </Space>
           </TrueAdminModal>
         </>

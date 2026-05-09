@@ -1,6 +1,6 @@
 import { PlusOutlined } from '@ant-design/icons';
-import { App, Button, Form, Input, InputNumber, Select, Space, Tag, TreeSelect } from 'antd';
 import type { TreeSelectProps } from 'antd';
+import { App, Button, Form, Input, InputNumber, Select, Space, Tag, TreeSelect } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { TrueAdminCrudPage } from '@/core/crud';
 import type { CrudColumns, CrudFilterSchema, CrudTableAction } from '@/core/crud/types';
@@ -25,7 +25,9 @@ const toTreeSelectData = (
       value: department.id,
       key: department.id,
       disabled,
-      children: department.children ? toTreeSelectData(department.children, disabledId, disabled) : undefined,
+      children: department.children
+        ? toTreeSelectData(department.children, disabledId, disabled)
+        : undefined,
     };
   });
 
@@ -84,7 +86,12 @@ export default function AdminDepartmentsPage() {
       { title: t('system.departments.column.name', '部门名称'), dataIndex: 'name', width: 220 },
       { title: t('system.departments.column.code', '部门编码'), dataIndex: 'code', width: 220 },
       { title: t('system.departments.column.level', '层级'), dataIndex: 'level', width: 90 },
-      { title: t('system.departments.column.sort', '排序'), dataIndex: 'sort', width: 90, sorter: true },
+      {
+        title: t('system.departments.column.sort', '排序'),
+        dataIndex: 'sort',
+        width: 90,
+        sorter: true,
+      },
       {
         title: t('system.departments.column.status', '状态'),
         dataIndex: 'status',
@@ -126,7 +133,9 @@ export default function AdminDepartmentsPage() {
     [departmentTree, editing?.id, t],
   );
 
-  const submit = async (action: CrudTableAction<DepartmentTreeNode, DepartmentPayload, DepartmentPayload>) => {
+  const submit = async (
+    action: CrudTableAction<DepartmentTreeNode, DepartmentPayload, DepartmentPayload>,
+  ) => {
     const values = await form.validateFields();
     setSubmitting(true);
     try {
@@ -147,14 +156,23 @@ export default function AdminDepartmentsPage() {
   return (
     <TrueAdminCrudPage<DepartmentTreeNode, DepartmentPayload, DepartmentPayload>
       title={t('system.departments.title', '部门管理')}
-      description={t('system.departments.description', '维护后台组织架构，供管理员归属和组织筛选使用。')}
+      description={t(
+        'system.departments.description',
+        '维护后台组织架构，供管理员归属和组织筛选使用。',
+      )}
       resource="system.department"
       rowKey="id"
       columns={columns}
       service={departmentApi}
-      quickSearch={{ placeholder: t('system.departments.quickSearch.placeholder', '搜索部门名称 / 编码') }}
+      quickSearch={{
+        placeholder: t('system.departments.quickSearch.placeholder', '搜索部门名称 / 编码'),
+      }}
       filters={filters}
-      extra={<Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>{t('system.departments.action.create', '新增部门')}</Button>}
+      extra={
+        <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
+          {t('system.departments.action.create', '新增部门')}
+        </Button>
+      }
       rowActions={{
         width: 150,
         render: ({ record }) => (
@@ -171,10 +189,14 @@ export default function AdminDepartmentsPage() {
         deleteText: t('crud.action.delete', '删除'),
         filterResetText: t('crud.filter.reset', '重置'),
         filterSearchText: t('crud.filter.search', '查询'),
-        paginationTotalText: (total) => t('crud.pagination.total', '共 {{total}} 条').replace('{{total}}', String(total)),
+        paginationTotalText: (total) =>
+          t('crud.pagination.total', '共 {{total}} 条').replace('{{total}}', String(total)),
         searchText: t('crud.action.search', '搜索'),
       }}
-      toolbarProps={{ quickSearchInputProps: { allowClear: true }, reloadButtonProps: { title: t('crud.action.reload', '刷新') } }}
+      toolbarProps={{
+        quickSearchInputProps: { allowClear: true },
+        reloadButtonProps: { title: t('crud.action.reload', '刷新') },
+      }}
       tableProps={{ size: 'middle' }}
       paginationProps={{ showQuickJumper: true }}
       tableScrollX={920}
@@ -185,19 +207,50 @@ export default function AdminDepartmentsPage() {
             destroyOnHidden
             confirmLoading={submitting}
             open={open}
-            title={editing ? t('system.departments.modal.edit', '编辑部门') : t('system.departments.modal.create', '新增部门')}
+            title={
+              editing
+                ? t('system.departments.modal.edit', '编辑部门')
+                : t('system.departments.modal.create', '新增部门')
+            }
             width={560}
             onCancel={closeForm}
             onOk={() => void submit(action)}
           >
-            <Form<DepartmentFormValues> form={form} layout="vertical" initialValues={{ parentId: ROOT_PARENT_ID, sort: 0, status: 'enabled' }}>
+            <Form<DepartmentFormValues>
+              form={form}
+              layout="vertical"
+              initialValues={{ parentId: ROOT_PARENT_ID, sort: 0, status: 'enabled' }}
+            >
               <Form.Item label={t('system.departments.form.parentId', '上级部门')} name="parentId">
-                <TreeSelect treeData={parentTreeData} treeDefaultExpandAll showSearch treeNodeFilterProp="title" />
+                <TreeSelect
+                  treeData={parentTreeData}
+                  treeDefaultExpandAll
+                  showSearch
+                  treeNodeFilterProp="title"
+                />
               </Form.Item>
-              <Form.Item label={t('system.departments.form.name', '部门名称')} name="name" rules={[{ required: true, message: t('system.departments.form.nameRequired', '请输入部门名称') }]}>
+              <Form.Item
+                label={t('system.departments.form.name', '部门名称')}
+                name="name"
+                rules={[
+                  {
+                    required: true,
+                    message: t('system.departments.form.nameRequired', '请输入部门名称'),
+                  },
+                ]}
+              >
                 <Input maxLength={64} />
               </Form.Item>
-              <Form.Item label={t('system.departments.form.code', '部门编码')} name="code" rules={[{ required: true, message: t('system.departments.form.codeRequired', '请输入部门编码') }]}>
+              <Form.Item
+                label={t('system.departments.form.code', '部门编码')}
+                name="code"
+                rules={[
+                  {
+                    required: true,
+                    message: t('system.departments.form.codeRequired', '请输入部门编码'),
+                  },
+                ]}
+              >
                 <Input maxLength={64} />
               </Form.Item>
               <Space size={12} style={{ width: '100%' }} align="start">
@@ -205,7 +258,13 @@ export default function AdminDepartmentsPage() {
                   <InputNumber style={{ width: 160 }} />
                 </Form.Item>
                 <Form.Item label={t('system.departments.form.status', '状态')} name="status">
-                  <Select style={{ width: 180 }} options={[{ label: statusText.enabled, value: 'enabled' }, { label: statusText.disabled, value: 'disabled' }]} />
+                  <Select
+                    style={{ width: 180 }}
+                    options={[
+                      { label: statusText.enabled, value: 'enabled' },
+                      { label: statusText.disabled, value: 'disabled' },
+                    ]}
+                  />
                 </Form.Item>
               </Space>
             </Form>

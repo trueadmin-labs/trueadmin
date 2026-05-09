@@ -22,7 +22,7 @@ final class SaveAdminMenuRequest extends FormRequest
             'open_mode' => ['sometimes', 'string', 'in:blank,self,iframe'],
             'showLinkHeader' => ['sometimes', 'boolean'],
             'show_link_header' => ['sometimes', 'boolean'],
-            'icon' => ['sometimes', 'string', 'max:64'],
+            'icon' => ['sometimes', 'string', 'max:1024'],
             'permission' => ['sometimes', 'string', 'max:128'],
             'sort' => ['sometimes', 'integer'],
             'status' => ['sometimes', 'string', 'in:enabled,disabled'],

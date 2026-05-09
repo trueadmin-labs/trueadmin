@@ -11,7 +11,8 @@ export default {
   'system.common.status.enabled': 'Enabled',
   'system.common.status.disabled': 'Disabled',
   'system.departments.title': 'Department Management',
-  'system.departments.description': 'Maintain the admin organization tree for account ownership and organization filters.',
+  'system.departments.description':
+    'Maintain the admin organization tree for account ownership and organization filters.',
   'system.departments.quickSearch.placeholder': 'Search department name / code',
   'system.departments.action.create': 'Create Department',
   'system.departments.column.name': 'Department Name',
@@ -33,7 +34,8 @@ export default {
   'system.departments.deleteConfirm': 'Delete this department?',
   'system.departments.deleteSuccess': 'Department deleted',
   'system.roles.title': 'Role Management',
-  'system.roles.description': 'Maintain admin roles and permission scopes. Role hierarchy is only a management boundary.',
+  'system.roles.description':
+    'Maintain admin roles and permission scopes. Role hierarchy is only a management boundary.',
   'system.roles.quickSearch.placeholder': 'Search role name / code',
   'system.roles.action.create': 'Create Role',
   'system.roles.action.authorize': 'Authorize',
@@ -43,7 +45,8 @@ export default {
   'system.roles.column.sort': 'Sort',
   'system.roles.column.status': 'Status',
   'system.roles.form.parentId': 'Parent Role',
-  'system.roles.form.parentId.extra': 'The parent role limits child role permissions. It does not imply user membership inheritance.',
+  'system.roles.form.parentId.extra':
+    'The parent role limits child role permissions. It does not imply user membership inheritance.',
   'system.roles.form.name': 'Role Name',
   'system.roles.form.code': 'Role Code',
   'system.roles.form.sort': 'Sort',
@@ -54,14 +57,16 @@ export default {
   'system.roles.modal.edit': 'Edit Role',
   'system.roles.modal.authorize': 'Role Authorization',
   'system.roles.modal.authorizeWithName': 'Role Authorization - {{name}}',
-  'system.roles.authorize.description': 'Select directories, menus, and button permissions this role can access. Child roles cannot exceed the parent role permission scope.',
+  'system.roles.authorize.description':
+    'Select directories, menus, and button permissions this role can access. Child roles cannot exceed the parent role permission scope.',
   'system.roles.success.create': 'Role created',
   'system.roles.success.update': 'Role saved',
   'system.roles.success.authorize': 'Role permissions saved',
   'system.roles.deleteConfirm': 'Delete this role?',
   'system.roles.deleteSuccess': 'Role deleted',
   'system.menus.title': 'Menu Management',
-  'system.menus.description': 'Manage the admin resource tree. Code resources are module-defined; custom resources support directories and links.',
+  'system.menus.description':
+    'Manage the admin resource tree. Code resources are module-defined; custom resources support directories and links.',
   'system.menus.quickSearch.placeholder': 'Search name / code / path / permission',
   'system.menus.action.create': 'Create Resource',
   'system.menus.type.directory': 'Directory',
@@ -223,7 +228,8 @@ export default {
   'system.notificationManagement.audit.offline': 'Offline',
   'system.notificationManagement.audit.offline.description': 'Notification batch taken offline',
   'system.announcementManagement.title': 'Announcement Management',
-  'system.announcementManagement.description': 'Manage admin announcements, scheduled publish, pinned state, and visibility scope.',
+  'system.announcementManagement.description':
+    'Manage admin announcements, scheduled publish, pinned state, and visibility scope.',
   'system.announcementManagement.keyword.placeholder': 'Search title / content / operator',
   'system.announcementManagement.roleOptions.loadFailed': 'Failed to load role options',
   'system.announcementManagement.action.createAnnouncement': 'Publish announcement',
@@ -267,8 +273,10 @@ export default {
   'system.announcementManagement.form.targetRoleIds': 'Target roles',
   'system.announcementManagement.form.pinned': 'Pinned announcement',
   'system.announcementManagement.form.attachments': 'Attachments',
-  'system.announcementManagement.form.attachments.uploadTitle': 'Drag announcement attachments here, or click to select',
-  'system.announcementManagement.form.attachments.uploadHint': 'Attachments will be displayed with the announcement. Display names can be edited.',
+  'system.announcementManagement.form.attachments.uploadTitle':
+    'Drag announcement attachments here, or click to select',
+  'system.announcementManagement.form.attachments.uploadHint':
+    'Attachments will be displayed with the announcement. Display names can be edited.',
   'system.announcementManagement.form.scheduledAt': 'Scheduled publish time',
   'system.announcementManagement.form.expireAt': 'Expire time',
   'system.announcementManagement.modal.createAnnouncement': 'Publish announcement',

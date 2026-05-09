@@ -1,7 +1,6 @@
 import { appConfig } from '@config/index';
-import type { ReactNode } from 'react';
 import { matchPath } from 'react-router';
-import { IconRenderer } from '@/core/icon/IconRenderer';
+import type { TrueAdminIconInput } from '@/core/icon/TrueAdminIcon';
 import { frontendRoutes } from '@/core/module/registry';
 import type { FrontendRoute } from '@/core/module/types';
 import type { TabDescriptor } from './types';
@@ -14,7 +13,7 @@ export type TabMenuNode = {
   type?: 'directory' | 'menu' | 'button' | 'link';
   openMode?: 'blank' | 'self' | 'iframe' | '';
   label: string;
-  icon?: ReactNode;
+  icon?: TrueAdminIconInput;
   children?: TabMenuNode[];
 };
 
@@ -54,7 +53,9 @@ export const findMenuByPath = (menus: TabMenuNode[], pathname: string): TabMenuN
   for (const menu of menus) {
     if (
       normalizePath(menu.path) === currentPath ||
-      (menu.type === 'link' && menu.openMode === 'iframe' && normalizePath(toIframeLinkPath(menu)) === currentPath)
+      (menu.type === 'link' &&
+        menu.openMode === 'iframe' &&
+        normalizePath(toIframeLinkPath(menu)) === currentPath)
     ) {
       return menu;
     }
@@ -121,10 +122,7 @@ export const createDescriptorMap = (
       key,
       path,
       title: t(tab.title ?? route.meta?.title, path),
-      icon:
-        tab.icon || route.meta?.icon ? (
-          <IconRenderer name={tab.icon || route.meta?.icon} />
-        ) : undefined,
+      icon: tab.icon || route.meta?.icon,
     });
   }
 
@@ -184,9 +182,6 @@ export const createRouteDescriptor = (
     key,
     path: normalizePath(pathname),
     title: t(route.meta.tab.title ?? route.meta.title, pathname),
-    icon:
-      route.meta.tab.icon || route.meta.icon ? (
-        <IconRenderer name={route.meta.tab.icon || route.meta.icon} />
-      ) : undefined,
+    icon: route.meta.tab.icon || route.meta.icon,
   };
 };

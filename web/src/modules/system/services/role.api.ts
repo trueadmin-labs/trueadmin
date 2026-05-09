@@ -51,12 +51,22 @@ const roleListMethod = <TRole>(url: string, params?: CrudListParams) =>
   http.Get<RoleListResponse<TRole>>(url, params ? { params } : undefined);
 
 export const roleApi = {
-  list: (params: CrudListParams) => http.Get<PageResult<AdminRole>>('/admin/system/roles', { params }).send(),
-  tree: async (params?: CrudListParams) => unwrapRoleList<AdminRole>(await roleListMethod<AdminRole>('/admin/system/roles/tree', params).send()),
-  options: async () => unwrapRoleList<AdminRoleOption>(await roleListMethod<AdminRoleOption>('/admin/system/roles/options').send()),
+  list: (params: CrudListParams) =>
+    http.Get<PageResult<AdminRole>>('/admin/system/roles', { params }).send(),
+  tree: async (params?: CrudListParams) =>
+    unwrapRoleList<AdminRole>(
+      await roleListMethod<AdminRole>('/admin/system/roles/tree', params).send(),
+    ),
+  options: async () =>
+    unwrapRoleList<AdminRoleOption>(
+      await roleListMethod<AdminRoleOption>('/admin/system/roles/options').send(),
+    ),
   detail: (id: React.Key) => http.Get<AdminRole>(`/admin/system/roles/${id}`).send(),
-  create: (payload: AdminRolePayload) => http.Post<AdminRole>('/admin/system/roles', payload).send(),
-  update: (id: React.Key, payload: AdminRolePayload) => http.Put<AdminRole>(`/admin/system/roles/${id}`, payload).send(),
+  create: (payload: AdminRolePayload) =>
+    http.Post<AdminRole>('/admin/system/roles', payload).send(),
+  update: (id: React.Key, payload: AdminRolePayload) =>
+    http.Put<AdminRole>(`/admin/system/roles/${id}`, payload).send(),
   delete: (id: React.Key) => http.Delete<null>(`/admin/system/roles/${id}`).send(),
-  authorizeMenus: (id: React.Key, menuIds: number[]) => http.Post<AdminRole>(`/admin/system/roles/${id}/menus`, { menuIds }).send(),
+  authorizeMenus: (id: React.Key, menuIds: number[]) =>
+    http.Post<AdminRole>(`/admin/system/roles/${id}/menus`, { menuIds }).send(),
 };

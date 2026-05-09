@@ -43,7 +43,8 @@ export default {
   'examples.stream.message.aborted': '请求已取消',
   'examples.stream.error.unknown': '请求失败',
   'examples.notification.title': '站内消息示例',
-  'examples.notification.description': '演示插件如何发送后台通知、注册模板和扩展消息详情 payload 渲染。',
+  'examples.notification.description':
+    '演示插件如何发送后台通知、注册模板和扩展消息详情 payload 渲染。',
   'examples.notification.type.task': '示例任务',
   'examples.notification.send.title': '发送通知',
   'examples.notification.action.direct': '发送普通通知',

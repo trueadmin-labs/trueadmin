@@ -1,6 +1,7 @@
-import type { ComponentType, LazyExoticComponent, ReactNode } from 'react';
+import type { ComponentType, LazyExoticComponent } from 'react';
 import type { ErrorRegistry } from '@/core/error/types';
-import type { BackendMenu } from '@/core/menu/types';
+import type { TrueAdminIconInput } from '@/core/icon/TrueAdminIcon';
+import type { AppMenu } from '@/core/menu/types';
 import type { AdminMessageSourceConfig, AdminMessageTypeConfig } from '@/core/notification/types';
 
 export type RouteComponent = LazyExoticComponent<ComponentType> | ComponentType;
@@ -17,7 +18,7 @@ export type RouteTabMeta = {
   enabled?: boolean;
   title?: string;
   closable?: boolean;
-  icon?: string;
+  icon?: TrueAdminIconInput;
   keyMode?: 'pathname' | 'fullPath';
   key?: string;
 };
@@ -27,14 +28,14 @@ export type FrontendRoute = {
   component: RouteComponent;
   meta?: {
     title?: string;
-    icon?: string;
+    icon?: TrueAdminIconInput;
     auth?: boolean;
     layout?: RouteLayoutMeta;
     tab?: RouteTabMeta;
   };
 };
 
-export type FrontendMenu = Omit<BackendMenu, 'children'> & {
+export type FrontendMenu = Omit<AppMenu, 'children'> & {
   parentPath?: string;
   devOnly?: boolean;
   children?: FrontendMenu[];
@@ -44,7 +45,7 @@ export type LocaleLoader = () => Promise<
   { default: Record<string, string> } | Record<string, string>
 >;
 
-export type IconLoader = Record<string, ReactNode>;
+export type IconLoader = Record<string, TrueAdminIconInput>;
 
 export type ModuleNotificationSourceConfig = AdminMessageSourceConfig;
 

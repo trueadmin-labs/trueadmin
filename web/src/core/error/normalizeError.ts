@@ -26,7 +26,12 @@ const fromRecord = (record: ErrorLikeRecord): ApiError | undefined => {
   const status = readStatus(record.status) ?? readStatus(record.statusCode);
 
   if (code || message || status) {
-    return new ApiError(code ?? (status ? `HTTP.${status}` : 'WEB.UNKNOWN'), message ?? '请求失败', status, record);
+    return new ApiError(
+      code ?? (status ? `HTTP.${status}` : 'WEB.UNKNOWN'),
+      message ?? '请求失败',
+      status,
+      record,
+    );
   }
 
   return undefined;
@@ -59,5 +64,8 @@ export const normalizeError = (error: unknown): ApiError => {
     return new ApiError(error.name || 'WEB.ERROR', error.message || '未知错误', undefined, error);
   }
 
-  return new ApiError('WEB.UNKNOWN', typeof error === 'string' && error !== '' ? error : '未知错误');
+  return new ApiError(
+    'WEB.UNKNOWN',
+    typeof error === 'string' && error !== '' ? error : '未知错误',
+  );
 };

@@ -3,7 +3,12 @@ import { App, Button, Collapse, Descriptions, Space, Statistic, Tag, Typography 
 import { useMemo, useState } from 'react';
 import { TrueAdminConfirmAction } from '@/core/action';
 import { TrueAdminCrudPage, TrueAdminCrudTable } from '@/core/crud';
-import type { CrudColumns, CrudExtraQuerySchema, CrudFilterSchema, CrudService } from '@/core/crud/types';
+import type {
+  CrudColumns,
+  CrudExtraQuerySchema,
+  CrudFilterSchema,
+  CrudService,
+} from '@/core/crud/types';
 import { TrueAdminQuickFilter } from '@/core/filter/TrueAdminQuickFilter';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { TrueAdminMarkdown } from '@/core/markdown';
@@ -146,7 +151,14 @@ export default function AdminNotificationManagementPage() {
     [levelText, sourceOptions, t, typeOptions],
   );
 
-  const service = useMemo<CrudService<AdminNotificationBatch, Partial<AdminNotificationBatch>, Partial<AdminNotificationBatch>, AdminNotificationBatchListMeta>>(
+  const service = useMemo<
+    CrudService<
+      AdminNotificationBatch,
+      Partial<AdminNotificationBatch>,
+      Partial<AdminNotificationBatch>,
+      AdminNotificationBatchListMeta
+    >
+  >(
     () => ({
       list: async (params, options) =>
         adminNotificationManagementApi.listNotifications(params).send(options?.force),
@@ -171,7 +183,11 @@ export default function AdminNotificationManagementPage() {
               </div>
               <Space orientation="vertical" size={4} style={{ minWidth: 0 }}>
                 <Typography.Text strong>{record.title}</Typography.Text>
-                {summary ? <Typography.Text type="secondary" ellipsis>{summary}</Typography.Text> : null}
+                {summary ? (
+                  <Typography.Text type="secondary" ellipsis>
+                    {summary}
+                  </Typography.Text>
+                ) : null}
               </Space>
             </div>
           );
@@ -181,13 +197,17 @@ export default function AdminNotificationManagementPage() {
       },
       {
         dataIndex: 'status',
-        render: (_, record) => <Tag color={batchStatusColor[record.status]}>{statusText[record.status]}</Tag>,
+        render: (_, record) => (
+          <Tag color={batchStatusColor[record.status]}>{statusText[record.status]}</Tag>
+        ),
         title: t('system.notificationManagement.column.status', '批次状态'),
         width: 120,
       },
       {
         dataIndex: 'level',
-        render: (_, record) => <Tag color={levelColor[record.level]}>{levelText[record.level]}</Tag>,
+        render: (_, record) => (
+          <Tag color={levelColor[record.level]}>{levelText[record.level]}</Tag>
+        ),
         title: t('system.messages.column.level', '等级'),
         width: 110,
       },
@@ -207,7 +227,9 @@ export default function AdminNotificationManagementPage() {
         render: (_, record) => (
           <Typography.Text>
             {record.sentTotal}/{record.deliveryTotal}
-            {record.failedTotal > 0 ? <Typography.Text type="danger"> · {record.failedTotal}</Typography.Text> : null}
+            {record.failedTotal > 0 ? (
+              <Typography.Text type="danger"> · {record.failedTotal}</Typography.Text>
+            ) : null}
           </Typography.Text>
         ),
         title: t('system.notificationManagement.column.delivery', '投递概况'),
@@ -215,7 +237,12 @@ export default function AdminNotificationManagementPage() {
       },
       {
         dataIndex: 'source',
-        render: (_, record) => resolveAdminMessageLabel(getAdminMessageSourceConfig(record.source)?.label, t, record.source),
+        render: (_, record) =>
+          resolveAdminMessageLabel(
+            getAdminMessageSourceConfig(record.source)?.label,
+            t,
+            record.source,
+          ),
         title: t('notification.detail.source', '来源'),
         width: 160,
       },
@@ -231,24 +258,80 @@ export default function AdminNotificationManagementPage() {
 
   return (
     <>
-      <TrueAdminCrudPage<AdminNotificationBatch, Partial<AdminNotificationBatch>, Partial<AdminNotificationBatch>, AdminNotificationBatchListMeta>
+      <TrueAdminCrudPage<
+        AdminNotificationBatch,
+        Partial<AdminNotificationBatch>,
+        Partial<AdminNotificationBatch>,
+        AdminNotificationBatchListMeta
+      >
         title={t('system.notificationManagement.title', '通知管理')}
-        description={t('system.notificationManagement.description', '查看通知批次、投递记录和失败重发。')}
+        description={t(
+          'system.notificationManagement.description',
+          '查看通知批次、投递记录和失败重发。',
+        )}
         resource="system.notificationManagement"
         rowKey="id"
         columns={columns}
         service={service}
-        quickSearch={{ placeholder: t('system.notificationManagement.keyword.placeholder', '搜索标题 / 内容 / 操作人') }}
+        quickSearch={{
+          placeholder: t(
+            'system.notificationManagement.keyword.placeholder',
+            '搜索标题 / 内容 / 操作人',
+          ),
+        }}
         filters={filters}
         extraQuery={useMemo<CrudExtraQuerySchema[]>(() => [{ name: 'status' }], [])}
         rowActions={{
           width: 190,
           render: ({ record, action }) => (
             <Space size={4} wrap>
-              <Button size="small" type="link" onClick={() => { setDetail(record); setDetailOpen(true); }}>{t('system.notificationManagement.action.detail', '详情')}</Button>
-              <Button size="small" type="link" onClick={() => { setDeliveryBatch(record); setDeliveryOpen(true); }}>{t('system.notificationManagement.action.deliveries', '投递记录')}</Button>
+              <Button
+                size="small"
+                type="link"
+                onClick={() => {
+                  setDetail(record);
+                  setDetailOpen(true);
+                }}
+              >
+                {t('system.notificationManagement.action.detail', '详情')}
+              </Button>
+              <Button
+                size="small"
+                type="link"
+                onClick={() => {
+                  setDeliveryBatch(record);
+                  setDeliveryOpen(true);
+                }}
+              >
+                {t('system.notificationManagement.action.deliveries', '投递记录')}
+              </Button>
               {record.failedTotal > 0 ? (
-                <TrueAdminConfirmAction size="small" type="link" icon={<RedoOutlined />} confirm={t('system.notificationManagement.confirm.resend', '确认重发失败投递吗？')} successMessage={t('system.notificationManagement.success.resend', '投递记录已重发')} action={async () => { const result = await adminNotificationManagementApi.resendNotification(record.id).send(); message.success(t('system.notificationManagement.success.resendCount', '已重发 {{count}} 条').replace('{{count}}', String(result.resent))); action.reload(); setRefreshSeed((seed) => seed + 1); }}>
+                <TrueAdminConfirmAction
+                  size="small"
+                  type="link"
+                  icon={<RedoOutlined />}
+                  confirm={t(
+                    'system.notificationManagement.confirm.resend',
+                    '确认重发失败投递吗？',
+                  )}
+                  successMessage={t(
+                    'system.notificationManagement.success.resend',
+                    '投递记录已重发',
+                  )}
+                  action={async () => {
+                    const result = await adminNotificationManagementApi
+                      .resendNotification(record.id)
+                      .send();
+                    message.success(
+                      t(
+                        'system.notificationManagement.success.resendCount',
+                        '已重发 {{count}} 条',
+                      ).replace('{{count}}', String(result.resent)),
+                    );
+                    action.reload();
+                    setRefreshSeed((seed) => seed + 1);
+                  }}
+                >
                   {t('system.notificationManagement.action.resend', '重发')}
                 </TrueAdminConfirmAction>
               ) : null}
@@ -256,7 +339,8 @@ export default function AdminNotificationManagementPage() {
           ),
         }}
         toolbarRender={({ query }) => {
-          const currentStatus = (query.values.status as AdminNotificationBatchStatus | undefined) ?? 'all';
+          const currentStatus =
+            (query.values.status as AdminNotificationBatchStatus | undefined) ?? 'all';
           return (
             <TrueAdminQuickFilter<AdminNotificationBatchStatus | 'all'>
               value={currentStatus}
@@ -266,7 +350,9 @@ export default function AdminNotificationManagementPage() {
                 { label: statusText.partial_failed, value: 'partial_failed' },
                 { label: statusText.failed, value: 'failed' },
               ]}
-              onChange={(nextStatus) => query.setValue('status', nextStatus === 'all' ? undefined : nextStatus)}
+              onChange={(nextStatus) =>
+                query.setValue('status', nextStatus === 'all' ? undefined : nextStatus)
+              }
             />
           );
         }}
@@ -275,8 +361,30 @@ export default function AdminNotificationManagementPage() {
         tableScrollX={1320}
       />
 
-      <NotificationDetailModal open={detailOpen} batch={detail} statusText={statusText} levelText={levelText} targetTypeText={targetTypeText} onClose={() => setDetailOpen(false)} afterOpenChange={(nextOpen) => { if (!nextOpen) { setDetail(undefined); } }} />
-      <DeliveryRecordsModal open={deliveryOpen} batch={deliveryBatch} deliveryStatusText={deliveryStatusText} onClose={() => setDeliveryOpen(false)} afterOpenChange={(nextOpen) => { if (!nextOpen) { setDeliveryBatch(undefined); } }} />
+      <NotificationDetailModal
+        open={detailOpen}
+        batch={detail}
+        statusText={statusText}
+        levelText={levelText}
+        targetTypeText={targetTypeText}
+        onClose={() => setDetailOpen(false)}
+        afterOpenChange={(nextOpen) => {
+          if (!nextOpen) {
+            setDetail(undefined);
+          }
+        }}
+      />
+      <DeliveryRecordsModal
+        open={deliveryOpen}
+        batch={deliveryBatch}
+        deliveryStatusText={deliveryStatusText}
+        onClose={() => setDeliveryOpen(false)}
+        afterOpenChange={(nextOpen) => {
+          if (!nextOpen) {
+            setDeliveryBatch(undefined);
+          }
+        }}
+      />
     </>
   );
 }
@@ -291,47 +399,92 @@ type NotificationDetailModalProps = {
   afterOpenChange?: (open: boolean) => void;
 };
 
-function NotificationDetailModal({ open, batch, statusText, levelText, targetTypeText, onClose, afterOpenChange }: NotificationDetailModalProps) {
+function NotificationDetailModal({
+  open,
+  batch,
+  statusText,
+  levelText,
+  targetTypeText,
+  onClose,
+  afterOpenChange,
+}: NotificationDetailModalProps) {
   const { t } = useI18n();
   const typeConfig = batch ? getAdminMessageTypeConfig(batch.type) : undefined;
   return (
-    <TrueAdminModal destroyOnHidden open={open} title={batch?.title ?? ''} width={920} footer={<Button onClick={onClose}>{t('modal.action.close', '关闭')}</Button>} onCancel={onClose} afterOpenChange={afterOpenChange}>
+    <TrueAdminModal
+      destroyOnHidden
+      open={open}
+      title={batch?.title ?? ''}
+      width={920}
+      footer={<Button onClick={onClose}>{t('modal.action.close', '关闭')}</Button>}
+      onCancel={onClose}
+      afterOpenChange={afterOpenChange}
+    >
       {batch && typeConfig ? (
-      <Space orientation="vertical" size={16} style={{ width: '100%' }}>
-        <Space size={8} wrap>
-          <Tag color={batchStatusColor[batch.status]}>{statusText[batch.status]}</Tag>
-          <Tag color={typeConfig.color}>{resolveAdminMessageLabel(typeConfig.label, t, batch.type)}</Tag>
-          <Tag color={levelColor[batch.level]}>{levelText[batch.level]}</Tag>
+        <Space orientation="vertical" size={16} style={{ width: '100%' }}>
+          <Space size={8} wrap>
+            <Tag color={batchStatusColor[batch.status]}>{statusText[batch.status]}</Tag>
+            <Tag color={typeConfig.color}>
+              {resolveAdminMessageLabel(typeConfig.label, t, batch.type)}
+            </Tag>
+            <Tag color={levelColor[batch.level]}>{levelText[batch.level]}</Tag>
+          </Space>
+          <Descriptions size="small" column={{ xs: 1, md: 2 }}>
+            <Descriptions.Item label={t('notification.detail.source', '来源')}>
+              {resolveAdminMessageLabel(
+                getAdminMessageSourceConfig(batch.source)?.label,
+                t,
+                batch.source,
+              )}
+            </Descriptions.Item>
+            <Descriptions.Item label={t('system.notificationManagement.column.target', '接收范围')}>
+              {batch.targetSummary} · {targetTypeText[batch.targetType]}
+            </Descriptions.Item>
+            <Descriptions.Item
+              label={t('system.notificationManagement.column.delivery', '投递概况')}
+            >
+              {batch.sentTotal}/{batch.deliveryTotal}
+              {batch.failedTotal > 0 ? ` · ${String(batch.failedTotal)}` : ''}
+            </Descriptions.Item>
+            <Descriptions.Item label={t('system.notificationManagement.column.operator', '操作人')}>
+              {batch.operatorName ?? '-'}
+            </Descriptions.Item>
+            <Descriptions.Item label={t('notification.detail.createdAt', '时间')}>
+              {batch.createdAt ?? '-'}
+            </Descriptions.Item>
+            <Descriptions.Item label={t('system.notificationManagement.form.expireAt', '过期时间')}>
+              {batch.expireAt ?? '-'}
+            </Descriptions.Item>
+          </Descriptions>
+          <div className="trueadmin-message-detail-content">
+            <TrueAdminMarkdown value={batch.content} />
+          </div>
+          {batch.attachments?.length ? (
+            <TrueAdminAttachmentUpload readonly value={batch.attachments} />
+          ) : null}
+          {batch.payload && Object.keys(batch.payload).length > 0 ? (
+            <Collapse
+              className="trueadmin-message-detail-payload"
+              ghost
+              items={[
+                {
+                  key: 'payload',
+                  label: t('notification.detail.payload', '扩展数据'),
+                  children: (
+                    <Typography.Paragraph
+                      code
+                      className="trueadmin-message-detail-payload-code"
+                      style={{ margin: 0, whiteSpace: 'pre-wrap' }}
+                    >
+                      {JSON.stringify(batch.payload, null, 2)}
+                    </Typography.Paragraph>
+                  ),
+                },
+              ]}
+              size="small"
+            />
+          ) : null}
         </Space>
-        <Descriptions size="small" column={{ xs: 1, md: 2 }}>
-          <Descriptions.Item label={t('notification.detail.source', '来源')}>{resolveAdminMessageLabel(getAdminMessageSourceConfig(batch.source)?.label, t, batch.source)}</Descriptions.Item>
-          <Descriptions.Item label={t('system.notificationManagement.column.target', '接收范围')}>{batch.targetSummary} · {targetTypeText[batch.targetType]}</Descriptions.Item>
-          <Descriptions.Item label={t('system.notificationManagement.column.delivery', '投递概况')}>{batch.sentTotal}/{batch.deliveryTotal}{batch.failedTotal > 0 ? ` · ${String(batch.failedTotal)}` : ''}</Descriptions.Item>
-          <Descriptions.Item label={t('system.notificationManagement.column.operator', '操作人')}>{batch.operatorName ?? '-'}</Descriptions.Item>
-          <Descriptions.Item label={t('notification.detail.createdAt', '时间')}>{batch.createdAt ?? '-'}</Descriptions.Item>
-          <Descriptions.Item label={t('system.notificationManagement.form.expireAt', '过期时间')}>{batch.expireAt ?? '-'}</Descriptions.Item>
-        </Descriptions>
-        <div className="trueadmin-message-detail-content"><TrueAdminMarkdown value={batch.content} /></div>
-        {batch.attachments?.length ? <TrueAdminAttachmentUpload readonly value={batch.attachments} /> : null}
-        {batch.payload && Object.keys(batch.payload).length > 0 ? (
-          <Collapse
-            className="trueadmin-message-detail-payload"
-            ghost
-            items={[
-              {
-                key: 'payload',
-                label: t('notification.detail.payload', '扩展数据'),
-                children: (
-                  <Typography.Paragraph code className="trueadmin-message-detail-payload-code" style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
-                    {JSON.stringify(batch.payload, null, 2)}
-                  </Typography.Paragraph>
-                ),
-              },
-            ]}
-            size="small"
-          />
-        ) : null}
-      </Space>
       ) : null}
     </TrueAdminModal>
   );
@@ -345,7 +498,13 @@ type DeliveryRecordsModalProps = {
   afterOpenChange?: (open: boolean) => void;
 };
 
-function DeliveryRecordsModal({ open, batch, deliveryStatusText, onClose, afterOpenChange }: DeliveryRecordsModalProps) {
+function DeliveryRecordsModal({
+  open,
+  batch,
+  deliveryStatusText,
+  onClose,
+  afterOpenChange,
+}: DeliveryRecordsModalProps) {
   const { t } = useI18n();
   const deliveryExtraQuery = useMemo<CrudExtraQuerySchema[]>(() => [{ name: 'status' }], []);
   const deliveryService = useMemo<CrudService<AdminNotificationDelivery>>(
@@ -359,36 +518,90 @@ function DeliveryRecordsModal({ open, batch, deliveryStatusText, onClose, afterO
   );
   const deliveryColumns = useMemo<CrudColumns<AdminNotificationDelivery>>(
     () => [
-      { dataIndex: 'receiverName', title: t('system.notificationManagement.column.receiver', '接收人'), width: 160 },
-      { dataIndex: 'status', render: (_, record) => <Tag color={deliveryStatusColor[record.status]}>{deliveryStatusText[record.status]}</Tag>, title: t('system.notificationManagement.column.deliveryStatus', '投递状态'), width: 120 },
-      { dataIndex: 'readAt', render: (_, record) => record.readAt ?? '-', title: t('system.notificationManagement.column.readAt', '已读时间'), width: 180 },
-      { dataIndex: 'failedReason', render: (_, record) => record.failedReason ?? '-', title: t('system.notificationManagement.column.failedReason', '失败原因'), width: 220 },
-      { dataIndex: 'retryCount', title: t('system.notificationManagement.column.retryCount', '重试次数'), width: 100 },
+      {
+        dataIndex: 'receiverName',
+        title: t('system.notificationManagement.column.receiver', '接收人'),
+        width: 160,
+      },
+      {
+        dataIndex: 'status',
+        render: (_, record) => (
+          <Tag color={deliveryStatusColor[record.status]}>{deliveryStatusText[record.status]}</Tag>
+        ),
+        title: t('system.notificationManagement.column.deliveryStatus', '投递状态'),
+        width: 120,
+      },
+      {
+        dataIndex: 'readAt',
+        render: (_, record) => record.readAt ?? '-',
+        title: t('system.notificationManagement.column.readAt', '已读时间'),
+        width: 180,
+      },
+      {
+        dataIndex: 'failedReason',
+        render: (_, record) => record.failedReason ?? '-',
+        title: t('system.notificationManagement.column.failedReason', '失败原因'),
+        width: 220,
+      },
+      {
+        dataIndex: 'retryCount',
+        title: t('system.notificationManagement.column.retryCount', '重试次数'),
+        width: 100,
+      },
       { dataIndex: 'updatedAt', title: t('notification.detail.createdAt', '时间'), width: 180 },
     ],
     [deliveryStatusText, t],
   );
 
   return (
-    <TrueAdminModal destroyOnHidden className="trueadmin-notification-delivery-modal" open={open} title={batch ? `${t('system.notificationManagement.modal.deliveries', '投递记录')} - ${batch.title}` : ''} width={980} footer={<Button onClick={onClose}>{t('modal.action.close', '关闭')}</Button>} onCancel={onClose} afterOpenChange={afterOpenChange}>
+    <TrueAdminModal
+      destroyOnHidden
+      className="trueadmin-notification-delivery-modal"
+      open={open}
+      title={
+        batch
+          ? `${t('system.notificationManagement.modal.deliveries', '投递记录')} - ${batch.title}`
+          : ''
+      }
+      width={980}
+      footer={<Button onClick={onClose}>{t('modal.action.close', '关闭')}</Button>}
+      onCancel={onClose}
+      afterOpenChange={afterOpenChange}
+    >
       {batch ? (
         <div className="trueadmin-notification-delivery-modal-body">
           <div className="trueadmin-notification-management-stats">
-            <Statistic title={t('system.notificationManagement.stats.total', '总投递')} value={batch.deliveryTotal} />
-            <Statistic title={t('system.notificationManagement.stats.sent', '已投递')} value={batch.sentTotal} />
-            <Statistic title={t('system.notificationManagement.stats.failed', '失败')} value={batch.failedTotal} valueStyle={batch.failedTotal > 0 ? { color: 'var(--ant-color-error)' } : undefined} />
-            <Statistic title={t('system.notificationManagement.stats.read', '已读')} value={batch.readTotal} />
+            <Statistic
+              title={t('system.notificationManagement.stats.total', '总投递')}
+              value={batch.deliveryTotal}
+            />
+            <Statistic
+              title={t('system.notificationManagement.stats.sent', '已投递')}
+              value={batch.sentTotal}
+            />
+            <Statistic
+              title={t('system.notificationManagement.stats.failed', '失败')}
+              value={batch.failedTotal}
+              valueStyle={batch.failedTotal > 0 ? { color: 'var(--ant-color-error)' } : undefined}
+            />
+            <Statistic
+              title={t('system.notificationManagement.stats.read', '已读')}
+              value={batch.readTotal}
+            />
           </div>
           <TrueAdminCrudTable<AdminNotificationDelivery>
             resource="system.notificationManagement.delivery"
             rowKey="id"
             columns={deliveryColumns}
             service={deliveryService}
-            quickSearch={{ placeholder: t('system.notificationManagement.column.receiver', '接收人') }}
+            quickSearch={{
+              placeholder: t('system.notificationManagement.column.receiver', '接收人'),
+            }}
             queryMode="local"
             extraQuery={deliveryExtraQuery}
             toolbarRender={({ query }) => {
-              const currentStatus = (query.values.status as AdminNotificationDeliveryStatus | undefined) ?? 'all';
+              const currentStatus =
+                (query.values.status as AdminNotificationDeliveryStatus | undefined) ?? 'all';
               return (
                 <TrueAdminQuickFilter<AdminNotificationDeliveryStatus | 'all'>
                   value={currentStatus}
@@ -399,7 +612,9 @@ function DeliveryRecordsModal({ open, batch, deliveryStatusText, onClose, afterO
                     { label: deliveryStatusText.failed, value: 'failed' },
                     { label: deliveryStatusText.skipped, value: 'skipped' },
                   ]}
-                  onChange={(nextStatus) => query.setValue('status', nextStatus === 'all' ? undefined : nextStatus)}
+                  onChange={(nextStatus) =>
+                    query.setValue('status', nextStatus === 'all' ? undefined : nextStatus)
+                  }
                 />
               );
             }}

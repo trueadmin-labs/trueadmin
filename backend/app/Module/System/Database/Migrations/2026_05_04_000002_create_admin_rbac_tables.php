@@ -32,7 +32,7 @@ return new class extends Migration {
             $table->string('url', 1024)->default('');
             $table->string('open_mode', 32)->default('');
             $table->boolean('show_link_header')->default(false);
-            $table->string('icon', 64)->default('');
+            $table->string('icon', 1024)->default('');
             $table->string('permission', 128)->default('');
             $table->string('source', 32)->default('custom');
             $table->integer('sort')->default(0);

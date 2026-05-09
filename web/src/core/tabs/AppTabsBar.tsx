@@ -35,6 +35,7 @@ import {
   useState,
 } from 'react';
 import { useLocation, useNavigate } from 'react-router';
+import { TrueAdminIcon } from '@/core/icon/TrueAdminIcon';
 import {
   removeWorkspaceScroll,
   removeWorkspaceScrollExcept,
@@ -379,7 +380,7 @@ function SortableTab({
             </span>
           ) : null}
           <span className="trueadmin-tabs-icon-slot" aria-hidden="true">
-            {tab.icon}
+            <TrueAdminIcon icon={tab.icon} />
           </span>
           <span className="trueadmin-tabs-title">{tab.title}</span>
         </button>

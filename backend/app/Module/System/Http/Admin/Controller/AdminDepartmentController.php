@@ -20,7 +20,7 @@ use TrueAdmin\Kernel\Http\Attribute\Menu;
 use TrueAdmin\Kernel\Http\Attribute\Permission;
 use TrueAdmin\Kernel\OperationLog\Attribute\OperationLog;
 
-#[Menu(code: 'system.departments', title: '部门管理', path: '/system/departments', parent: 'system', permission: 'system:department:list', icon: 'team', sort: 15)]
+#[Menu(code: 'system.departments', title: '部门管理', path: '/system/departments', parent: 'system', permission: 'system:department:list', icon: 'TeamOutlined', sort: 15)]
 #[AdminRouteController(path: '/api/admin/system/departments', middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
 final class AdminDepartmentController extends AdminController
 {

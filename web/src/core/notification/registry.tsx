@@ -1,4 +1,3 @@
-import { BellOutlined, ExclamationCircleOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import type { ReactNode } from 'react';
 import { isTransText, resolveTrans, type TranslateFunction, trans } from '@/core/i18n/trans';
 import type { ModuleManifest } from '@/core/module/types';
@@ -9,7 +8,7 @@ const sourceRegistry = new Map<string, AdminMessageSourceConfig>();
 
 export const defaultAdminMessageTypeConfig: AdminMessageTypeConfig = {
   color: 'default',
-  icon: <InfoCircleOutlined />,
+  icon: 'InfoCircleOutlined',
 };
 
 export const registerAdminMessageType = (type: string, config: AdminMessageTypeConfig) => {
@@ -64,17 +63,17 @@ export const registerModuleNotifications = (manifest: ModuleManifest) => {
 registerAdminMessageType('system', {
   label: trans('notification.type.system', '系统'),
   color: 'blue',
-  icon: <InfoCircleOutlined />,
+  icon: 'InfoCircleOutlined',
 });
 
 registerAdminMessageType('announcement', {
   label: trans('notification.type.announcement', '公告'),
   color: 'purple',
-  icon: <BellOutlined />,
+  icon: 'BellOutlined',
 });
 
 registerAdminMessageType('alert', {
   label: trans('notification.type.alert', '预警'),
   color: 'red',
-  icon: <ExclamationCircleOutlined />,
+  icon: 'ExclamationCircleOutlined',
 });

@@ -9,7 +9,7 @@ export default defineModule({
       component: lazy(() => import('./pages/WorkbenchPage')),
       meta: {
         title: 'workbench.title',
-        icon: 'dashboard',
+        icon: 'DashboardOutlined',
         auth: true,
       },
     },
@@ -20,7 +20,7 @@ export default defineModule({
       title: 'Workbench',
       i18n: 'menu.workbench',
       path: '/workbench',
-      icon: 'dashboard',
+      icon: 'DashboardOutlined',
       type: 'menu',
       status: 'enabled',
       sort: -100,

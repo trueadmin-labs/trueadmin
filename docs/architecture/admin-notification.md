@@ -97,7 +97,7 @@ admin_announcement_reads
 | `id` | 自增 ID |
 | `type` | 业务类型，例如 `system`、`alert`、插件自定义类型 |
 | `level` | `info`、`success`、`warning`、`error` |
-| `source` | 来源字符串，例如 `system`、`plugin.true-admin.examples` |
+| `source` | 来源字符串，例如 `system`、`true-admin.examples` |
 | `targets` | 原始投递目标 JSON |
 | `template_key` | 模板 key，可空 |
 | `template_variables` | 模板变量 JSON，可空 |
@@ -346,7 +346,7 @@ POST   /api/admin/announcements/{id}/restore
 ```ts
 type AdminMessageTypeConfig = {
   label?: string;
-  icon?: React.ReactNode;
+  icon?: TrueAdminIconInput;
   color?: string;
   onClick?: (message: AdminMessageItem, context: AdminMessageClickContext) => void | Promise<void>;
 };
@@ -357,6 +357,7 @@ type AdminMessageTypeConfig = {
 - 后端只保存 `type` 字符串。
 - 前端核心注册基础类型：`system / announcement / alert`。
 - 插件或模块可注册自己的类型，例如 `approval / order / workflow`。
+- `icon` 复用框架图标输入能力，可以传 AntD 图标 key、manifest 注册图标 key、图片地址或 ReactNode，最终统一由 `TrueAdminIcon` 渲染。
 - 未注册类型使用默认图标、默认颜色，并显示原始 `type`。
 
 ## 通知发送服务
@@ -562,6 +563,6 @@ all / roles
 - 站内消息是 Admin 底层能力，不作为普通插件实现。
 - 公告独立建模，用户侧通过统一消息流聚合。
 - 个人通知使用批次 + 投递记录，支持排查、重发、去重和多语言渲染。
-- 前端统一标准消息 UI，插件只注册类型图标、颜色和点击行为。
+- 前端统一标准消息 UI，插件只注册类型图标、颜色和点击行为；类型图标复用框架 `TrueAdminIcon`。
 - 实时通道默认 auto，SSE 只做变化通知，轮询兜底。
 - 详情弹窗是通知和公告的统一承接方式。

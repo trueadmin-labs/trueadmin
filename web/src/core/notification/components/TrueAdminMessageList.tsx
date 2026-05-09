@@ -1,6 +1,7 @@
 import { ClockCircleOutlined, PaperClipOutlined } from '@ant-design/icons';
 import { Empty, List, Space, Tag, Typography } from 'antd';
 import { useI18n } from '@/core/i18n/I18nProvider';
+import { TrueAdminIcon } from '@/core/icon/TrueAdminIcon';
 import {
   getAdminMessageSourceConfig,
   getAdminMessageTypeConfig,
@@ -56,7 +57,11 @@ export function TrueAdminMessageList({
             onClick={() => onItemClick?.(message)}
           >
             <List.Item.Meta
-              avatar={<span className="trueadmin-message-list-icon">{typeConfig.icon}</span>}
+              avatar={
+                <span className="trueadmin-message-list-icon">
+                  <TrueAdminIcon icon={typeConfig.icon} />
+                </span>
+              }
               title={
                 <Space size={6} wrap>
                   <Tag color={typeConfig.color}>

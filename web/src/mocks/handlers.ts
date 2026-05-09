@@ -53,9 +53,36 @@ const departmentTree = [
 ];
 
 const roleOptions = [
-  { id: 1, parentId: 0, code: 'super-admin', name: '超级管理员', level: 1, path: '', sort: 0, status: 'enabled' },
-  { id: 2, parentId: 1, code: 'operator', name: '运营管理员', level: 2, path: ',1,', sort: 10, status: 'enabled' },
-  { id: 3, parentId: 1, code: 'auditor', name: '审计员', level: 2, path: ',1,', sort: 20, status: 'enabled' },
+  {
+    id: 1,
+    parentId: 0,
+    code: 'super-admin',
+    name: '超级管理员',
+    level: 1,
+    path: '',
+    sort: 0,
+    status: 'enabled',
+  },
+  {
+    id: 2,
+    parentId: 1,
+    code: 'operator',
+    name: '运营管理员',
+    level: 2,
+    path: ',1,',
+    sort: 10,
+    status: 'enabled',
+  },
+  {
+    id: 3,
+    parentId: 1,
+    code: 'auditor',
+    name: '审计员',
+    level: 2,
+    path: ',1,',
+    sort: 20,
+    status: 'enabled',
+  },
 ];
 
 const roleTree = [
@@ -92,7 +119,7 @@ const messageItems = [
     content: '配置项 **系统参数 01** 已提交变更，请进入 CRUD 示例页面查看处理。',
     level: 'info',
     type: 'system',
-    source: 'plugin.true-admin.examples',
+    source: 'true-admin.examples',
     targetUrl: '/examples/crud',
     payload: { recordId: 1 },
     attachments: [],
@@ -133,7 +160,7 @@ const notificationBatches: AdminNotificationBatch[] = [
     kind: 'notification',
     level: 'info',
     type: 'system',
-    source: 'plugin.true-admin.examples',
+    source: 'true-admin.examples',
     status: 'partial_failed',
     targetType: 'role',
     targetSummary: '运营管理员',
@@ -303,7 +330,7 @@ export const handlers = [
         title: '系统管理',
         i18n: 'menu.system',
         path: '/system',
-        icon: 'setting',
+        icon: 'SettingOutlined',
         type: 'directory',
         status: 'enabled',
         children: [
@@ -312,7 +339,7 @@ export const handlers = [
             title: '用户管理',
             i18n: 'menu.system.users',
             path: '/system/users',
-            icon: 'user',
+            icon: 'UserOutlined',
             type: 'menu',
             status: 'enabled',
           },
@@ -320,7 +347,7 @@ export const handlers = [
             code: 'system.departments',
             title: '部门管理',
             path: '/system/departments',
-            icon: 'team',
+            icon: 'TeamOutlined',
             type: 'menu',
             status: 'enabled',
           },
@@ -466,7 +493,13 @@ export const handlers = [
         return false;
       }
       if (keyword) {
-        const searchable = [batch.title, batch.content, batch.source, batch.type, batch.operatorName]
+        const searchable = [
+          batch.title,
+          batch.content,
+          batch.source,
+          batch.type,
+          batch.operatorName,
+        ]
           .filter(Boolean)
           .join(' ')
           .toLowerCase();
@@ -508,7 +541,12 @@ export const handlers = [
       return true;
     });
     const start = Math.max(0, (page - 1) * pageSize);
-    return success({ items: items.slice(start, start + pageSize), total: items.length, page, pageSize });
+    return success({
+      items: items.slice(start, start + pageSize),
+      total: items.length,
+      page,
+      pageSize,
+    });
   }),
   http.post('/api/admin/notifications/:id/resend', ({ params }) => {
     let resent = 0;
@@ -554,7 +592,13 @@ export const handlers = [
         return false;
       }
       if (keyword) {
-        const searchable = [announcement.title, announcement.content, announcement.source, announcement.type, announcement.operatorName]
+        const searchable = [
+          announcement.title,
+          announcement.content,
+          announcement.source,
+          announcement.type,
+          announcement.operatorName,
+        ]
           .filter(Boolean)
           .join(' ')
           .toLowerCase();
@@ -569,7 +613,13 @@ export const handlers = [
       stats[announcement.status] = (stats[announcement.status] ?? 0) + 1;
       return stats;
     }, {});
-    return success({ items: items.slice(start, start + pageSize), meta: { statusStats }, total: items.length, page, pageSize });
+    return success({
+      items: items.slice(start, start + pageSize),
+      meta: { statusStats },
+      total: items.length,
+      page,
+      pageSize,
+    });
   }),
   http.post('/api/admin/announcements', async ({ request }) => {
     const body = (await request.json()) as {
@@ -642,8 +692,12 @@ export const handlers = [
     announcement.level = body.level || announcement.level;
     announcement.type = body.type || announcement.type;
     announcement.targetType = body.targetType || 'all';
-    announcement.targetRoleIds = announcement.targetType === 'role' ? (body.targetRoleIds ?? []) : [];
-    announcement.targetSummary = getNotificationTargetSummary({ targetType: announcement.targetType, targetRoleIds: announcement.targetRoleIds });
+    announcement.targetRoleIds =
+      announcement.targetType === 'role' ? (body.targetRoleIds ?? []) : [];
+    announcement.targetSummary = getNotificationTargetSummary({
+      targetType: announcement.targetType,
+      targetRoleIds: announcement.targetRoleIds,
+    });
     announcement.pinned = Boolean(body.pinned);
     announcement.attachments = body.attachments ?? [];
     announcement.status = isScheduled ? 'scheduled' : 'draft';
@@ -700,7 +754,10 @@ export const handlers = [
     announcement.publishedAt = announcement.publishedAt ?? now;
     announcement.scheduledAt = null;
     announcement.offlineAt = null;
-    announcement.expireAt = announcement.expireAt && new Date(announcement.expireAt).getTime() <= Date.now() ? null : announcement.expireAt;
+    announcement.expireAt =
+      announcement.expireAt && new Date(announcement.expireAt).getTime() <= Date.now()
+        ? null
+        : announcement.expireAt;
     announcement.updatedAt = now;
     return success(announcement);
   }),

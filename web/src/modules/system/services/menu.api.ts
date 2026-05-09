@@ -18,7 +18,8 @@ export const menuApi = {
   tree: (params?: CrudListParams) =>
     http.Get<AdminMenu[]>('/admin/system/menus/tree', params ? { params } : undefined).send(),
   detail: (id: React.Key) => http.Get<AdminMenu>(`/admin/system/menus/${id}`).send(),
-  create: (payload: AdminMenuPayload) => http.Post<AdminMenu>('/admin/system/menus', payload).send(),
+  create: (payload: AdminMenuPayload) =>
+    http.Post<AdminMenu>('/admin/system/menus', payload).send(),
   update: (id: React.Key, payload: AdminMenuPayload) =>
     http.Put<AdminMenu>(`/admin/system/menus/${id}`, payload).send(),
   delete: (id: React.Key) => http.Delete<null>(`/admin/system/menus/${id}`).send(),

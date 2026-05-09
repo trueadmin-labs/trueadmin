@@ -1,3 +1,5 @@
+import type { TrueAdminIconInput } from '@/core/icon/TrueAdminIcon';
+
 export type BackendMenu = {
   id?: number;
   code: string;
@@ -14,7 +16,12 @@ export type BackendMenu = {
   children?: BackendMenu[];
 };
 
-export type RuntimeMenu = BackendMenu & {
+export type AppMenu = Omit<BackendMenu, 'children' | 'icon'> & {
+  icon?: TrueAdminIconInput;
+  children?: AppMenu[];
+};
+
+export type RuntimeMenu = AppMenu & {
   label: string;
   key: string;
   children?: RuntimeMenu[];

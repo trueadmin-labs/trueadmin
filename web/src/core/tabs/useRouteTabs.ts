@@ -13,6 +13,7 @@ const isSameTabSnapshot = (left: AppTab, right: AppTab) =>
   left.key === right.key &&
   left.path === right.path &&
   left.title === right.title &&
+  left.icon === right.icon &&
   left.pinned === right.pinned &&
   left.home === right.home &&
   left.refreshKey === right.refreshKey &&
@@ -68,7 +69,7 @@ const mapStoredTab = (
     ...nextHomeState,
     path: descriptor.path,
     title: descriptor.title,
-    icon: tab.icon ?? descriptor.icon,
+    icon: descriptor.icon,
   };
 };
 

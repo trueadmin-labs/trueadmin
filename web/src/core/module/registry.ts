@@ -1,4 +1,5 @@
 import { pluginConfig } from '@config/plugin';
+import { registerIcons } from '@/core/icon/TrueAdminIcon';
 import { registerModuleNotifications } from '@/core/notification/registry';
 import type { ModuleManifest } from './types';
 
@@ -20,6 +21,11 @@ export const pluginManifests = Object.values(pluginLoaders)
 export const enabledManifests = [...moduleManifests, ...pluginManifests];
 
 enabledManifests.forEach(registerModuleNotifications);
+enabledManifests.forEach((manifest) => {
+  if (manifest.icons) {
+    registerIcons(manifest.icons, { source: manifest.id });
+  }
+});
 
 export const frontendRoutes = enabledManifests.flatMap((manifest) => manifest.routes ?? []);
 export const frontendMenus = enabledManifests.flatMap((manifest) => manifest.menus ?? []);

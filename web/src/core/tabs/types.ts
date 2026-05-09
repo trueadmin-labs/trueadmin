@@ -1,10 +1,10 @@
-import type { ReactNode } from 'react';
+import type { TrueAdminIconInput } from '@/core/icon/TrueAdminIcon';
 
 export type AppTab = {
   key: string;
   path: string;
   title: string;
-  icon?: ReactNode;
+  icon?: TrueAdminIconInput;
   pinned: boolean;
   home: boolean;
   refreshKey: number;
@@ -16,7 +16,7 @@ export type TabDescriptor = {
   key: string;
   path: string;
   title: string;
-  icon?: ReactNode;
+  icon?: TrueAdminIconInput;
   home?: boolean;
   pinned?: boolean;
 };

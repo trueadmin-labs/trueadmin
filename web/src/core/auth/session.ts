@@ -1,9 +1,6 @@
 import { tokenStorage } from '@/shared/utils/storage';
 
-const AUTH_UNAUTHORIZED_CODES = new Set([
-  'KERNEL.AUTH.UNAUTHORIZED',
-  'KERNEL.AUTH.TOKEN_EXPIRED',
-]);
+const AUTH_UNAUTHORIZED_CODES = new Set(['KERNEL.AUTH.UNAUTHORIZED', 'KERNEL.AUTH.TOKEN_EXPIRED']);
 let redirecting = false;
 
 const isLoginPath = (pathname: string) => pathname === '/login';

@@ -1,23 +1,41 @@
 import { CloudUploadOutlined, SaveOutlined } from '@ant-design/icons';
-import { App, Button, Collapse, DatePicker, Descriptions, Form, Input, Select, Space, Switch, Tag, Typography } from 'antd';
+import {
+  App,
+  Button,
+  Collapse,
+  DatePicker,
+  Descriptions,
+  Form,
+  Input,
+  Select,
+  Space,
+  Switch,
+  Tag,
+  Typography,
+} from 'antd';
 import dayjs from 'dayjs';
 import { useEffect, useMemo, useState } from 'react';
 import { TrueAdminConfirmAction } from '@/core/action';
 import { TrueAdminCrudPage } from '@/core/crud';
-import type { CrudColumns, CrudExtraQuerySchema, CrudFilterSchema, CrudService } from '@/core/crud/types';
+import type {
+  CrudColumns,
+  CrudExtraQuerySchema,
+  CrudFilterSchema,
+  CrudService,
+} from '@/core/crud/types';
 import { errorCenter } from '@/core/error/errorCenter';
 import { TrueAdminQuickFilter } from '@/core/filter/TrueAdminQuickFilter';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { TrueAdminMarkdown, TrueAdminMarkdownEditor } from '@/core/markdown';
 import { TrueAdminModal } from '@/core/modal';
 import {
-  type AdminMessageLevel,
   type AdminAnnouncement,
   type AdminAnnouncementCreatePayload,
   type AdminAnnouncementListMeta,
   type AdminAnnouncementStatus,
-  type AdminAnnouncementUpdatePayload,
   type AdminAnnouncementTargetType,
+  type AdminAnnouncementUpdatePayload,
+  type AdminMessageLevel,
   adminNotificationManagementApi,
   getAdminMessageSourceConfig,
   getRegisteredAdminMessageSources,
@@ -85,7 +103,9 @@ export default function AdminAnnouncementManagementPage() {
   const [roleOptionsLoading, setRoleOptionsLoading] = useState(false);
   const [form] = Form.useForm<AnnouncementFormValues>();
   const targetType = Form.useWatch('targetType', form);
-  const metadataOnlyEdit = editing ? editing.status === 'active' || editing.status === 'expired' : false;
+  const metadataOnlyEdit = editing
+    ? editing.status === 'active' || editing.status === 'expired'
+    : false;
 
   useEffect(() => {
     let mounted = true;
@@ -171,7 +191,14 @@ export default function AdminAnnouncementManagementPage() {
     [levelText, sourceOptions, t],
   );
 
-  const service = useMemo<CrudService<AdminAnnouncement, Partial<AdminAnnouncement>, Partial<AdminAnnouncement>, AdminAnnouncementListMeta>>(
+  const service = useMemo<
+    CrudService<
+      AdminAnnouncement,
+      Partial<AdminAnnouncement>,
+      Partial<AdminAnnouncement>,
+      AdminAnnouncementListMeta
+    >
+  >(
     () => ({
       list: async (params, options) =>
         adminNotificationManagementApi.listAnnouncements(params).send(options?.force),
@@ -196,9 +223,15 @@ export default function AdminAnnouncementManagementPage() {
               <Space orientation="vertical" size={4} style={{ minWidth: 0 }}>
                 <Space size={6} wrap>
                   <Typography.Text strong>{record.title}</Typography.Text>
-                  {record.pinned ? <Tag color="gold">{t('notification.pinned', '置顶')}</Tag> : null}
+                  {record.pinned ? (
+                    <Tag color="gold">{t('notification.pinned', '置顶')}</Tag>
+                  ) : null}
                 </Space>
-                {summary ? <Typography.Text type="secondary" ellipsis>{summary}</Typography.Text> : null}
+                {summary ? (
+                  <Typography.Text type="secondary" ellipsis>
+                    {summary}
+                  </Typography.Text>
+                ) : null}
               </Space>
             </div>
           );
@@ -208,13 +241,17 @@ export default function AdminAnnouncementManagementPage() {
       },
       {
         dataIndex: 'status',
-        render: (_, record) => <Tag color={announcementStatusColor[record.status]}>{statusText[record.status]}</Tag>,
+        render: (_, record) => (
+          <Tag color={announcementStatusColor[record.status]}>{statusText[record.status]}</Tag>
+        ),
         title: t('system.announcementManagement.column.status', '状态'),
         width: 120,
       },
       {
         dataIndex: 'level',
-        render: (_, record) => <Tag color={levelColor[record.level]}>{levelText[record.level]}</Tag>,
+        render: (_, record) => (
+          <Tag color={levelColor[record.level]}>{levelText[record.level]}</Tag>
+        ),
         title: t('system.messages.column.level', '等级'),
         width: 110,
       },
@@ -287,7 +324,11 @@ export default function AdminAnnouncementManagementPage() {
       message.success(t('system.announcementManagement.success.updateAnnouncement', '公告已保存'));
     } else {
       await adminNotificationManagementApi.createAnnouncement(payload).send();
-      message.success(mode === 'draft' ? t('system.announcementManagement.success.saveDraft', '草稿已保存') : t('system.announcementManagement.success.createAnnouncement', '公告已创建'));
+      message.success(
+        mode === 'draft'
+          ? t('system.announcementManagement.success.saveDraft', '草稿已保存')
+          : t('system.announcementManagement.success.createAnnouncement', '公告已创建'),
+      );
     }
 
     setOpen(false);
@@ -304,47 +345,137 @@ export default function AdminAnnouncementManagementPage() {
 
   return (
     <>
-      <TrueAdminCrudPage<AdminAnnouncement, Partial<AdminAnnouncement>, Partial<AdminAnnouncement>, AdminAnnouncementListMeta>
+      <TrueAdminCrudPage<
+        AdminAnnouncement,
+        Partial<AdminAnnouncement>,
+        Partial<AdminAnnouncement>,
+        AdminAnnouncementListMeta
+      >
         title={t('system.announcementManagement.title', '公告管理')}
-        description={t('system.announcementManagement.description', '管理后台公告、定时发布、置顶和可见范围。')}
+        description={t(
+          'system.announcementManagement.description',
+          '管理后台公告、定时发布、置顶和可见范围。',
+        )}
         resource="system.announcementManagement"
         rowKey="id"
         columns={columns}
         service={service}
-        quickSearch={{ placeholder: t('system.announcementManagement.keyword.placeholder', '搜索标题 / 内容 / 操作人') }}
+        quickSearch={{
+          placeholder: t(
+            'system.announcementManagement.keyword.placeholder',
+            '搜索标题 / 内容 / 操作人',
+          ),
+        }}
         filters={filters}
         extraQuery={useMemo<CrudExtraQuerySchema[]>(() => [{ name: 'status' }], [])}
-        extra={<Button type="primary" icon={<CloudUploadOutlined />} onClick={openCreate}>{t('system.announcementManagement.action.createAnnouncement', '发布公告')}</Button>}
+        extra={
+          <Button type="primary" icon={<CloudUploadOutlined />} onClick={openCreate}>
+            {t('system.announcementManagement.action.createAnnouncement', '发布公告')}
+          </Button>
+        }
         rowActions={{
           width: 190,
           render: ({ record, action }) => (
             <Space size={4} wrap>
-              <Button size="small" type="link" onClick={() => { setDetail(record); setDetailOpen(true); }}>{t('system.announcementManagement.action.detail', '详情')}</Button>
+              <Button
+                size="small"
+                type="link"
+                onClick={() => {
+                  setDetail(record);
+                  setDetailOpen(true);
+                }}
+              >
+                {t('system.announcementManagement.action.detail', '详情')}
+              </Button>
               {['draft', 'scheduled', 'active', 'expired'].includes(record.status) ? (
-                <Button size="small" type="link" onClick={() => openEdit(record)}>{t('system.announcementManagement.action.edit', '编辑')}</Button>
+                <Button size="small" type="link" onClick={() => openEdit(record)}>
+                  {t('system.announcementManagement.action.edit', '编辑')}
+                </Button>
               ) : null}
               {record.status === 'draft' || record.status === 'scheduled' ? (
-                <TrueAdminConfirmAction size="small" type="link" confirm={t('system.announcementManagement.confirm.publish', '确认发布该公告吗？')} successMessage={t('system.announcementManagement.success.publish', '公告已发布')} action={async () => { await adminNotificationManagementApi.publishAnnouncement(record.id).send(); action.reload(); }}>
+                <TrueAdminConfirmAction
+                  size="small"
+                  type="link"
+                  confirm={t('system.announcementManagement.confirm.publish', '确认发布该公告吗？')}
+                  successMessage={t('system.announcementManagement.success.publish', '公告已发布')}
+                  action={async () => {
+                    await adminNotificationManagementApi.publishAnnouncement(record.id).send();
+                    action.reload();
+                  }}
+                >
                   {t('system.announcementManagement.action.publish', '发布')}
                 </TrueAdminConfirmAction>
               ) : null}
               {record.status === 'scheduled' ? (
-                <TrueAdminConfirmAction danger size="small" type="link" confirm={t('system.announcementManagement.confirm.cancelScheduled', '取消后会退回草稿状态。')} successMessage={t('system.announcementManagement.success.cancelScheduled', '定时发布已取消')} action={async () => { await adminNotificationManagementApi.cancelScheduledAnnouncement(record.id).send(); action.reload(); }}>
+                <TrueAdminConfirmAction
+                  danger
+                  size="small"
+                  type="link"
+                  confirm={t(
+                    'system.announcementManagement.confirm.cancelScheduled',
+                    '取消后会退回草稿状态。',
+                  )}
+                  successMessage={t(
+                    'system.announcementManagement.success.cancelScheduled',
+                    '定时发布已取消',
+                  )}
+                  action={async () => {
+                    await adminNotificationManagementApi
+                      .cancelScheduledAnnouncement(record.id)
+                      .send();
+                    action.reload();
+                  }}
+                >
                   {t('system.announcementManagement.action.cancelScheduled', '取消')}
                 </TrueAdminConfirmAction>
               ) : null}
               {record.status === 'draft' ? (
-                <TrueAdminConfirmAction danger size="small" type="link" confirm={t('system.announcementManagement.confirm.deleteDraft', '删除后不可恢复。')} successMessage={t('system.announcementManagement.success.deleteDraft', '草稿已删除')} action={async () => { await adminNotificationManagementApi.deleteDraftAnnouncement(record.id).send(); action.reload(); }}>
+                <TrueAdminConfirmAction
+                  danger
+                  size="small"
+                  type="link"
+                  confirm={t(
+                    'system.announcementManagement.confirm.deleteDraft',
+                    '删除后不可恢复。',
+                  )}
+                  successMessage={t(
+                    'system.announcementManagement.success.deleteDraft',
+                    '草稿已删除',
+                  )}
+                  action={async () => {
+                    await adminNotificationManagementApi.deleteDraftAnnouncement(record.id).send();
+                    action.reload();
+                  }}
+                >
                   {t('system.announcementManagement.action.delete', '删除')}
                 </TrueAdminConfirmAction>
               ) : null}
               {record.status === 'active' ? (
-                <TrueAdminConfirmAction danger size="small" type="link" confirm={t('system.announcementManagement.confirm.offline', '确认下线该公告吗？')} successMessage={t('system.announcementManagement.success.offline', '公告已下线')} action={async () => { await adminNotificationManagementApi.offlineAnnouncement(record.id).send(); action.reload(); }}>
+                <TrueAdminConfirmAction
+                  danger
+                  size="small"
+                  type="link"
+                  confirm={t('system.announcementManagement.confirm.offline', '确认下线该公告吗？')}
+                  successMessage={t('system.announcementManagement.success.offline', '公告已下线')}
+                  action={async () => {
+                    await adminNotificationManagementApi.offlineAnnouncement(record.id).send();
+                    action.reload();
+                  }}
+                >
                   {t('system.announcementManagement.action.offline', '下线')}
                 </TrueAdminConfirmAction>
               ) : null}
               {record.status === 'offline' || record.status === 'expired' ? (
-                <TrueAdminConfirmAction size="small" type="link" confirm={t('system.announcementManagement.confirm.restore', '确认恢复该公告吗？')} successMessage={t('system.announcementManagement.success.restore', '公告已恢复')} action={async () => { await adminNotificationManagementApi.restoreAnnouncement(record.id).send(); action.reload(); }}>
+                <TrueAdminConfirmAction
+                  size="small"
+                  type="link"
+                  confirm={t('system.announcementManagement.confirm.restore', '确认恢复该公告吗？')}
+                  successMessage={t('system.announcementManagement.success.restore', '公告已恢复')}
+                  action={async () => {
+                    await adminNotificationManagementApi.restoreAnnouncement(record.id).send();
+                    action.reload();
+                  }}
+                >
                   {t('system.announcementManagement.action.restore', '恢复')}
                 </TrueAdminConfirmAction>
               ) : null}
@@ -352,7 +483,8 @@ export default function AdminAnnouncementManagementPage() {
           ),
         }}
         toolbarRender={({ query, response }) => {
-          const currentStatus = (query.values.status as AdminAnnouncementStatus | undefined) ?? 'all';
+          const currentStatus =
+            (query.values.status as AdminAnnouncementStatus | undefined) ?? 'all';
           const scheduledCount = response?.meta?.statusStats?.scheduled ?? 0;
           return (
             <TrueAdminQuickFilter<AdminAnnouncementStatus | 'all'>
@@ -365,7 +497,9 @@ export default function AdminAnnouncementManagementPage() {
                 { label: statusText.expired, value: 'expired' },
                 { label: statusText.offline, value: 'offline' },
               ]}
-              onChange={(nextStatus) => query.setValue('status', nextStatus === 'all' ? undefined : nextStatus)}
+              onChange={(nextStatus) =>
+                query.setValue('status', nextStatus === 'all' ? undefined : nextStatus)
+              }
             />
           );
         }}
@@ -374,23 +508,164 @@ export default function AdminAnnouncementManagementPage() {
         tableScrollX={1180}
       />
 
-      <TrueAdminModal destroyOnHidden open={open} title={editing ? t('system.announcementManagement.modal.editAnnouncement', '编辑公告') : t('system.announcementManagement.modal.createAnnouncement', '发布公告')} width={760} footer={<Space><Button onClick={closeModal}>{t('modal.action.close', '关闭')}</Button>{!editing ? <Button icon={<SaveOutlined />} onClick={() => void submit('draft')}>{t('system.announcementManagement.action.saveDraft', '保存草稿')}</Button> : null}<Button type="primary" icon={editing ? <SaveOutlined /> : <CloudUploadOutlined />} onClick={() => void submit('publish')}>{editing ? t('system.announcementManagement.action.save', '保存') : t('system.announcementManagement.action.createAnnouncement', '发布公告')}</Button></Space>} onCancel={closeModal}>
-        <Form<AnnouncementFormValues> form={form} layout="vertical" initialValues={getInitialAnnouncementValues()}>
-          <Form.Item label={t('system.announcementManagement.form.title', '公告标题')} name="title" rules={[{ required: true }]}><Input disabled={metadataOnlyEdit} /></Form.Item>
-          <Form.Item label={t('system.announcementManagement.form.content', '公告正文')} name="content" rules={[{ required: true }]}><TrueAdminMarkdownEditor disabled={metadataOnlyEdit} rows={8} placeholder={t('system.announcementManagement.form.content.placeholder', '请输入 Markdown 公告正文')} /></Form.Item>
-          <Form.Item label={t('system.announcementManagement.form.attachments', '附件')} name="attachments"><TrueAdminAttachmentUpload disabled={metadataOnlyEdit} readonly={metadataOnlyEdit} multiple maxCount={8} title={t('system.announcementManagement.form.attachments.uploadTitle', '拖拽公告附件到这里，或点击选择')} hint={t('system.announcementManagement.form.attachments.uploadHint', '附件会随公告一起展示，支持编辑展示名称。')} /></Form.Item>
-          <Space size={12} style={{ width: '100%' }} align="start">
-            <Form.Item label={t('system.announcementManagement.form.level', '公告等级')} name="level"><Select disabled={metadataOnlyEdit} style={{ width: 160 }} options={Object.entries(levelText).map(([value, label]) => ({ label, value }))} /></Form.Item>
-            <Form.Item label={t('system.announcementManagement.form.targetType', '接收范围')} name="targetType"><Select disabled={metadataOnlyEdit} style={{ width: 180 }} options={[{ label: targetTypeText.all, value: 'all' }, { label: targetTypeText.role, value: 'role' }]} /></Form.Item>
+      <TrueAdminModal
+        destroyOnHidden
+        open={open}
+        title={
+          editing
+            ? t('system.announcementManagement.modal.editAnnouncement', '编辑公告')
+            : t('system.announcementManagement.modal.createAnnouncement', '发布公告')
+        }
+        width={760}
+        footer={
+          <Space>
+            <Button onClick={closeModal}>{t('modal.action.close', '关闭')}</Button>
+            {!editing ? (
+              <Button icon={<SaveOutlined />} onClick={() => void submit('draft')}>
+                {t('system.announcementManagement.action.saveDraft', '保存草稿')}
+              </Button>
+            ) : null}
+            <Button
+              type="primary"
+              icon={editing ? <SaveOutlined /> : <CloudUploadOutlined />}
+              onClick={() => void submit('publish')}
+            >
+              {editing
+                ? t('system.announcementManagement.action.save', '保存')
+                : t('system.announcementManagement.action.createAnnouncement', '发布公告')}
+            </Button>
           </Space>
-          {targetType === 'role' ? <Form.Item label={t('system.announcementManagement.form.targetRoleIds', '目标角色')} name="targetRoleIds" rules={[{ required: true }]}><Select disabled={metadataOnlyEdit} mode="multiple" loading={roleOptionsLoading} options={roleOptions} /></Form.Item> : null}
-          <Form.Item label={t('system.announcementManagement.form.pinned', '置顶公告')} name="pinned" valuePropName="checked"><Switch /></Form.Item>
-          <Form.Item label={t('system.announcementManagement.form.scheduledAt', '定时发布时间')} name="scheduledAt"><DatePicker disabled={metadataOnlyEdit} format="YYYY-MM-DD HH:mm" showTime={{ format: 'HH:mm' }} style={{ width: '100%' }} /></Form.Item>
-          <Form.Item label={t('system.announcementManagement.form.expireAt', '过期时间')} name="expireAt"><DatePicker format="YYYY-MM-DD HH:mm" showTime={{ format: 'HH:mm' }} style={{ width: '100%' }} /></Form.Item>
+        }
+        onCancel={closeModal}
+      >
+        <Form<AnnouncementFormValues>
+          form={form}
+          layout="vertical"
+          initialValues={getInitialAnnouncementValues()}
+        >
+          <Form.Item
+            label={t('system.announcementManagement.form.title', '公告标题')}
+            name="title"
+            rules={[{ required: true }]}
+          >
+            <Input disabled={metadataOnlyEdit} />
+          </Form.Item>
+          <Form.Item
+            label={t('system.announcementManagement.form.content', '公告正文')}
+            name="content"
+            rules={[{ required: true }]}
+          >
+            <TrueAdminMarkdownEditor
+              disabled={metadataOnlyEdit}
+              rows={8}
+              placeholder={t(
+                'system.announcementManagement.form.content.placeholder',
+                '请输入 Markdown 公告正文',
+              )}
+            />
+          </Form.Item>
+          <Form.Item
+            label={t('system.announcementManagement.form.attachments', '附件')}
+            name="attachments"
+          >
+            <TrueAdminAttachmentUpload
+              disabled={metadataOnlyEdit}
+              readonly={metadataOnlyEdit}
+              multiple
+              maxCount={8}
+              title={t(
+                'system.announcementManagement.form.attachments.uploadTitle',
+                '拖拽公告附件到这里，或点击选择',
+              )}
+              hint={t(
+                'system.announcementManagement.form.attachments.uploadHint',
+                '附件会随公告一起展示，支持编辑展示名称。',
+              )}
+            />
+          </Form.Item>
+          <Space size={12} style={{ width: '100%' }} align="start">
+            <Form.Item
+              label={t('system.announcementManagement.form.level', '公告等级')}
+              name="level"
+            >
+              <Select
+                disabled={metadataOnlyEdit}
+                style={{ width: 160 }}
+                options={Object.entries(levelText).map(([value, label]) => ({ label, value }))}
+              />
+            </Form.Item>
+            <Form.Item
+              label={t('system.announcementManagement.form.targetType', '接收范围')}
+              name="targetType"
+            >
+              <Select
+                disabled={metadataOnlyEdit}
+                style={{ width: 180 }}
+                options={[
+                  { label: targetTypeText.all, value: 'all' },
+                  { label: targetTypeText.role, value: 'role' },
+                ]}
+              />
+            </Form.Item>
+          </Space>
+          {targetType === 'role' ? (
+            <Form.Item
+              label={t('system.announcementManagement.form.targetRoleIds', '目标角色')}
+              name="targetRoleIds"
+              rules={[{ required: true }]}
+            >
+              <Select
+                disabled={metadataOnlyEdit}
+                mode="multiple"
+                loading={roleOptionsLoading}
+                options={roleOptions}
+              />
+            </Form.Item>
+          ) : null}
+          <Form.Item
+            label={t('system.announcementManagement.form.pinned', '置顶公告')}
+            name="pinned"
+            valuePropName="checked"
+          >
+            <Switch />
+          </Form.Item>
+          <Form.Item
+            label={t('system.announcementManagement.form.scheduledAt', '定时发布时间')}
+            name="scheduledAt"
+          >
+            <DatePicker
+              disabled={metadataOnlyEdit}
+              format="YYYY-MM-DD HH:mm"
+              showTime={{ format: 'HH:mm' }}
+              style={{ width: '100%' }}
+            />
+          </Form.Item>
+          <Form.Item
+            label={t('system.announcementManagement.form.expireAt', '过期时间')}
+            name="expireAt"
+          >
+            <DatePicker
+              format="YYYY-MM-DD HH:mm"
+              showTime={{ format: 'HH:mm' }}
+              style={{ width: '100%' }}
+            />
+          </Form.Item>
         </Form>
       </TrueAdminModal>
 
-      <AnnouncementDetailModal open={detailOpen} announcement={detail} statusText={statusText} levelText={levelText} targetTypeText={targetTypeText} onClose={() => setDetailOpen(false)} afterOpenChange={(nextOpen) => { if (!nextOpen) { setDetail(undefined); } }} />
+      <AnnouncementDetailModal
+        open={detailOpen}
+        announcement={detail}
+        statusText={statusText}
+        levelText={levelText}
+        targetTypeText={targetTypeText}
+        onClose={() => setDetailOpen(false)}
+        afterOpenChange={(nextOpen) => {
+          if (!nextOpen) {
+            setDetail(undefined);
+          }
+        }}
+      />
     </>
   );
 }
@@ -405,7 +680,15 @@ type AnnouncementDetailModalProps = {
   afterOpenChange?: (open: boolean) => void;
 };
 
-function AnnouncementDetailModal({ open, announcement, statusText, levelText, targetTypeText, onClose, afterOpenChange }: AnnouncementDetailModalProps) {
+function AnnouncementDetailModal({
+  open,
+  announcement,
+  statusText,
+  levelText,
+  targetTypeText,
+  onClose,
+  afterOpenChange,
+}: AnnouncementDetailModalProps) {
   const { t } = useI18n();
   const auditItems = useMemo<TrueAdminAuditTimelineItem[]>(() => {
     if (!announcement) {
@@ -413,55 +696,122 @@ function AnnouncementDetailModal({ open, announcement, statusText, levelText, ta
     }
 
     return [
-      { color: 'blue', description: t('system.announcementManagement.audit.created.description', '公告已创建'), operator: announcement.operatorName, time: announcement.createdAt, title: t('system.announcementManagement.audit.created', '创建') },
-      announcement.publishedAt ? { color: 'green', description: t('system.announcementManagement.audit.published.description', '公告已发布'), operator: announcement.operatorName, time: announcement.publishedAt, title: t('system.announcementManagement.audit.published', '发布') } : undefined,
-      announcement.offlineAt ? { color: 'gray', description: t('system.announcementManagement.audit.offline.description', '公告已下线'), operator: announcement.operatorName, time: announcement.offlineAt, title: t('system.announcementManagement.audit.offline', '下线') } : undefined,
+      {
+        color: 'blue',
+        description: t('system.announcementManagement.audit.created.description', '公告已创建'),
+        operator: announcement.operatorName,
+        time: announcement.createdAt,
+        title: t('system.announcementManagement.audit.created', '创建'),
+      },
+      announcement.publishedAt
+        ? {
+            color: 'green',
+            description: t(
+              'system.announcementManagement.audit.published.description',
+              '公告已发布',
+            ),
+            operator: announcement.operatorName,
+            time: announcement.publishedAt,
+            title: t('system.announcementManagement.audit.published', '发布'),
+          }
+        : undefined,
+      announcement.offlineAt
+        ? {
+            color: 'gray',
+            description: t('system.announcementManagement.audit.offline.description', '公告已下线'),
+            operator: announcement.operatorName,
+            time: announcement.offlineAt,
+            title: t('system.announcementManagement.audit.offline', '下线'),
+          }
+        : undefined,
     ].filter(Boolean) as TrueAdminAuditTimelineItem[];
   }, [announcement, t]);
 
   return (
-    <TrueAdminModal destroyOnHidden open={open} title={announcement?.title ?? ''} width={920} footer={<Button onClick={onClose}>{t('modal.action.close', '关闭')}</Button>} onCancel={onClose} afterOpenChange={afterOpenChange}>
+    <TrueAdminModal
+      destroyOnHidden
+      open={open}
+      title={announcement?.title ?? ''}
+      width={920}
+      footer={<Button onClick={onClose}>{t('modal.action.close', '关闭')}</Button>}
+      onCancel={onClose}
+      afterOpenChange={afterOpenChange}
+    >
       {announcement ? (
-      <Space orientation="vertical" size={16} style={{ width: '100%' }}>
-        <Space size={8} wrap>
-          <Tag color={announcementStatusColor[announcement.status]}>{statusText[announcement.status]}</Tag>
-          <Tag color="purple">{t('notification.type.announcement', '公告')}</Tag>
-          <Tag color={levelColor[announcement.level]}>{levelText[announcement.level]}</Tag>
-          {announcement.pinned ? <Tag color="gold">{t('notification.pinned', '置顶')}</Tag> : null}
+        <Space orientation="vertical" size={16} style={{ width: '100%' }}>
+          <Space size={8} wrap>
+            <Tag color={announcementStatusColor[announcement.status]}>
+              {statusText[announcement.status]}
+            </Tag>
+            <Tag color="purple">{t('notification.type.announcement', '公告')}</Tag>
+            <Tag color={levelColor[announcement.level]}>{levelText[announcement.level]}</Tag>
+            {announcement.pinned ? (
+              <Tag color="gold">{t('notification.pinned', '置顶')}</Tag>
+            ) : null}
+          </Space>
+          <Descriptions size="small" column={{ xs: 1, md: 2 }}>
+            <Descriptions.Item label={t('notification.detail.source', '来源')}>
+              {resolveAdminMessageLabel(
+                getAdminMessageSourceConfig(announcement.source)?.label,
+                t,
+                announcement.source,
+              )}
+            </Descriptions.Item>
+            <Descriptions.Item label={t('system.announcementManagement.column.target', '可见范围')}>
+              {announcement.targetSummary} · {targetTypeText[announcement.targetType]}
+            </Descriptions.Item>
+            <Descriptions.Item label={t('system.announcementManagement.column.operator', '操作人')}>
+              {announcement.operatorName ?? '-'}
+            </Descriptions.Item>
+            <Descriptions.Item
+              label={t('system.announcementManagement.form.scheduledAt', '定时发布时间')}
+            >
+              {announcement.scheduledAt ?? '-'}
+            </Descriptions.Item>
+            <Descriptions.Item
+              label={t('system.announcementManagement.column.publishedAt', '发布时间')}
+            >
+              {announcement.publishedAt ?? '-'}
+            </Descriptions.Item>
+            <Descriptions.Item label={t('system.announcementManagement.form.expireAt', '过期时间')}>
+              {announcement.expireAt ?? '-'}
+            </Descriptions.Item>
+          </Descriptions>
+          <div className="trueadmin-message-detail-content">
+            <TrueAdminMarkdown value={announcement.content} />
+          </div>
+          {announcement.attachments?.length ? (
+            <TrueAdminAttachmentUpload readonly value={announcement.attachments} />
+          ) : null}
+          {announcement.payload && Object.keys(announcement.payload).length > 0 ? (
+            <Collapse
+              className="trueadmin-message-detail-payload"
+              ghost
+              items={[
+                {
+                  key: 'payload',
+                  label: t('notification.detail.payload', '扩展数据'),
+                  children: (
+                    <Typography.Paragraph
+                      code
+                      className="trueadmin-message-detail-payload-code"
+                      style={{ margin: 0, whiteSpace: 'pre-wrap' }}
+                    >
+                      {JSON.stringify(announcement.payload, null, 2)}
+                    </Typography.Paragraph>
+                  ),
+                },
+              ]}
+              size="small"
+            />
+          ) : null}
+          <div className="trueadmin-notification-management-audit">
+            <Typography.Text strong>
+              {t('system.announcementManagement.audit.title', '操作记录')}
+            </Typography.Text>
+            <TrueAdminAuditTimeline items={auditItems} />
+          </div>
         </Space>
-        <Descriptions size="small" column={{ xs: 1, md: 2 }}>
-          <Descriptions.Item label={t('notification.detail.source', '来源')}>{resolveAdminMessageLabel(getAdminMessageSourceConfig(announcement.source)?.label, t, announcement.source)}</Descriptions.Item>
-          <Descriptions.Item label={t('system.announcementManagement.column.target', '可见范围')}>{announcement.targetSummary} · {targetTypeText[announcement.targetType]}</Descriptions.Item>
-          <Descriptions.Item label={t('system.announcementManagement.column.operator', '操作人')}>{announcement.operatorName ?? '-'}</Descriptions.Item>
-          <Descriptions.Item label={t('system.announcementManagement.form.scheduledAt', '定时发布时间')}>{announcement.scheduledAt ?? '-'}</Descriptions.Item>
-          <Descriptions.Item label={t('system.announcementManagement.column.publishedAt', '发布时间')}>{announcement.publishedAt ?? '-'}</Descriptions.Item>
-          <Descriptions.Item label={t('system.announcementManagement.form.expireAt', '过期时间')}>{announcement.expireAt ?? '-'}</Descriptions.Item>
-        </Descriptions>
-        <div className="trueadmin-message-detail-content"><TrueAdminMarkdown value={announcement.content} /></div>
-        {announcement.attachments?.length ? <TrueAdminAttachmentUpload readonly value={announcement.attachments} /> : null}
-        {announcement.payload && Object.keys(announcement.payload).length > 0 ? (
-          <Collapse
-            className="trueadmin-message-detail-payload"
-            ghost
-            items={[
-              {
-                key: 'payload',
-                label: t('notification.detail.payload', '扩展数据'),
-                children: (
-                  <Typography.Paragraph code className="trueadmin-message-detail-payload-code" style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
-                    {JSON.stringify(announcement.payload, null, 2)}
-                  </Typography.Paragraph>
-                ),
-              },
-            ]}
-            size="small"
-          />
-        ) : null}
-        <div className="trueadmin-notification-management-audit">
-          <Typography.Text strong>{t('system.announcementManagement.audit.title', '操作记录')}</Typography.Text>
-          <TrueAdminAuditTimeline items={auditItems} />
-        </div>
-      </Space>
       ) : null}
     </TrueAdminModal>
   );

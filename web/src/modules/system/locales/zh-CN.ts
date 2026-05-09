@@ -54,7 +54,8 @@ export default {
   'system.roles.modal.edit': '编辑角色',
   'system.roles.modal.authorize': '角色授权',
   'system.roles.modal.authorizeWithName': '角色授权 - {{name}}',
-  'system.roles.authorize.description': '勾选该角色可访问的目录、菜单和按钮权限。子角色不能超出父角色权限范围。',
+  'system.roles.authorize.description':
+    '勾选该角色可访问的目录、菜单和按钮权限。子角色不能超出父角色权限范围。',
   'system.roles.success.create': '角色已创建',
   'system.roles.success.update': '角色已保存',
   'system.roles.success.authorize': '角色授权已保存',
@@ -264,7 +265,8 @@ export default {
   'system.announcementManagement.form.pinned': '置顶公告',
   'system.announcementManagement.form.attachments': '附件',
   'system.announcementManagement.form.attachments.uploadTitle': '拖拽公告附件到这里，或点击选择',
-  'system.announcementManagement.form.attachments.uploadHint': '附件会随公告一起展示，支持编辑展示名称。',
+  'system.announcementManagement.form.attachments.uploadHint':
+    '附件会随公告一起展示，支持编辑展示名称。',
   'system.announcementManagement.form.scheduledAt': '定时发布时间',
   'system.announcementManagement.form.expireAt': '过期时间',
   'system.announcementManagement.modal.createAnnouncement': '发布公告',

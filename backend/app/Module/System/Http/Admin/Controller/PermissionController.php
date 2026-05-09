@@ -14,7 +14,7 @@ use TrueAdmin\Kernel\Http\Attribute\AdminGet;
 use TrueAdmin\Kernel\Http\Attribute\Menu;
 use TrueAdmin\Kernel\Http\Attribute\Permission;
 
-#[Menu(code: 'system', title: '系统管理', path: '/system', icon: 'setting', sort: 10, type: 'directory')]
+#[Menu(code: 'system', title: '系统管理', path: '/system', icon: 'SettingOutlined', sort: 10, type: 'directory')]
 #[AdminRouteController(path: '/api/admin/system', middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
 final class PermissionController extends AdminController
 {

@@ -2,6 +2,7 @@ import type { Dayjs } from 'dayjs';
 import type { ReactNode } from 'react';
 import type { PageResult } from '@/core/http/types';
 import type { TransText } from '@/core/i18n/trans';
+import type { TrueAdminIconInput } from '@/core/icon/TrueAdminIcon';
 import type { TrueAdminAttachmentValue } from '@/core/upload';
 
 export type AdminMessageKind = 'notification' | 'announcement';
@@ -73,7 +74,7 @@ export type AdminMessagePayloadRenderContext = {
 
 export type AdminMessageTypeConfig = {
   label?: AdminMessageLabel;
-  icon?: ReactNode;
+  icon?: TrueAdminIconInput;
   color?: string;
   payloadRender?: (context: AdminMessagePayloadRenderContext) => ReactNode;
   onClick?: (
@@ -241,7 +242,10 @@ export type AdminNotificationBatchCreatePayload = {
 
 export type AdminNotificationBatchUpdatePayload = AdminNotificationBatchCreatePayload;
 
-export type AdminAnnouncementCreatePayload = Omit<AdminNotificationBatchCreatePayload, 'targetType'> & {
+export type AdminAnnouncementCreatePayload = Omit<
+  AdminNotificationBatchCreatePayload,
+  'targetType'
+> & {
   publishMode?: 'draft' | 'publish';
   targetType: AdminAnnouncementTargetType;
 };

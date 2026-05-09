@@ -5,13 +5,13 @@ import { Button, Layout, Menu, Result, Spin, Tooltip } from 'antd';
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router';
 import { useI18n } from '@/core/i18n/I18nProvider';
-import { IconRenderer } from '@/core/icon/IconRenderer';
+import { TrueAdminIcon, type TrueAdminIconInput } from '@/core/icon/TrueAdminIcon';
 import { getRouteLayoutMeta } from '@/core/layout/routeLayoutMeta';
 import { WorkspaceScrollRestoration } from '@/core/layout/WorkspaceScrollRestoration';
 import { useWorkspaceViewport, WorkspaceViewportProvider } from '@/core/layout/WorkspaceViewport';
 import { useMenuTreeQuery } from '@/core/menu/hooks';
 import { mergeFrontendMenus } from '@/core/menu/mergeFrontendMenus';
-import type { BackendMenu } from '@/core/menu/types';
+import type { AppMenu as AppMenuConfig } from '@/core/menu/types';
 import { type LayoutMode, useLayoutStore } from '@/core/store/layoutStore';
 import { AppTabsBar } from '@/core/tabs/AppTabsBar';
 import { useRouteTabs } from '@/core/tabs/useRouteTabs';
@@ -26,12 +26,12 @@ type RuntimeMenuNode = {
   path: string;
   id?: number;
   code: string;
-  type?: BackendMenu['type'];
+  type?: AppMenuConfig['type'];
   url?: string;
-  openMode?: BackendMenu['openMode'];
+  openMode?: AppMenuConfig['openMode'];
   showLinkHeader?: boolean;
   label: string;
-  icon?: ReactNode;
+  icon?: TrueAdminIconInput;
   children?: RuntimeMenuNode[];
 };
 
@@ -44,7 +44,7 @@ type MenuMatch = {
 const normalizePath = (path: string) => path.replace(/\/+$/, '') || '/';
 
 const toRuntimeMenus = (
-  menus: BackendMenu[] | undefined,
+  menus: AppMenuConfig[] | undefined,
   t: (key?: string, fallback?: string) => string,
 ): RuntimeMenuNode[] =>
   (menus ?? [])
@@ -59,14 +59,14 @@ const toRuntimeMenus = (
       openMode: menu.openMode,
       showLinkHeader: menu.showLinkHeader,
       label: t(menu.i18n, menu.title),
-      icon: <IconRenderer name={menu.icon || menu.code} />,
+      icon: menu.icon || menu.code,
       children: toRuntimeMenus(menu.children, t),
     }));
 
 const toMenuItems = (menus: RuntimeMenuNode[]): MenuItem[] =>
   menus.map((menu) => ({
     key: menu.key,
-    icon: menu.icon,
+    icon: <TrueAdminIcon icon={menu.icon} />,
     label: menu.label,
     children: menu.children?.length ? toMenuItems(menu.children) : undefined,
   }));
@@ -74,7 +74,7 @@ const toMenuItems = (menus: RuntimeMenuNode[]): MenuItem[] =>
 const toRootMenuItems = (menus: RuntimeMenuNode[]): MenuItem[] =>
   menus.map((menu) => ({
     key: menu.key,
-    icon: menu.icon,
+    icon: <TrueAdminIcon icon={menu.icon} />,
     label: menu.label,
   }));
 
@@ -88,7 +88,9 @@ const toMenuNodeMap = (menus: RuntimeMenuNode[], nodeMap = new Map<string, Runti
 };
 
 const getFirstNavigableMenu = (menu: RuntimeMenuNode): RuntimeMenuNode => {
-  const firstChild = menu.children?.find((child) => child.type === 'link' || child.path || child.children?.length);
+  const firstChild = menu.children?.find(
+    (child) => child.type === 'link' || child.path || child.children?.length,
+  );
 
   return firstChild ? getFirstNavigableMenu(firstChild) : menu;
 };
@@ -106,7 +108,10 @@ const toRootMenuNodeMap = (menus: RuntimeMenuNode[]) => {
 const toIframeLinkPath = (menu: RuntimeMenuNode): string =>
   `/system/link-frame/${encodeURIComponent(String(menu.id ?? menu.code))}`;
 
-const openRuntimeMenu = (menu: RuntimeMenuNode | undefined, navigate: ReturnType<typeof useNavigate>) => {
+const openRuntimeMenu = (
+  menu: RuntimeMenuNode | undefined,
+  navigate: ReturnType<typeof useNavigate>,
+) => {
   if (!menu) {
     return;
   }
@@ -148,7 +153,12 @@ const findMenuMatch = (
 
   for (const menu of menus) {
     const nextLabels = [...labels, menu.label];
-    if ((menu.path && normalizePath(menu.path) === currentPath) || (menu.type === 'link' && menu.openMode === 'iframe' && normalizePath(toIframeLinkPath(menu)) === currentPath)) {
+    if (
+      (menu.path && normalizePath(menu.path) === currentPath) ||
+      (menu.type === 'link' &&
+        menu.openMode === 'iframe' &&
+        normalizePath(toIframeLinkPath(menu)) === currentPath)
+    ) {
       return {
         selectedKey: menu.key,
         openKeys: parents,
@@ -318,7 +328,7 @@ function AppColumnRootMenu({
               onClick={() => openRuntimeMenu(menuNodeMap.get(menu.key), navigate)}
             >
               <span className="trueadmin-shell-column-root-icon" aria-hidden="true">
-                {menu.icon}
+                <TrueAdminIcon icon={menu.icon} />
               </span>
             </button>
           </Tooltip>
