@@ -184,7 +184,28 @@ export default {
 
 ## 菜单、路由和权限
 
-菜单、权限、按钮和接口元数据由后端注册和运行时配置。前端 manifest 只做 `path -> component` 映射。第一版使用 `path` 作为菜单和前端组件的绑定键。菜单层级、名称、图标、排序、状态可以在数据库调整；`path` 属于前后端契约，不建议后台随意修改。
+菜单、权限、按钮和接口元数据由后端注册和运行时配置。前端 manifest 只做 `path -> component` 映射。内部页面菜单不是后台动态创建的页面配置，而是“后端资源声明 + 前端路由实现”的组合：后端通过 Controller Attribute 声明菜单和权限，前端通过模块或插件 `manifest.ts` 声明同一路径的页面组件。
+
+后台菜单资源类型固定为：
+
+```text
+directory  分组目录，不直接承载页面
+menu       代码定义的内部页面入口
+button     代码定义的按钮或接口权限点
+link       后台自定义外部链接入口
+```
+
+代码定义资源的 `type`、`path`、`permission` 等关键字段由代码掌权，后台菜单管理页面只允许调整名称、图标、排序、层级、启停等展示和授权相关信息。后台自定义资源只允许创建 `directory` 和 `link`，不能创建内部 `menu` 或 `button`，避免数据库里出现前端没有组件实现的“空菜单”。
+
+`link` 用于外部系统入口，字段为 `url` 和 `openMode`：
+
+```text
+blank   新标签页打开，使用 noopener/noreferrer
+self    当前窗口跳转
+iframe  在 TrueAdmin 工作区 iframe 承载页中打开
+```
+
+`iframe` 只用于可信或允许被嵌入的站点；目标站点如果设置了 `X-Frame-Options` 或严格 CSP，浏览器会拒绝嵌入，这时应改用 `blank` 或 `self`。
 
 权限最佳实践是后端注册权限、后端校验权限、前端消费权限。当前用户权限由 `/api/admin/auth/me` 返回。前端只用 `permissions` 控制按钮和区域显示，后端 `PermissionMiddleware` 是最终安全边界。
 

@@ -98,6 +98,9 @@ final class AdminMenuManagementService extends AbstractService
         if (! in_array($type, [self::TYPE_DIRECTORY, 'menu', 'button', self::TYPE_LINK], true)) {
             throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'type', 'reason' => 'unsupported_menu_type']);
         }
+        if (! $isCodeMenu && ! in_array($type, [self::TYPE_DIRECTORY, self::TYPE_LINK], true)) {
+            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'type', 'reason' => 'custom_menu_only_supports_directory_or_link']);
+        }
 
         $code = $isCodeMenu ? (string) $current->getAttribute('code') : (string) ($payload['code'] ?? $current?->getAttribute('code') ?? '');
         if ($creating && $code === '') {

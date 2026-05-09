@@ -79,6 +79,33 @@ admin_user_departments.is_primary 是否主部门
 aud = admin
 ```
 
+## 后台菜单和链接资源
+
+后台菜单权限基于 `admin_menus` 和 `admin_role_menu`。菜单表保存的是后台资源树，不是前端动态页面定义。
+
+资源类型固定为：
+
+```text
+directory  目录分组
+menu       内部页面入口
+button     按钮或接口权限点
+link       外部链接入口
+```
+
+`menu` 和 `button` 必须来自代码元数据同步，属于 `source=code`。模块或插件通过 Controller Attribute 声明内部页面和按钮权限，前端通过 manifest 提供对应路由组件。后台管理页面可以调整代码资源的名称、图标、排序、父级和状态，但不能把代码资源改成别的类型，也不能把 `path`、`permission` 当成普通配置项随意改写。
+
+后台自定义资源属于 `source=custom`，只允许创建 `directory` 和 `link`。`link` 可参与角色授权，建议为链接生成或填写独立权限点；没有权限点的目录只作为可见容器，由子节点权限决定实际可见性。
+
+链接打开方式：
+
+```text
+blank   新标签页
+self    当前窗口
+iframe  系统内 iframe 承载
+```
+
+`iframe` 只是显示策略，不改变权限模型。用户能否看到链接仍取决于角色是否被授权对应菜单资源。
+
 ## 用户端身份体系
 
 用户端身份体系服务 App、小程序、H5、会员端、员工轻量工作台或其他用户端应用。

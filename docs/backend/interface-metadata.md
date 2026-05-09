@@ -148,15 +148,51 @@ permissions      原子权限点清单，用于注册和角色授权。
 permissionRules  接口权限规则，用于运行时校验、OpenAPI 和 AI 理解。
 ```
 
-### 菜单按钮元数据
+### 菜单和按钮元数据
+
+菜单资源不是动态页面配置。TrueAdmin 把菜单树当成后台资源树：代码定义内部页面和按钮权限，数据库保存运行时树形结构、角色授权和展示状态。
+
+内部页面入口使用 `#[Menu]` 声明：
+
+```php
+#[Menu(
+    code: 'product.orders',
+    title: '订单管理',
+    path: '/product/orders',
+    parent: 'product',
+    permission: 'product:order:list',
+    icon: 'shopping-cart',
+    sort: 20,
+)]
+final class OrderController extends AdminController
+{
+}
+```
+
+规则：
+
+- `code` 必须全局唯一。
+- `path` 是前后端内部页面契约，必须由前端模块或插件 `manifest.ts` 提供对应 route component。
+- `permission` 是进入该页面的权限点，接口级权限仍由 `#[Permission]` 或权限规则控制。
+- `type` 默认是 `menu`，也可以用于声明代码定义的 `directory`。
+- 代码定义资源同步到数据库后标记为 `source=code`，后台管理只能调整展示属性和层级，不应修改 `type`、`path`、`permission` 等关键字段。
+
+按钮权限使用 `#[MenuButton]` 描述接口附近的按钮权限默认资产：
 
 ```php
 #[MenuButton('product:create', title: '新增', parent: 'product', permission: 'product:create')]
 ```
 
-菜单树不建议完全靠接口注解生成。菜单目录和菜单页面仍优先使用 `menus.php` 或后台数据库维护。
+`MenuButton` 只适合描述查询、新增、编辑、删除、导出等按钮或接口权限点，不承载页面路由。
 
-`MenuButton` 只适合描述接口附近的按钮权限默认资产，例如查询、新增、编辑、删除、导出。
+后台菜单管理允许创建的自定义资源只有：
+
+```text
+directory  运行时分组目录
+link       外部链接入口
+```
+
+自定义 `link` 支持 `url` 和 `openMode`，其中 `openMode` 可选 `blank`、`self`、`iframe`。后台不能创建内部 `menu` 或 `button`，因为内部页面和按钮必须有代码事实来源，避免数据库菜单指向不存在的前端组件或不存在的接口权限。
 
 ### OpenAPI 元数据
 
