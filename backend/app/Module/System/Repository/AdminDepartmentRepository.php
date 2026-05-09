@@ -105,7 +105,6 @@ final class AdminDepartmentRepository extends AbstractRepository
         return [
             'id' => (int) $department->getAttribute('id'),
             'parentId' => (int) $department->getAttribute('parent_id'),
-            'parent_id' => (int) $department->getAttribute('parent_id'),
             'code' => (string) $department->getAttribute('code'),
             'name' => (string) $department->getAttribute('name'),
             'level' => (int) $department->getAttribute('level'),

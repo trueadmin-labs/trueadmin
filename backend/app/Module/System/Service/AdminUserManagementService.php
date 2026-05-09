@@ -110,14 +110,6 @@ final class AdminUserManagementService extends AbstractService
         });
     }
 
-    /**
-     * @return list<array{id:int,code:string,name:string,status:string}>
-     */
-    public function roleOptions(): array
-    {
-        return $this->roles->options();
-    }
-
     private function mustFind(int $id): AdminUser
     {
         $user = $this->users->findById($id);

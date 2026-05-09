@@ -36,6 +36,20 @@ final class AdminRoleController extends AdminController
         return ApiResponse::success($this->roles->paginate($request->adminQuery())->toArray());
     }
 
+    #[AdminGet('tree')]
+    #[Permission('system:role:list', title: '角色树', group: '系统管理')]
+    public function tree(AdminQueryRequest $request): array
+    {
+        return ApiResponse::success($this->roles->tree($request->adminQuery()));
+    }
+
+    #[AdminGet('options')]
+    #[Permission('system:role:list', title: '角色选项', group: '系统管理')]
+    public function options(): array
+    {
+        return ApiResponse::success($this->roles->options());
+    }
+
     #[AdminGet('{id}')]
     #[Permission('system:role:detail', title: '角色详情', group: '系统管理')]
     public function detail(int $id): array

@@ -24,7 +24,7 @@ import {
 } from '@/core/notification';
 import { TrueAdminAuditTimeline, type TrueAdminAuditTimelineItem } from '@/core/timeline';
 import { TrueAdminAttachmentUpload } from '@/core/upload';
-import { adminUserApi } from '../../services/admin-user.api';
+import { roleApi } from '../../services/role.api';
 
 const levelColor: Record<AdminMessageLevel, string> = {
   error: 'error',
@@ -88,8 +88,8 @@ export default function AdminAnnouncementManagementPage() {
   useEffect(() => {
     let mounted = true;
     setRoleOptionsLoading(true);
-    adminUserApi
-      .roleOptions()
+    roleApi
+      .options()
       .then((roles) => {
         if (mounted) {
           setRoleOptions(roles.map((role) => ({ label: role.name, value: role.id })));

@@ -42,6 +42,10 @@ Http/Client/Controller
 Http/Client/Middleware
 Http/Client/Request
 Http/Common/Event
+Command
+Crontab
+Event
+Listener
 Library
 Model
 Repository
@@ -53,6 +57,8 @@ module.php
 ```
 
 模块业务接口默认通过 Controller 上的 Attribute 声明路由、权限、日志和 OpenAPI 元数据，不再要求每个模块维护 `routes.php`。配置模式与注解模式边界见 [配置模式与注解模式规范](configuration-vs-attribute.md)。
+
+模块业务定时任务放在模块内 `Crontab/` 目录，优先使用 Hyperf 原生 `#[Crontab]` 注解注册。根级 `config/autoload/crontab.php` 只保留全局开关和框架级兜底配置，不集中登记各模块业务任务。定时任务类只做调度入口，复杂业务规则下沉到模块 Service。
 
 第一阶段不需要每个模块都创建完整目录，只创建实际需要的部分。
 

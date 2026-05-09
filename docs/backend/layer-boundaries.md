@@ -246,6 +246,8 @@ backend/app/Module/Order/Listener/IncreaseProductSalesListener.php
 
 定时任务类只做调度入口，复杂业务规则应下沉到对应 Service。
 
+业务定时任务优先使用 Hyperf 原生 `#[Crontab]` 注解声明，类放模块内 `Crontab/` 目录。根级 `config/autoload/crontab.php` 不作为业务任务集中注册表，只保留全局开关和极少数框架级兜底配置。
+
 ## 依赖方向
 
 推荐依赖方向：

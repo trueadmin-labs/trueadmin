@@ -38,6 +38,15 @@ final class AdminRoleRepository extends AbstractRepository
         );
     }
 
+    public function all(AdminQuery $adminQuery): array
+    {
+        return $this->listQuery(
+            AdminRole::query(),
+            $adminQuery,
+            fn (AdminRole $role): array => $this->toArray($role),
+        );
+    }
+
     public function find(int $id): ?AdminRole
     {
         /** @var null|AdminRole $role */
@@ -126,7 +135,6 @@ final class AdminRoleRepository extends AbstractRepository
         return [
             'id' => (int) $role->getAttribute('id'),
             'parentId' => (int) $role->getAttribute('parent_id'),
-            'parent_id' => (int) $role->getAttribute('parent_id'),
             'code' => (string) $role->getAttribute('code'),
             'name' => (string) $role->getAttribute('name'),
             'level' => (int) $role->getAttribute('level'),

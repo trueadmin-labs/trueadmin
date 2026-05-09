@@ -52,6 +52,19 @@ const departmentTree = [
   },
 ];
 
+const roleOptions = [
+  { id: 1, parentId: 0, code: 'super-admin', name: '超级管理员', level: 1, path: '', sort: 0, status: 'enabled' },
+  { id: 2, parentId: 1, code: 'operator', name: '运营管理员', level: 2, path: ',1,', sort: 10, status: 'enabled' },
+  { id: 3, parentId: 1, code: 'auditor', name: '审计员', level: 2, path: ',1,', sort: 20, status: 'enabled' },
+];
+
+const roleTree = [
+  {
+    ...roleOptions[0],
+    children: [roleOptions[1], roleOptions[2]],
+  },
+];
+
 const now = '2026-05-09 10:30:00';
 
 const messageItems = [
@@ -322,13 +335,8 @@ export const handlers = [
     const pageSize = Number(url.searchParams.get('pageSize') || 20);
     return success({ items: users, total: users.length, page, pageSize });
   }),
-  http.get('/api/admin/system/users/role-options', () =>
-    success([
-      { id: 1, code: 'super-admin', name: '超级管理员', status: 'enabled' },
-      { id: 2, code: 'operator', name: '运营管理员', status: 'enabled' },
-      { id: 3, code: 'auditor', name: '审计员', status: 'enabled' },
-    ]),
-  ),
+  http.get('/api/admin/system/roles/tree', () => success(roleTree)),
+  http.get('/api/admin/system/roles/options', () => success(roleOptions)),
   http.get('/api/admin/messages', ({ request }) => {
     const url = new URL(request.url);
     const page = Number(url.searchParams.get('page') || 1);

@@ -68,11 +68,4 @@ final class AdminUserController extends AdminController
 
         return ApiResponse::success(null);
     }
-
-    #[AdminGet('role-options')]
-    #[Permission('system:role:list', title: '角色选项', group: '系统管理')]
-    public function listRoleOptions(): array
-    {
-        return ApiResponse::success($this->users->roleOptions());
-    }
 }

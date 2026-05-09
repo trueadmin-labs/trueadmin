@@ -7,13 +7,6 @@ import type {
   AdminUserUpdatePayload,
 } from '../types/admin-user';
 
-export type AdminRoleOption = {
-  id: number;
-  code: string;
-  name: string;
-  status: string;
-};
-
 const normalizePageResult = (result: PageResult<AdminUser>): PageResult<AdminUser> => ({
   ...result,
   items: result.items ?? [],
@@ -32,5 +25,4 @@ export const adminUserApi = {
   update: (id: React.Key, payload: AdminUserUpdatePayload) =>
     http.Put<AdminUser>(`/admin/system/users/${id}`, payload).send(),
   delete: (id: React.Key) => http.Delete<null>(`/admin/system/users/${id}`).send(),
-  roleOptions: () => http.Get<AdminRoleOption[]>('/admin/system/users/role-options').send(),
 };

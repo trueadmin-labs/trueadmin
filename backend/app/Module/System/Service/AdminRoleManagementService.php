@@ -29,6 +29,16 @@ final class AdminRoleManagementService extends AbstractService
         return $this->roles->paginate($query);
     }
 
+    public function tree(AdminQuery $query): array
+    {
+        return $this->tree->build($this->roles->all($query));
+    }
+
+    public function options(): array
+    {
+        return $this->roles->options();
+    }
+
     public function detail(int $id): array
     {
         $role = $this->mustFind($id);

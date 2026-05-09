@@ -190,6 +190,22 @@ class ExampleTest extends TestCase
         $this->assertSame(3, $childRole['data']['level']);
         $this->assertSame(rtrim((string) $role['data']['path'], ',') . ',' . $role['data']['id'] . ',', $childRole['data']['path']);
 
+        $roleOptions = $this->get('/api/admin/system/roles/options', [], $headers);
+        $this->assertSame('SUCCESS', $roleOptions['code']);
+        $roleOptionIds = array_column($roleOptions['data'], 'id');
+        $this->assertContains($role['data']['id'], $roleOptionIds);
+        $this->assertContains($childRole['data']['id'], $roleOptionIds);
+        $this->assertArrayNotHasKey('children', $roleOptions['data'][0]);
+        $this->assertArrayNotHasKey('parent_id', $roleOptions['data'][0]);
+
+        $roleTree = $this->get('/api/admin/system/roles/tree', [], $headers);
+        $this->assertSame('SUCCESS', $roleTree['code']);
+        $treeParent = $this->findNodeById($roleTree['data'], $role['data']['id']);
+        $this->assertIsArray($treeParent);
+        $this->assertArrayHasKey('children', $treeParent);
+        $this->assertContains($childRole['data']['id'], array_column($treeParent['children'], 'id'));
+        $this->assertArrayNotHasKey('parent_id', $treeParent);
+
         $user = $this->json('/api/admin/system/users', [
             'username' => 'test-user-' . $suffix,
             'password' => 'trueadmin',
@@ -441,6 +457,23 @@ class ExampleTest extends TestCase
         $this->assertSame('allOf', $all['data']['mode']);
     }
 
+
+    private function findNodeById(array $nodes, int $id): ?array
+    {
+        foreach ($nodes as $node) {
+            if ((int) ($node['id'] ?? 0) === $id) {
+                return $node;
+            }
+            if (isset($node['children']) && is_array($node['children'])) {
+                $found = $this->findNodeById($node['children'], $id);
+                if ($found !== null) {
+                    return $found;
+                }
+            }
+        }
+
+        return null;
+    }
 
     private function loginAsAdmin()
     {
