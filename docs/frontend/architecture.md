@@ -227,7 +227,7 @@ CRUD 组件支持按 `resource` 推导常见权限，例如 `system.user.create`
 
 前端维护 icon registry，后端菜单下发 icon key。目录为 `src/core/icon`，核心文件为 `iconRegistry.tsx`、`TrueAdminIcon.tsx` 和 `TrueAdminIconPicker.tsx`。框架默认注册完整 Ant Design Icons，内置图标 key 使用 AntD 原始组件名，例如 `SettingOutlined`、`UserOutlined`、`MenuOutlined`。
 
-模块和插件可以通过 `manifest.icons` 注册额外图标，注册 key 应使用明确命名空间，避免与 AntD 图标或其他插件冲突，例如 `vendor.plugin.CustomIcon`。注册值支持 ReactNode，也支持图片地址字符串，例如 `'vendor.plugin.logo': logoUrl` 或 `'vendor.plugin.logo': '/assets/logo.svg'`。菜单图标支持 registered icon name 和 image url：registered icon name 由 `TrueAdminIcon` 从 icon registry 渲染，注册项可以是 AntD 图标、插件自定义 React 图标或插件注册的图片图标；image url 由 `TrueAdminIcon` 自动识别并直接渲染为图片。菜单管理表单使用 `TrueAdminIconPicker` 从 Ant Design Icons 与模块/插件注册图标中筛选选择，搜索范围包含图标 key、来源和图片地址；找不到图标时使用 `AppstoreOutlined` fallback。
+模块和插件可以通过 `manifest.icons` 注册额外图标，注册 key 应使用明确命名空间，避免与 AntD 图标或其他插件冲突，例如 `vendor.plugin.CustomIcon`。Ant Design Icons 已由框架完整内置，模块和插件使用 AntD 图标时直接填写原始组件名即可，不需要重复注册。`manifest.icons` 只用于插件自定义 React 图标或图片图标，注册值支持 ReactNode，也支持图片地址字符串，例如 `'vendor.plugin.logo': logoUrl` 或 `'vendor.plugin.logo': '/assets/logo.svg'`。菜单图标支持 registered icon name 和 image url：registered icon name 由 `TrueAdminIcon` 从 icon registry 渲染；image url 由 `TrueAdminIcon` 自动识别并直接渲染为图片。菜单管理表单使用 `TrueAdminIconPicker` 从 Ant Design Icons 与模块/插件注册图标中筛选选择，搜索范围包含图标 key、来源和图片地址；找不到图标时使用 `AppstoreOutlined` fallback。
 
 ## 请求与状态
 

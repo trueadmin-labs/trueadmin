@@ -238,18 +238,18 @@ final class AdminMenuRepository extends AbstractRepository implements MetadataMe
             return (int) $created->getAttribute('id');
         }
 
-        $updates = ['code' => $code, 'source' => 'code', 'metadata_synced_at' => $syncedAt, 'updated_at' => $syncedAt];
-        foreach (['permission', 'type', 'path', 'url', 'open_mode'] as $field) {
-            $current = $exists->getAttribute($field);
-            if (
-                $field === 'url'
-                || $field === 'open_mode'
-                || $current === null
-                || $current === ''
-            ) {
-                $updates[$field] = $defaults[$field];
-            }
-        }
+        $updates = [
+            'code' => $code,
+            'type' => $defaults['type'],
+            'path' => $defaults['path'],
+            'url' => $defaults['url'],
+            'open_mode' => $defaults['open_mode'],
+            'show_link_header' => $defaults['show_link_header'],
+            'permission' => $defaults['permission'],
+            'source' => 'code',
+            'metadata_synced_at' => $syncedAt,
+            'updated_at' => $syncedAt,
+        ];
 
         $exists->fill($updates);
         $exists->save();

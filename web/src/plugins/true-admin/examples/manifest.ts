@@ -1,4 +1,3 @@
-import { ExperimentOutlined } from '@ant-design/icons';
 import { Descriptions, Tag } from 'antd';
 import { createElement, lazy } from 'react';
 import { trans } from '@/core/i18n/trans';
@@ -312,7 +311,6 @@ export default defineModule({
     'en-US': () => import('./locales/en-US'),
   },
   icons: {
-    'true-admin.examples.ExperimentOutlined': createElement(ExperimentOutlined),
     'true-admin.examples.logo': '/mock/icons/true-admin-examples.svg',
   },
   notification: {
