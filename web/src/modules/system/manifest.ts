@@ -6,9 +6,24 @@ export default defineModule({
   id: 'system',
   routes: [
     {
+      path: '/system/departments',
+      component: lazy(() => import('./pages/departments')),
+      meta: { title: 'system.departments.title', auth: true },
+    },
+    {
       path: '/system/users',
       component: lazy(() => import('./pages/users')),
       meta: { title: 'system.users.title', auth: true },
+    },
+    {
+      path: '/system/roles',
+      component: lazy(() => import('./pages/roles')),
+      meta: { title: 'system.roles.title', auth: true },
+    },
+    {
+      path: '/system/menus',
+      component: lazy(() => import('./pages/menus')),
+      meta: { title: 'system.menus.title', auth: true },
     },
     {
       path: '/system/messages',

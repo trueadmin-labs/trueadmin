@@ -35,6 +35,13 @@ final class AdminMenuController extends AdminController
         return ApiResponse::success($this->menus->list($request->adminQuery()));
     }
 
+    #[AdminGet('tree')]
+    #[Permission('system:menu:list', title: '菜单树', group: '系统管理')]
+    public function tree(AdminQueryRequest $request): array
+    {
+        return ApiResponse::success($this->menus->tree($request->adminQuery()));
+    }
+
     #[AdminGet('{id}')]
     #[Permission('system:menu:detail', title: '菜单详情', group: '系统管理')]
     public function detail(int $id): array

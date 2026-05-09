@@ -53,6 +53,33 @@ final class AdminMenuRepository extends AbstractRepository implements MetadataMe
         return $menu;
     }
 
+    public function findByCode(string $code): ?AdminMenu
+    {
+        return AdminMenu::query()->where('code', $code)->first();
+    }
+
+    public function childCount(int $id): int
+    {
+        return (int) AdminMenu::query()->where('parent_id', $id)->count();
+    }
+
+    public function hasAncestor(int $menuId, int $ancestorId): bool
+    {
+        $current = $this->find($menuId);
+        while ($current !== null) {
+            $parentId = (int) $current->getAttribute('parent_id');
+            if ($parentId <= 0) {
+                return false;
+            }
+            if ($parentId === $ancestorId) {
+                return true;
+            }
+            $current = $this->find($parentId);
+        }
+
+        return false;
+    }
+
     public function create(array $data): AdminMenu
     {
         /** @var AdminMenu $menu */
@@ -148,6 +175,11 @@ final class AdminMenuRepository extends AbstractRepository implements MetadataMe
     public function enabledTree(): array
     {
         return $this->tree($this->allEnabled());
+    }
+
+    public function managementTree(AdminQuery $adminQuery): array
+    {
+        return $this->tree($this->all($adminQuery));
     }
 
     /**
