@@ -24,6 +24,7 @@ return [
         'charset' => env('DB_CHARSET', $driver === 'pgsql' ? 'utf8' : 'utf8mb4'),
         'collation' => env('DB_COLLATION', $driver === 'pgsql' ? '' : 'utf8mb4_unicode_ci'),
         'prefix' => env('DB_PREFIX', ''),
+        'timezone' => $driver === 'pgsql' ? 'Asia/Shanghai' : '+08:00',
         'pool' => [
             'min_connections' => 1,
             'max_connections' => 10,

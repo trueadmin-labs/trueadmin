@@ -29,7 +29,7 @@ final class NotificationDemoController extends AdminController
             'receiverIds' => [1],
             'type' => 'example_task',
             'level' => 'info',
-            'source' => 'plugin.true-admin.examples',
+            'source' => 'true-admin.examples',
             'title' => '开发示例通知',
             'content' => '这是一条由示例插件发送的站内通知。',
             'payload' => [
@@ -62,7 +62,7 @@ final class NotificationDemoController extends AdminController
             'receiverIds' => [1],
             'type' => 'example_task',
             'level' => 'warning',
-            'source' => 'plugin.true-admin.examples',
+            'source' => 'true-admin.examples',
             'templateKey' => 'examples.task.assigned',
             'variables' => [
                 'taskName' => '合同复核',
