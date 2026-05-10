@@ -11,5 +11,5 @@ interface DataPolicyProviderInterface
     /**
      * @return list<\TrueAdmin\Kernel\DataPermission\DataPolicyRule>
      */
-    public function policiesFor(Actor $actor, string $resource, string $action): array;
+    public function policiesFor(Actor $actor, string $resource): array;
 }

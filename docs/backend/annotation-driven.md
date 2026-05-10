@@ -49,7 +49,7 @@ use TrueAdmin\Kernel\DataPermission\ScopeType;
 
 final class AdminUserQueryService
 {
-    #[DataScope(resource: 'admin_user', action: 'list')]
+    #[DataScope(resource: 'admin_user')]
     public function list(): array
     {
         // Repository 会读取 DataPermission Context 并追加查询约束。

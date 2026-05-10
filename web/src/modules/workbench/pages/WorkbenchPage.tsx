@@ -7,19 +7,7 @@ import {
   TeamOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import {
-  Badge,
-  Button,
-  Card,
-  Col,
-  List,
-  Progress,
-  Row,
-  Space,
-  Statistic,
-  Tag,
-  Typography,
-} from 'antd';
+import { Badge, Button, Card, Col, Progress, Row, Space, Statistic, Tag, Typography } from 'antd';
 import { useNavigate } from 'react-router';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { TrueAdminPage } from '@/core/page/TrueAdminPage';
@@ -156,18 +144,17 @@ export default function WorkbenchPage() {
         <Row gutter={[16, 16]} align="stretch">
           <Col xs={24} xl={14}>
             <Card size="small" title={t('workbench.todo.title', '待办事项')}>
-              <List
-                dataSource={data.todos}
-                renderItem={(item) => (
-                  <List.Item>
-                    <List.Item.Meta
-                      avatar={<Badge status={item.status} />}
-                      title={item.title}
-                      description={item.time}
-                    />
-                  </List.Item>
-                )}
-              />
+              <ul className="trueadmin-workbench-list">
+                {data.todos.map((item) => (
+                  <li key={item.title} className="trueadmin-workbench-list-item">
+                    <Badge status={item.status} />
+                    <div className="trueadmin-workbench-list-content">
+                      <Text>{item.title}</Text>
+                      <Text type="secondary">{item.time}</Text>
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </Card>
           </Col>
           <Col xs={24} xl={10}>
@@ -205,20 +192,16 @@ export default function WorkbenchPage() {
           </Col>
           <Col xs={24} xl={10}>
             <Card size="small" title={t('workbench.recent.title', '最近访问')}>
-              <List
-                dataSource={data.recent}
-                renderItem={(item) => (
-                  <List.Item
-                    actions={[
-                      <Button key="open" type="link" onClick={() => navigate(item.path)}>
-                        {t('workbench.action.open', '打开')}
-                      </Button>,
-                    ]}
-                  >
+              <ul className="trueadmin-workbench-list">
+                {data.recent.map((item) => (
+                  <li key={item.path} className="trueadmin-workbench-list-item is-actionable">
                     <Text>{item.label}</Text>
-                  </List.Item>
-                )}
-              />
+                    <Button type="link" onClick={() => navigate(item.path)}>
+                      {t('workbench.action.open', '打开')}
+                    </Button>
+                  </li>
+                ))}
+              </ul>
             </Card>
           </Col>
         </Row>

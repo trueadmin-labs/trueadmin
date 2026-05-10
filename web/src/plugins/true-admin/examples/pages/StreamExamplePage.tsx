@@ -1,5 +1,5 @@
 import { ApiOutlined, ClearOutlined, PlayCircleOutlined, StopOutlined } from '@ant-design/icons';
-import { App, Button, Card, Col, Descriptions, List, Row, Space, Tag, Typography } from 'antd';
+import { App, Button, Card, Col, Descriptions, Empty, Row, Space, Tag, Typography } from 'antd';
 import { useRef, useState } from 'react';
 import { ApiError } from '@/core/error/ApiError';
 import { http } from '@/core/http/client';
@@ -244,33 +244,34 @@ export default function StreamExamplePage() {
           title={t('examples.stream.panel.events', '事件明细')}
           description={t('examples.stream.panel.eventsDesc', '按接收顺序展示 SSE data 块。')}
         >
-          <List
-            size="small"
-            dataSource={events}
-            locale={{ emptyText: t('examples.stream.events.empty', '暂无事件') }}
-            renderItem={(event, index) => {
-              const payload = formatEventPayload(event);
-              return (
-                <List.Item>
-                  <Space orientation="vertical" size={4} style={{ width: '100%' }}>
-                    <Space wrap>
-                      <Tag color={eventColor(event.type)}>{event.type}</Tag>
-                      <Typography.Text strong>{event.message}</Typography.Text>
-                      <Typography.Text type="secondary">#{index + 1}</Typography.Text>
-                      {typeof event.percent === 'number' ? <Tag>{event.percent}%</Tag> : null}
-                      {event.module ? <Tag>{event.module}</Tag> : null}
-                      {event.stage ? <Tag>{event.stage}</Tag> : null}
+          {events.length === 0 ? (
+            <Empty description={t('examples.stream.events.empty', '暂无事件')} />
+          ) : (
+            <ul className="trueadmin-example-list is-compact">
+              {events.map((event, index) => {
+                const payload = formatEventPayload(event);
+                return (
+                  <li key={`${event.type}-${index}`} className="trueadmin-example-list-item">
+                    <Space orientation="vertical" size={4} style={{ width: '100%' }}>
+                      <Space wrap>
+                        <Tag color={eventColor(event.type)}>{event.type}</Tag>
+                        <Typography.Text strong>{event.message}</Typography.Text>
+                        <Typography.Text type="secondary">#{index + 1}</Typography.Text>
+                        {typeof event.percent === 'number' ? <Tag>{event.percent}%</Tag> : null}
+                        {event.module ? <Tag>{event.module}</Tag> : null}
+                        {event.stage ? <Tag>{event.stage}</Tag> : null}
+                      </Space>
+                      {payload ? (
+                        <Typography.Paragraph code style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
+                          {payload}
+                        </Typography.Paragraph>
+                      ) : null}
                     </Space>
-                    {payload ? (
-                      <Typography.Paragraph code style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
-                        {payload}
-                      </Typography.Paragraph>
-                    ) : null}
-                  </Space>
-                </List.Item>
-              );
-            }}
-          />
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </TrueAdminPageSection>
       </Space>
     </TrueAdminPage>

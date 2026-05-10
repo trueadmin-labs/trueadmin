@@ -1529,6 +1529,26 @@ body,
   width: 100%;
 }
 
+.trueadmin-example-list-item {
+  padding: 10px 0;
+  border-block-end: 1px solid var(--ant-color-border-secondary, rgba(5, 5, 5, 0.06));
+}
+
+.trueadmin-example-list.is-compact .trueadmin-example-list-item {
+  padding: 8px 0;
+}
+
+.trueadmin-example-list-item:last-child {
+  border-block-end: 0;
+}
+
+.trueadmin-example-list-item.is-active {
+  padding-inline: 8px;
+  border-radius: 6px;
+  color: var(--trueadmin-color-primary, #1677ff);
+  background: var(--trueadmin-color-primary-bg, rgba(22, 119, 255, 0.08));
+}
+
 .trueadmin-workbench-stack {
   width: 100%;
 }
@@ -1587,6 +1607,38 @@ body,
   height: 38px;
 }
 
+.trueadmin-workbench-list,
+.trueadmin-example-list,
+.trueadmin-message-list {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.trueadmin-workbench-list-item {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-block-end: 1px solid var(--ant-color-border-secondary, rgba(5, 5, 5, 0.06));
+}
+
+.trueadmin-workbench-list-item:last-child {
+  border-block-end: 0;
+}
+
+.trueadmin-workbench-list-item:not(.is-actionable) {
+  justify-content: flex-start;
+}
+
+.trueadmin-workbench-list-content {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
 .trueadmin-workbench-health-list {
   width: 100%;
 }
@@ -1596,6 +1648,97 @@ body,
   grid-template-columns: minmax(128px, 180px) 1fr;
   gap: 16px;
   align-items: center;
+}
+
+.trueadmin-role-authorize-modal .ant-modal-body {
+  box-sizing: border-box;
+  min-height: 0;
+}
+
+.trueadmin-role-authorize-body,
+.trueadmin-role-authorize-body .ant-spin-nested-loading,
+.trueadmin-role-authorize-body .ant-spin,
+.trueadmin-role-authorize-body .ant-spin-container,
+.trueadmin-role-authorize-tabs,
+.trueadmin-role-authorize-tabs .ant-tabs-content,
+.trueadmin-role-authorize-tabs .ant-tabs-tabpane,
+.trueadmin-role-authorize-pane {
+  min-height: 0;
+  height: 100%;
+}
+
+.trueadmin-role-authorize-body,
+.trueadmin-role-authorize-body .ant-spin-nested-loading,
+.trueadmin-role-authorize-body .ant-spin-container {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+}
+
+.trueadmin-role-authorize-body .ant-spin-container::after {
+  display: none;
+}
+
+.trueadmin-role-authorize-tabs {
+  display: grid;
+  width: 100%;
+  --trueadmin-role-authorize-tabs-nav-height: 44px;
+  --trueadmin-role-authorize-tabs-nav-gap: 12px;
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
+}
+
+.trueadmin-role-authorize-tabs .ant-tabs-nav {
+  height: var(--trueadmin-role-authorize-tabs-nav-height);
+  margin-bottom: var(--trueadmin-role-authorize-tabs-nav-gap);
+}
+
+.trueadmin-role-authorize-tabs .ant-tabs-content-holder {
+  align-self: stretch;
+  min-height: 0;
+  height: calc(
+    100% -
+    var(--trueadmin-role-authorize-tabs-nav-height) -
+    var(--trueadmin-role-authorize-tabs-nav-gap)
+  );
+  max-height: calc(
+    100% -
+    var(--trueadmin-role-authorize-tabs-nav-height) -
+    var(--trueadmin-role-authorize-tabs-nav-gap)
+  );
+  overflow: hidden;
+}
+
+.trueadmin-role-authorize-tabs .ant-tabs-content {
+  display: flex;
+  max-height: 100%;
+}
+
+.trueadmin-role-authorize-tabs .ant-tabs-tabpane {
+  flex: 0 0 100%;
+  max-height: 100%;
+  overflow: hidden;
+}
+
+.trueadmin-role-authorize-pane {
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 6px;
+}
+
+.trueadmin-role-authorize-tree-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.trueadmin-role-authorize-tree-label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 .trueadmin-shell.is-dark .trueadmin-workbench-summary {
@@ -3175,18 +3318,40 @@ body,
   margin-bottom: 8px;
 }
 
-.trueadmin-message-list .ant-list-item {
-  padding: 10px 8px;
+.trueadmin-message-list-item {
   border-block-end: 1px solid var(--ant-color-border-secondary, rgba(5, 5, 5, 0.06));
   border-radius: 6px;
+}
+
+.trueadmin-message-list-button {
+  display: grid;
+  width: 100%;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  padding: 10px 8px;
+  border: 0;
+  border-radius: inherit;
+  color: inherit;
+  font: inherit;
+  text-align: start;
   cursor: pointer;
+  background: transparent;
   transition:
     background-color 0.2s,
     border-color 0.2s;
 }
 
-.trueadmin-message-list .ant-list-item:hover {
+.trueadmin-message-list-button:hover {
   background: var(--ant-color-fill-quaternary, rgba(0, 0, 0, 0.02));
+}
+
+.trueadmin-message-list-content {
+  min-width: 0;
+}
+
+.trueadmin-message-list-title {
+  display: block;
+  margin-bottom: 4px;
 }
 
 .trueadmin-message-list-item.is-unread {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Foundation\DataPermission;
 
+use App\Foundation\Plugin\PluginRepository;
 use Hyperf\Contract\ConfigInterface;
 use Psr\Container\ContainerInterface;
 use RuntimeException;
@@ -19,12 +20,19 @@ final class DataPolicyRegistry
     /** @var null|array<string, array<string, mixed>> */
     private ?array $strategies = null;
 
+    /** @var null|list<array<string, mixed>> */
+    private ?array $resourceDefinitions = null;
+
+    /** @var null|list<class-string> */
+    private ?array $strategyClasses = null;
+
     /** @var array<string, DataPolicyStrategyInterface> */
     private array $strategyInstances = [];
 
     public function __construct(
         private readonly ContainerInterface $container,
         private readonly ConfigInterface $config,
+        private readonly PluginRepository $plugins,
     ) {
     }
 
@@ -46,32 +54,24 @@ final class DataPolicyRegistry
     {
         $rules = [];
         foreach ($this->resources() as $resource) {
-            foreach ($resource['actions'] as $action) {
-                foreach ($resource['strategies'] as $strategy) {
-                    $rules[] = new DataPolicyRule(
-                        resource: $resource['key'],
-                        action: $action['key'],
-                        strategy: $strategy,
-                        scope: 'all',
-                        roleId: $roleId,
-                    );
-                }
+            foreach ($resource['strategies'] as $strategy) {
+                $rules[] = new DataPolicyRule(
+                    resource: $resource['key'],
+                    strategy: $strategy,
+                    scope: 'all',
+                    roleId: $roleId,
+                );
             }
         }
 
         return $rules;
     }
 
-    public function assertRegisteredAction(string $resource, string $action): void
+    public function assertRegisteredResource(string $resource): void
     {
         $resources = $this->resources();
         if (! isset($resources[$resource])) {
             throw new RuntimeException(sprintf('Data policy resource [%s] is not registered.', $resource));
-        }
-
-        $actions = array_column($resources[$resource]['actions'], 'key');
-        if (! in_array($action, $actions, true)) {
-            throw new RuntimeException(sprintf('Data policy action [%s.%s] is not registered.', $resource, $action));
         }
     }
 
@@ -81,18 +81,12 @@ final class DataPolicyRegistry
     public function assertPolicyInput(array $policy): void
     {
         $resource = (string) ($policy['resource'] ?? '');
-        $action = (string) ($policy['action'] ?? '');
         $strategy = (string) ($policy['strategy'] ?? '');
         $scope = (string) ($policy['scope'] ?? '');
 
         $resourceConfig = $this->resources()[$resource] ?? null;
         if ($resourceConfig === null) {
             $this->validationError('unsupported_data_policy_resource');
-        }
-
-        $actions = array_column($resourceConfig['actions'], 'key');
-        if (! in_array($action, $actions, true)) {
-            $this->validationError('unsupported_data_policy_action');
         }
 
         if (! in_array($strategy, $resourceConfig['strategies'], true)) {
@@ -117,7 +111,7 @@ final class DataPolicyRegistry
     {
         $seen = [];
         foreach ($policies as $policy) {
-            $key = sprintf('%s:%s:%s', (string) ($policy['resource'] ?? ''), (string) ($policy['action'] ?? ''), (string) ($policy['strategy'] ?? ''));
+            $key = sprintf('%s:%s', (string) ($policy['resource'] ?? ''), (string) ($policy['strategy'] ?? ''));
             if (isset($seen[$key])) {
                 $this->validationError('duplicate_data_policy');
             }
@@ -125,10 +119,10 @@ final class DataPolicyRegistry
         }
     }
 
-    public function assertRule(DataPolicyRule $rule, string $resource, string $action): void
+    public function assertRule(DataPolicyRule $rule, string $resource): void
     {
-        if (! $rule->matches($resource, $action)) {
-            throw new RuntimeException(sprintf('Data policy rule [%s.%s] does not match [%s.%s].', $rule->resource, $rule->action, $resource, $action));
+        if (! $rule->matches($resource)) {
+            throw new RuntimeException(sprintf('Data policy rule [%s] does not match [%s].', $rule->resource, $resource));
         }
 
         $resourceConfig = $this->resources()[$rule->resource] ?? null;
@@ -171,7 +165,7 @@ final class DataPolicyRegistry
         }
 
         $resources = [];
-        foreach ((array) $this->config->get('data_policy.resources', []) as $resource) {
+        foreach ($this->resourceDefinitions() as $resource) {
             if (! is_array($resource)) {
                 continue;
             }
@@ -182,11 +176,13 @@ final class DataPolicyRegistry
             if (isset($resources[$key])) {
                 throw new RuntimeException(sprintf('Duplicate data policy resource [%s].', $key));
             }
+            if (array_key_exists('actions', $resource)) {
+                throw new RuntimeException(sprintf('Data policy resource [%s] must not define actions.', $key));
+            }
 
-            $actions = $this->normalizeActions($resource['actions'] ?? []);
             $strategies = array_values(array_unique(array_filter(array_map('strval', (array) ($resource['strategies'] ?? [])))));
-            if ($actions === [] || $strategies === []) {
-                throw new RuntimeException(sprintf('Data policy resource [%s] must define actions and strategies.', $key));
+            if ($strategies === []) {
+                throw new RuntimeException(sprintf('Data policy resource [%s] must define strategies.', $key));
             }
             foreach ($strategies as $strategy) {
                 if (! isset($this->strategies()[$strategy])) {
@@ -198,7 +194,6 @@ final class DataPolicyRegistry
                 'key' => $key,
                 'label' => (string) ($resource['label'] ?? $key),
                 'i18n' => (string) ($resource['i18n'] ?? ''),
-                'actions' => $actions,
                 'strategies' => $strategies,
                 'sort' => (int) ($resource['sort'] ?? 0),
             ];
@@ -219,10 +214,20 @@ final class DataPolicyRegistry
         }
 
         $this->loadStrategies();
-        $strategies = array_map(
-            static fn (DataPolicyStrategyInterface $strategy): array => $strategy->metadata(),
-            $this->strategyInstances,
-        );
+        $strategies = [];
+        foreach ($this->strategyInstances as $key => $strategy) {
+            $metadata = $strategy->metadata();
+            $scopes = $this->normalizeScopes($key, $metadata['scopes'] ?? []);
+            $strategies[$key] = [
+                'key' => $key,
+                'label' => (string) ($metadata['label'] ?? $key),
+                'i18n' => (string) ($metadata['i18n'] ?? ''),
+                'scopes' => $scopes,
+                'sort' => (int) ($metadata['sort'] ?? 0),
+            ];
+        }
+
+        uasort($strategies, static fn (array $a, array $b): int => [$a['sort'], $a['key']] <=> [$b['sort'], $b['key']]);
 
         return $this->strategies = $strategies;
     }
@@ -233,7 +238,7 @@ final class DataPolicyRegistry
             return;
         }
 
-        foreach ((array) $this->config->get('data_policy.strategies', []) as $strategyClass) {
+        foreach ($this->strategyClasses() as $strategyClass) {
             $strategy = $this->container->get($strategyClass);
             if (! $strategy instanceof DataPolicyStrategyInterface) {
                 throw new RuntimeException(sprintf('Data policy strategy [%s] must implement %s.', (string) $strategyClass, DataPolicyStrategyInterface::class));
@@ -251,37 +256,185 @@ final class DataPolicyRegistry
     }
 
     /**
-     * @param mixed $actions
      * @return list<array<string, mixed>>
      */
-    private function normalizeActions(mixed $actions): array
+    private function resourceDefinitions(): array
+    {
+        if ($this->resourceDefinitions !== null) {
+            return $this->resourceDefinitions;
+        }
+
+        $resources = [];
+        foreach ($this->dataPolicyDefinitions() as $definition) {
+            foreach ($definition['resources'] as $resource) {
+                $resources[] = $resource;
+            }
+        }
+
+        return $this->resourceDefinitions = $resources;
+    }
+
+    /**
+     * @return list<class-string>
+     */
+    private function strategyClasses(): array
+    {
+        if ($this->strategyClasses !== null) {
+            return $this->strategyClasses;
+        }
+
+        $classes = [];
+        foreach ($this->dataPolicyDefinitions() as $definition) {
+            foreach ($definition['strategies'] as $strategyClass) {
+                if (! is_string($strategyClass) || $strategyClass === '') {
+                    throw new RuntimeException('Data policy strategy class must be a non-empty string.');
+                }
+
+                $classes[] = $strategyClass;
+            }
+        }
+
+        return $this->strategyClasses = array_values(array_unique($classes));
+    }
+
+    /**
+     * @return list<array{strategies: list<class-string>, resources: list<array<string, mixed>>}>
+     */
+    private function dataPolicyDefinitions(): array
+    {
+        $definitions = [];
+
+        $definitions[] = $this->normalizeDataPolicyDefinition((array) $this->config->get('data_policy', []), 'config:data_policy');
+
+        foreach ($this->dataPolicyResourceFiles() as $file) {
+            $definition = require $file;
+            if (! is_array($definition)) {
+                throw new RuntimeException(sprintf('Data policy resource file [%s] must return an array.', $file));
+            }
+
+            $definitions[] = $this->normalizeDataPolicyDefinition($definition, $file);
+        }
+
+        return $definitions;
+    }
+
+    /**
+     * @param array<string, mixed> $definition
+     * @return array{strategies: list<class-string>, resources: list<array<string, mixed>>}
+     */
+    private function normalizeDataPolicyDefinition(array $definition, string $source): array
+    {
+        $strategies = $definition['strategies'] ?? [];
+        $resources = $definition['resources'] ?? [];
+        if (! is_array($strategies) || ! is_array($resources)) {
+            throw new RuntimeException(sprintf('Data policy definition [%s] must define strategies and resources as arrays.', $source));
+        }
+
+        foreach ($resources as $resource) {
+            if (! is_array($resource)) {
+                throw new RuntimeException(sprintf('Data policy definition [%s] contains an invalid resource.', $source));
+            }
+        }
+
+        return [
+            'strategies' => array_values($strategies),
+            'resources' => array_values($resources),
+        ];
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function dataPolicyResourceFiles(): array
+    {
+        $files = [
+            ...(glob(BASE_PATH . '/app/Module/*/resources/data_policies.php') ?: []),
+            ...$this->plugins->dataPolicyResourceFiles(),
+        ];
+
+        sort($files);
+
+        return array_values(array_unique($files));
+    }
+
+    /**
+     * @param mixed $scopes
+     * @return list<array<string, mixed>>
+     */
+    private function normalizeScopes(string $strategy, mixed $scopes): array
     {
         $items = [];
-        foreach ((array) $actions as $action) {
-            if (is_string($action)) {
-                $key = trim($action);
-                $items[] = ['key' => $key, 'label' => $key, 'i18n' => ''];
+        foreach ((array) $scopes as $scope) {
+            if (is_string($scope)) {
+                $key = trim($scope);
+                if ($key === '') {
+                    continue;
+                }
+                $items[] = ['key' => $key, 'label' => $key, 'i18n' => '', 'sort' => count($items)];
                 continue;
             }
-            if (! is_array($action)) {
+            if (! is_array($scope)) {
                 continue;
             }
-            $key = trim((string) ($action['key'] ?? ''));
+            $key = trim((string) ($scope['key'] ?? ''));
             if ($key === '') {
                 continue;
             }
             $items[] = [
                 'key' => $key,
-                'label' => (string) ($action['label'] ?? $key),
-                'i18n' => (string) ($action['i18n'] ?? ''),
-                'sort' => (int) ($action['sort'] ?? count($items)),
+                'label' => (string) ($scope['label'] ?? $key),
+                'i18n' => (string) ($scope['i18n'] ?? ''),
+                'sort' => (int) ($scope['sort'] ?? count($items)),
+                'configSchema' => $this->normalizeConfigSchema($strategy, $key, $scope['configSchema'] ?? []),
+            ];
+        }
+
+        if ($items === []) {
+            throw new RuntimeException(sprintf('Data policy strategy [%s] must define scopes.', $strategy));
+        }
+
+        $seen = [];
+        foreach ($items as $item) {
+            if (isset($seen[$item['key']])) {
+                throw new RuntimeException(sprintf('Duplicate data policy scope [%s.%s].', $strategy, $item['key']));
+            }
+            $seen[$item['key']] = true;
+        }
+
+        usort($items, static fn (array $a, array $b): int => [$a['sort'] ?? 0, $a['key']] <=> [$b['sort'] ?? 0, $b['key']]);
+
+        return $items;
+    }
+
+    /**
+     * @param mixed $schema
+     * @return list<array<string, mixed>>
+     */
+    private function normalizeConfigSchema(string $strategy, string $scope, mixed $schema): array
+    {
+        $items = [];
+        foreach ((array) $schema as $field) {
+            if (! is_array($field)) {
+                continue;
+            }
+            $key = trim((string) ($field['key'] ?? ''));
+            $type = trim((string) ($field['type'] ?? ''));
+            if ($key === '' || $type === '') {
+                throw new RuntimeException(sprintf('Data policy config schema [%s.%s] must define key and type.', $strategy, $scope));
+            }
+            $items[] = [
+                'key' => $key,
+                'type' => $type,
+                'label' => (string) ($field['label'] ?? $key),
+                'i18n' => (string) ($field['i18n'] ?? ''),
+                'sort' => (int) ($field['sort'] ?? count($items)),
             ];
         }
 
         $seen = [];
         foreach ($items as $item) {
             if (isset($seen[$item['key']])) {
-                throw new RuntimeException(sprintf('Duplicate data policy action [%s].', $item['key']));
+                throw new RuntimeException(sprintf('Duplicate data policy config field [%s.%s.%s].', $strategy, $scope, $item['key']));
             }
             $seen[$item['key']] = true;
         }

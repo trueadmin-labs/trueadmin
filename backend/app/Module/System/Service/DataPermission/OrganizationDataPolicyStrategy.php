@@ -35,6 +35,9 @@ final class OrganizationDataPolicyStrategy implements DataPolicyStrategyInterfac
                 ['key' => 'custom_departments', 'label' => '自定义部门', 'i18n' => 'dataPolicy.scope.customDepartments', 'sort' => 50, 'configSchema' => [
                     ['key' => 'deptIds', 'type' => 'department_tree', 'label' => '可见部门', 'i18n' => 'dataPolicy.config.deptIds'],
                 ]],
+                ['key' => 'custom_departments_and_children', 'label' => '自定义部门及子部门', 'i18n' => 'dataPolicy.scope.customDepartmentsAndChildren', 'sort' => 60, 'configSchema' => [
+                    ['key' => 'deptIds', 'type' => 'department_tree', 'label' => '可见部门', 'i18n' => 'dataPolicy.config.deptIds'],
+                ]],
             ],
         ];
     }
@@ -75,8 +78,12 @@ final class OrganizationDataPolicyStrategy implements DataPolicyStrategyInterfac
             return false;
         }
         if ($parent->scope === $child->scope) {
-            return $parent->scope !== 'custom_departments'
-                || $this->containsDepartmentIds($parent->config['deptIds'] ?? [], $child->config['deptIds'] ?? []);
+            return ! in_array($parent->scope, ['custom_departments', 'custom_departments_and_children'], true)
+                || $this->containsDepartmentIds($this->configuredDepartmentIds($parent), $this->configuredDepartmentIds($child));
+        }
+
+        if ($parent->scope === 'custom_departments_and_children' && $child->scope === 'custom_departments') {
+            return $this->containsDepartmentIds($this->configuredDepartmentIds($parent), $this->configuredDepartmentIds($child));
         }
 
         return $parent->scope === 'department_and_children' && $child->scope === 'department';
@@ -92,8 +99,11 @@ final class OrganizationDataPolicyStrategy implements DataPolicyStrategyInterfac
         }
 
         if ($rule->scope === 'custom_departments') {
-            $deptIds = $rule->config['deptIds'] ?? [];
-            return is_array($deptIds) ? array_values(array_unique(array_filter(array_map('intval', $deptIds), static fn (int $id): bool => $id > 0))) : [];
+            return $this->normalizeDeptIds($rule->config['deptIds'] ?? []);
+        }
+
+        if ($rule->scope === 'custom_departments_and_children') {
+            return $this->departments->selfAndDescendantIds($this->normalizeDeptIds($rule->config['deptIds'] ?? []));
         }
 
         $operationDeptId = (int) ($actor->claims['operationDeptId'] ?? 0);
@@ -118,6 +128,21 @@ final class OrganizationDataPolicyStrategy implements DataPolicyStrategyInterfac
         $child = $this->normalizeDeptIds($childDeptIds);
 
         return $child !== [] && array_diff($child, $parent) === [];
+    }
+
+    /**
+     * @return list<int>
+     */
+    private function configuredDepartmentIds(DataPolicyRule $rule): array
+    {
+        $deptIds = $this->normalizeDeptIds($rule->config['deptIds'] ?? []);
+        if ($deptIds === []) {
+            return [];
+        }
+
+        return $rule->scope === 'custom_departments_and_children'
+            ? $this->departments->selfAndDescendantIds($deptIds)
+            : $deptIds;
     }
 
     private function normalizeDeptIds(mixed $value): array

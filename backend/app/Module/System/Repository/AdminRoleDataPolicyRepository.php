@@ -18,7 +18,7 @@ final class AdminRoleDataPolicyRepository extends AbstractRepository
      * @param list<int> $roleIds
      * @return list<DataPolicyRule>
      */
-    public function rulesForRoleIds(array $roleIds, string $resource, string $action): array
+    public function rulesForRoleIds(array $roleIds, string $resource): array
     {
         if ($roleIds === []) {
             return [];
@@ -28,7 +28,6 @@ final class AdminRoleDataPolicyRepository extends AbstractRepository
             ->whereIn('role_id', array_values(array_unique($roleIds)))
             ->where('status', 'enabled')
             ->where('resource', $resource)
-            ->where('action', $action)
             ->orderBy('sort')
             ->orderBy('id')
             ->get()
@@ -63,10 +62,9 @@ final class AdminRoleDataPolicyRepository extends AbstractRepository
             Db::table('admin_role_data_policies')->insert([
                 'role_id' => $roleId,
                 'resource' => (string) $policy['resource'],
-                'action' => (string) $policy['action'],
-                'strategy' => (string) ($policy['strategy'] ?? 'organization'),
+                'strategy' => (string) $policy['strategy'],
                 'effect' => (string) ($policy['effect'] ?? 'allow'),
-                'scope' => (string) ($policy['scope'] ?? 'self'),
+                'scope' => (string) $policy['scope'],
                 'config' => json_encode((array) ($policy['config'] ?? []), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
                 'status' => (string) ($policy['status'] ?? 'enabled'),
                 'sort' => (int) ($policy['sort'] ?? $index),
@@ -85,7 +83,6 @@ final class AdminRoleDataPolicyRepository extends AbstractRepository
     {
         return new DataPolicyRule(
             resource: (string) $policy->getAttribute('resource'),
-            action: (string) $policy->getAttribute('action'),
             strategy: (string) $policy->getAttribute('strategy'),
             scope: (string) $policy->getAttribute('scope'),
             effect: (string) $policy->getAttribute('effect'),
@@ -101,7 +98,6 @@ final class AdminRoleDataPolicyRepository extends AbstractRepository
             'id' => (int) $policy->getAttribute('id'),
             'roleId' => (int) $policy->getAttribute('role_id'),
             'resource' => (string) $policy->getAttribute('resource'),
-            'action' => (string) $policy->getAttribute('action'),
             'strategy' => (string) $policy->getAttribute('strategy'),
             'effect' => (string) $policy->getAttribute('effect'),
             'scope' => (string) $policy->getAttribute('scope'),

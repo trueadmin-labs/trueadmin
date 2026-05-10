@@ -11,7 +11,6 @@ final readonly class DataPolicyRule
      */
     public function __construct(
         public string $resource,
-        public string $action,
         public string $strategy,
         public string $scope,
         public string $effect = 'allow',
@@ -21,9 +20,9 @@ final readonly class DataPolicyRule
     ) {
     }
 
-    public function matches(string $resource, string $action): bool
+    public function matches(string $resource): bool
     {
-        return $this->resource === $resource && $this->action === $action;
+        return $this->resource === $resource;
     }
 
     public function isAllow(): bool

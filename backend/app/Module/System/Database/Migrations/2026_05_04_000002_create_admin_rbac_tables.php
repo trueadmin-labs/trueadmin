@@ -54,15 +54,14 @@ return new class extends Migration {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('role_id');
             $table->string('resource', 128);
-            $table->string('action', 64);
-            $table->string('strategy', 64)->default('organization');
+            $table->string('strategy', 64);
             $table->string('effect', 16)->default('allow');
-            $table->string('scope', 64)->default('self');
+            $table->string('scope', 64);
             $table->json('config')->nullable();
             $table->string('status', 32)->default('enabled');
             $table->integer('sort')->default(0);
             $table->datetimes();
-            $table->index(['role_id', 'resource', 'action']);
+            $table->unique(['role_id', 'resource', 'strategy']);
         });
     }
 

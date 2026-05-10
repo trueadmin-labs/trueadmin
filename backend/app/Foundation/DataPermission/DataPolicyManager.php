@@ -26,16 +26,16 @@ final class DataPolicyManager
     /**
      * @param array<string, mixed>|DataPolicyTarget $target
      */
-    public function apply(mixed $query, string $resource, string $action = 'list', array|DataPolicyTarget $target = []): void
+    public function apply(mixed $query, string $resource, array|DataPolicyTarget $target = []): void
     {
-        $this->registry->assertRegisteredAction($resource, $action);
+        $this->registry->assertRegisteredResource($resource);
 
         $actor = ActorContext::principal();
         if (! $actor instanceof Actor || $actor->type === 'system') {
             return;
         }
 
-        $allowRules = $this->allowRules($actor, $resource, $action);
+        $allowRules = $this->allowRules($actor, $resource);
         if ($allowRules === []) {
             $query->whereRaw('1 = 0');
             return;
@@ -59,9 +59,9 @@ final class DataPolicyManager
     /**
      * @param array<string, mixed>|DataPolicyTarget $target
      */
-    public function allows(mixed $query, string $resource, string $action = 'view', array|DataPolicyTarget $target = []): bool
+    public function allows(mixed $query, string $resource, array|DataPolicyTarget $target = []): bool
     {
-        $this->apply($query, $resource, $action, $target);
+        $this->apply($query, $resource, $target);
 
         return (bool) $query->exists();
     }
@@ -69,16 +69,15 @@ final class DataPolicyManager
     /**
      * @param array<string, mixed>|DataPolicyTarget $target
      */
-    public function assertAllows(mixed $query, string $resource, string $action = 'view', array|DataPolicyTarget $target = []): void
+    public function assertAllows(mixed $query, string $resource, array|DataPolicyTarget $target = []): void
     {
-        if ($this->allows($query, $resource, $action, $target)) {
+        if ($this->allows($query, $resource, $target)) {
             return;
         }
 
         throw new BusinessException(ErrorCode::FORBIDDEN, 403, [
             'reason' => 'data_policy_denied',
             'resource' => $resource,
-            'action' => $action,
         ]);
     }
 
@@ -86,15 +85,15 @@ final class DataPolicyManager
      * @param list<int|string> $ids
      * @param array<string, mixed>|DataPolicyTarget $target
      */
-    public function assertAllowsAll(mixed $query, string $resource, string $action, array $ids, string $idColumn = 'id', array|DataPolicyTarget $target = []): void
+    public function assertAllowsAll(mixed $query, string $resource, array $ids, string $idColumn = 'id', array|DataPolicyTarget $target = []): void
     {
         $ids = array_values(array_unique(array_filter($ids, static fn (int|string $id): bool => (string) $id !== '')));
         if ($ids === []) {
             return;
         }
 
-        $this->apply($query, $resource, $action, $target);
-        $allowedCount = (int) $query->whereIn($idColumn, $ids)->count();
+        $this->apply($query, $resource, $target);
+        $allowedCount = (int) $query->whereIn($idColumn, $ids)->distinct()->count($idColumn);
         if ($allowedCount === count($ids)) {
             return;
         }
@@ -102,23 +101,22 @@ final class DataPolicyManager
         throw new BusinessException(ErrorCode::FORBIDDEN, 403, [
             'reason' => 'data_policy_denied',
             'resource' => $resource,
-            'action' => $action,
         ]);
     }
 
     /**
      * @return list<DataPolicyRule>
      */
-    private function allowRules(Actor $actor, string $resource, string $action): array
+    private function allowRules(Actor $actor, string $resource): array
     {
         $rules = array_values(array_filter(
-            $this->provider->policiesFor($actor, $resource, $action),
-            static fn (DataPolicyRule $rule): bool => $rule->matches($resource, $action),
+            $this->provider->policiesFor($actor, $resource),
+            static fn (DataPolicyRule $rule): bool => $rule->matches($resource),
         ));
 
         $rules = array_values(array_filter($rules, static fn (DataPolicyRule $rule): bool => $rule->isAllow()));
         foreach ($rules as $rule) {
-            $this->registry->assertRule($rule, $resource, $action);
+            $this->registry->assertRule($rule, $resource);
         }
 
         return $rules;

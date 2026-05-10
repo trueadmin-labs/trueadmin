@@ -84,7 +84,7 @@ final class AdminUserRepository extends AbstractRepository
     public function paginate(AdminQuery $adminQuery): PageResult
     {
         $query = AdminUser::query();
-        $this->applyDataPolicy($query, 'admin_user', 'list', [
+        $this->applyDataPolicy($query, 'admin_user', [
             'deptColumn' => 'primary_dept_id',
             'createdByColumn' => 'created_by',
         ]);
@@ -104,7 +104,7 @@ final class AdminUserRepository extends AbstractRepository
         return $user;
     }
 
-    public function findByIdForAction(int $id, string $action): ?AdminUser
+    public function findByIdWithDataPolicy(int $id): ?AdminUser
     {
         $user = $this->findById($id);
         if ($user === null) {
@@ -112,7 +112,7 @@ final class AdminUserRepository extends AbstractRepository
         }
 
         $query = AdminUser::query()->where('id', $id);
-        $this->assertDataPolicyAllows($query, 'admin_user', $action, [
+        $this->assertDataPolicyAllows($query, 'admin_user', [
             'deptColumn' => 'primary_dept_id',
             'createdByColumn' => 'created_by',
         ]);
@@ -123,9 +123,9 @@ final class AdminUserRepository extends AbstractRepository
     /**
      * @param list<int> $ids
      */
-    public function assertIdsAllowedForAction(array $ids, string $action): void
+    public function assertIdsAllowedByDataPolicy(array $ids): void
     {
-        $this->assertDataPolicyAllowsAll(AdminUser::query(), 'admin_user', $action, $ids, 'id', [
+        $this->assertDataPolicyAllowsAll(AdminUser::query(), 'admin_user', $ids, 'id', [
             'deptColumn' => 'primary_dept_id',
             'createdByColumn' => 'created_by',
         ]);

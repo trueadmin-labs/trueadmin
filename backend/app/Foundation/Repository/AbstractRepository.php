@@ -139,34 +139,34 @@ abstract class AbstractRepository
     /**
      * @param array<string, mixed>|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target
      */
-    protected function applyDataPolicy(mixed $query, string $resource, string $action = 'list', array|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target = []): void
+    protected function applyDataPolicy(mixed $query, string $resource, array|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target = []): void
     {
-        $this->dataPolicyManager()->apply($query, $resource, $action, $target);
+        $this->dataPolicyManager()->apply($query, $resource, $target);
     }
 
     /**
      * @param array<string, mixed>|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target
      */
-    protected function dataPolicyAllows(mixed $query, string $resource, string $action = 'view', array|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target = []): bool
+    protected function dataPolicyAllows(mixed $query, string $resource, array|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target = []): bool
     {
-        return $this->dataPolicyManager()->allows($query, $resource, $action, $target);
+        return $this->dataPolicyManager()->allows($query, $resource, $target);
     }
 
     /**
      * @param array<string, mixed>|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target
      */
-    protected function assertDataPolicyAllows(mixed $query, string $resource, string $action = 'view', array|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target = []): void
+    protected function assertDataPolicyAllows(mixed $query, string $resource, array|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target = []): void
     {
-        $this->dataPolicyManager()->assertAllows($query, $resource, $action, $target);
+        $this->dataPolicyManager()->assertAllows($query, $resource, $target);
     }
 
     /**
      * @param list<int|string> $ids
      * @param array<string, mixed>|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target
      */
-    protected function assertDataPolicyAllowsAll(mixed $query, string $resource, string $action, array $ids, string $idColumn = 'id', array|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target = []): void
+    protected function assertDataPolicyAllowsAll(mixed $query, string $resource, array $ids, string $idColumn = 'id', array|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target = []): void
     {
-        $this->dataPolicyManager()->assertAllowsAll($query, $resource, $action, $ids, $idColumn, $target);
+        $this->dataPolicyManager()->assertAllowsAll($query, $resource, $ids, $idColumn, $target);
     }
 
     private function dataPolicyManager(): DataPolicyManager

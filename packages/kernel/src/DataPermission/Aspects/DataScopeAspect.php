@@ -29,7 +29,6 @@ final class DataScopeAspect extends AbstractAspect
 
         return Context::runWith([
             'resource' => $attribute->resource,
-            'action' => $attribute->action,
         ], static fn () => $proceedingJoinPoint->process());
     }
 }

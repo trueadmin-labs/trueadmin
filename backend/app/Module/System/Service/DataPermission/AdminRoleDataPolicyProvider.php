@@ -20,7 +20,7 @@ final class AdminRoleDataPolicyProvider implements DataPolicyProviderInterface
     ) {
     }
 
-    public function policiesFor(Actor $actor, string $resource, string $action): array
+    public function policiesFor(Actor $actor, string $resource): array
     {
         if ($actor->type !== 'admin') {
             return [];
@@ -36,7 +36,7 @@ final class AdminRoleDataPolicyProvider implements DataPolicyProviderInterface
             return [];
         }
 
-        return $this->policies->rulesForRoleIds($roleIds, $resource, $action);
+        return $this->policies->rulesForRoleIds($roleIds, $resource);
     }
 
     /**

@@ -102,19 +102,28 @@ final class AdminDepartmentRepository extends AbstractRepository
 
 
     /**
+     * @param int|list<int> $ids
      * @return list<int>
      */
-    public function selfAndDescendantIds(int $id): array
+    public function selfAndDescendantIds(int|array $ids): array
     {
-        $ids = AdminDepartment::query()
-            ->where('id', $id)
-            ->orWhere('path', 'like', '%,' . $id . ',%')
+        $normalizedIds = array_values(array_unique(array_filter(array_map('intval', is_array($ids) ? $ids : [$ids]), static fn (int $id): bool => $id > 0)));
+        if ($normalizedIds === []) {
+            return [];
+        }
+
+        $query = AdminDepartment::query()->whereIn('id', $normalizedIds);
+        foreach ($normalizedIds as $id) {
+            $query->orWhere('path', 'like', '%,' . $id . ',%');
+        }
+
+        $departmentIds = $query
             ->pluck('id')
             ->map(static fn ($value): int => (int) $value)
             ->values()
             ->all();
 
-        return array_values(array_unique($ids));
+        return array_values(array_unique($departmentIds));
     }
 
     public function toArray(AdminDepartment $department): array

@@ -5,13 +5,13 @@ export type AdminRoleDataPolicyScope =
   | 'self'
   | 'department'
   | 'department_and_children'
-  | 'custom_departments';
+  | 'custom_departments'
+  | 'custom_departments_and_children';
 
 export type AdminRoleDataPolicy = {
   id?: number;
   roleId?: number;
   resource: string;
-  action: string;
   strategy: string;
   effect: 'allow';
   scope: AdminRoleDataPolicyScope;
@@ -39,7 +39,6 @@ export type DataPolicyStrategyMetadata = DataPolicyText & {
 };
 
 export type DataPolicyResourceMetadata = DataPolicyText & {
-  actions: DataPolicyText[];
   strategies: string[];
 };
 

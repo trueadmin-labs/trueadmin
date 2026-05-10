@@ -72,7 +72,7 @@ final class SystemSeeder extends Seeder
         $this->metadata->sync();
         foreach ($this->dataPolicyRegistry->allScopeRules($roleId) as $index => $rule) {
             Db::table('admin_role_data_policies')->updateOrInsert(
-                ['role_id' => $roleId, 'resource' => $rule->resource, 'action' => $rule->action, 'strategy' => $rule->strategy],
+                ['role_id' => $roleId, 'resource' => $rule->resource, 'strategy' => $rule->strategy],
                 [
                     'effect' => $rule->effect,
                     'scope' => $rule->scope,

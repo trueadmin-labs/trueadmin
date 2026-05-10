@@ -242,7 +242,7 @@ export default function AdminMenusPage() {
         width: 260,
         render: (_, record) =>
           record.type === 'link' ? (
-            <Space direction="vertical" size={2}>
+            <Space orientation="vertical" size={2}>
               <Typography.Link
                 href={record.url}
                 target="_blank"
@@ -555,7 +555,7 @@ export default function AdminMenusPage() {
               <Row gutter={FORM_GUTTER}>
                 <Col xs={24} md={12}>
                   <Form.Item label={t('system.menus.form.icon', '图标')}>
-                    <Space direction="vertical" size={8} style={{ width: '100%' }}>
+                    <Space orientation="vertical" size={8} style={{ width: '100%' }}>
                       <Segmented<MenuIconMode>
                         block
                         value={iconMode}

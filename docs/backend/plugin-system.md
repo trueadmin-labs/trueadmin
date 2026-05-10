@@ -379,6 +379,15 @@ web/src/plugins/*/*/manifest.ts
 
 安装后的 `web/src/plugins/<vendor>/<name>/manifest.ts` 只负责 Web runtime 注册：路由、前端菜单、locales、图标、错误解释和其他前端扩展能力。它不声明插件名称、版本、依赖、启停或安装生命周期。
 
+后端插件 runtime 与 `backend/app/Module/*` 保持同构，可以自带框架元数据资源：
+
+```text
+backend/php/resources/menus.php          菜单、按钮和链接资源
+backend/php/resources/data_policies.php  数据权限策略和资源
+```
+
+`resources/menus.php` 声明后台资源树，由接口元数据同步命令写入 `admin_menus`；`resources/data_policies.php` 声明数据权限策略类和资源，由 `DataPolicyRegistry` 自动扫描。插件启用后，角色授权页会同时出现插件提供的菜单权限和数据权限资源；插件禁用后不再参与扫描。插件不需要也不应该直接修改宿主 `config/autoload/data_policy.php`。
+
 Mobile 插件资产预留在 `mobile/` 目录。Mobile 初始化后，再实现插件页面合并、菜单同步和类型生成。
 
 ## 禁止事项

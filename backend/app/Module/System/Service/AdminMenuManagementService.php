@@ -21,6 +21,10 @@ final class AdminMenuManagementService extends AbstractService
 
     private const SOURCE_CUSTOM = 'custom';
 
+    private const CODE_PATTERN = '/^[A-Za-z][A-Za-z0-9_.:-]*$/';
+
+    private const PERMISSION_PATTERN = '/^[A-Za-z][A-Za-z0-9_-]*(?::[A-Za-z0-9][A-Za-z0-9_-]*)+$/';
+
     public function __construct(private readonly AdminMenuRepository $menus)
     {
     }
@@ -107,6 +111,7 @@ final class AdminMenuManagementService extends AbstractService
             $code = $this->generateCustomCode($type);
         }
         if ($code !== '') {
+            $this->assertCode($code);
             $exists = $this->menus->findByCode($code);
             $currentId = $current === null ? 0 : (int) $current->getAttribute('id');
             $this->assertUnique($exists !== null && (int) $exists->getAttribute('id') !== $currentId, 'code');
@@ -115,6 +120,9 @@ final class AdminMenuManagementService extends AbstractService
         $permission = $isCodeMenu ? (string) $current->getAttribute('permission') : (string) ($payload['permission'] ?? $current?->getAttribute('permission') ?? '');
         if ($creating && $type === self::TYPE_LINK && $permission === '') {
             $permission = str_replace('custom:link:', 'custom:link:view:', $code);
+        }
+        if ($permission !== '') {
+            $this->assertPermission($permission);
         }
 
         $openMode = $type === self::TYPE_LINK
@@ -164,6 +172,20 @@ final class AdminMenuManagementService extends AbstractService
         $scheme = strtolower((string) parse_url($url, PHP_URL_SCHEME));
         if (! in_array($scheme, ['http', 'https'], true) || filter_var($url, FILTER_VALIDATE_URL) === false) {
             throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'url', 'reason' => 'invalid_url']);
+        }
+    }
+
+    private function assertCode(string $code): void
+    {
+        if (preg_match(self::CODE_PATTERN, $code) !== 1) {
+            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'code', 'reason' => 'invalid_code']);
+        }
+    }
+
+    private function assertPermission(string $permission): void
+    {
+        if (preg_match(self::PERMISSION_PATTERN, $permission) !== 1) {
+            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'permission', 'reason' => 'invalid_permission']);
         }
     }
 

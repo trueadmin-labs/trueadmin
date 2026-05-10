@@ -13,7 +13,6 @@ final class AdminRoleDataPolicy extends Model
     protected array $fillable = [
         'role_id',
         'resource',
-        'action',
         'strategy',
         'effect',
         'scope',

@@ -1,5 +1,11 @@
-import { DatabaseOutlined, PlusOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
-import type { TreeProps } from 'antd';
+import {
+  CaretDownOutlined,
+  CaretUpOutlined,
+  DatabaseOutlined,
+  PlusOutlined,
+  SafetyCertificateOutlined,
+} from '@ant-design/icons';
+import type { TreeProps, TreeSelectProps } from 'antd';
 import {
   App,
   Button,
@@ -9,13 +15,16 @@ import {
   Radio,
   Select,
   Space,
+  Spin,
+  Switch,
   Tabs,
   Tag,
+  Tooltip,
   Tree,
   TreeSelect,
   Typography,
 } from 'antd';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { TrueAdminCrudPage } from '@/core/crud';
 import type {
   CrudColumns,
@@ -40,15 +49,25 @@ import type {
 
 type RoleFormValues = AdminRolePayload;
 
+type DataPolicyScopeSelection = AdminRoleDataPolicyScope | 'none';
+
+type DepartmentSelectionValue = Array<
+  | number
+  | string
+  | {
+      value?: number | string;
+      key?: number | string;
+    }
+>;
+
 type DataPolicyFormValues = {
-  policies: Record<string, AdminRoleDataPolicyScope>;
-  customDepartments: Record<string, number[]>;
+  policies: Record<string, DataPolicyScopeSelection>;
+  customDepartments: Record<string, DepartmentSelectionValue>;
 };
 
 type DataPolicyItem = {
   key: string;
   resource: string;
-  action: string;
   strategy: string;
 };
 
@@ -59,22 +78,64 @@ const roleService: CrudService<AdminRole, AdminRolePayload, AdminRolePayload> = 
   delete: roleApi.delete,
 };
 
+const toggleTreeNodeCheckByTitleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  event.preventDefault();
+  event.stopPropagation();
+  event.currentTarget
+    .closest('.ant-tree-treenode')
+    ?.querySelector<HTMLElement>('.ant-tree-checkbox')
+    ?.click();
+};
+
 const toMenuTreeData = (menus: AdminMenu[]): TreeProps['treeData'] =>
   menus.map((menu) => ({
-    title: `${menu.name}${menu.permission ? ` (${menu.permission})` : ''}`,
+    title: (
+      <button
+        type="button"
+        className="trueadmin-role-authorize-tree-label"
+        onClick={toggleTreeNodeCheckByTitleClick}
+      >
+        {menu.name}
+      </button>
+    ),
     key: menu.id,
     children: menu.children ? toMenuTreeData(menu.children) : undefined,
   }));
 
-const toDepartmentTreeData = (departments: DepartmentTreeNode[]): TreeProps['treeData'] =>
+const toDepartmentTreeData = (departments: DepartmentTreeNode[]): TreeSelectProps['treeData'] =>
   departments.map((department) => ({
     title: department.name,
+    value: department.id,
     key: department.id,
     children: department.children ? toDepartmentTreeData(department.children) : undefined,
   }));
 
-const dataPolicyItemKey = (resource: string, action: string, strategy: string) =>
-  `${resource}::${action}::${strategy}`;
+const getMenuTreeKeys = (menus: AdminMenu[]): React.Key[] =>
+  menus.flatMap((menu) => [menu.id, ...(menu.children ? getMenuTreeKeys(menu.children) : [])]);
+
+const normalizeDepartmentSelection = (value: unknown): number[] => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  const ids = value
+    .map((item) => {
+      if (typeof item === 'object' && item !== null) {
+        const option = item as { value?: number | string; key?: number | string };
+        return Number(option.value ?? option.key ?? 0);
+      }
+
+      return Number(item);
+    })
+    .filter((id) => Number.isInteger(id) && id > 0);
+
+  return Array.from(new Set(ids));
+};
+
+const toDepartmentSelectionValue = (value: unknown): DepartmentSelectionValue =>
+  normalizeDepartmentSelection(value).map((id) => ({ value: id, key: id }));
+
+const dataPolicyItemKey = (resource: string, strategy: string) => `${resource}::${strategy}`;
 
 const textOf = (
   item: { label: string; i18n?: string },
@@ -87,14 +148,11 @@ const dataPolicyItems = (metadata?: DataPolicyMetadata): DataPolicyItem[] => {
   }
 
   return metadata.resources.flatMap((resource) =>
-    resource.actions.flatMap((action) =>
-      resource.strategies.map((strategy) => ({
-        key: dataPolicyItemKey(resource.key, action.key, strategy),
-        resource: resource.key,
-        action: action.key,
-        strategy,
-      })),
-    ),
+    resource.strategies.map((strategy) => ({
+      key: dataPolicyItemKey(resource.key, strategy),
+      resource: resource.key,
+      strategy,
+    })),
   );
 };
 
@@ -102,19 +160,16 @@ const toDataPolicyFormValues = (
   metadata: DataPolicyMetadata | undefined,
   role?: AdminRole,
 ): DataPolicyFormValues => {
-  const policies: Record<string, AdminRoleDataPolicyScope> = {};
-  const customDepartments: Record<string, number[]> = {};
+  const policies: Record<string, DataPolicyScopeSelection> = {};
+  const customDepartments: Record<string, DepartmentSelectionValue> = {};
   const rolePolicies = role?.dataPolicies ?? [];
 
   for (const item of dataPolicyItems(metadata)) {
     const policy = rolePolicies.find(
-      (candidate) =>
-        candidate.resource === item.resource &&
-        candidate.action === item.action &&
-        candidate.strategy === item.strategy,
+      (candidate) => candidate.resource === item.resource && candidate.strategy === item.strategy,
     );
-    policies[item.key] = policy?.scope ?? 'self';
-    customDepartments[item.key] = policy?.config?.deptIds ?? [];
+    policies[item.key] = policy?.scope ?? 'none';
+    customDepartments[item.key] = toDepartmentSelectionValue(policy?.config?.deptIds ?? []);
   }
 
   return { policies, customDepartments };
@@ -124,17 +179,20 @@ const toDataPolicies = (
   metadata: DataPolicyMetadata | undefined,
   values: DataPolicyFormValues,
 ): AdminRoleDataPolicy[] =>
-  dataPolicyItems(metadata).map((item, index) => {
-    const scope = values.policies?.[item.key] ?? 'self';
+  dataPolicyItems(metadata).flatMap((item, index) => {
+    const scope = values.policies?.[item.key];
+    if (!scope || scope === 'none') {
+      return [];
+    }
+
     return {
       resource: item.resource,
-      action: item.action,
       strategy: item.strategy as AdminRoleDataPolicy['strategy'],
       effect: 'allow',
       scope,
       config:
-        scope === 'custom_departments'
-          ? { deptIds: values.customDepartments?.[item.key] ?? [] }
+        scope === 'custom_departments' || scope === 'custom_departments_and_children'
+          ? { deptIds: normalizeDepartmentSelection(values.customDepartments?.[item.key]) }
           : {},
       status: 'enabled',
       sort: index,
@@ -153,9 +211,13 @@ export default function AdminRolesPage() {
   const [departmentTree, setDepartmentTree] = useState<DepartmentTreeNode[]>([]);
   const [dataPolicyMetadata, setDataPolicyMetadata] = useState<DataPolicyMetadata>();
   const [authorizeOpen, setAuthorizeOpen] = useState(false);
+  const [authorizeLoading, setAuthorizeLoading] = useState(false);
   const [authorizing, setAuthorizing] = useState(false);
   const [authorizeRole, setAuthorizeRole] = useState<AdminRole>();
+  const [pendingAuthorizeRole, setPendingAuthorizeRole] = useState<AdminRole>();
   const [checkedMenuIds, setCheckedMenuIds] = useState<React.Key[]>([]);
+  const [expandedMenuIds, setExpandedMenuIds] = useState<React.Key[]>([]);
+  const [strictMenuCheck, setStrictMenuCheck] = useState(true);
   const dataPolicyScopes = Form.useWatch('policies', dataPolicyForm);
 
   const statusText = useMemo<Record<AdminRole['status'], string>>(
@@ -196,27 +258,67 @@ export default function AdminRolesPage() {
     form.resetFields();
   };
 
-  const openAuthorize = async (record: AdminRole) => {
-    const [detail, metadata, menus, departments] = await Promise.all([
-      roleApi.detail(record.id),
-      dataPolicyMetadata ? Promise.resolve(dataPolicyMetadata) : loadDataPolicyMetadata(),
-      menuTree.length > 0 ? Promise.resolve(menuTree) : menuApi.tree(),
-      departmentTree.length > 0 ? Promise.resolve(departmentTree) : departmentApi.tree(),
-    ]);
-    setMenuTree(menus);
-    setDepartmentTree(departments);
-    setAuthorizeRole(detail);
-    setCheckedMenuIds(detail.menuIds ?? []);
-    dataPolicyForm.setFieldsValue(toDataPolicyFormValues(metadata, detail));
+  const openAuthorize = (record: AdminRole) => {
+    setPendingAuthorizeRole(record);
+    setAuthorizeRole(undefined);
+    setCheckedMenuIds([]);
+    setExpandedMenuIds([]);
+    setStrictMenuCheck(true);
+    dataPolicyForm.resetFields();
     setAuthorizeOpen(true);
   };
 
   const closeAuthorize = () => {
     setAuthorizeOpen(false);
+    setAuthorizeLoading(false);
+    setPendingAuthorizeRole(undefined);
     setAuthorizeRole(undefined);
     setCheckedMenuIds([]);
+    setExpandedMenuIds([]);
+    setStrictMenuCheck(true);
     dataPolicyForm.resetFields();
   };
+
+  useEffect(() => {
+    if (!authorizeOpen || !pendingAuthorizeRole) {
+      return;
+    }
+
+    let cancelled = false;
+    setAuthorizeLoading(true);
+
+    const loadAuthorizeData = async () => {
+      try {
+        const [detail, metadata, menus, departments] = await Promise.all([
+          roleApi.detail(pendingAuthorizeRole.id),
+          dataPolicyMetadata ? Promise.resolve(dataPolicyMetadata) : loadDataPolicyMetadata(),
+          menuTree.length > 0 ? Promise.resolve(menuTree) : menuApi.tree(),
+          departmentTree.length > 0 ? Promise.resolve(departmentTree) : departmentApi.tree(),
+        ]);
+
+        if (cancelled) {
+          return;
+        }
+
+        setMenuTree(menus);
+        setDepartmentTree(departments);
+        setAuthorizeRole(detail);
+        setCheckedMenuIds(detail.menuIds ?? []);
+        setExpandedMenuIds(getMenuTreeKeys(menus));
+        dataPolicyForm.setFieldsValue(toDataPolicyFormValues(metadata, detail));
+      } finally {
+        if (!cancelled) {
+          setAuthorizeLoading(false);
+        }
+      }
+    };
+
+    void loadAuthorizeData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authorizeOpen, pendingAuthorizeRole]);
 
   const columns = useMemo<CrudColumns<AdminRole>>(
     () => [
@@ -330,7 +432,7 @@ export default function AdminRolesPage() {
               size="small"
               type="link"
               icon={<SafetyCertificateOutlined />}
-              onClick={() => void openAuthorize(record)}
+              onClick={() => openAuthorize(record)}
             >
               {t('system.roles.action.authorize', '授权')}
             </Button>
@@ -419,150 +521,195 @@ export default function AdminRolesPage() {
           </TrueAdminModal>
           <TrueAdminModal
             destroyOnHidden
+            className="trueadmin-role-authorize-modal"
             confirmLoading={authorizing}
+            okButtonProps={{ disabled: authorizeLoading || !authorizeRole }}
             open={authorizeOpen}
             title={
-              authorizeRole
+              authorizeRole || pendingAuthorizeRole
                 ? t('system.roles.modal.authorizeWithName', '角色授权 - {{name}}').replace(
                     '{{name}}',
-                    authorizeRole.name,
+                    (authorizeRole ?? pendingAuthorizeRole)?.name ?? '',
                   )
                 : t('system.roles.modal.authorize', '角色授权')
             }
-            width={760}
+            width={820}
+            styles={{ body: { height: 'min(68vh, 680px)', overflow: 'hidden' } }}
             onCancel={closeAuthorize}
             onOk={() => void submitAuthorize(action)}
           >
-            <Tabs
-              items={[
-                {
-                  key: 'menus',
-                  label: t('system.roles.authorize.tab.menus', '功能权限'),
-                  icon: <SafetyCertificateOutlined />,
-                  children: (
-                    <Space direction="vertical" size={12} style={{ width: '100%' }}>
-                      <Typography.Text type="secondary">
-                        {t(
-                          'system.roles.authorize.description',
-                          '勾选该角色可访问的目录、菜单和按钮权限。角色之间不继承权限。',
-                        )}
-                      </Typography.Text>
-                      <Tree
-                        checkable
-                        defaultExpandAll
-                        treeData={menuTreeData}
-                        checkedKeys={checkedMenuIds}
-                        onCheck={(keys) =>
-                          setCheckedMenuIds(Array.isArray(keys) ? keys : keys.checked)
-                        }
-                      />
-                    </Space>
-                  ),
-                },
-                {
-                  key: 'data-policy',
-                  label: t('system.roles.authorize.tab.dataPolicy', '数据权限'),
-                  icon: <DatabaseOutlined />,
-                  children: (
-                    <Form<DataPolicyFormValues>
-                      form={dataPolicyForm}
-                      layout="vertical"
-                      initialValues={toDataPolicyFormValues(dataPolicyMetadata, authorizeRole)}
-                    >
-                      <Space direction="vertical" size={16} style={{ width: '100%' }}>
-                        <Typography.Text type="secondary">
-                          {t(
-                            'system.roles.dataPolicy.description',
-                            '数据权限按资源单独配置。模块必须先注册资源，角色授权时才能选择对应策略。',
-                          )}
-                        </Typography.Text>
-                        {dataPolicyMetadata?.resources.map((resource) => (
-                          <div key={resource.key}>
-                            <Typography.Title level={5} style={{ marginTop: 0 }}>
-                              {textOf(resource, t)}
-                            </Typography.Title>
-                            <Space direction="vertical" size={12} style={{ width: '100%' }}>
-                              {resource.actions.flatMap((action) =>
-                                resource.strategies.map((strategyKey) => {
-                                  const strategy = dataPolicyStrategyMap.get(strategyKey);
-                                  if (!strategy) {
-                                    return null;
-                                  }
-                                  const fieldKey = dataPolicyItemKey(
-                                    resource.key,
-                                    action.key,
-                                    strategyKey,
-                                  );
-                                  const scope = dataPolicyScopes?.[fieldKey];
+            <div className="trueadmin-role-authorize-body">
+              <Spin spinning={authorizeLoading}>
+                <Tabs
+                  className="trueadmin-role-authorize-tabs"
+                  items={[
+                    {
+                      key: 'menus',
+                      label: t('system.roles.authorize.tab.menus', '功能权限'),
+                      icon: <SafetyCertificateOutlined />,
+                      children: (
+                        <div className="trueadmin-role-authorize-pane">
+                          <Space orientation="vertical" size={12} style={{ width: '100%' }}>
+                            <div className="trueadmin-role-authorize-tree-toolbar">
+                              <Space size={4}>
+                                <Tooltip title={t('system.roles.authorize.expandAll', '展开全部')}>
+                                  <Button
+                                    disabled={authorizeLoading || menuTree.length === 0}
+                                    icon={<CaretDownOutlined />}
+                                    size="small"
+                                    type="text"
+                                    onClick={() => setExpandedMenuIds(getMenuTreeKeys(menuTree))}
+                                  />
+                                </Tooltip>
+                                <Tooltip
+                                  title={t('system.roles.authorize.collapseAll', '收起全部')}
+                                >
+                                  <Button
+                                    disabled={authorizeLoading || expandedMenuIds.length === 0}
+                                    icon={<CaretUpOutlined />}
+                                    size="small"
+                                    type="text"
+                                    onClick={() => setExpandedMenuIds([])}
+                                  />
+                                </Tooltip>
+                              </Space>
+                              <Space size={8}>
+                                <Typography.Text type="secondary">
+                                  {t('system.roles.authorize.strictCheck', '精准勾选')}
+                                </Typography.Text>
+                                <Switch
+                                  checked={strictMenuCheck}
+                                  disabled={authorizeLoading}
+                                  size="small"
+                                  onChange={setStrictMenuCheck}
+                                />
+                              </Space>
+                            </div>
+                            <Tree
+                              checkable
+                              checkStrictly={strictMenuCheck}
+                              expandedKeys={expandedMenuIds}
+                              treeData={menuTreeData}
+                              checkedKeys={checkedMenuIds}
+                              onCheck={(keys) =>
+                                setCheckedMenuIds(Array.isArray(keys) ? keys : keys.checked)
+                              }
+                              onExpand={(keys) => setExpandedMenuIds(keys)}
+                            />
+                          </Space>
+                        </div>
+                      ),
+                    },
+                    {
+                      key: 'data-policy',
+                      label: t('system.roles.authorize.tab.dataPolicy', '数据权限'),
+                      icon: <DatabaseOutlined />,
+                      children: (
+                        <div className="trueadmin-role-authorize-pane">
+                          <Form<DataPolicyFormValues>
+                            form={dataPolicyForm}
+                            layout="vertical"
+                            initialValues={toDataPolicyFormValues(
+                              dataPolicyMetadata,
+                              authorizeRole,
+                            )}
+                          >
+                            <Space orientation="vertical" size={16} style={{ width: '100%' }}>
+                              <Typography.Text type="secondary">
+                                {t(
+                                  'system.roles.dataPolicy.description',
+                                  '数据权限按资源单独配置。未选择的数据资源不会授予任何数据范围。',
+                                )}
+                              </Typography.Text>
+                              {dataPolicyMetadata?.resources.map((resource) => (
+                                <div key={resource.key}>
+                                  <Typography.Title level={5} style={{ marginTop: 0 }}>
+                                    {textOf(resource, t)}
+                                  </Typography.Title>
+                                  <Space orientation="vertical" size={12} style={{ width: '100%' }}>
+                                    {resource.strategies.map((strategyKey) => {
+                                      const strategy = dataPolicyStrategyMap.get(strategyKey);
+                                      if (!strategy) {
+                                        return null;
+                                      }
+                                      const fieldKey = dataPolicyItemKey(resource.key, strategyKey);
+                                      const scope = dataPolicyScopes?.[fieldKey];
 
-                                  return (
-                                    <div key={fieldKey}>
-                                      <Form.Item
-                                        label={`${textOf(action, t)} / ${textOf(strategy, t)}`}
-                                        name={['policies', fieldKey]}
-                                        rules={[
-                                          {
-                                            required: true,
-                                            message: t(
-                                              'system.roles.dataPolicy.scopeRequired',
-                                              '请选择数据范围',
-                                            ),
-                                          },
-                                        ]}
-                                      >
-                                        <Radio.Group>
-                                          <Space wrap>
-                                            {strategy.scopes.map((scopeItem) => (
-                                              <Radio key={scopeItem.key} value={scopeItem.key}>
-                                                {textOf(scopeItem, t)}
-                                              </Radio>
-                                            ))}
-                                          </Space>
-                                        </Radio.Group>
-                                      </Form.Item>
-                                      {scope === 'custom_departments' ? (
-                                        <Form.Item
-                                          label={t(
-                                            'system.roles.dataPolicy.departments',
-                                            '可见部门',
-                                          )}
-                                          name={['customDepartments', fieldKey]}
-                                          rules={[
-                                            {
-                                              required: true,
-                                              message: t(
-                                                'system.roles.dataPolicy.departmentsRequired',
-                                                '请选择可见部门',
-                                              ),
-                                            },
-                                          ]}
-                                        >
-                                          <TreeSelect
-                                            treeData={departmentTreeData}
-                                            treeCheckable
-                                            treeDefaultExpandAll
-                                            showSearch
-                                            treeNodeFilterProp="title"
-                                            placeholder={t(
-                                              'system.roles.dataPolicy.departmentsPlaceholder',
-                                              '请选择部门',
-                                            )}
-                                          />
-                                        </Form.Item>
-                                      ) : null}
-                                    </div>
-                                  );
-                                }),
-                              )}
+                                      return (
+                                        <div key={fieldKey}>
+                                          <Form.Item
+                                            label={textOf(strategy, t)}
+                                            name={['policies', fieldKey]}
+                                            rules={[]}
+                                          >
+                                            <Radio.Group optionType="button">
+                                              <Space wrap>
+                                                <Radio.Button value="none">
+                                                  {t(
+                                                    'system.roles.dataPolicy.scope.none',
+                                                    '不授权',
+                                                  )}
+                                                </Radio.Button>
+                                                {strategy.scopes.map((scopeItem) => (
+                                                  <Radio.Button
+                                                    key={scopeItem.key}
+                                                    value={scopeItem.key}
+                                                  >
+                                                    {textOf(scopeItem, t)}
+                                                  </Radio.Button>
+                                                ))}
+                                              </Space>
+                                            </Radio.Group>
+                                          </Form.Item>
+                                          {scope === 'custom_departments' ||
+                                          scope === 'custom_departments_and_children' ? (
+                                            <div>
+                                              <Form.Item
+                                                label={t(
+                                                  'system.roles.dataPolicy.departments',
+                                                  '可见部门',
+                                                )}
+                                                name={['customDepartments', fieldKey]}
+                                                rules={[
+                                                  {
+                                                    required: true,
+                                                    message: t(
+                                                      'system.roles.dataPolicy.departmentsRequired',
+                                                      '请选择可见部门',
+                                                    ),
+                                                  },
+                                                ]}
+                                              >
+                                                <TreeSelect
+                                                  treeData={departmentTreeData}
+                                                  treeCheckable
+                                                  treeCheckStrictly
+                                                  treeDefaultExpandAll
+                                                  showSearch
+                                                  treeNodeFilterProp="title"
+                                                  placeholder={t(
+                                                    'system.roles.dataPolicy.departmentsPlaceholder',
+                                                    '请选择部门',
+                                                  )}
+                                                />
+                                              </Form.Item>
+                                            </div>
+                                          ) : null}
+                                        </div>
+                                      );
+                                    })}
+                                  </Space>
+                                </div>
+                              ))}
                             </Space>
-                          </div>
-                        ))}
-                      </Space>
-                    </Form>
-                  ),
-                },
-              ]}
-            />
+                          </Form>
+                        </div>
+                      ),
+                    },
+                  ]}
+                />
+              </Spin>
+            </div>
           </TrueAdminModal>
         </>
       )}

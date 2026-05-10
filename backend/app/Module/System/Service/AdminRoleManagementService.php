@@ -9,6 +9,7 @@ use App\Foundation\Query\AdminQuery;
 use App\Foundation\Service\AbstractService;
 use App\Foundation\DataPermission\DataPolicyRegistry;
 use App\Module\System\Model\AdminRole;
+use App\Module\System\Repository\AdminDepartmentRepository;
 use App\Module\System\Repository\AdminMenuRepository;
 use App\Module\System\Repository\AdminRoleDataPolicyRepository;
 use App\Module\System\Repository\AdminRoleRepository;
@@ -21,6 +22,7 @@ final class AdminRoleManagementService extends AbstractService
     public function __construct(
         private readonly AdminRoleRepository $roles,
         private readonly AdminMenuRepository $menus,
+        private readonly AdminDepartmentRepository $departments,
         private readonly AdminRoleDataPolicyRepository $dataPolicies,
         private readonly DataPolicyRegistry $dataPolicyRegistry,
     ) {
@@ -86,6 +88,9 @@ final class AdminRoleManagementService extends AbstractService
             if (array_key_exists('menuIds', $payload)) {
                 $this->roles->syncMenus($role, $menuIds);
             }
+            if (array_key_exists('dataPolicies', $payload)) {
+                $this->dataPolicies->syncRolePolicies($role, $this->policies($payload['dataPolicies']));
+            }
 
             return $this->detail((int) $role->getAttribute('id'));
         });
@@ -123,11 +128,13 @@ final class AdminRoleManagementService extends AbstractService
         foreach ($policies as $policy) {
             $this->dataPolicyRegistry->assertPolicyInput($policy);
             $scope = (string) ($policy['scope'] ?? '');
-            if ($scope === 'custom_departments') {
+            if (in_array($scope, ['custom_departments', 'custom_departments_and_children'], true)) {
                 $deptIds = $policy['config']['deptIds'] ?? [];
                 if (! is_array($deptIds) || $deptIds === []) {
-                    throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'dataPolicies', 'reason' => 'custom_departments_requires_deptIds']);
+                    throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'dataPolicies', 'reason' => 'custom_department_scope_requires_deptIds']);
                 }
+                $deptIds = array_values(array_unique(array_filter(array_map('intval', $deptIds), static fn (int $id): bool => $id > 0)));
+                $this->assertExistingIds($deptIds, $this->departments->existingIds($deptIds), 'dataPolicies', 'contains_missing_department');
             }
         }
         $this->dataPolicyRegistry->assertUniquePolicies($policies);

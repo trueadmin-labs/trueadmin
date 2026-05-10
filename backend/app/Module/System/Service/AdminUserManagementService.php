@@ -32,7 +32,7 @@ final class AdminUserManagementService extends AbstractService
 
     public function detail(int $id): array
     {
-        return $this->users->toArray($this->mustFindForAction($id, 'view'));
+        return $this->users->toArray($this->mustFindWithDataPolicy($id));
     }
 
     public function create(array $payload): array
@@ -62,7 +62,7 @@ final class AdminUserManagementService extends AbstractService
     public function update(int $id, array $payload): array
     {
         return Db::transaction(function () use ($id, $payload): array {
-            $user = $this->mustFindForAction($id, 'update');
+            $user = $this->mustFindWithDataPolicy($id);
             $username = (string) $payload['username'];
             $this->assertUnique($this->users->existsUsername($username, $id), 'username');
 
@@ -101,7 +101,7 @@ final class AdminUserManagementService extends AbstractService
     public function delete(int $id): void
     {
         Db::transaction(function () use ($id): void {
-            $user = $this->mustFindForAction($id, 'delete');
+            $user = $this->mustFindWithDataPolicy($id);
             if ((int) $user->getAttribute('id') === 1) {
                 throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['reason' => 'cannot_delete_builtin_admin']);
             }
@@ -120,9 +120,9 @@ final class AdminUserManagementService extends AbstractService
         return $user;
     }
 
-    private function mustFindForAction(int $id, string $action): AdminUser
+    private function mustFindWithDataPolicy(int $id): AdminUser
     {
-        $user = $this->users->findByIdForAction($id, $action);
+        $user = $this->users->findByIdWithDataPolicy($id);
         if ($user === null) {
             throw $this->notFound('admin_user', $id);
         }

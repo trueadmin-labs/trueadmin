@@ -33,7 +33,6 @@ import {
   useMemo,
   useRef,
   useState,
-  type WheelEvent,
 } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { TrueAdminIcon } from '@/core/icon/TrueAdminIcon';
@@ -86,13 +85,13 @@ const normalizePath = (path: string) => path.replace(/\/+$/, '') || '/';
 
 const isSamePath = (left: string, right: string) => normalizePath(left) === normalizePath(right);
 
-const toPixelDelta = (event: WheelEvent<HTMLElement>) => {
+const toPixelDelta = (event: WheelEvent, target: HTMLElement) => {
   if (event.deltaMode === 1) {
     return event.deltaY * 16;
   }
 
   if (event.deltaMode === 2) {
-    return event.deltaY * event.currentTarget.clientWidth;
+    return event.deltaY * target.clientWidth;
   }
 
   return event.deltaY;
@@ -684,14 +683,18 @@ export function AppTabsBar({ activeKey }: { activeKey?: string }) {
     }
   };
 
-  const handleTabsWheel = (event: WheelEvent<HTMLUListElement>) => {
-    const target = event.currentTarget;
+  const handleTabsWheel = useCallback((event: WheelEvent) => {
+    const target = scrollRef.current;
+    if (!target) {
+      return;
+    }
+
     const maxScrollLeft = target.scrollWidth - target.clientWidth;
     if (maxScrollLeft <= 0 || event.deltaY === 0) {
       return;
     }
 
-    const delta = toPixelDelta(event);
+    const delta = toPixelDelta(event, target);
     const nextScrollLeft = Math.max(0, Math.min(maxScrollLeft, target.scrollLeft + delta));
     if (nextScrollLeft === target.scrollLeft) {
       return;
@@ -699,7 +702,20 @@ export function AppTabsBar({ activeKey }: { activeKey?: string }) {
 
     event.preventDefault();
     target.scrollLeft = nextScrollLeft;
-  };
+  }, []);
+
+  useEffect(() => {
+    const target = scrollRef.current;
+    if (!target) {
+      return;
+    }
+
+    target.addEventListener('wheel', handleTabsWheel, { passive: false });
+
+    return () => {
+      target.removeEventListener('wheel', handleTabsWheel);
+    };
+  }, [handleTabsWheel]);
 
   const handleDragEnd = ({ active, delta, over }: DragEndEvent) => {
     const activeKey = String(active.id);
@@ -743,7 +759,7 @@ export function AppTabsBar({ activeKey }: { activeKey?: string }) {
         modifiers={[restrictToHorizontalAxis]}
         onDragEnd={handleDragEnd}
       >
-        <ul ref={scrollRef} className="trueadmin-tabs-scroll" onWheel={handleTabsWheel}>
+        <ul ref={scrollRef} className="trueadmin-tabs-scroll">
           <SortableTabGroup
             activeKey={activeKey}
             closingTabs={closingTabs}
