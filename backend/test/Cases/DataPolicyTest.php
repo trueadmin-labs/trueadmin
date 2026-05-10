@@ -10,6 +10,8 @@ use App\Foundation\DataPermission\DataPolicyManager;
 use App\Foundation\DataPermission\DataPolicyRegistry;
 use App\Foundation\Plugin\PluginRepository;
 use App\Foundation\Query\AdminQuery;
+use App\Module\System\Repository\Notification\AdminAnnouncementRepository;
+use App\Module\System\Repository\Notification\AdminNotificationBatchRepository;
 use App\Module\System\Repository\AdminUserRepository;
 use Hyperf\Contract\ConfigInterface;
 use Hyperf\Context\ApplicationContext;
@@ -184,6 +186,44 @@ final class DataPolicyTest extends TestCase
         $this->assertSame('all', $rules[$broadRoleId] ?? null);
     }
 
+    public function testAnnouncementManagementDataPolicyUsesOperatorDepartment(): void
+    {
+        $suffix = str_replace('.', '', uniqid('dp-announcement', true));
+        $deptA = $this->createDepartment('dp-announcement-a-' . $suffix);
+        $deptB = $this->createDepartment('dp-announcement-b-' . $suffix);
+        $roleId = $this->createRole('dp-announcement-' . $suffix);
+        $this->createPolicy($roleId, 'department', [], 'admin_announcement');
+        $visibleId = $this->createAnnouncement('dp-visible-' . $suffix, 900001, $deptA);
+        $hiddenId = $this->createAnnouncement('dp-hidden-' . $suffix, 900002, $deptB);
+
+        ActorContext::set(ActorFactory::fromAdmin(801005, 'dp-announcement', 'DP Announcement', ['dp-announcement'], [$roleId], [], $deptA, [$deptA]));
+
+        $result = $this->container()->get(AdminAnnouncementRepository::class)->paginate(new AdminQuery(page: 1, pageSize: 50, keyword: $suffix));
+        $ids = array_column($result->items, 'id');
+
+        $this->assertContains($visibleId, $ids);
+        $this->assertNotContains($hiddenId, $ids);
+    }
+
+    public function testNotificationManagementDataPolicyUsesOperatorIdentity(): void
+    {
+        $suffix = str_replace('.', '', uniqid('dp-notification', true));
+        $deptId = $this->createDepartment('dp-notification-' . $suffix);
+        $actorId = 801006;
+        $roleId = $this->createRole('dp-notification-' . $suffix);
+        $this->createPolicy($roleId, 'self', [], 'admin_notification_batch');
+        $visibleId = $this->createNotificationBatch('dp-visible-' . $suffix, $actorId, $deptId);
+        $hiddenId = $this->createNotificationBatch('dp-hidden-' . $suffix, 900003, $deptId);
+
+        ActorContext::set(ActorFactory::fromAdmin($actorId, 'dp-notification', 'DP Notification', ['dp-notification'], [$roleId], [], $deptId, [$deptId]));
+
+        $result = $this->container()->get(AdminNotificationBatchRepository::class)->paginate(new AdminQuery(page: 1, pageSize: 50, keyword: $suffix));
+        $ids = array_column($result->items, 'id');
+
+        $this->assertContains($visibleId, $ids);
+        $this->assertNotContains($hiddenId, $ids);
+    }
+
     public function testModuleDataPolicyResourceFileRegistersStrategiesAndResources(): void
     {
         $this->writeDataPolicies([
@@ -321,18 +361,77 @@ final class DataPolicyTest extends TestCase
     /**
      * @param array<string, mixed> $config
      */
-    private function createPolicy(int $roleId, string $scope, array $config = []): void
+    private function createPolicy(int $roleId, string $scope, array $config = [], string $resource = 'admin_user'): void
     {
         $now = date('Y-m-d H:i:s');
         Db::table('admin_role_data_policies')->insert([
             'role_id' => $roleId,
-            'resource' => 'admin_user',
+            'resource' => $resource,
             'strategy' => 'organization',
             'effect' => 'allow',
             'scope' => $scope,
             'config' => json_encode($config, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
             'status' => 'enabled',
             'sort' => 0,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+    }
+
+    private function createAnnouncement(string $title, int $operatorId, int $operatorDeptId): int
+    {
+        $now = date('Y-m-d H:i:s');
+
+        return (int) Db::table('admin_announcements')->insertGetId([
+            'title' => $title,
+            'content' => 'data policy announcement',
+            'level' => 'info',
+            'type' => 'announcement',
+            'source' => 'system',
+            'scope' => 'all',
+            'role_ids' => '[]',
+            'payload' => '[]',
+            'attachments' => '[]',
+            'target_url' => '',
+            'status' => 'active',
+            'pinned' => false,
+            'publish_at' => $now,
+            'expire_at' => null,
+            'operator_type' => 'admin',
+            'operator_id' => $operatorId,
+            'operator_dept_id' => $operatorDeptId,
+            'operator_name' => 'Data Policy Tester',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+    }
+
+    private function createNotificationBatch(string $title, int $operatorId, int $operatorDeptId): int
+    {
+        $now = date('Y-m-d H:i:s');
+
+        return (int) Db::table('admin_notification_batches')->insertGetId([
+            'type' => 'system',
+            'level' => 'info',
+            'source' => 'system',
+            'targets' => '[]',
+            'template_key' => null,
+            'template_variables' => '[]',
+            'fallback_title' => $title,
+            'fallback_content' => 'data policy notification',
+            'payload' => '[]',
+            'attachments' => '[]',
+            'target_url' => '',
+            'dedupe_key' => null,
+            'dedupe_ttl_seconds' => null,
+            'expires_at' => null,
+            'status' => 'completed',
+            'operator_type' => 'admin',
+            'operator_id' => $operatorId,
+            'operator_dept_id' => $operatorDeptId,
+            'operator_name' => 'Data Policy Tester',
+            'impersonator_id' => null,
+            'error_message' => null,
             'created_at' => $now,
             'updated_at' => $now,
         ]);

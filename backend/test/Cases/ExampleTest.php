@@ -77,15 +77,6 @@ class ExampleTest extends TestCase
 
     public function testSystemPermissionEntrances()
     {
-        $roleId = (int) \Hyperf\DbConnection\Db::table('admin_roles')->where('code', 'super-admin')->value('id');
-        $menuIds = \Hyperf\DbConnection\Db::table('admin_menus')->pluck('id')->all();
-        foreach ($menuIds as $menuId) {
-            \Hyperf\DbConnection\Db::table('admin_role_menu')->updateOrInsert([
-                'role_id' => $roleId,
-                'menu_id' => (int) $menuId,
-            ]);
-        }
-
         $login = $this->loginAsAdmin();
         $headers = ['Authorization' => 'Bearer ' . $login['data']['accessToken']];
 
@@ -377,15 +368,6 @@ class ExampleTest extends TestCase
 
         $this->assertGreaterThanOrEqual(9, $sync['menus']);
         $this->assertGreaterThanOrEqual(10, $sync['permissions']);
-
-        $roleId = (int) \Hyperf\DbConnection\Db::table('admin_roles')->where('code', 'super-admin')->value('id');
-        $menuIds = \Hyperf\DbConnection\Db::table('admin_menus')->pluck('id')->all();
-        foreach ($menuIds as $menuId) {
-            \Hyperf\DbConnection\Db::table('admin_role_menu')->updateOrInsert([
-                'role_id' => $roleId,
-                'menu_id' => (int) $menuId,
-            ]);
-        }
 
         $this->assertSame(1, \Hyperf\DbConnection\Db::table('admin_menus')->where('code', 'organization')->count());
         $this->assertSame(1, \Hyperf\DbConnection\Db::table('admin_menus')->where('code', 'messageManagement')->count());

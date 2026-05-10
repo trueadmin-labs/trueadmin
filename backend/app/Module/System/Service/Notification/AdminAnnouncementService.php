@@ -59,6 +59,7 @@ final class AdminAnnouncementService extends AbstractService
                 'publish_at' => $publishAt,
                 'operator_type' => $actor === null ? 'system' : 'admin',
                 'operator_id' => $actor === null ? null : (int) $actor->id,
+                'operator_dept_id' => $actor === null ? null : ($actor->claims['operationDeptId'] ?? $actor->claims['primaryDeptId'] ?? null),
                 'operator_name' => $actor?->name ?? '',
             ]));
 
@@ -308,7 +309,7 @@ final class AdminAnnouncementService extends AbstractService
 
     private function mustFind(int $id): AdminAnnouncement
     {
-        $announcement = $this->announcements->findById($id);
+        $announcement = $this->announcements->findByIdWithDataPolicy($id);
         if ($announcement === null) {
             throw $this->notFound('admin_announcement', $id);
         }

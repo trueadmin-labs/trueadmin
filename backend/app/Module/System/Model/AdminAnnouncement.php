@@ -28,6 +28,7 @@ final class AdminAnnouncement extends Model
         'expire_at',
         'operator_type',
         'operator_id',
+        'operator_dept_id',
         'operator_name',
     ];
 

@@ -68,6 +68,8 @@ export default {
   'system.roles.dataPolicy.departmentsRequired': '请选择可见部门',
   'system.roles.dataPolicy.departmentsPlaceholder': '请选择部门',
   'dataPolicy.resource.adminUser': '管理员用户',
+  'dataPolicy.resource.adminAnnouncement': '公告管理',
+  'dataPolicy.resource.adminNotificationBatch': '通知管理',
   'dataPolicy.strategy.organization': '组织范围',
   'dataPolicy.scope.all': '全部数据',
   'dataPolicy.scope.department': '本部门',

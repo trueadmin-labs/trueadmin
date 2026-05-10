@@ -41,6 +41,8 @@ final class AdminRoleManagementService extends AbstractService
     public function detail(int $id): array
     {
         $role = $this->mustFind($id);
+        $this->assertMutableRole($role, 'cannot_read_builtin_role_detail');
+
         return [
             ...$this->roles->toArray($role),
             'menuIds' => $this->roles->menuIds($role),
@@ -73,6 +75,8 @@ final class AdminRoleManagementService extends AbstractService
     {
         return Db::transaction(function () use ($id, $payload): array {
             $role = $this->mustFind($id);
+            $this->assertMutableRole($role, 'cannot_update_builtin_role');
+
             $code = (string) $payload['code'];
             $exists = $this->roles->findByCode($code);
             $this->assertUnique($exists !== null && (int) $exists->getAttribute('id') !== $id, 'code');
@@ -100,9 +104,7 @@ final class AdminRoleManagementService extends AbstractService
     {
         Db::transaction(function () use ($id): void {
             $role = $this->mustFind($id);
-            if ((string) $role->getAttribute('code') === 'super-admin') {
-                throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['reason' => 'cannot_delete_builtin_role']);
-            }
+            $this->assertMutableRole($role, 'cannot_delete_builtin_role');
 
             $this->roles->delete($role);
         });
@@ -112,6 +114,8 @@ final class AdminRoleManagementService extends AbstractService
     {
         return Db::transaction(function () use ($id, $menuIds, $dataPolicies): array {
             $role = $this->mustFind($id);
+            $this->assertMutableRole($role, 'cannot_authorize_builtin_role');
+
             $menuIds = $this->menuIds($menuIds);
             $this->roles->syncMenus($role, $menuIds);
             $this->dataPolicies->syncRolePolicies($role, $this->policies($dataPolicies));
@@ -158,6 +162,18 @@ final class AdminRoleManagementService extends AbstractService
         }
 
         return $role;
+    }
+
+    private function assertMutableRole(AdminRole $role, string $reason): void
+    {
+        if ((string) $role->getAttribute('code') !== AdminRoleRepository::SUPER_ADMIN_CODE) {
+            return;
+        }
+
+        throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, [
+            'field' => 'role',
+            'reason' => $reason,
+        ]);
     }
 
 }

@@ -31,7 +31,7 @@ final class AdminNotificationBatchService extends AbstractService
 
     public function detail(int $id): array
     {
-        $batch = $this->batches->findById($id);
+        $batch = $this->batches->findByIdWithDataPolicy($id);
         if ($batch === null) {
             throw $this->notFound('admin_notification_batch', $id);
         }
@@ -41,7 +41,7 @@ final class AdminNotificationBatchService extends AbstractService
 
     public function paginateDeliveries(int $id, AdminQuery $query): PageResult
     {
-        $batch = $this->batches->findById($id);
+        $batch = $this->batches->findByIdWithDataPolicy($id);
         if ($batch === null) {
             throw $this->notFound('admin_notification_batch', $id);
         }
@@ -52,8 +52,9 @@ final class AdminNotificationBatchService extends AbstractService
     public function resendDelivery(int $batchId, int $deliveryId): array
     {
         return Db::transaction(function () use ($batchId, $deliveryId): array {
-            $delivery = $this->deliveries->findById($deliveryId);
-            if ($delivery === null || (int) $delivery->getAttribute('batch_id') !== $batchId) {
+            $batch = $this->batches->findByIdWithDataPolicy($batchId);
+            $delivery = $batch === null ? null : $this->deliveries->findById($deliveryId);
+            if ($batch === null || $delivery === null || (int) $delivery->getAttribute('batch_id') !== $batchId) {
                 throw $this->notFound('admin_notification_delivery', $deliveryId);
             }
 
@@ -71,7 +72,7 @@ final class AdminNotificationBatchService extends AbstractService
     public function resendFailedDeliveries(int $batchId): array
     {
         return Db::transaction(function () use ($batchId): array {
-            $batch = $this->batches->findById($batchId);
+            $batch = $this->batches->findByIdWithDataPolicy($batchId);
             if ($batch === null) {
                 throw $this->notFound('admin_notification_batch', $batchId);
             }

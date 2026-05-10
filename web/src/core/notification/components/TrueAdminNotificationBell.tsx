@@ -1,6 +1,6 @@
 import { BellOutlined } from '@ant-design/icons';
 import { Badge, Button, Popover } from 'antd';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { useAdminNotificationStore } from '../store';
 import { TrueAdminNotificationPopover } from './TrueAdminNotificationPopover';
@@ -8,6 +8,7 @@ import { TrueAdminNotificationPopover } from './TrueAdminNotificationPopover';
 export function TrueAdminNotificationBell() {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
+  const openedOnceRef = useRef(false);
   const unreadCount = useAdminNotificationStore((state) => state.unreadCount.total);
   const initialized = useAdminNotificationStore((state) => state.initialized);
   const refresh = useAdminNotificationStore((state) => state.refresh);
@@ -21,9 +22,22 @@ export function TrueAdminNotificationBell() {
 
   useEffect(() => {
     if (!initialized) {
-      void refresh();
+      void refresh({ silent: true });
     }
   }, [initialized, refresh]);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    if (openedOnceRef.current && initialized) {
+      return;
+    }
+
+    openedOnceRef.current = true;
+    void refresh();
+  }, [initialized, open, refresh]);
 
   return (
     <Popover

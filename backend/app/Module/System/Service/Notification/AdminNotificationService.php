@@ -69,6 +69,7 @@ final class AdminNotificationService
             'status' => 'sending',
             'operator_type' => $input['operatorType'] ?? ($actor === null ? 'system' : 'admin'),
             'operator_id' => $input['operatorId'] ?? ($actor === null ? null : (int) $actor->id),
+            'operator_dept_id' => $input['operatorDeptId'] ?? ($actor === null ? null : ($actor->claims['operationDeptId'] ?? $actor->claims['primaryDeptId'] ?? null)),
             'operator_name' => $input['operatorName'] ?? ($actor?->name ?? ''),
             'impersonator_id' => $input['impersonatorId'] ?? null,
         ]);

@@ -28,6 +28,7 @@ return new class extends Migration {
             $table->string('status', 32)->default('completed');
             $table->string('operator_type', 32)->default('admin');
             $table->unsignedBigInteger('operator_id')->nullable();
+            $table->unsignedBigInteger('operator_dept_id')->nullable();
             $table->string('operator_name', 64)->default('');
             $table->unsignedBigInteger('impersonator_id')->nullable();
             $table->string('error_message', 512)->nullable();
@@ -35,6 +36,7 @@ return new class extends Migration {
 
             $table->index(['status', 'created_at']);
             $table->index(['source', 'type']);
+            $table->index(['operator_dept_id', 'operator_id']);
             $table->index(['dedupe_key']);
         });
 
@@ -84,12 +86,14 @@ return new class extends Migration {
             $table->timestamp('expire_at')->nullable();
             $table->string('operator_type', 32)->default('admin');
             $table->unsignedBigInteger('operator_id')->nullable();
+            $table->unsignedBigInteger('operator_dept_id')->nullable();
             $table->string('operator_name', 64)->default('');
             $table->datetimes();
 
             $table->index(['status', 'publish_at']);
             $table->index(['source', 'type']);
             $table->index(['pinned', 'publish_at']);
+            $table->index(['operator_dept_id', 'operator_id']);
         });
 
         Schema::create('admin_announcement_reads', function (Blueprint $table): void {

@@ -32,8 +32,11 @@ final class AdminNotificationBatchRepository extends AbstractRepository
 
     public function paginate(AdminQuery $adminQuery): PageResult
     {
+        $query = AdminNotificationBatch::query();
+        $this->applyManagementDataPolicy($query);
+
         return $this->pageQuery(
-            AdminNotificationBatch::query(),
+            $query,
             $adminQuery,
             fn (AdminNotificationBatch $batch): array => $this->toArray($batch),
         );
@@ -43,6 +46,19 @@ final class AdminNotificationBatchRepository extends AbstractRepository
     {
         /** @var null|AdminNotificationBatch $batch */
         $batch = $this->findModelById($id);
+
+        return $batch;
+    }
+
+    public function findByIdWithDataPolicy(int $id): ?AdminNotificationBatch
+    {
+        $batch = $this->findById($id);
+        if ($batch === null) {
+            return null;
+        }
+
+        $query = AdminNotificationBatch::query()->where('id', $id);
+        $this->assertManagementDataPolicy($query);
 
         return $batch;
     }
@@ -71,7 +87,10 @@ final class AdminNotificationBatchRepository extends AbstractRepository
 
     public function statusStats(): array
     {
-        return AdminNotificationBatch::query()
+        $query = AdminNotificationBatch::query();
+        $this->applyManagementDataPolicy($query);
+
+        return $query
             ->select('status', Db::raw('count(*) as total'))
             ->groupBy('status')
             ->get()
@@ -122,6 +141,22 @@ final class AdminNotificationBatchRepository extends AbstractRepository
         $this->applyFilters($query, $adminQuery);
         $this->applyParams($query, $adminQuery);
         $this->applySort($query, $adminQuery);
+    }
+
+    private function applyManagementDataPolicy(mixed $query): void
+    {
+        $this->applyDataPolicy($query, 'admin_notification_batch', [
+            'deptColumn' => 'operator_dept_id',
+            'createdByColumn' => 'operator_id',
+        ]);
+    }
+
+    private function assertManagementDataPolicy(mixed $query): void
+    {
+        $this->assertDataPolicyAllows($query, 'admin_notification_batch', [
+            'deptColumn' => 'operator_dept_id',
+            'createdByColumn' => 'operator_id',
+        ]);
     }
 
     private function applyParams(Builder $query, AdminQuery $adminQuery): void

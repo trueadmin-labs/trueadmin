@@ -69,6 +69,8 @@ export default {
   'system.roles.dataPolicy.departmentsRequired': 'Select visible departments',
   'system.roles.dataPolicy.departmentsPlaceholder': 'Select departments',
   'dataPolicy.resource.adminUser': 'Admin Users',
+  'dataPolicy.resource.adminAnnouncement': 'Announcement Management',
+  'dataPolicy.resource.adminNotificationBatch': 'Notification Management',
   'dataPolicy.strategy.organization': 'Organization Scope',
   'dataPolicy.scope.all': 'All Data',
   'dataPolicy.scope.department': 'Current Department',

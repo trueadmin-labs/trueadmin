@@ -60,19 +60,40 @@ final class SystemSeeder extends Seeder
             ]
         );
 
-        $userId = (int) Db::table('admin_users')->where('username', 'admin')->value('id');
-        $roleId = (int) Db::table('admin_roles')->where('code', 'super-admin')->value('id');
+        Db::table('admin_roles')->updateOrInsert(
+            ['code' => 'admin'],
+            [
+                'name' => '管理员',
+                'sort' => 10,
+                'status' => 'enabled',
+                'updated_at' => $now,
+                'created_at' => $now,
+            ]
+        );
 
-        Db::table('admin_role_user')->updateOrInsert(['user_id' => $userId, 'role_id' => $roleId]);
+        $userId = (int) Db::table('admin_users')->where('username', 'admin')->value('id');
+        $superAdminRoleId = (int) Db::table('admin_roles')->where('code', 'super-admin')->value('id');
+        $adminRoleId = (int) Db::table('admin_roles')->where('code', 'admin')->value('id');
+
+        Db::table('admin_role_user')->updateOrInsert(['user_id' => $userId, 'role_id' => $superAdminRoleId]);
         Db::table('admin_user_departments')->updateOrInsert(
             ['user_id' => $userId, 'dept_id' => $deptId],
             ['is_primary' => true]
         );
 
         $this->metadata->sync();
-        foreach ($this->dataPolicyRegistry->allScopeRules($roleId) as $index => $rule) {
+
+        $menuIds = Db::table('admin_menus')->pluck('id')->all();
+        foreach ($menuIds as $menuId) {
+            Db::table('admin_role_menu')->updateOrInsert([
+                'role_id' => $adminRoleId,
+                'menu_id' => (int) $menuId,
+            ]);
+        }
+
+        foreach ($this->dataPolicyRegistry->allScopeRules($adminRoleId) as $index => $rule) {
             Db::table('admin_role_data_policies')->updateOrInsert(
-                ['role_id' => $roleId, 'resource' => $rule->resource, 'strategy' => $rule->strategy],
+                ['role_id' => $adminRoleId, 'resource' => $rule->resource, 'strategy' => $rule->strategy],
                 [
                     'effect' => $rule->effect,
                     'scope' => $rule->scope,
@@ -83,11 +104,6 @@ final class SystemSeeder extends Seeder
                     'created_at' => $now,
                 ]
             );
-        }
-
-        $menuIds = Db::table('admin_menus')->pluck('id')->all();
-        foreach ($menuIds as $menuId) {
-            Db::table('admin_role_menu')->updateOrInsert(['role_id' => $roleId, 'menu_id' => (int) $menuId]);
         }
     }
 }

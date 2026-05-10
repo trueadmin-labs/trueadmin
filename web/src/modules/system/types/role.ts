@@ -53,6 +53,7 @@ export type AdminRole = {
   name: string;
   sort: number;
   status: AdminRoleStatus;
+  builtin?: boolean;
   menuIds?: number[];
   dataPolicies?: AdminRoleDataPolicy[];
 };

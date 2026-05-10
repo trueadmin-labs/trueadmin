@@ -25,6 +25,7 @@ import {
   Typography,
 } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
+import { TrueAdminConfirmAction } from '@/core/action';
 import { TrueAdminCrudPage } from '@/core/crud';
 import type {
   CrudColumns,
@@ -77,6 +78,11 @@ const roleService: CrudService<AdminRole, AdminRolePayload, AdminRolePayload> = 
   update: roleApi.update,
   delete: roleApi.delete,
 };
+
+const SUPER_ADMIN_ROLE_CODE = 'super-admin';
+
+const isBuiltinRole = (role?: Pick<AdminRole, 'builtin' | 'code'>) =>
+  role?.builtin === true || role?.code === SUPER_ADMIN_ROLE_CODE;
 
 const toggleTreeNodeCheckByTitleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
   event.preventDefault();
@@ -242,6 +248,10 @@ export default function AdminRolesPage() {
   };
 
   const openEdit = (record: AdminRole) => {
+    if (isBuiltinRole(record)) {
+      return;
+    }
+
     setEditing(record);
     form.setFieldsValue({
       code: record.code,
@@ -259,6 +269,10 @@ export default function AdminRolesPage() {
   };
 
   const openAuthorize = (record: AdminRole) => {
+    if (isBuiltinRole(record)) {
+      return;
+    }
+
     setPendingAuthorizeRole(record);
     setAuthorizeRole(undefined);
     setCheckedMenuIds([]);
@@ -336,6 +350,17 @@ export default function AdminRolesPage() {
           </Tag>
         ),
       },
+      {
+        title: t('system.roles.column.type', '类型'),
+        dataIndex: 'builtin',
+        width: 120,
+        render: (_, record) =>
+          isBuiltinRole(record) ? (
+            <Tag color="gold">{t('system.roles.type.builtin', '系统内置')}</Tag>
+          ) : (
+            <Tag>{t('system.roles.type.custom', '自定义')}</Tag>
+          ),
+      },
     ],
     [statusText, t],
   );
@@ -363,6 +388,10 @@ export default function AdminRolesPage() {
   );
 
   const submit = async (action: CrudTableAction<AdminRole, AdminRolePayload, AdminRolePayload>) => {
+    if (isBuiltinRole(editing)) {
+      return;
+    }
+
     const values = await form.validateFields();
     setSubmitting(true);
     try {
@@ -385,6 +414,10 @@ export default function AdminRolesPage() {
     if (!authorizeRole) {
       return;
     }
+    if (isBuiltinRole(authorizeRole)) {
+      return;
+    }
+
     setAuthorizing(true);
     try {
       const metadata = dataPolicyMetadata ?? (await loadDataPolicyMetadata());
@@ -422,13 +455,20 @@ export default function AdminRolesPage() {
         </Button>
       }
       rowActions={{
+        delete: false,
         width: 210,
-        render: ({ record }) => (
+        render: ({ action, record }) => (
           <Space size={4} wrap>
-            <Button size="small" type="link" onClick={() => openEdit(record)}>
+            <Button
+              disabled={isBuiltinRole(record)}
+              size="small"
+              type="link"
+              onClick={() => openEdit(record)}
+            >
               {t('crud.action.edit', '编辑')}
             </Button>
             <Button
+              disabled={isBuiltinRole(record)}
               size="small"
               type="link"
               icon={<SafetyCertificateOutlined />}
@@ -436,6 +476,19 @@ export default function AdminRolesPage() {
             >
               {t('system.roles.action.authorize', '授权')}
             </Button>
+            <TrueAdminConfirmAction
+              danger
+              disabled={isBuiltinRole(record)}
+              size="small"
+              type="link"
+              action={async () => {
+                await action.delete?.(record.id);
+              }}
+              confirm={t('system.roles.deleteConfirm', '确认删除该角色吗？')}
+              successMessage={t('system.roles.deleteSuccess', '角色已删除')}
+            >
+              {t('crud.action.delete', '删除')}
+            </TrueAdminConfirmAction>
           </Space>
         ),
       }}

@@ -142,90 +142,89 @@ class AdminNotificationTest extends TestCase
 
     private function ensureNotificationTables(): void
     {
-        if (! Schema::hasTable('admin_notification_batches')) {
-            Schema::create('admin_notification_batches', function (Blueprint $table): void {
-                $table->bigIncrements('id');
-                $table->string('type', 64)->default('system');
-                $table->string('level', 32)->default('info');
-                $table->string('source', 64)->default('system');
-                $table->json('targets')->nullable();
-                $table->string('template_key', 128)->nullable();
-                $table->json('template_variables')->nullable();
-                $table->string('fallback_title', 255)->nullable();
-                $table->text('fallback_content')->nullable();
-                $table->json('payload')->nullable();
-                $table->json('attachments')->nullable();
-                $table->string('target_url', 512)->nullable();
-                $table->string('dedupe_key', 191)->nullable();
-                $table->integer('dedupe_ttl_seconds')->nullable();
-                $table->timestamp('expires_at')->nullable();
-                $table->string('status', 32)->default('completed');
-                $table->string('operator_type', 32)->default('admin');
-                $table->unsignedBigInteger('operator_id')->nullable();
-                $table->string('operator_name', 64)->default('');
-                $table->unsignedBigInteger('impersonator_id')->nullable();
-                $table->string('error_message', 512)->nullable();
-                $table->datetimes();
-            });
-        }
+        Schema::dropIfExists('admin_announcement_reads');
+        Schema::dropIfExists('admin_announcements');
+        Schema::dropIfExists('admin_notification_deliveries');
+        Schema::dropIfExists('admin_notification_batches');
 
-        if (! Schema::hasTable('admin_notification_deliveries')) {
-            Schema::create('admin_notification_deliveries', function (Blueprint $table): void {
-                $table->bigIncrements('id');
-                $table->unsignedBigInteger('batch_id');
-                $table->unsignedBigInteger('receiver_id');
-                $table->string('receiver_name', 64)->default('');
-                $table->string('locale', 32)->default('zh_CN');
-                $table->string('title', 255);
-                $table->text('content')->nullable();
-                $table->json('payload')->nullable();
-                $table->json('attachments')->nullable();
-                $table->string('target_url', 512)->nullable();
-                $table->string('status', 32)->default('pending');
-                $table->string('skip_reason', 64)->nullable();
-                $table->timestamp('sent_at')->nullable();
-                $table->timestamp('read_at')->nullable();
-                $table->timestamp('archived_at')->nullable();
-                $table->timestamp('expires_at')->nullable();
-                $table->string('error_message', 512)->nullable();
-                $table->integer('retry_count')->default(0);
-                $table->datetimes();
-            });
-        }
+        Schema::create('admin_notification_batches', function (Blueprint $table): void {
+            $table->bigIncrements('id');
+            $table->string('type', 64)->default('system');
+            $table->string('level', 32)->default('info');
+            $table->string('source', 64)->default('system');
+            $table->json('targets')->nullable();
+            $table->string('template_key', 128)->nullable();
+            $table->json('template_variables')->nullable();
+            $table->string('fallback_title', 255)->nullable();
+            $table->text('fallback_content')->nullable();
+            $table->json('payload')->nullable();
+            $table->json('attachments')->nullable();
+            $table->string('target_url', 512)->nullable();
+            $table->string('dedupe_key', 191)->nullable();
+            $table->integer('dedupe_ttl_seconds')->nullable();
+            $table->timestamp('expires_at')->nullable();
+            $table->string('status', 32)->default('completed');
+            $table->string('operator_type', 32)->default('admin');
+            $table->unsignedBigInteger('operator_id')->nullable();
+            $table->unsignedBigInteger('operator_dept_id')->nullable();
+            $table->string('operator_name', 64)->default('');
+            $table->unsignedBigInteger('impersonator_id')->nullable();
+            $table->string('error_message', 512)->nullable();
+            $table->datetimes();
+        });
 
-        if (! Schema::hasTable('admin_announcements')) {
-            Schema::create('admin_announcements', function (Blueprint $table): void {
-                $table->bigIncrements('id');
-                $table->string('title', 255);
-                $table->text('content')->nullable();
-                $table->string('level', 32)->default('info');
-                $table->string('type', 64)->default('announcement');
-                $table->string('source', 64)->default('system');
-                $table->string('scope', 32)->default('all');
-                $table->json('role_ids')->nullable();
-                $table->json('payload')->nullable();
-                $table->json('attachments')->nullable();
-                $table->string('target_url', 512)->nullable();
-                $table->string('status', 32)->default('draft');
-                $table->boolean('pinned')->default(false);
-                $table->timestamp('publish_at')->nullable();
-                $table->timestamp('expire_at')->nullable();
-                $table->string('operator_type', 32)->default('admin');
-                $table->unsignedBigInteger('operator_id')->nullable();
-                $table->string('operator_name', 64)->default('');
-                $table->datetimes();
-            });
-        }
+        Schema::create('admin_notification_deliveries', function (Blueprint $table): void {
+            $table->bigIncrements('id');
+            $table->unsignedBigInteger('batch_id');
+            $table->unsignedBigInteger('receiver_id');
+            $table->string('receiver_name', 64)->default('');
+            $table->string('locale', 32)->default('zh_CN');
+            $table->string('title', 255);
+            $table->text('content')->nullable();
+            $table->json('payload')->nullable();
+            $table->json('attachments')->nullable();
+            $table->string('target_url', 512)->nullable();
+            $table->string('status', 32)->default('pending');
+            $table->string('skip_reason', 64)->nullable();
+            $table->timestamp('sent_at')->nullable();
+            $table->timestamp('read_at')->nullable();
+            $table->timestamp('archived_at')->nullable();
+            $table->timestamp('expires_at')->nullable();
+            $table->string('error_message', 512)->nullable();
+            $table->integer('retry_count')->default(0);
+            $table->datetimes();
+        });
 
-        if (! Schema::hasTable('admin_announcement_reads')) {
-            Schema::create('admin_announcement_reads', function (Blueprint $table): void {
-                $table->bigIncrements('id');
-                $table->unsignedBigInteger('announcement_id');
-                $table->unsignedBigInteger('admin_id');
-                $table->timestamp('read_at')->nullable();
-                $table->timestamp('archived_at')->nullable();
-                $table->datetimes();
-            });
-        }
+        Schema::create('admin_announcements', function (Blueprint $table): void {
+            $table->bigIncrements('id');
+            $table->string('title', 255);
+            $table->text('content')->nullable();
+            $table->string('level', 32)->default('info');
+            $table->string('type', 64)->default('announcement');
+            $table->string('source', 64)->default('system');
+            $table->string('scope', 32)->default('all');
+            $table->json('role_ids')->nullable();
+            $table->json('payload')->nullable();
+            $table->json('attachments')->nullable();
+            $table->string('target_url', 512)->nullable();
+            $table->string('status', 32)->default('draft');
+            $table->boolean('pinned')->default(false);
+            $table->timestamp('publish_at')->nullable();
+            $table->timestamp('expire_at')->nullable();
+            $table->string('operator_type', 32)->default('admin');
+            $table->unsignedBigInteger('operator_id')->nullable();
+            $table->unsignedBigInteger('operator_dept_id')->nullable();
+            $table->string('operator_name', 64)->default('');
+            $table->datetimes();
+        });
+
+        Schema::create('admin_announcement_reads', function (Blueprint $table): void {
+            $table->bigIncrements('id');
+            $table->unsignedBigInteger('announcement_id');
+            $table->unsignedBigInteger('admin_id');
+            $table->timestamp('read_at')->nullable();
+            $table->timestamp('archived_at')->nullable();
+            $table->datetimes();
+        });
     }
 }

@@ -29,6 +29,7 @@ final class AdminNotificationBatch extends Model
         'status',
         'operator_type',
         'operator_id',
+        'operator_dept_id',
         'operator_name',
         'impersonator_id',
         'error_message',

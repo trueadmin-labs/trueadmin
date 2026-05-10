@@ -12,6 +12,8 @@ use Hyperf\DbConnection\Db;
 
 final class AdminRoleRepository extends AbstractRepository
 {
+    public const SUPER_ADMIN_CODE = 'super-admin';
+
     protected ?string $modelClass = AdminRole::class;
 
     protected array $keywordFields = ['code', 'name'];
@@ -144,12 +146,15 @@ final class AdminRoleRepository extends AbstractRepository
 
     public function toArray(AdminRole $role): array
     {
+        $code = (string) $role->getAttribute('code');
+
         return [
             'id' => (int) $role->getAttribute('id'),
-            'code' => (string) $role->getAttribute('code'),
+            'code' => $code,
             'name' => (string) $role->getAttribute('name'),
             'sort' => (int) $role->getAttribute('sort'),
             'status' => (string) $role->getAttribute('status'),
+            'builtin' => $code === self::SUPER_ADMIN_CODE,
         ];
     }
 }

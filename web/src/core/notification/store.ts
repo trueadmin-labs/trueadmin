@@ -36,7 +36,7 @@ type NotificationStoreState = {
   sseFailures: number;
   refreshUnreadCount: () => Promise<void>;
   refreshLatestMessages: (query?: AdminMessageQuery) => Promise<void>;
-  refresh: () => Promise<void>;
+  refresh: (options?: { silent?: boolean }) => Promise<void>;
   markRead: (messages: Array<Pick<AdminMessageItem, 'id' | 'kind'>>) => Promise<void>;
   archive: (messages: Array<Pick<AdminMessageItem, 'id' | 'kind'>>) => Promise<void>;
   restore: (messages: Array<Pick<AdminMessageItem, 'id' | 'kind'>>) => Promise<void>;
@@ -46,6 +46,7 @@ type NotificationStoreState = {
 };
 
 let realtimeAdapter: AdminNotificationRealtimeAdapter | undefined;
+let visibleRefreshCount = 0;
 
 const toMessageIdentities = (messages: Array<Pick<AdminMessageItem, 'id' | 'kind'>>) =>
   messages.map((message) => ({ id: message.id, kind: message.kind }));
@@ -99,15 +100,25 @@ export const useAdminNotificationStore = create<NotificationStoreState>((set, ge
     set({ latestMessages: result.items ?? [] });
   },
 
-  refresh: async () => {
-    set({ loading: true });
+  refresh: async (options) => {
+    const visible = options?.silent !== true;
+    if (visible) {
+      visibleRefreshCount += 1;
+      set({ loading: true });
+    }
+
     try {
       await Promise.all([get().refreshUnreadCount(), get().refreshLatestMessages()]);
       set({ error: undefined, initialized: true });
     } catch (error) {
       set({ error });
     } finally {
-      set({ loading: false });
+      if (visible) {
+        visibleRefreshCount = Math.max(0, visibleRefreshCount - 1);
+        if (visibleRefreshCount === 0) {
+          set({ loading: false });
+        }
+      }
     }
   },
 
@@ -178,7 +189,7 @@ export const useAdminNotificationStore = create<NotificationStoreState>((set, ge
       realtimeAdapter = createPollingNotificationAdapter(
         {
           onEvent: () => {
-            void get().refresh();
+            void get().refresh({ silent: true });
           },
           onError: (error) => set({ error }),
         },
@@ -200,7 +211,7 @@ export const useAdminNotificationStore = create<NotificationStoreState>((set, ge
       {
         onEvent: () => {
           set({ sseFailures: 0 });
-          void get().refresh();
+          void get().refresh({ silent: true });
         },
         onError: (error) => {
           const nextFailures = get().sseFailures + 1;

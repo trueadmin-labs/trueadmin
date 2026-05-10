@@ -34,8 +34,11 @@ final class AdminAnnouncementRepository extends AbstractRepository
 
     public function paginate(AdminQuery $adminQuery): PageResult
     {
+        $query = AdminAnnouncement::query();
+        $this->applyManagementDataPolicy($query);
+
         return $this->pageQuery(
-            AdminAnnouncement::query(),
+            $query,
             $adminQuery,
             fn (AdminAnnouncement $announcement): array => $this->toArray($announcement),
         );
@@ -63,6 +66,19 @@ final class AdminAnnouncementRepository extends AbstractRepository
     {
         /** @var null|AdminAnnouncement $announcement */
         $announcement = $this->findModelById($id);
+
+        return $announcement;
+    }
+
+    public function findByIdWithDataPolicy(int $id): ?AdminAnnouncement
+    {
+        $announcement = $this->findById($id);
+        if ($announcement === null) {
+            return null;
+        }
+
+        $query = AdminAnnouncement::query()->where('id', $id);
+        $this->assertManagementDataPolicy($query);
 
         return $announcement;
     }
@@ -103,7 +119,10 @@ final class AdminAnnouncementRepository extends AbstractRepository
 
     public function statusStats(): array
     {
-        return AdminAnnouncement::query()
+        $query = AdminAnnouncement::query();
+        $this->applyManagementDataPolicy($query);
+
+        return $query
             ->select('status', Db::raw('count(*) as total'))
             ->groupBy('status')
             ->get()
@@ -193,6 +212,22 @@ final class AdminAnnouncementRepository extends AbstractRepository
         $this->applyFilters($query, $adminQuery);
         $this->applyParams($query, $adminQuery);
         $this->applySort($query, $adminQuery);
+    }
+
+    private function applyManagementDataPolicy(mixed $query): void
+    {
+        $this->applyDataPolicy($query, 'admin_announcement', [
+            'deptColumn' => 'operator_dept_id',
+            'createdByColumn' => 'operator_id',
+        ]);
+    }
+
+    private function assertManagementDataPolicy(mixed $query): void
+    {
+        $this->assertDataPolicyAllows($query, 'admin_announcement', [
+            'deptColumn' => 'operator_dept_id',
+            'createdByColumn' => 'operator_id',
+        ]);
     }
 
     private function applyParams(Builder $query, AdminQuery $adminQuery): void
@@ -304,7 +339,6 @@ final class AdminAnnouncementRepository extends AbstractRepository
 
         return Db::table('admin_roles')
             ->whereIn('id', $roleIds)
-            ->orderBy('level')
             ->orderBy('sort')
             ->orderBy('id')
             ->pluck('name')
