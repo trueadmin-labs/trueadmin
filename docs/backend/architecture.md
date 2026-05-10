@@ -634,51 +634,163 @@ admin_roles.sort
 
 ## 10. 数据权限设计
 
-参考 MineAdmin：
+TrueAdmin 数据权限采用框架级 `DataPolicy`，不以 Casbin 作为核心依赖。Casbin 适合单对象授权决策，但后台系统的数据权限核心是列表、统计、导出和批量操作时的查询约束生成，例如把“业务员可见客户”“仓管可见仓库”“主管可见部门树”转换成明确的 SQL 条件。TrueAdmin 因此保留可替换决策引擎的空间，但第一版由 DataPolicy 策略直接生成 Repository 可控的查询约束。
+
+核心概念：
 
 ```text
-#[DataScope]
-DataScopeAspect
-DataPermission Context
-Rule / Factory
+RBAC        控制能不能访问菜单、按钮和接口
+DataPolicy  控制能访问哪些数据
+Resource    数据资源，例如 admin_user / outbound_order / customer
+Action      数据动作，例如 list / view / update / delete / export
+Strategy    策略类型，例如 organization / customer / warehouse / project
+Scope       策略范围，例如 all / self / department / assigned / custom
+Target      资源字段映射，例如 dept_id / created_by / customer_id / warehouse_id
 ```
 
-TrueAdmin 增强点：
+数据权限不提供隐式默认值，也不使用 `*/*` 通配兜底。框架提供策略能力，模块负责显式注册资源；只有注册过的资源才能在角色授权中配置数据权限。某个 Repository 调用了 `applyDataPolicy()` 或 `assertDataPolicyAllows()`，但资源或动作未注册时，按配置错误直接抛异常，避免开发阶段静默放行或误拒绝。
 
-- 数据权限基于 ActorContext 的 operator。
-- 数据权限支持多部门，计算时使用 operator 的可见部门集合，而不是只使用主部门。
-- 当前操作部门只决定写入归属和审计上下文，不应该收窄用户本来拥有的可见部门集合。
-- 支持 HTTP、队列、定时任务显式注入 operator。
-- 支持查询别名和多表查询规范。
-- 支持测试断言数据权限是否生效。
-- 支持调试最终数据范围。
-
-后台数据权限建议内置这些范围：
+第一版内置 `organization` 策略，并通过 `admin_role_data_policies` 落库。数据库只保存稳定 key，多语言由资源/策略注册元数据提供：
 
 ```text
-all                         全部数据
-self                        本人创建
-current_department          当前操作部门
-current_department_tree     当前操作部门及子部门
-assigned_departments        用户所属部门集合
-assigned_departments_tree   用户所属部门集合及子部门
-department_created_by       所属部门集合 + 本人创建
-custom_departments          角色指定部门集合
+resource    显式资源 key，例如 admin_user / outbound_order / customer
+action      显式动作 key，例如 list/view/update/delete/export
+strategy    第一版内置 organization
+scope       all / self / department / department_and_children / custom_departments
+config      custom_departments 使用 { deptIds: [...] }
+effect      预留 allow / deny，第一版以 allow 并集为主
 ```
 
-当用户属于多个部门时，`assigned_departments` 和 `assigned_departments_tree` 才是主要数据权限入口。`primary_dept_id` 只是默认操作部门，不应该被误用为唯一数据部门。
+角色可以拥有多条数据策略。多角色、多策略按 allow 并集组合；某个资源动作的策略为 `all` 时不追加查询约束。后续启用 deny 时，deny 策略应优先排除。超级管理员拥有所有已注册数据资源动作的 `all` 权限，但实现上按注册表展开为具体规则，不引入全局通配。
 
-推荐使用位置：
+资源注册示例：
 
 ```php
-#[DataScope(onlyTables: ['products'])]
-public function page(array $params): array
+'resources' => [
+    [
+        'key' => 'admin_user',
+        'label' => '管理员用户',
+        'i18n' => 'dataPolicy.resource.adminUser',
+        'actions' => [
+            ['key' => 'list', 'label' => '列表', 'i18n' => 'dataPolicy.action.list'],
+            ['key' => 'view', 'label' => '详情', 'i18n' => 'dataPolicy.action.view'],
+            ['key' => 'update', 'label' => '编辑', 'i18n' => 'dataPolicy.action.update'],
+            ['key' => 'delete', 'label' => '删除', 'i18n' => 'dataPolicy.action.delete'],
+        ],
+        'strategies' => ['organization'],
+    ],
+]
+```
+
+策略注册元数据必须包含稳定 key、fallback label 和 i18n key。前端角色授权页通过 `/api/admin/system-config/data-policies/metadata` 获取资源、动作、策略和 scope 元数据，再用当前语言包渲染。审计日志不按这套元数据做多语言，日志记录保持当时发生的事实文本和结构。
+
+策略自身必须实现 `contains(parent, child)`，用于判断子角色的数据权限是否超出父角色。这个判断不能写在角色服务里，因为不同业务策略的包含关系完全不同：`organization` 可以判断 `department` 是否被 `department_and_children` 包含，ERP 的 `customer` 策略则需要判断 `assigned_customers`、`owned_customers`、`custom_customers` 之间的关系。角色授权只负责找到同一 `resource/action/strategy` 的父策略，再把包含关系交给策略实现。
+
+`#[DataScope]` 的职责不是写死“本部门/本人”，而是声明当前方法涉及的数据资源和动作：
+
+```php
+#[DataScope(resource: 'outbound_order', action: 'list')]
+public function paginate(AdminQuery $query): PageResult
 {
-    return $this->repository->page($params);
+    return $this->orders->paginate($query);
 }
 ```
 
-不建议把所有 Repository 默认都强行套数据权限。数据权限应该由业务查询入口声明。
+Repository 负责显式应用查询约束：
+
+```php
+$this->applyDataPolicy($query, 'outbound_order', 'list', [
+    'deptColumn' => 'dept_id',
+    'createdByColumn' => 'created_by',
+    'customerColumn' => 'customer_id',
+    'warehouseColumn' => 'warehouse_id',
+]);
+```
+
+详情、编辑、删除和批量操作必须使用同一资源动作做断言：
+
+```php
+$this->assertDataPolicyAllows($query, 'outbound_order', 'update', [
+    'deptColumn' => 'dept_id',
+    'createdByColumn' => 'created_by',
+]);
+
+$this->assertDataPolicyAllowsAll($query, 'outbound_order', 'delete', $ids, 'id', [
+    'deptColumn' => 'dept_id',
+    'createdByColumn' => 'created_by',
+]);
+```
+
+业务模块开发数据权限的最小闭环：
+
+```php
+final class CustomerDataPolicyStrategy implements DataPolicyStrategyInterface
+{
+    public function key(): string { return 'customer'; }
+
+    public function metadata(): array
+    {
+        return [
+            'key' => 'customer',
+            'label' => '客户范围',
+            'i18n' => 'erp.dataPolicy.strategy.customer',
+            'scopes' => [
+                ['key' => 'all', 'label' => '全部客户', 'i18n' => 'erp.dataPolicy.scope.allCustomers'],
+                ['key' => 'owned_customers', 'label' => '自己的客户', 'i18n' => 'erp.dataPolicy.scope.ownedCustomers'],
+                ['key' => 'assigned_customers', 'label' => '授权客户', 'i18n' => 'erp.dataPolicy.scope.assignedCustomers'],
+            ],
+        ];
+    }
+
+    public function apply(mixed $query, Actor $actor, DataPolicyRule $rule, DataPolicyTarget $target): void
+    {
+        $customerColumn = $target->string('customerColumn', 'customer_id');
+        // owned_customers: whereExists customer.owner_user_id = actor.id
+        // assigned_customers: whereExists erp_customer_assignments.user_id = actor.id
+    }
+
+    public function contains(DataPolicyRule $parent, DataPolicyRule $child): bool
+    {
+        if ($parent->scope === 'all') {
+            return true;
+        }
+
+        return $parent->scope === $child->scope;
+    }
+}
+```
+
+模块注册资源后，角色授权页会自动出现这些资源和策略：
+
+```php
+[
+    'key' => 'erp_sales_order',
+    'label' => '销售订单',
+    'i18n' => 'erp.dataPolicy.resource.salesOrder',
+    'actions' => [
+        ['key' => 'list', 'label' => '列表', 'i18n' => 'dataPolicy.action.list'],
+        ['key' => 'view', 'label' => '详情', 'i18n' => 'dataPolicy.action.view'],
+        ['key' => 'update', 'label' => '编辑', 'i18n' => 'dataPolicy.action.update'],
+        ['key' => 'delete', 'label' => '删除', 'i18n' => 'dataPolicy.action.delete'],
+    ],
+    'strategies' => ['customer', 'organization'],
+]
+```
+
+普通后台资源优先使用 `organization` 策略。ERP/CRM/WMS 等业务模块不要把客户、仓库、项目、门店规则写进 System 模块，而应注册自己的策略，例如 `customer`、`warehouse`、`project`、`store`。复杂关联查询不强求框架自动解析关系链，业务 Repository 可以显式使用 `whereExists` 或 join，这比全局 SQL 拦截更清晰也更容易排查。
+
+系统内置资源建议：
+
+```text
+admin_users        organization，按 primary_dept_id / created_by 先落第一版
+admin_departments  可见部门树 + 必要祖先节点，后续专门处理
+admin_roles        不走部门数据权限，使用角色层级和授权边界
+admin_menus        系统资源，不走数据权限
+files              owner / organization / all，后续接入
+logs               organization / owner / all，后续接入
+```
+
+不建议把所有 Repository 默认强行套数据权限。需要数据权限的查询入口必须显式调用 `applyDataPolicy()`，写操作也必须提供 `assertDataPolicyAllows()` 类能力，确保详情、编辑、删除、导出、批量操作和列表一致。
 
 ## 11. 操作日志与审计
 

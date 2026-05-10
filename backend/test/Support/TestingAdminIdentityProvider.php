@@ -38,10 +38,10 @@ final class TestingAdminIdentityProvider implements AdminIdentityProviderInterfa
     private function users(): array
     {
         return [
-            'admin' => new AuthUser(1, 'admin', 'TrueAdmin', ['super-admin'], ['*'], 1, [1]),
-            'permission-any-a' => new AuthUser(2, 'permission-any-a', 'Permission Any A', ['tester'], ['testing:permission:any-a'], 1, [1]),
-            'permission-all-a' => new AuthUser(3, 'permission-all-a', 'Permission All A', ['tester'], ['testing:permission:all-a'], 1, [1]),
-            'permission-all-ab' => new AuthUser(4, 'permission-all-ab', 'Permission All AB', ['tester'], ['testing:permission:all-a', 'testing:permission:all-b'], 1, [1]),
+            'admin' => new AuthUser(1, 'admin', 'TrueAdmin', ['super-admin'], [1], ['*'], 1, [1]),
+            'permission-any-a' => new AuthUser(2, 'permission-any-a', 'Permission Any A', ['tester'], [2], ['testing:permission:any-a'], 1, [1]),
+            'permission-all-a' => new AuthUser(3, 'permission-all-a', 'Permission All A', ['tester'], [2], ['testing:permission:all-a'], 1, [1]),
+            'permission-all-ab' => new AuthUser(4, 'permission-all-ab', 'Permission All AB', ['tester'], [2], ['testing:permission:all-a', 'testing:permission:all-b'], 1, [1]),
         ];
     }
 }

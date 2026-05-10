@@ -8,10 +8,13 @@ use App\Foundation\Pagination\PageResult;
 use App\Foundation\Query\AdminQuery;
 use App\Foundation\Service\AbstractService;
 use App\Foundation\Tree\TreeHelper;
+use App\Foundation\DataPermission\DataPolicyRegistry;
 use App\Module\System\Model\AdminRole;
 use App\Module\System\Repository\AdminMenuRepository;
+use App\Module\System\Repository\AdminRoleDataPolicyRepository;
 use App\Module\System\Repository\AdminRoleRepository;
 use Hyperf\DbConnection\Db;
+use TrueAdmin\Kernel\DataPermission\DataPolicyRule;
 use TrueAdmin\Kernel\Constant\ErrorCode;
 use TrueAdmin\Kernel\Exception\BusinessException;
 
@@ -20,6 +23,8 @@ final class AdminRoleManagementService extends AbstractService
     public function __construct(
         private readonly AdminRoleRepository $roles,
         private readonly AdminMenuRepository $menus,
+        private readonly AdminRoleDataPolicyRepository $dataPolicies,
+        private readonly DataPolicyRegistry $dataPolicyRegistry,
         private readonly TreeHelper $tree,
     ) {
     }
@@ -42,7 +47,11 @@ final class AdminRoleManagementService extends AbstractService
     public function detail(int $id): array
     {
         $role = $this->mustFind($id);
-        return [...$this->roles->toArray($role), 'menuIds' => $this->roles->menuIds($role)];
+        return [
+            ...$this->roles->toArray($role),
+            'menuIds' => $this->roles->menuIds($role),
+            'dataPolicies' => $this->dataPolicies->policiesForRole($role),
+        ];
     }
 
     public function create(array $payload): array
@@ -65,6 +74,7 @@ final class AdminRoleManagementService extends AbstractService
             ]);
 
             $this->roles->syncMenus($role, $menuIds);
+            $this->dataPolicies->syncRolePolicies($role, $this->policies($payload['dataPolicies'] ?? null, $parent));
 
             return $this->detail((int) $role->getAttribute('id'));
         });
@@ -117,17 +127,96 @@ final class AdminRoleManagementService extends AbstractService
         });
     }
 
-    public function authorizeMenus(int $id, array $menuIds): array
+    public function authorize(int $id, array $menuIds, array $dataPolicies): array
     {
-        return Db::transaction(function () use ($id, $menuIds): array {
+        return Db::transaction(function () use ($id, $menuIds, $dataPolicies): array {
             $role = $this->mustFind($id);
             $menuIds = $this->menuIds($menuIds);
             $parent = $this->parentRole((int) $role->getAttribute('parent_id'));
             $this->assertWithinParentMenuScope($parent, $menuIds);
             $this->roles->syncMenus($role, $menuIds);
+            $this->dataPolicies->syncRolePolicies($role, $this->policies($dataPolicies, $parent));
 
             return $this->detail($id);
         });
+    }
+
+
+    private function policies(mixed $value, ?AdminRole $parent): array
+    {
+        $policies = is_array($value) ? array_values($value) : [];
+
+        foreach ($policies as $policy) {
+            $this->dataPolicyRegistry->assertPolicyInput($policy);
+            $scope = (string) ($policy['scope'] ?? '');
+            if ($scope === 'custom_departments') {
+                $deptIds = $policy['config']['deptIds'] ?? [];
+                if (! is_array($deptIds) || $deptIds === []) {
+                    throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'dataPolicies', 'reason' => 'custom_departments_requires_deptIds']);
+                }
+            }
+        }
+        $this->dataPolicyRegistry->assertUniquePolicies($policies);
+
+        $this->assertWithinParentDataPolicyScope($parent, $policies);
+
+        return $policies;
+    }
+
+    private function assertWithinParentDataPolicyScope(?AdminRole $parent, array $policies): void
+    {
+        if ($parent === null || (string) $parent->getAttribute('code') === 'super-admin') {
+            return;
+        }
+
+        $parentPolicies = $this->dataPolicies->policiesForRole($parent);
+        foreach ($policies as $policy) {
+            $parentPolicy = $this->matchingParentPolicy($parentPolicies, $policy);
+            if ($parentPolicy === null) {
+                throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'dataPolicies', 'reason' => 'exceeds_parent_data_policy_scope']);
+            }
+            if (! $this->isWithinParentDataPolicyScope($parentPolicy, $policy)) {
+                throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'dataPolicies', 'reason' => 'exceeds_parent_data_policy_scope']);
+            }
+        }
+    }
+
+    private function isWithinParentDataPolicyScope(array $parentPolicy, array $policy): bool
+    {
+        $parentRule = $this->toDataPolicyRule($parentPolicy);
+        $rule = $this->toDataPolicyRule($policy);
+
+        if (! $parentRule->matches($rule->resource, $rule->action) || $parentRule->strategy !== $rule->strategy) {
+            return false;
+        }
+
+        return $this->dataPolicyRegistry->strategy($rule->strategy)->contains($parentRule, $rule);
+    }
+
+    private function toDataPolicyRule(array $policy): DataPolicyRule
+    {
+        return new DataPolicyRule(
+            resource: (string) ($policy['resource'] ?? ''),
+            action: (string) ($policy['action'] ?? ''),
+            strategy: (string) ($policy['strategy'] ?? ''),
+            scope: (string) ($policy['scope'] ?? ''),
+            effect: (string) ($policy['effect'] ?? 'allow'),
+            config: (array) ($policy['config'] ?? []),
+        );
+    }
+
+    private function matchingParentPolicy(array $parentPolicies, array $policy): ?array
+    {
+        foreach ($parentPolicies as $parentPolicy) {
+            if (($parentPolicy['resource'] ?? '') === ($policy['resource'] ?? '')
+                && ($parentPolicy['action'] ?? '') === ($policy['action'] ?? '')
+                && ($parentPolicy['strategy'] ?? '') === ($policy['strategy'] ?? '')
+            ) {
+                return $parentPolicy;
+            }
+        }
+
+        return null;
     }
 
     private function menuIds(mixed $value): array

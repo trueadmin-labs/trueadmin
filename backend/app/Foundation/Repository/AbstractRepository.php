@@ -6,8 +6,10 @@ namespace App\Foundation\Repository;
 
 use App\Foundation\Pagination\PageResult;
 use App\Foundation\Query\AdminQuery;
-use Hyperf\DbConnection\Model\Model;
+use App\Foundation\DataPermission\DataPolicyManager;
+use Hyperf\Context\ApplicationContext;
 use Hyperf\DbConnection\Db;
+use Hyperf\DbConnection\Model\Model;
 use RuntimeException;
 
 abstract class AbstractRepository
@@ -131,6 +133,45 @@ abstract class AbstractRepository
         $this->handleSearch($query, $adminQuery);
 
         return $query->get()->map($mapper)->all();
+    }
+
+
+    /**
+     * @param array<string, mixed>|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target
+     */
+    protected function applyDataPolicy(mixed $query, string $resource, string $action = 'list', array|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target = []): void
+    {
+        $this->dataPolicyManager()->apply($query, $resource, $action, $target);
+    }
+
+    /**
+     * @param array<string, mixed>|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target
+     */
+    protected function dataPolicyAllows(mixed $query, string $resource, string $action = 'view', array|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target = []): bool
+    {
+        return $this->dataPolicyManager()->allows($query, $resource, $action, $target);
+    }
+
+    /**
+     * @param array<string, mixed>|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target
+     */
+    protected function assertDataPolicyAllows(mixed $query, string $resource, string $action = 'view', array|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target = []): void
+    {
+        $this->dataPolicyManager()->assertAllows($query, $resource, $action, $target);
+    }
+
+    /**
+     * @param list<int|string> $ids
+     * @param array<string, mixed>|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target
+     */
+    protected function assertDataPolicyAllowsAll(mixed $query, string $resource, string $action, array $ids, string $idColumn = 'id', array|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target = []): void
+    {
+        $this->dataPolicyManager()->assertAllowsAll($query, $resource, $action, $ids, $idColumn, $target);
+    }
+
+    private function dataPolicyManager(): DataPolicyManager
+    {
+        return ApplicationContext::getContainer()->get(DataPolicyManager::class);
     }
 
     protected function handleSearch(mixed $query, AdminQuery $adminQuery): void

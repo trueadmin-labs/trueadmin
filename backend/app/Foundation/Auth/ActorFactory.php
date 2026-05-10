@@ -13,6 +13,7 @@ final class ActorFactory
         string $username,
         string $nickname = '',
         array $roles = [],
+        array $roleIds = [],
         array $permissions = [],
         ?int $primaryDeptId = null,
         array $deptIds = [],
@@ -28,6 +29,7 @@ final class ActorFactory
             claims: [
                 'nickname' => $nickname,
                 'roles' => $roles,
+                'roleIds' => $roleIds,
                 'permissions' => $permissions,
                 'primaryDeptId' => $primaryDeptId,
                 'deptIds' => $deptIds,

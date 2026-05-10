@@ -100,6 +100,23 @@ final class AdminDepartmentRepository extends AbstractRepository
         return $this->existingModelIds(array_values(array_unique(array_map('intval', $ids))));
     }
 
+
+    /**
+     * @return list<int>
+     */
+    public function selfAndDescendantIds(int $id): array
+    {
+        $ids = AdminDepartment::query()
+            ->where('id', $id)
+            ->orWhere('path', 'like', '%,' . $id . ',%')
+            ->pluck('id')
+            ->map(static fn ($value): int => (int) $value)
+            ->values()
+            ->all();
+
+        return array_values(array_unique($ids));
+    }
+
     public function toArray(AdminDepartment $department): array
     {
         return [

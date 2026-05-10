@@ -1485,10 +1485,10 @@
                 ]
             }
         },
-        "/api/admin/organization/roles/{id}/menus": {
+        "/api/admin/organization/roles/{id}/authorize": {
             "post": {
                 "operationId": "App_Module_System_Http_Admin_Controller_AdminRoleController_authorize",
-                "summary": "角色菜单授权",
+                "summary": "角色授权",
                 "description": "",
                 "tags": [
                     "系统管理"
@@ -1643,6 +1643,35 @@
                     "permissionMode": "single",
                     "permissions": [
                         "system:user:update"
+                    ],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/system-config/data-policies/metadata": {
+            "get": {
+                "operationId": "App_Module_System_Http_Admin_Controller_PermissionController_dataPolicyMetadata",
+                "summary": "数据权限元数据",
+                "description": "",
+                "tags": [
+                    "系统管理"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\PermissionController@dataPolicyMetadata",
+                    "permission": "system:role:authorize",
+                    "permissionMode": "single",
+                    "permissions": [
+                        "system:role:authorize"
                     ],
                     "public": false
                 },

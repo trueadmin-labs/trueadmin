@@ -83,8 +83,14 @@ final class AdminUserRepository extends AbstractRepository
 
     public function paginate(AdminQuery $adminQuery): PageResult
     {
+        $query = AdminUser::query();
+        $this->applyDataPolicy($query, 'admin_user', 'list', [
+            'deptColumn' => 'primary_dept_id',
+            'createdByColumn' => 'created_by',
+        ]);
+
         return $this->pageQuery(
-            AdminUser::query(),
+            $query,
             $adminQuery,
             fn (AdminUser $user): array => $this->toArray($user),
         );
@@ -96,6 +102,33 @@ final class AdminUserRepository extends AbstractRepository
         $user = $this->findModelById($id);
 
         return $user;
+    }
+
+    public function findByIdForAction(int $id, string $action): ?AdminUser
+    {
+        $user = $this->findById($id);
+        if ($user === null) {
+            return null;
+        }
+
+        $query = AdminUser::query()->where('id', $id);
+        $this->assertDataPolicyAllows($query, 'admin_user', $action, [
+            'deptColumn' => 'primary_dept_id',
+            'createdByColumn' => 'created_by',
+        ]);
+
+        return $user;
+    }
+
+    /**
+     * @param list<int> $ids
+     */
+    public function assertIdsAllowedForAction(array $ids, string $action): void
+    {
+        $this->assertDataPolicyAllowsAll(AdminUser::query(), 'admin_user', $action, $ids, 'id', [
+            'deptColumn' => 'primary_dept_id',
+            'createdByColumn' => 'created_by',
+        ]);
     }
 
     public function existsUsername(string $username, ?int $exceptId = null): bool

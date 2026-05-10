@@ -28,10 +28,8 @@ final class DataScopeAspect extends AbstractAspect
         }
 
         return Context::runWith([
-            'deptColumn' => $attribute->deptColumn,
-            'createdByColumn' => $attribute->createdByColumn,
-            'scopeType' => $attribute->scopeType->value,
-            'onlyTables' => $attribute->onlyTables,
+            'resource' => $attribute->resource,
+            'action' => $attribute->action,
         ], static fn () => $proceedingJoinPoint->process());
     }
 }

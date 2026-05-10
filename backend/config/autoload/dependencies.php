@@ -11,9 +11,11 @@ declare(strict_types=1);
  */
 use App\Foundation\Database\Seeder\NamespacedSeed;
 use App\Foundation\Contract\AdminPermissionProviderInterface;
+use App\Foundation\Contract\DataPolicyProviderInterface;
 use App\Foundation\Metadata\MetadataMenuRepositoryInterface;
 use App\Module\System\Contract\AdminIdentityProviderInterface;
 use App\Module\System\Repository\AdminMenuRepository;
+use App\Module\System\Service\DataPermission\AdminRoleDataPolicyProvider;
 use App\Module\System\Service\AdminIdentityService;
 use App\Module\System\Service\AdminPermissionService;
 use Hyperf\Contract\TranslatorLoaderInterface;
@@ -30,5 +32,6 @@ return [
     AdminPermissionProviderInterface::class => env('APP_ENV') === 'testing'
         ? HyperfTest\Support\TestingAdminPermissionProvider::class
         : AdminPermissionService::class,
+    DataPolicyProviderInterface::class => AdminRoleDataPolicyProvider::class,
     MetadataMenuRepositoryInterface::class => AdminMenuRepository::class,
 ];

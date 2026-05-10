@@ -80,6 +80,7 @@ final class AdminRoleRepository extends AbstractRepository
     {
         $roleId = (int) $role->getAttribute('id');
         AdminRole::query()->where('parent_id', $roleId)->update(['parent_id' => 0, 'level' => 1, 'path' => '']);
+        Db::table('admin_role_data_policies')->where('role_id', $roleId)->delete();
         Db::table('admin_role_menu')->where('role_id', $roleId)->delete();
         Db::table('admin_role_user')->where('role_id', $roleId)->delete();
         $this->deleteModel($role);
@@ -127,6 +128,26 @@ final class AdminRoleRepository extends AbstractRepository
             ->orderBy('id')
             ->get()
             ->map(fn (AdminRole $role): array => $this->toArray($role))
+            ->all();
+    }
+
+
+    /**
+     * @param list<string> $codes
+     * @return list<int>
+     */
+    public function idsByCodes(array $codes): array
+    {
+        if ($codes === []) {
+            return [];
+        }
+
+        return AdminRole::query()
+            ->whereIn('code', array_values(array_unique($codes)))
+            ->where('status', 'enabled')
+            ->pluck('id')
+            ->map(static fn ($id): int => (int) $id)
+            ->values()
             ->all();
     }
 

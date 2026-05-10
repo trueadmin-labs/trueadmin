@@ -5,14 +5,17 @@ declare(strict_types=1);
 namespace App\Module\System\Database\Seeders;
 
 use App\Foundation\Metadata\MetadataSynchronizer;
+use App\Foundation\DataPermission\DataPolicyRegistry;
 use App\Foundation\Support\Password;
 use Hyperf\Database\Seeders\Seeder;
 use Hyperf\DbConnection\Db;
 
 final class SystemSeeder extends Seeder
 {
-    public function __construct(private readonly MetadataSynchronizer $metadata)
-    {
+    public function __construct(
+        private readonly MetadataSynchronizer $metadata,
+        private readonly DataPolicyRegistry $dataPolicyRegistry,
+    ) {
     }
 
     public function run(): void
@@ -70,6 +73,21 @@ final class SystemSeeder extends Seeder
         );
 
         $this->metadata->sync();
+        foreach ($this->dataPolicyRegistry->allScopeRules($roleId) as $index => $rule) {
+            Db::table('admin_role_data_policies')->updateOrInsert(
+                ['role_id' => $roleId, 'resource' => $rule->resource, 'action' => $rule->action, 'strategy' => $rule->strategy],
+                [
+                    'effect' => $rule->effect,
+                    'scope' => $rule->scope,
+                    'config' => json_encode($rule->config, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+                    'status' => 'enabled',
+                    'sort' => $index,
+                    'updated_at' => $now,
+                    'created_at' => $now,
+                ]
+            );
+        }
+
         $menuIds = Db::table('admin_menus')->pluck('id')->all();
         foreach ($menuIds as $menuId) {
             Db::table('admin_role_menu')->updateOrInsert(['role_id' => $roleId, 'menu_id' => (int) $menuId]);

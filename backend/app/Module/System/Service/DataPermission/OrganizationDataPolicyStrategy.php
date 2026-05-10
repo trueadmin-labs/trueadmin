@@ -1,0 +1,129 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Module\System\Service\DataPermission;
+
+use App\Foundation\DataPermission\DataPolicyStrategyInterface;
+use App\Module\System\Repository\AdminDepartmentRepository;
+use TrueAdmin\Kernel\Context\Actor;
+use TrueAdmin\Kernel\DataPermission\DataPolicyRule;
+use TrueAdmin\Kernel\DataPermission\DataPolicyTarget;
+
+final class OrganizationDataPolicyStrategy implements DataPolicyStrategyInterface
+{
+    public function __construct(private readonly AdminDepartmentRepository $departments)
+    {
+    }
+
+    public function key(): string
+    {
+        return 'organization';
+    }
+
+    public function metadata(): array
+    {
+        return [
+            'key' => 'organization',
+            'label' => '组织范围',
+            'i18n' => 'dataPolicy.strategy.organization',
+            'scopes' => [
+                ['key' => 'all', 'label' => '全部数据', 'i18n' => 'dataPolicy.scope.all', 'sort' => 10],
+                ['key' => 'department', 'label' => '本部门', 'i18n' => 'dataPolicy.scope.department', 'sort' => 20],
+                ['key' => 'department_and_children', 'label' => '本部门及子部门', 'i18n' => 'dataPolicy.scope.departmentAndChildren', 'sort' => 30],
+                ['key' => 'self', 'label' => '仅本人', 'i18n' => 'dataPolicy.scope.self', 'sort' => 40],
+                ['key' => 'custom_departments', 'label' => '自定义部门', 'i18n' => 'dataPolicy.scope.customDepartments', 'sort' => 50, 'configSchema' => [
+                    ['key' => 'deptIds', 'type' => 'department_tree', 'label' => '可见部门', 'i18n' => 'dataPolicy.config.deptIds'],
+                ]],
+            ],
+        ];
+    }
+
+    public function apply(mixed $query, Actor $actor, DataPolicyRule $rule, DataPolicyTarget $target): void
+    {
+        if ($rule->scope === 'all') {
+            return;
+        }
+
+        $deptColumn = $target->string('deptColumn', 'dept_id');
+        $createdByColumn = $target->string('createdByColumn', 'created_by');
+        $deptIds = $this->departmentIds($actor, $rule);
+
+        if ($deptIds !== [] && $deptColumn !== '') {
+            $query->whereIn($deptColumn, $deptIds);
+            return;
+        }
+
+        if ($rule->scope === 'self' && $createdByColumn !== '') {
+            $query->where($createdByColumn, (int) $actor->id);
+            return;
+        }
+
+        $query->whereRaw('1 = 0');
+    }
+
+    public function contains(DataPolicyRule $parent, DataPolicyRule $child): bool
+    {
+        if ($parent->strategy !== $this->key() || $child->strategy !== $this->key()) {
+            return false;
+        }
+
+        if ($parent->scope === 'all') {
+            return true;
+        }
+        if ($child->scope === 'all') {
+            return false;
+        }
+        if ($parent->scope === $child->scope) {
+            return $parent->scope !== 'custom_departments'
+                || $this->containsDepartmentIds($parent->config['deptIds'] ?? [], $child->config['deptIds'] ?? []);
+        }
+
+        return $parent->scope === 'department_and_children' && $child->scope === 'department';
+    }
+
+    /**
+     * @return list<int>
+     */
+    private function departmentIds(Actor $actor, DataPolicyRule $rule): array
+    {
+        if ($rule->scope === 'self') {
+            return [];
+        }
+
+        if ($rule->scope === 'custom_departments') {
+            $deptIds = $rule->config['deptIds'] ?? [];
+            return is_array($deptIds) ? array_values(array_unique(array_filter(array_map('intval', $deptIds), static fn (int $id): bool => $id > 0))) : [];
+        }
+
+        $operationDeptId = (int) ($actor->claims['operationDeptId'] ?? 0);
+        if ($operationDeptId <= 0) {
+            return [];
+        }
+
+        if ($rule->scope === 'department') {
+            return [$operationDeptId];
+        }
+
+        if ($rule->scope === 'department_and_children') {
+            return $this->departments->selfAndDescendantIds($operationDeptId);
+        }
+
+        return [];
+    }
+
+    private function containsDepartmentIds(mixed $parentDeptIds, mixed $childDeptIds): bool
+    {
+        $parent = $this->normalizeDeptIds($parentDeptIds);
+        $child = $this->normalizeDeptIds($childDeptIds);
+
+        return $child !== [] && array_diff($child, $parent) === [];
+    }
+
+    private function normalizeDeptIds(mixed $value): array
+    {
+        return is_array($value)
+            ? array_values(array_unique(array_filter(array_map('intval', $value), static fn (int $id): bool => $id > 0)))
+            : [];
+    }
+}

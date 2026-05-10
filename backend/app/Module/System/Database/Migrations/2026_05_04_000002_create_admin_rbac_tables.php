@@ -52,10 +52,26 @@ return new class extends Migration {
             $table->unsignedBigInteger('menu_id');
             $table->primary(['role_id', 'menu_id']);
         });
+
+        Schema::create('admin_role_data_policies', function (Blueprint $table): void {
+            $table->bigIncrements('id');
+            $table->unsignedBigInteger('role_id');
+            $table->string('resource', 128);
+            $table->string('action', 64);
+            $table->string('strategy', 64)->default('organization');
+            $table->string('effect', 16)->default('allow');
+            $table->string('scope', 64)->default('self');
+            $table->json('config')->nullable();
+            $table->string('status', 32)->default('enabled');
+            $table->integer('sort')->default(0);
+            $table->datetimes();
+            $table->index(['role_id', 'resource', 'action']);
+        });
     }
 
     public function down(): void
     {
+        Schema::dropIfExists('admin_role_data_policies');
         Schema::dropIfExists('admin_role_menu');
         Schema::dropIfExists('admin_role_user');
         Schema::dropIfExists('admin_menus');

@@ -31,7 +31,7 @@ TrueAdmin 使用多注解组合：
 #[AdminGet('/products', name: 'product.list')]
 #[Permission('product:list', title: '商品列表')]
 #[MenuButton('product:list', title: '查询', parent: 'product')]
-#[DataScope(onlyTables: ['products'])]
+#[DataScope(resource: 'product', action: 'list')]
 #[OperationLog(module: 'product', action: 'list', remark: '查询商品列表')]
 #[OpenApi(summary: '商品列表', response: ProductVo::class)]
 public function list(): array
@@ -215,7 +215,7 @@ OpenAPI 注解不直接负责路由注册，只负责接口文档元数据。
 已有 kernel 能力继续沿用：
 
 ```php
-#[DataScope(onlyTables: ['products'])]
+#[DataScope(resource: 'product', action: 'list')]
 #[OperationLog(module: 'product', action: 'create', remark: '新增商品')]
 ```
 

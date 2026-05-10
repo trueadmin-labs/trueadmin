@@ -303,7 +303,7 @@ class ExampleTest extends TestCase
         $this->assertSame('SUCCESS', $updatedClientUser['code']);
         $this->assertSame('用户端账号更新' . $suffix, $updatedClientUser['data']['nickname']);
 
-        $roleAuthorize = $this->json('/api/admin/organization/roles/' . $role['data']['id'] . '/menus', [
+        $roleAuthorize = $this->json('/api/admin/organization/roles/' . $role['data']['id'] . '/authorize', [
             'menuIds' => [],
         ], $headers);
         $this->assertSame('SUCCESS', $roleAuthorize['code']);

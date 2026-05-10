@@ -19,6 +19,15 @@ final class SaveAdminRoleRequest extends FormRequest
             'status' => ['sometimes', 'string', 'in:enabled,disabled'],
             'menuIds' => ['sometimes', 'array'],
             'menuIds.*' => ['integer', 'min:1'],
+            'dataPolicies' => ['sometimes', 'array'],
+            'dataPolicies.*.resource' => ['required_with:dataPolicies', 'string', 'max:128'],
+            'dataPolicies.*.action' => ['required_with:dataPolicies', 'string', 'max:64'],
+            'dataPolicies.*.strategy' => ['required_with:dataPolicies', 'string', 'max:64'],
+            'dataPolicies.*.effect' => ['sometimes', 'string', 'in:allow'],
+            'dataPolicies.*.scope' => ['required_with:dataPolicies', 'string', 'in:all,self,department,department_and_children,custom_departments'],
+            'dataPolicies.*.config' => ['sometimes', 'array'],
+            'dataPolicies.*.config.deptIds' => ['sometimes', 'array'],
+            'dataPolicies.*.config.deptIds.*' => ['integer', 'min:1'],
         ];
     }
 
@@ -40,6 +49,9 @@ final class SaveAdminRoleRequest extends FormRequest
         }
         if (array_key_exists('menuIds', $data)) {
             $normalized['menuIds'] = array_values(array_unique(array_map('intval', $data['menuIds'])));
+        }
+        if (array_key_exists('dataPolicies', $data)) {
+            $normalized['dataPolicies'] = AuthorizeAdminRoleRequest::normalizeDataPolicies($data['dataPolicies']);
         }
 
         return $normalized;

@@ -9,7 +9,7 @@ use App\Foundation\Http\Middleware\PermissionMiddleware;
 use App\Foundation\Http\Request\AdminQueryRequest;
 use App\Foundation\Support\ApiResponse;
 use App\Module\Auth\Http\Admin\Middleware\AdminAuthMiddleware;
-use App\Module\System\Http\Admin\Request\AuthorizeAdminRoleMenusRequest;
+use App\Module\System\Http\Admin\Request\AuthorizeAdminRoleRequest;
 use App\Module\System\Http\Admin\Request\SaveAdminRoleRequest;
 use App\Module\System\Service\AdminRoleManagementService;
 use TrueAdmin\Kernel\Http\Attribute\AdminController as AdminRouteController;
@@ -83,11 +83,13 @@ final class AdminRoleController extends AdminController
         return ApiResponse::success(null);
     }
 
-    #[AdminPost('{id}/menus')]
-    #[Permission('system:role:authorize', title: '角色菜单授权', group: '系统管理')]
-    #[OperationLog(module: 'system', action: 'admin.role.authorize', remark: '角色菜单授权')]
-    public function authorize(int $id, AuthorizeAdminRoleMenusRequest $request): array
+    #[AdminPost('{id}/authorize')]
+    #[Permission('system:role:authorize', title: '角色授权', group: '系统管理')]
+    #[OperationLog(module: 'system', action: 'admin.role.authorize', remark: '角色授权')]
+    public function authorize(int $id, AuthorizeAdminRoleRequest $request): array
     {
-        return ApiResponse::success($this->roles->authorizeMenus($id, $request->validated()['menuIds']));
+        $validated = $request->validated();
+
+        return ApiResponse::success($this->roles->authorize($id, $validated['menuIds'], $validated['dataPolicies'] ?? []));
     }
 }

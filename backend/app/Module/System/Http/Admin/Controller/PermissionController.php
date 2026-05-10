@@ -8,6 +8,7 @@ use App\Foundation\Http\Controller\AdminController;
 use App\Foundation\Http\Middleware\PermissionMiddleware;
 use App\Foundation\Support\ApiResponse;
 use App\Foundation\Contract\AdminPermissionProviderInterface;
+use App\Foundation\DataPermission\DataPolicyRegistry;
 use App\Module\Auth\Http\Admin\Middleware\AdminAuthMiddleware;
 use TrueAdmin\Kernel\Http\Attribute\AdminController as AdminRouteController;
 use TrueAdmin\Kernel\Http\Attribute\AdminGet;
@@ -18,8 +19,10 @@ use TrueAdmin\Kernel\Http\Attribute\Permission;
 #[AdminRouteController(path: '/api/admin/system-config', middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
 final class PermissionController extends AdminController
 {
-    public function __construct(private readonly AdminPermissionProviderInterface $permissions)
-    {
+    public function __construct(
+        private readonly AdminPermissionProviderInterface $permissions,
+        private readonly DataPolicyRegistry $dataPolicyRegistry,
+    ) {
     }
 
     #[AdminGet('menu-tree')]
@@ -34,5 +37,12 @@ final class PermissionController extends AdminController
     public function listPermissionCodes(): array
     {
         return ApiResponse::success($this->permissions->permissionCodes());
+    }
+
+    #[AdminGet('data-policies/metadata')]
+    #[Permission('system:role:authorize', title: '数据权限元数据', group: '系统管理')]
+    public function dataPolicyMetadata(): array
+    {
+        return ApiResponse::success($this->dataPolicyRegistry->metadata());
     }
 }

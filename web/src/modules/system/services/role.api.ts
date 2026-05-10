@@ -2,7 +2,12 @@ import type { CrudListParams } from '@/core/crud/types';
 import { ApiError } from '@/core/error/ApiError';
 import { http } from '@/core/http/client';
 import type { ApiEnvelope, PageResult } from '@/core/http/types';
-import type { AdminRole, AdminRolePayload } from '../types/role';
+import type {
+  AdminRole,
+  AdminRoleDataPolicy,
+  AdminRolePayload,
+  DataPolicyMetadata,
+} from '../types/role';
 
 export type AdminRoleOption = {
   id: number;
@@ -67,6 +72,8 @@ export const roleApi = {
   update: (id: React.Key, payload: AdminRolePayload) =>
     http.Put<AdminRole>(`/admin/organization/roles/${id}`, payload).send(),
   delete: (id: React.Key) => http.Delete<null>(`/admin/organization/roles/${id}`).send(),
-  authorizeMenus: (id: React.Key, menuIds: number[]) =>
-    http.Post<AdminRole>(`/admin/organization/roles/${id}/menus`, { menuIds }).send(),
+  authorize: (id: React.Key, payload: { menuIds: number[]; dataPolicies: AdminRoleDataPolicy[] }) =>
+    http.Post<AdminRole>(`/admin/organization/roles/${id}/authorize`, payload).send(),
+  dataPolicyMetadata: () =>
+    http.Get<DataPolicyMetadata>('/admin/system-config/data-policies/metadata').send(),
 };
