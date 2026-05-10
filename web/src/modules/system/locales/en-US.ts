@@ -56,6 +56,7 @@ export default {
   'system.roles.modal.edit': 'Edit Role',
   'system.roles.modal.authorize': 'Role Authorization',
   'system.roles.modal.authorizeWithName': 'Role Authorization - {{name}}',
+  'system.roles.authorize.emptyGroup': 'No child permissions',
   'system.roles.success.create': 'Role created',
   'system.roles.success.update': 'Role saved',
   'system.roles.success.authorize': 'Role permissions saved',

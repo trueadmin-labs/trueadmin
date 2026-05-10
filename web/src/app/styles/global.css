@@ -1727,10 +1727,16 @@ body,
 }
 
 .trueadmin-role-authorize-tree-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  padding: 0 0 8px;
+  border-bottom: 1px solid var(--ant-color-border-secondary);
+  background: var(--ant-color-bg-container);
 }
 
 .trueadmin-role-authorize-tree-label {
@@ -1739,6 +1745,32 @@ body,
   min-height: 24px;
   border-radius: 4px;
   cursor: pointer;
+}
+
+.trueadmin-menu-permission-card-list {
+  display: grid;
+  gap: 10px;
+}
+
+.trueadmin-menu-permission-card .ant-card-head {
+  min-height: 38px;
+  padding: 0 12px;
+}
+
+.trueadmin-menu-permission-card .ant-card-head-title {
+  padding: 9px 0;
+}
+
+.trueadmin-menu-permission-card .ant-card-extra {
+  padding: 7px 0;
+}
+
+.trueadmin-menu-permission-card .ant-card-body {
+  padding: 8px 12px 10px;
+}
+
+.trueadmin-menu-permission-card .ant-tree {
+  background: transparent;
 }
 
 .trueadmin-data-policy-list {

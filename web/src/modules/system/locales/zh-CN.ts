@@ -55,6 +55,7 @@ export default {
   'system.roles.modal.edit': '编辑角色',
   'system.roles.modal.authorize': '角色授权',
   'system.roles.modal.authorizeWithName': '角色授权 - {{name}}',
+  'system.roles.authorize.emptyGroup': '暂无子权限',
   'system.roles.success.create': '角色已创建',
   'system.roles.success.update': '角色已保存',
   'system.roles.success.authorize': '角色授权已保存',

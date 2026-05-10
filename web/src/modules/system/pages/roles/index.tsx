@@ -10,6 +10,7 @@ import {
   App,
   Button,
   Card,
+  Checkbox,
   Form,
   Input,
   InputNumber,
@@ -118,6 +119,28 @@ const toDepartmentTreeData = (departments: DepartmentTreeNode[]): TreeSelectProp
 
 const getMenuTreeKeys = (menus: AdminMenu[]): React.Key[] =>
   menus.flatMap((menu) => [menu.id, ...(menu.children ? getMenuTreeKeys(menu.children) : [])]);
+
+const getMenuChildTreeKeys = (menu: AdminMenu): React.Key[] =>
+  menu.children ? getMenuTreeKeys(menu.children) : [];
+
+const uniqueKeys = (keys: React.Key[]): React.Key[] => Array.from(new Set(keys));
+
+const mergeMenuGroupCheckedKeys = (
+  checkedKeys: React.Key[],
+  groupKeys: React.Key[],
+  rootKey: React.Key,
+  nextChildKeys: React.Key[],
+): React.Key[] => {
+  const groupKeySet = new Set(groupKeys);
+  const outsideKeys = checkedKeys.filter((key) => !groupKeySet.has(key));
+  const normalizedChildKeys = uniqueKeys(nextChildKeys);
+
+  return uniqueKeys([
+    ...outsideKeys,
+    ...(normalizedChildKeys.length > 0 ? [rootKey] : []),
+    ...normalizedChildKeys,
+  ]);
+};
 
 const normalizeDepartmentSelection = (value: unknown): number[] => {
   if (!Array.isArray(value)) {
@@ -380,12 +403,23 @@ export default function AdminRolesPage() {
     [statusText, t],
   );
 
-  const menuTreeData = useMemo(() => toMenuTreeData(menuTree), [menuTree]);
   const departmentTreeData = useMemo(() => toDepartmentTreeData(departmentTree), [departmentTree]);
+  const menuGroupKeysMap = useMemo(
+    () => new Map(menuTree.map((menu) => [menu.id, getMenuTreeKeys([menu])])),
+    [menuTree],
+  );
   const dataPolicyStrategyMap = useMemo(
     () => new Map(dataPolicyMetadata?.strategies.map((strategy) => [strategy.key, strategy]) ?? []),
     [dataPolicyMetadata],
   );
+
+  const toggleMenuGroupRoot = (menu: AdminMenu, checked: boolean) => {
+    setCheckedMenuIds((current) => {
+      const withoutRoot = current.filter((key) => key !== menu.id);
+
+      return checked ? uniqueKeys([...withoutRoot, menu.id]) : withoutRoot;
+    });
+  };
 
   const submit = async (action: CrudTableAction<AdminRole, AdminRolePayload, AdminRolePayload>) => {
     if (isBuiltinRole(editing)) {
@@ -638,17 +672,79 @@ export default function AdminRolesPage() {
                                 />
                               </Space>
                             </div>
-                            <Tree
-                              checkable
-                              checkStrictly={strictMenuCheck}
-                              expandedKeys={expandedMenuIds}
-                              treeData={menuTreeData}
-                              checkedKeys={checkedMenuIds}
-                              onCheck={(keys) =>
-                                setCheckedMenuIds(Array.isArray(keys) ? keys : keys.checked)
-                              }
-                              onExpand={(keys) => setExpandedMenuIds(keys)}
-                            />
+                            <div className="trueadmin-menu-permission-card-list">
+                              {menuTree.map((menu) => {
+                                const groupKeys =
+                                  menuGroupKeysMap.get(menu.id) ?? getMenuTreeKeys([menu]);
+                                const childKeys = getMenuChildTreeKeys(menu);
+                                const childCheckedCount = childKeys.filter((key) =>
+                                  checkedMenuIds.includes(key),
+                                ).length;
+                                const childTreeData = toMenuTreeData(menu.children ?? []);
+
+                                return (
+                                  <Card
+                                    className="trueadmin-menu-permission-card"
+                                    key={menu.id}
+                                    size="small"
+                                    title={
+                                      <Checkbox
+                                        checked={checkedMenuIds.includes(menu.id)}
+                                        disabled={authorizeLoading}
+                                        indeterminate={
+                                          !checkedMenuIds.includes(menu.id) && childCheckedCount > 0
+                                        }
+                                        onChange={(event) =>
+                                          toggleMenuGroupRoot(menu, event.target.checked)
+                                        }
+                                      >
+                                        {menu.name}
+                                      </Checkbox>
+                                    }
+                                  >
+                                    {childTreeData && childTreeData.length > 0 ? (
+                                      <Tree
+                                        checkable
+                                        checkStrictly={strictMenuCheck}
+                                        expandedKeys={expandedMenuIds.filter((key) =>
+                                          childKeys.includes(key),
+                                        )}
+                                        treeData={childTreeData}
+                                        checkedKeys={checkedMenuIds.filter((key) =>
+                                          childKeys.includes(key),
+                                        )}
+                                        onCheck={(keys) => {
+                                          const nextChildKeys = Array.isArray(keys)
+                                            ? keys
+                                            : keys.checked;
+                                          setCheckedMenuIds((current) =>
+                                            mergeMenuGroupCheckedKeys(
+                                              current,
+                                              groupKeys,
+                                              menu.id,
+                                              nextChildKeys,
+                                            ),
+                                          );
+                                        }}
+                                        onExpand={(keys) =>
+                                          setExpandedMenuIds((current) => {
+                                            const childKeySet = new Set(childKeys);
+                                            return uniqueKeys([
+                                              ...current.filter((key) => !childKeySet.has(key)),
+                                              ...keys,
+                                            ]);
+                                          })
+                                        }
+                                      />
+                                    ) : (
+                                      <Typography.Text type="secondary">
+                                        {t('system.roles.authorize.emptyGroup', '暂无子权限')}
+                                      </Typography.Text>
+                                    )}
+                                  </Card>
+                                );
+                              })}
+                            </div>
                           </Space>
                         </div>
                       ),
