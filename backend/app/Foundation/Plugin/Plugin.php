@@ -41,6 +41,13 @@ final class Plugin
         return is_dir($languagePath) ? $languagePath : null;
     }
 
+    public function menuResourceFile(): ?string
+    {
+        $file = $this->path . '/resources/menus.php';
+
+        return is_file($file) ? $file : null;
+    }
+
     /**
      * @return list<string>
      */

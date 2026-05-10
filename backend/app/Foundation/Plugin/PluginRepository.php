@@ -105,6 +105,25 @@ final class PluginRepository
     }
 
     /**
+     * @return list<string>
+     */
+    public function menuResourceFiles(): array
+    {
+        $files = [];
+
+        foreach ($this->enabled() as $plugin) {
+            $file = $plugin->menuResourceFile();
+            if ($file !== null) {
+                $files[] = $file;
+            }
+        }
+
+        sort($files);
+
+        return array_values(array_unique($files));
+    }
+
+    /**
      * @return array<string, array<string, mixed>>
      */
     private function installedPlugins(): array

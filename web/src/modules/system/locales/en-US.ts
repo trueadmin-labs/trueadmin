@@ -1,5 +1,8 @@
 export default {
   'menu.system': 'System',
+  'menu.organization': 'Organization & Access',
+  'menu.messageManagement': 'Message Management',
+  'menu.systemConfig': 'System Config',
   'menu.system.departments': 'Departments',
   'menu.system.users': 'Admin Users',
   'menu.system.roles': 'Roles',

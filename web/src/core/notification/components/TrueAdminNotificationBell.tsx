@@ -1,12 +1,13 @@
 import { BellOutlined } from '@ant-design/icons';
 import { Badge, Button, Popover } from 'antd';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { useAdminNotificationStore } from '../store';
 import { TrueAdminNotificationPopover } from './TrueAdminNotificationPopover';
 
 export function TrueAdminNotificationBell() {
   const { t } = useI18n();
+  const [open, setOpen] = useState(false);
   const unreadCount = useAdminNotificationStore((state) => state.unreadCount.total);
   const initialized = useAdminNotificationStore((state) => state.initialized);
   const refresh = useAdminNotificationStore((state) => state.refresh);
@@ -27,9 +28,11 @@ export function TrueAdminNotificationBell() {
   return (
     <Popover
       arrow={false}
-      content={<TrueAdminNotificationPopover />}
+      content={<TrueAdminNotificationPopover onRequestClose={() => setOpen(false)} />}
+      open={open}
       placement="bottomRight"
       trigger="click"
+      onOpenChange={setOpen}
     >
       <Button
         aria-label={t('notification.title', '消息通知')}

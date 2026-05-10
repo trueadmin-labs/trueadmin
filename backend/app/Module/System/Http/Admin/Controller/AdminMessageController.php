@@ -19,7 +19,7 @@ use TrueAdmin\Kernel\Http\Attribute\AdminPost;
 use TrueAdmin\Kernel\Http\Attribute\Menu;
 use TrueAdmin\Kernel\Http\Attribute\Permission;
 
-#[Menu(code: 'system.messages', title: '消息中心', path: '/system/messages', parent: 'system', permission: 'system:message:list', icon: 'MailOutlined', sort: 70)]
+#[Menu(code: 'system.messages', title: '消息中心', path: '/system/messages', permission: 'system:message:list', icon: 'MailOutlined', sort: 20)]
 #[AdminRouteController(path: '/api/admin/messages', middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
 final class AdminMessageController extends AdminController
 {

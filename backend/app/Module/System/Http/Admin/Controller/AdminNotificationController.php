@@ -17,7 +17,7 @@ use TrueAdmin\Kernel\Http\Attribute\Menu;
 use TrueAdmin\Kernel\Http\Attribute\Permission;
 use TrueAdmin\Kernel\OperationLog\Attribute\OperationLog;
 
-#[Menu(code: 'system.notificationManagement', title: '通知管理', path: '/system/notification-management', parent: 'system', permission: 'system:notification:list', icon: 'BellOutlined', sort: 80)]
+#[Menu(code: 'system.notificationManagement', title: '通知管理', path: '/system/notification-management', parent: 'messageManagement', permission: 'system:notification:list', icon: 'BellOutlined', sort: 20)]
 #[AdminRouteController(path: '/api/admin/notifications', middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
 final class AdminNotificationController extends AdminController
 {

@@ -1,7 +1,10 @@
 export default {
   'menu.system': '系统管理',
+  'menu.organization': '组织权限',
+  'menu.messageManagement': '消息管理',
+  'menu.systemConfig': '系统配置',
   'menu.system.departments': '部门管理',
-  'menu.system.users': '用户管理',
+  'menu.system.users': '管理员用户',
   'menu.system.roles': '角色管理',
   'menu.system.menus': '菜单管理',
   'menu.system.messages': '消息中心',

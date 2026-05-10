@@ -19,6 +19,7 @@ class Menu extends AbstractAnnotation
         public readonly string $icon = '',
         public readonly int $sort = 0,
         public readonly string $type = 'menu',
+        public readonly string $status = 'enabled',
     ) {
     }
 }

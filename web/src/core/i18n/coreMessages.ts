@@ -2,6 +2,8 @@ import type { Locale } from '@/core/store/localeStore';
 
 export const coreMessages: Record<Locale, Record<string, string>> = {
   'zh-CN': {
+    'common.confirm': '确认',
+    'common.cancel': '取消',
     'error.modal.title': '操作未完成',
     'error.modal.ok': '知道了',
     'error.modal.causes': '可能原因',
@@ -117,7 +119,10 @@ export const coreMessages: Record<Locale, Record<string, string>> = {
     'notification.kind.announcement': '公告',
     'notification.action.refresh': '刷新',
     'notification.action.readAll': '全部已读',
+    'notification.action.readAll.confirm': '全部标为已读？',
+    'notification.action.readAll.success': '已全部标为已读',
     'notification.action.viewAll': '查看全部',
+    'notification.action.viewAll.success': '已跳转到消息中心',
     'notification.type.system': '系统',
     'notification.type.announcement': '公告',
     'notification.type.alert': '预警',
@@ -141,6 +146,8 @@ export const coreMessages: Record<Locale, Record<string, string>> = {
     'permission.forbidden.pageDescription': '当前账号没有访问此页面的权限。',
   },
   'en-US': {
+    'common.confirm': 'Confirm',
+    'common.cancel': 'Cancel',
     'error.modal.title': 'Action not completed',
     'error.modal.ok': 'Got it',
     'error.modal.causes': 'Possible Causes',
@@ -266,7 +273,10 @@ export const coreMessages: Record<Locale, Record<string, string>> = {
     'notification.kind.announcement': 'Announcement',
     'notification.action.refresh': 'Refresh',
     'notification.action.readAll': 'Mark all read',
+    'notification.action.readAll.confirm': 'Mark all messages as read?',
+    'notification.action.readAll.success': 'All messages marked as read',
     'notification.action.viewAll': 'View all',
+    'notification.action.viewAll.success': 'Opened message center',
     'notification.type.system': 'System',
     'notification.type.announcement': 'Announcement',
     'notification.type.alert': 'Alert',

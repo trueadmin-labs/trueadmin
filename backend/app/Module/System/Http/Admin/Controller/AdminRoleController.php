@@ -21,7 +21,7 @@ use TrueAdmin\Kernel\Http\Attribute\Menu;
 use TrueAdmin\Kernel\Http\Attribute\Permission;
 use TrueAdmin\Kernel\OperationLog\Attribute\OperationLog;
 
-#[Menu(code: 'system.roles', title: '角色管理', path: '/system/roles', parent: 'system', permission: 'system:role:list', icon: 'LockOutlined', sort: 30)]
+#[Menu(code: 'system.roles', title: '角色管理', path: '/system/roles', parent: 'organization', permission: 'system:role:list', icon: 'LockOutlined', sort: 30)]
 #[AdminRouteController(path: '/api/admin/system/roles', middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
 final class AdminRoleController extends AdminController
 {

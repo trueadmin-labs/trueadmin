@@ -1,6 +1,8 @@
-import { Button, Divider, Space, Tabs, Typography } from 'antd';
+import { CheckCircleOutlined, ReloadOutlined } from '@ant-design/icons';
+import { App, Button, Divider, Space, Tabs, Typography } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
+import { TrueAdminConfirmAction } from '@/core/action';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { getAdminMessageTypeConfig } from '../registry';
 import { useAdminNotificationStore } from '../store';
@@ -10,13 +12,21 @@ import { TrueAdminMessageList } from './TrueAdminMessageList';
 
 type NotificationTabKey = 'all' | AdminMessageKind;
 
-export function TrueAdminNotificationPopover() {
+interface TrueAdminNotificationPopoverProps {
+  onRequestClose?: () => void;
+}
+
+export function TrueAdminNotificationPopover({
+  onRequestClose,
+}: TrueAdminNotificationPopoverProps) {
+  const { message } = App.useApp();
   const { t } = useI18n();
   const navigate = useNavigate();
   const messages = useAdminNotificationStore((state) => state.latestMessages);
   const readAll = useAdminNotificationStore((state) => state.readAll);
   const refresh = useAdminNotificationStore((state) => state.refresh);
   const [selectedMessage, setSelectedMessage] = useState<AdminMessageItem>();
+  const [refreshing, setRefreshing] = useState(false);
   const detailMessage = useMemo(() => {
     if (!selectedMessage) {
       return undefined;
@@ -80,22 +90,61 @@ export function TrueAdminNotificationPopover() {
     [messages, openMessage, t],
   );
 
+  const openMessageCenter = useCallback(() => {
+    navigate('/system/messages');
+    onRequestClose?.();
+    message.success(t('notification.action.viewAll.success', '已跳转到消息中心'));
+  }, [message, navigate, onRequestClose, t]);
+
+  const reloadMessages = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await refresh();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refresh]);
+
   return (
     <div className="trueadmin-notification-popover">
       <div className="trueadmin-notification-popover-header">
         <Typography.Text strong>{t('notification.title', '消息通知')}</Typography.Text>
         <Space size={8}>
-          <Button size="small" type="link" onClick={() => void refresh()}>
-            {t('notification.action.refresh', '刷新')}
-          </Button>
-          <Button size="small" type="link" onClick={() => void readAll('all')}>
+          <Button
+            aria-label={t('notification.action.refresh', '刷新')}
+            icon={<ReloadOutlined />}
+            loading={refreshing}
+            size="small"
+            title={t('notification.action.refresh', '刷新')}
+            type="text"
+            onClick={() => void reloadMessages()}
+          />
+          <TrueAdminConfirmAction
+            action={() => readAll('all')}
+            confirm={{
+              cancelText: t('common.cancel', '取消'),
+              okText: t('common.confirm', '确认'),
+              title: t('notification.action.readAll.confirm', '全部标为已读？'),
+            }}
+            successMessage={t('notification.action.readAll.success', '已全部标为已读')}
+            trigger={
+              <Button
+                aria-label={t('notification.action.readAll', '全部已读')}
+                icon={<CheckCircleOutlined />}
+                size="small"
+                title={t('notification.action.readAll', '全部已读')}
+                type="text"
+              />
+            }
+            onSuccess={() => onRequestClose?.()}
+          >
             {t('notification.action.readAll', '全部已读')}
-          </Button>
+          </TrueAdminConfirmAction>
         </Space>
       </div>
       <Tabs size="small" items={tabItems} />
       <Divider style={{ margin: '8px 0' }} />
-      <Button block type="link" onClick={() => navigate('/system/messages')}>
+      <Button block type="link" onClick={openMessageCenter}>
         {t('notification.action.viewAll', '查看全部')}
       </Button>
       <TrueAdminMessageDetailModal
