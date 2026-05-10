@@ -94,7 +94,7 @@ Request 负责入参校验和归一化。
 - 字符串 trim。
 - 数字转 int。
 - 前端字段保持 camelCase。
-- 必要时兼容少量旧式 snake_case 输入，但输出和 Service payload 以 camelCase 为准。
+- HTTP 入参只接受当前接口契约定义的字段名；Admin API 使用 camelCase，不做旧式 snake_case 输入兼容。
 
 Request 不检查数据库唯一性，不查询其他表。数据库相关的业务不变量交给 Service。
 

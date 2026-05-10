@@ -117,8 +117,8 @@ final class InterfaceMetadataScanner
 
         $path = isset($menu['path']) ? trim((string) $menu['path']) : '';
         $url = isset($menu['url']) ? trim((string) $menu['url']) : '';
-        $openMode = (string) ($menu['openMode'] ?? $menu['open_mode'] ?? '');
-        $showLinkHeader = $this->normalizeBoolean($menu['showLinkHeader'] ?? $menu['show_link_header'] ?? false);
+        $openMode = (string) ($menu['openMode'] ?? '');
+        $showLinkHeader = $this->normalizeBoolean($menu['showLinkHeader'] ?? false);
 
         if ($type === 'menu' && $path === '') {
             throw new \RuntimeException(sprintf('Menu [%s] with type [menu] must define a path.', $code));

@@ -35,7 +35,7 @@ final class AdminDepartmentManagementService extends AbstractService
         $code = (string) $payload['code'];
         $this->assertUnique($this->departments->findByCode($code) !== null, 'code');
 
-        $parent = $this->parentDepartment((int) ($payload['parentId'] ?? $payload['parent_id'] ?? 0));
+        $parent = $this->parentDepartment((int) ($payload['parentId'] ?? 0));
         $department = $this->departments->create([
             'parent_id' => $parent === null ? 0 : (int) $parent->getAttribute('id'),
             'code' => $code,
@@ -56,8 +56,8 @@ final class AdminDepartmentManagementService extends AbstractService
         $exists = $this->departments->findByCode($code);
         $this->assertUnique($exists !== null && (int) $exists->getAttribute('id') !== $id, 'code');
 
-        $parentId = array_key_exists('parentId', $payload) || array_key_exists('parent_id', $payload)
-            ? (int) ($payload['parentId'] ?? $payload['parent_id'])
+        $parentId = array_key_exists('parentId', $payload)
+            ? (int) $payload['parentId']
             : (int) $department->getAttribute('parent_id');
         $parent = $this->parentDepartment($parentId, $id);
 

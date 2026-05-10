@@ -85,7 +85,7 @@ final class AdminMenuManagementService extends AbstractService
 
     private function data(array $payload, ?AdminMenu $current = null, bool $creating = false): array
     {
-        $parentId = (int) ($payload['parentId'] ?? $payload['parent_id'] ?? $current?->getAttribute('parent_id') ?? 0);
+        $parentId = (int) ($payload['parentId'] ?? $current?->getAttribute('parent_id') ?? 0);
         $this->assertParent($parentId, $current === null ? null : (int) $current->getAttribute('id'));
 
         $isCodeMenu = $current !== null && (string) $current->getAttribute('source') === self::SOURCE_CODE;
@@ -118,7 +118,7 @@ final class AdminMenuManagementService extends AbstractService
         }
 
         $openMode = $type === self::TYPE_LINK
-            ? (string) ($payload['openMode'] ?? $payload['open_mode'] ?? $current?->getAttribute('open_mode') ?? 'blank')
+            ? (string) ($payload['openMode'] ?? $current?->getAttribute('open_mode') ?? 'blank')
             : '';
         if ($type === self::TYPE_LINK && ! in_array($openMode, ['blank', 'self', 'iframe'], true)) {
             throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'openMode', 'reason' => 'unsupported_open_mode']);
