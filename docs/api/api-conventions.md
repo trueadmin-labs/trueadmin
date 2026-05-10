@@ -141,9 +141,11 @@ GET /api/admin/organization/users?sort=created_at&order=desc
 ```json
 [
   {
-    "id": "file_202605080001",
+    "id": 10001,
     "name": "销售合同-客户已盖章",
-    "url": "/api/admin/files/file_202605080001/download",
+    "url": "https://admin.example.com/uploads/admin/announcement/2026/05/xxx.pdf",
+    "relativeUrl": "/uploads/admin/announcement/2026/05/xxx.pdf",
+    "absoluteUrl": "https://admin.example.com/uploads/admin/announcement/2026/05/xxx.pdf",
     "extension": "pdf",
     "size": 245760,
     "mimeType": "application/pdf"
@@ -153,14 +155,24 @@ GET /api/admin/organization/users?sort=created_at&order=desc
 
 字段含义：
 
-- `id`：文件表主键或稳定文件 ID，必填，用于后端校验文件是否存在、是否有权限、是否可关联到当前业务数据。
+- `id`：文件表主键，必填，用于后端校验文件是否存在、是否可关联到当前业务数据。
 - `name`：业务展示名，必填，不含扩展名，允许前端在业务表单中编辑。
-- `url`：下载或预览地址，必填，由后端按当前部署和权限策略生成或规范化。
+- `url`：文件实际访问地址，必填。拿到 URL 就代表业务允许访问文件本体，文件访问不再额外叠加后台数据权限判断。
+- `relativeUrl`：相对访问路径，例如 `/uploads/...`，推荐返回。
+- `absoluteUrl`：带站点或 OSS 域名的完整访问地址，推荐返回；`url` 默认与它保持一致。
 - `extension`：扩展名，不含点，推荐返回。
 - `size`：文件大小，单位 byte，推荐返回。
 - `mimeType`：文件 MIME 类型，推荐返回。
 
-后端保存业务数据时，应使用 `id` 回查文件表并规范化 `url`、`extension`、`size`、`mimeType` 等可信字段；`name` 作为业务展示名保留前端传入值，但需要做长度、空值和安全字符校验。文件存储内部字段，例如磁盘、hash、路径、上传人、上传时间、存储桶等，不应复制进业务表附件 JSON。
+后端保存业务数据时，应使用 `id` 回查文件表并规范化 `url`、`relativeUrl`、`absoluteUrl`、`extension`、`size`、`mimeType` 等可信字段；`name` 作为业务展示名保留前端传入值，但需要做长度、空值和安全字符校验。文件存储内部字段，例如磁盘、hash、路径、上传人、上传时间、存储桶等，不应复制进业务表附件 JSON。
+
+文件表记录 `scope`、`owner_type`、`owner_id`、`owner_dept_id`、`category`、`visibility`、`status` 等字段，用于审计和后台文件管理列表的数据权限控制。这个权限边界只作用在文件记录管理接口上，不作用在文件 URL 本体访问上。业务模块保存了文件 URL 后，前端或外部页面可直接按 URL 访问。
+
+上传接口第一阶段由系统模块提供：`POST /api/admin/files/upload` 用于本地上传，返回文件记录快照；`POST /api/admin/files/presign` 和 `POST /api/admin/files/complete` 用于 OSS 前端直传；`POST /api/admin/files/remote-url` 用于把远程 HTTP/HTTPS 文件转存到当前文件存储。OSS 直传必须返回真实签名 URL，不能用公开访问地址假装上传地址。
+
+后端业务代码生成的报表、合同、PDF、图片等文件，不应该模拟 HTTP 上传，而应调用文件服务的 `storeFromContents()` 或 `storeFromStream()`。这些方法会复用同一套存储、URL、hash、文件记录和附件快照规则。`mimeType` 默认自动识别：优先根据真实文件内容识别，其次根据文件名扩展名兜底，最后才使用 `application/octet-stream`；业务方只有在明确需要覆盖时才传入 MIME。
+
+远程 URL 转存必须由后端统一处理安全边界：只允许 `http`/`https`，禁止 localhost、内网和保留地址，限制重定向次数、连接超时、下载超时和最大文件大小，并在每次重定向后重新校验目标地址。
 
 ## 常用接口示例
 

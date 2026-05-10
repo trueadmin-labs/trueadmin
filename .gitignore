@@ -14,3 +14,5 @@ storage/logs/
 coverage/
 .phpunit.result.cache
 .phpunit.cache/
+backend/public/uploads/*
+!backend/public/uploads/.gitkeep

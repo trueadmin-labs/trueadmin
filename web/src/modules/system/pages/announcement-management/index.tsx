@@ -42,7 +42,7 @@ import {
   resolveAdminMessageLabel,
 } from '@/core/notification';
 import { TrueAdminAuditTimeline, type TrueAdminAuditTimelineItem } from '@/core/timeline';
-import { TrueAdminAttachmentUpload } from '@/core/upload';
+import { TrueAdminAttachmentUpload, uploadTrueAdminFile } from '@/core/upload';
 import { roleApi } from '../../services/role.api';
 
 const levelColor: Record<AdminMessageLevel, string> = {
@@ -573,6 +573,9 @@ export default function AdminAnnouncementManagementPage() {
               readonly={metadataOnlyEdit}
               multiple
               maxCount={8}
+              upload={(file) =>
+                uploadTrueAdminFile(file, { category: 'announcement', visibility: 'public' })
+              }
               title={t(
                 'system.announcementManagement.form.attachments.uploadTitle',
                 '拖拽公告附件到这里，或点击选择',
