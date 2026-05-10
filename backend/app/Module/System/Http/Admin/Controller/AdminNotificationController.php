@@ -17,8 +17,8 @@ use TrueAdmin\Kernel\Http\Attribute\Menu;
 use TrueAdmin\Kernel\Http\Attribute\Permission;
 use TrueAdmin\Kernel\OperationLog\Attribute\OperationLog;
 
-#[Menu(code: 'system.notificationManagement', title: '通知管理', path: '/system/notification-management', parent: 'messageManagement', permission: 'system:notification:list', icon: 'BellOutlined', sort: 20)]
-#[AdminRouteController(path: '/api/admin/notifications', middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
+#[Menu(code: 'system.notificationManagement', title: '通知管理', path: '/message-management/notifications', parent: 'messageManagement', permission: 'system:notification:list', icon: 'BellOutlined', sort: 20)]
+#[AdminRouteController(path: '/api/admin/message-management/notifications', middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
 final class AdminNotificationController extends AdminController
 {
     public function __construct(private readonly AdminNotificationBatchService $notifications)

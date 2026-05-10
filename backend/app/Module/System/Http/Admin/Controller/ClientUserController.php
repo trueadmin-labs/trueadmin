@@ -21,8 +21,8 @@ use TrueAdmin\Kernel\Http\Attribute\Menu;
 use TrueAdmin\Kernel\Http\Attribute\Permission;
 use TrueAdmin\Kernel\OperationLog\Attribute\OperationLog;
 
-#[Menu(code: 'system.client-users', title: '用户端账号', path: '/system/client-users', parent: 'organization', permission: 'system:client-user:list', icon: 'UserOutlined', sort: 90, status: 'disabled')]
-#[AdminRouteController(path: '/api/admin/system/client-users', middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
+#[Menu(code: 'system.client-users', title: '用户端账号', path: '/organization/client-users', parent: 'organization', permission: 'system:client-user:list', icon: 'UserOutlined', sort: 90, status: 'disabled')]
+#[AdminRouteController(path: '/api/admin/organization/client-users', middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
 final class ClientUserController extends AdminController
 {
     public function __construct(private readonly ClientUserManagementService $users)

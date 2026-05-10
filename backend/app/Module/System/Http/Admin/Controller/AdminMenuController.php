@@ -20,8 +20,8 @@ use TrueAdmin\Kernel\Http\Attribute\Menu;
 use TrueAdmin\Kernel\Http\Attribute\Permission;
 use TrueAdmin\Kernel\OperationLog\Attribute\OperationLog;
 
-#[Menu(code: 'system.menus', title: '菜单管理', path: '/system/menus', parent: 'systemConfig', permission: 'system:menu:list', icon: 'MenuOutlined', sort: 10)]
-#[AdminRouteController(path: '/api/admin/system/menus', middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
+#[Menu(code: 'system.menus', title: '菜单管理', path: '/system-config/menus', parent: 'systemConfig', permission: 'system:menu:list', icon: 'MenuOutlined', sort: 10)]
+#[AdminRouteController(path: '/api/admin/system-config/menus', middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
 final class AdminMenuController extends AdminController
 {
     public function __construct(private readonly AdminMenuManagementService $menus)

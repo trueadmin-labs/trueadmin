@@ -52,21 +52,21 @@ const roleListMethod = <TRole>(url: string, params?: CrudListParams) =>
 
 export const roleApi = {
   list: (params: CrudListParams) =>
-    http.Get<PageResult<AdminRole>>('/admin/system/roles', { params }).send(),
+    http.Get<PageResult<AdminRole>>('/admin/organization/roles', { params }).send(),
   tree: async (params?: CrudListParams) =>
     unwrapRoleList<AdminRole>(
-      await roleListMethod<AdminRole>('/admin/system/roles/tree', params).send(),
+      await roleListMethod<AdminRole>('/admin/organization/roles/tree', params).send(),
     ),
   options: async () =>
     unwrapRoleList<AdminRoleOption>(
-      await roleListMethod<AdminRoleOption>('/admin/system/roles/options').send(),
+      await roleListMethod<AdminRoleOption>('/admin/organization/roles/options').send(),
     ),
-  detail: (id: React.Key) => http.Get<AdminRole>(`/admin/system/roles/${id}`).send(),
+  detail: (id: React.Key) => http.Get<AdminRole>(`/admin/organization/roles/${id}`).send(),
   create: (payload: AdminRolePayload) =>
-    http.Post<AdminRole>('/admin/system/roles', payload).send(),
+    http.Post<AdminRole>('/admin/organization/roles', payload).send(),
   update: (id: React.Key, payload: AdminRolePayload) =>
-    http.Put<AdminRole>(`/admin/system/roles/${id}`, payload).send(),
-  delete: (id: React.Key) => http.Delete<null>(`/admin/system/roles/${id}`).send(),
+    http.Put<AdminRole>(`/admin/organization/roles/${id}`, payload).send(),
+  delete: (id: React.Key) => http.Delete<null>(`/admin/organization/roles/${id}`).send(),
   authorizeMenus: (id: React.Key, menuIds: number[]) =>
-    http.Post<AdminRole>(`/admin/system/roles/${id}/menus`, { menuIds }).send(),
+    http.Post<AdminRole>(`/admin/organization/roles/${id}/menus`, { menuIds }).send(),
 };

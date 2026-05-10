@@ -18,7 +18,7 @@ use TrueAdmin\Kernel\Http\Attribute\AdminPost;
 use TrueAdmin\Kernel\Http\Attribute\MenuButton;
 use TrueAdmin\Kernel\Http\Attribute\Permission;
 
-#[AdminRouteController(path: '/api/admin/system/uploads', middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
+#[AdminRouteController(path: '/api/admin/system-config/uploads', middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
 final class AdminUploadController extends AdminController
 {
     public function __construct(private readonly AdminUploadService $uploads)

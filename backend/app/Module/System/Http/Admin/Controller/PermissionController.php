@@ -15,7 +15,7 @@ use TrueAdmin\Kernel\Http\Attribute\Menu;
 use TrueAdmin\Kernel\Http\Attribute\Permission;
 
 #[Menu(code: 'system.permissions', title: '权限点', path: '', parent: 'systemConfig', permission: 'system:permission:list', sort: 0, type: 'button')]
-#[AdminRouteController(path: '/api/admin/system', middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
+#[AdminRouteController(path: '/api/admin/system-config', middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
 final class PermissionController extends AdminController
 {
     public function __construct(private readonly AdminPermissionProviderInterface $permissions)

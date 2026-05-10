@@ -526,7 +526,7 @@ admin_user_departments.dept_id
 admin_user_departments.is_primary
 ```
 
-`admin_departments` 按树形部门设计，后台提供 `/api/admin/system/departments` 作为标准管理入口。部门树是用户所属部门、主部门、后续数据权限范围和组织审计的基础资源，不应该只通过数据库手工维护。
+`admin_departments` 按树形部门设计，后台提供 `/api/admin/organization/departments` 作为标准管理入口。部门树是用户所属部门、主部门、后续数据权限范围和组织审计的基础资源，不应该只通过数据库手工维护。
 
 主部门用于默认操作部门，不代表用户只能查看主部门数据。一次请求的操作部门优先级：
 

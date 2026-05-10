@@ -20,8 +20,8 @@ use TrueAdmin\Kernel\Http\Attribute\Menu;
 use TrueAdmin\Kernel\Http\Attribute\Permission;
 use TrueAdmin\Kernel\OperationLog\Attribute\OperationLog;
 
-#[Menu(code: 'system.announcementManagement', title: '公告管理', path: '/system/announcement-management', parent: 'messageManagement', permission: 'system:announcement:list', icon: 'NotificationOutlined', sort: 10)]
-#[AdminRouteController(path: '/api/admin/announcements', middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
+#[Menu(code: 'system.announcementManagement', title: '公告管理', path: '/message-management/announcements', parent: 'messageManagement', permission: 'system:announcement:list', icon: 'NotificationOutlined', sort: 10)]
+#[AdminRouteController(path: '/api/admin/message-management/announcements', middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
 final class AdminAnnouncementController extends AdminController
 {
     public function __construct(private readonly AdminAnnouncementService $announcements)

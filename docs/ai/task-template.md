@@ -35,8 +35,8 @@
 列出涉及接口。
 
 ```text
-GET /api/v1/system/users
-POST /api/v1/system/users
+GET /api/admin/organization/users
+POST /api/admin/organization/users
 ```
 
 ## 权限点
@@ -69,4 +69,3 @@ system:user:delete
 ## 备注
 
 放置额外上下文或限制。
-

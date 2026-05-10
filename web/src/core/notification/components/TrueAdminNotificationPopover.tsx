@@ -91,7 +91,7 @@ export function TrueAdminNotificationPopover({
   );
 
   const openMessageCenter = useCallback(() => {
-    navigate('/system/messages');
+    navigate('/messages');
     onRequestClose?.();
     message.success(t('notification.action.viewAll.success', '已跳转到消息中心'));
   }, [message, navigate, onRequestClose, t]);

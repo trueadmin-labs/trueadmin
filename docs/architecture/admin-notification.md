@@ -247,10 +247,10 @@ GET    /api/admin/messages/stream
 通知管理：
 
 ```text
-GET    /api/admin/notifications
-GET    /api/admin/notifications/{id}
-POST   /api/admin/notifications/{id}/resend
-GET    /api/admin/notifications/{id}/deliveries
+GET    /api/admin/message-management/notifications
+GET    /api/admin/message-management/notifications/{id}
+POST   /api/admin/message-management/notifications/{id}/resend
+GET    /api/admin/message-management/notifications/{id}/deliveries
 ```
 
 当前版本不提供通知管理导出接口；后续确有审计导出需求时再按独立导出任务设计。
@@ -258,12 +258,12 @@ GET    /api/admin/notifications/{id}/deliveries
 公告管理：
 
 ```text
-GET    /api/admin/announcements
-POST   /api/admin/announcements
-PUT    /api/admin/announcements/{id}
-POST   /api/admin/announcements/{id}/publish
-POST   /api/admin/announcements/{id}/offline
-POST   /api/admin/announcements/{id}/restore
+GET    /api/admin/message-management/announcements
+POST   /api/admin/message-management/announcements
+PUT    /api/admin/message-management/announcements/{id}
+POST   /api/admin/message-management/announcements/{id}/publish
+POST   /api/admin/message-management/announcements/{id}/offline
+POST   /api/admin/message-management/announcements/{id}/restore
 ```
 
 当前版本不提供公告管理导出接口。

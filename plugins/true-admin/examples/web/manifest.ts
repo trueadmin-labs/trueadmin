@@ -226,7 +226,7 @@ export default defineModule({
   },
   notification: {
     sources: {
-      'plugin.true-admin.examples': {
+      'true-admin.examples': {
         label: trans('examples.name', '开发示例'),
       },
     },

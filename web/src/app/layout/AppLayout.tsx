@@ -106,7 +106,7 @@ const toRootMenuNodeMap = (menus: RuntimeMenuNode[]) => {
 };
 
 const toIframeLinkPath = (menu: RuntimeMenuNode): string =>
-  `/system/link-frame/${encodeURIComponent(String(menu.id ?? menu.code))}`;
+  `/link-frame/${encodeURIComponent(String(menu.id ?? menu.code))}`;
 
 const openRuntimeMenu = (
   menu: RuntimeMenuNode | undefined,

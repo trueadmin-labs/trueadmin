@@ -21,15 +21,19 @@ const toPageResult = (
 
 export const departmentApi = {
   list: async (params: CrudListParams) => toPageResult(await departmentApi.tree(params), params),
-  treeMethod: () => http.Get<DepartmentTreeNode[]>('/admin/system/departments/tree'),
+  treeMethod: () => http.Get<DepartmentTreeNode[]>('/admin/organization/departments/tree'),
   tree: (params?: CrudListParams) =>
     http
-      .Get<DepartmentTreeNode[]>('/admin/system/departments/tree', params ? { params } : undefined)
+      .Get<DepartmentTreeNode[]>(
+        '/admin/organization/departments/tree',
+        params ? { params } : undefined,
+      )
       .send(),
-  detail: (id: React.Key) => http.Get<DepartmentTreeNode>(`/admin/system/departments/${id}`).send(),
+  detail: (id: React.Key) =>
+    http.Get<DepartmentTreeNode>(`/admin/organization/departments/${id}`).send(),
   create: (payload: DepartmentPayload) =>
-    http.Post<DepartmentTreeNode>('/admin/system/departments', payload).send(),
+    http.Post<DepartmentTreeNode>('/admin/organization/departments', payload).send(),
   update: (id: React.Key, payload: DepartmentPayload) =>
-    http.Put<DepartmentTreeNode>(`/admin/system/departments/${id}`, payload).send(),
-  delete: (id: React.Key) => http.Delete<null>(`/admin/system/departments/${id}`).send(),
+    http.Put<DepartmentTreeNode>(`/admin/organization/departments/${id}`, payload).send(),
+  delete: (id: React.Key) => http.Delete<null>(`/admin/organization/departments/${id}`).send(),
 };

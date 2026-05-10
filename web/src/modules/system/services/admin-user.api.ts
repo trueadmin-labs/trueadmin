@@ -15,14 +15,14 @@ const normalizePageResult = (result: PageResult<AdminUser>): PageResult<AdminUse
 export const adminUserApi = {
   list: async (params: CrudListParams, options?: { force?: boolean }) => {
     const result = await http
-      .Get<PageResult<AdminUser>>('/admin/system/users', { params })
+      .Get<PageResult<AdminUser>>('/admin/organization/users', { params })
       .send(options?.force);
     return normalizePageResult(result);
   },
-  detail: (id: React.Key) => http.Get<AdminUser>(`/admin/system/users/${id}`).send(),
+  detail: (id: React.Key) => http.Get<AdminUser>(`/admin/organization/users/${id}`).send(),
   create: (payload: AdminUserCreatePayload) =>
-    http.Post<AdminUser>('/admin/system/users', payload).send(),
+    http.Post<AdminUser>('/admin/organization/users', payload).send(),
   update: (id: React.Key, payload: AdminUserUpdatePayload) =>
-    http.Put<AdminUser>(`/admin/system/users/${id}`, payload).send(),
-  delete: (id: React.Key) => http.Delete<null>(`/admin/system/users/${id}`).send(),
+    http.Put<AdminUser>(`/admin/organization/users/${id}`, payload).send(),
+  delete: (id: React.Key) => http.Delete<null>(`/admin/organization/users/${id}`).send(),
 };

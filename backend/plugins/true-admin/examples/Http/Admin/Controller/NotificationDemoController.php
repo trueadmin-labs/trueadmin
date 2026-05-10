@@ -73,7 +73,7 @@ final class NotificationDemoController extends AdminController
                 'taskName' => '合同复核',
                 'priority' => 'high',
             ],
-            'targetUrl' => '/system/messages',
+            'targetUrl' => '/messages',
         ]));
     }
 }

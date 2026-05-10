@@ -323,31 +323,99 @@ export const handlers = [
       operationDeptId: null,
     }),
   ),
-  http.get('/api/admin/system/menu-tree', () =>
+  http.get('/api/admin/system-config/menu-tree', () =>
     success([
       {
-        code: 'system',
-        title: '系统管理',
-        i18n: 'menu.system',
-        path: '/system',
-        icon: 'SettingOutlined',
+        code: 'system.messages',
+        title: '消息中心',
+        i18n: 'menu.system.messages',
+        path: '/messages',
+        icon: 'MailOutlined',
+        type: 'menu',
+        status: 'enabled',
+      },
+      {
+        code: 'organization',
+        title: '组织权限',
+        i18n: 'menu.organization',
+        path: '/organization',
+        icon: 'ApartmentOutlined',
         type: 'directory',
         status: 'enabled',
         children: [
           {
+            code: 'system.departments',
+            title: '部门管理',
+            i18n: 'menu.system.departments',
+            path: '/organization/departments',
+            icon: 'TeamOutlined',
+            type: 'menu',
+            status: 'enabled',
+          },
+          {
             code: 'system.users',
-            title: '用户管理',
+            title: '管理员用户',
             i18n: 'menu.system.users',
-            path: '/system/users',
+            path: '/organization/users',
             icon: 'UserOutlined',
             type: 'menu',
             status: 'enabled',
           },
           {
-            code: 'system.departments',
-            title: '部门管理',
-            path: '/system/departments',
-            icon: 'TeamOutlined',
+            code: 'system.roles',
+            title: '角色管理',
+            i18n: 'menu.system.roles',
+            path: '/organization/roles',
+            icon: 'LockOutlined',
+            type: 'menu',
+            status: 'enabled',
+          },
+        ],
+      },
+      {
+        code: 'messageManagement',
+        title: '消息管理',
+        i18n: 'menu.messageManagement',
+        path: '/message-management',
+        icon: 'NotificationOutlined',
+        type: 'directory',
+        status: 'enabled',
+        children: [
+          {
+            code: 'system.announcementManagement',
+            title: '公告管理',
+            i18n: 'menu.system.announcementManagement',
+            path: '/message-management/announcements',
+            icon: 'NotificationOutlined',
+            type: 'menu',
+            status: 'enabled',
+          },
+          {
+            code: 'system.notificationManagement',
+            title: '通知管理',
+            i18n: 'menu.system.notificationManagement',
+            path: '/message-management/notifications',
+            icon: 'BellOutlined',
+            type: 'menu',
+            status: 'enabled',
+          },
+        ],
+      },
+      {
+        code: 'systemConfig',
+        title: '系统配置',
+        i18n: 'menu.systemConfig',
+        path: '/system-config',
+        icon: 'SettingOutlined',
+        type: 'directory',
+        status: 'enabled',
+        children: [
+          {
+            code: 'system.menus',
+            title: '菜单管理',
+            i18n: 'menu.system.menus',
+            path: '/system-config/menus',
+            icon: 'MenuOutlined',
             type: 'menu',
             status: 'enabled',
           },
@@ -355,15 +423,15 @@ export const handlers = [
       },
     ]),
   ),
-  http.get('/api/admin/system/departments/tree', () => success(departmentTree)),
-  http.get('/api/admin/system/users', ({ request }) => {
+  http.get('/api/admin/organization/departments/tree', () => success(departmentTree)),
+  http.get('/api/admin/organization/users', ({ request }) => {
     const url = new URL(request.url);
     const page = Number(url.searchParams.get('page') || 1);
     const pageSize = Number(url.searchParams.get('pageSize') || 20);
     return success({ items: users, total: users.length, page, pageSize });
   }),
-  http.get('/api/admin/system/roles/tree', () => success(roleTree)),
-  http.get('/api/admin/system/roles/options', () => success(roleOptions)),
+  http.get('/api/admin/organization/roles/tree', () => success(roleTree)),
+  http.get('/api/admin/organization/roles/options', () => success(roleOptions)),
   http.get('/api/admin/messages', ({ request }) => {
     const url = new URL(request.url);
     const page = Number(url.searchParams.get('page') || 1);
@@ -470,7 +538,7 @@ export const handlers = [
     });
     return success(null);
   }),
-  http.get('/api/admin/notifications', ({ request }) => {
+  http.get('/api/admin/message-management/notifications', ({ request }) => {
     const url = new URL(request.url);
     const page = Number(url.searchParams.get('page') || 1);
     const pageSize = Number(url.searchParams.get('pageSize') || 20);
@@ -522,7 +590,7 @@ export const handlers = [
       pageSize,
     });
   }),
-  http.get('/api/admin/notifications/:id/deliveries', ({ params, request }) => {
+  http.get('/api/admin/message-management/notifications/:id/deliveries', ({ params, request }) => {
     const url = new URL(request.url);
     const page = Number(url.searchParams.get('page') || 1);
     const pageSize = Number(url.searchParams.get('pageSize') || 20);
@@ -548,7 +616,7 @@ export const handlers = [
       pageSize,
     });
   }),
-  http.post('/api/admin/notifications/:id/resend', ({ params }) => {
+  http.post('/api/admin/message-management/notifications/:id/resend', ({ params }) => {
     let resent = 0;
     notificationDeliveries.forEach((delivery) => {
       if (String(delivery.batchId) === String(params.id) && delivery.status === 'failed') {
@@ -569,7 +637,7 @@ export const handlers = [
     }
     return success({ resent });
   }),
-  http.get('/api/admin/announcements', ({ request }) => {
+  http.get('/api/admin/message-management/announcements', ({ request }) => {
     const url = new URL(request.url);
     const page = Number(url.searchParams.get('page') || 1);
     const pageSize = Number(url.searchParams.get('pageSize') || 20);
@@ -621,7 +689,7 @@ export const handlers = [
       pageSize,
     });
   }),
-  http.post('/api/admin/announcements', async ({ request }) => {
+  http.post('/api/admin/message-management/announcements', async ({ request }) => {
     const body = (await request.json()) as {
       title?: string;
       content?: string;
@@ -666,7 +734,7 @@ export const handlers = [
     announcements.unshift(announcement);
     return success(announcement);
   }),
-  http.put('/api/admin/announcements/:id', async ({ params, request }) => {
+  http.put('/api/admin/message-management/announcements/:id', async ({ params, request }) => {
     const announcement = announcements.find((item) => String(item.id) === String(params.id));
     if (!announcement) {
       return fail('SYSTEM.ANNOUNCEMENT.NOT_FOUND', '公告不存在');
@@ -708,7 +776,7 @@ export const handlers = [
     announcement.updatedAt = now;
     return success(announcement);
   }),
-  http.delete('/api/admin/announcements/:id', ({ params }) => {
+  http.delete('/api/admin/message-management/announcements/:id', ({ params }) => {
     const index = announcements.findIndex((item) => String(item.id) === String(params.id));
     if (index < 0) {
       return fail('SYSTEM.ANNOUNCEMENT.NOT_FOUND', '公告不存在');
@@ -719,7 +787,7 @@ export const handlers = [
     announcements.splice(index, 1);
     return success(null);
   }),
-  http.post('/api/admin/announcements/:id/publish', ({ params }) => {
+  http.post('/api/admin/message-management/announcements/:id/publish', ({ params }) => {
     const announcement = announcements.find((item) => String(item.id) === String(params.id));
     if (!announcement) {
       return fail('SYSTEM.ANNOUNCEMENT.NOT_FOUND', '公告不存在');
@@ -735,7 +803,7 @@ export const handlers = [
     }
     return success(announcement);
   }),
-  http.post('/api/admin/announcements/:id/offline', ({ params }) => {
+  http.post('/api/admin/message-management/announcements/:id/offline', ({ params }) => {
     const announcement = announcements.find((item) => String(item.id) === String(params.id));
     if (!announcement) {
       return fail('SYSTEM.ANNOUNCEMENT.NOT_FOUND', '公告不存在');
@@ -745,7 +813,7 @@ export const handlers = [
     announcement.updatedAt = now;
     return success(announcement);
   }),
-  http.post('/api/admin/announcements/:id/restore', ({ params }) => {
+  http.post('/api/admin/message-management/announcements/:id/restore', ({ params }) => {
     const announcement = announcements.find((item) => String(item.id) === String(params.id));
     if (!announcement) {
       return fail('SYSTEM.ANNOUNCEMENT.NOT_FOUND', '公告不存在');
@@ -761,7 +829,7 @@ export const handlers = [
     announcement.updatedAt = now;
     return success(announcement);
   }),
-  http.post('/api/admin/announcements/:id/cancel-scheduled', ({ params }) => {
+  http.post('/api/admin/message-management/announcements/:id/cancel-scheduled', ({ params }) => {
     const announcement = announcements.find((item) => String(item.id) === String(params.id));
     if (!announcement) {
       return fail('SYSTEM.ANNOUNCEMENT.NOT_FOUND', '公告不存在');
@@ -774,7 +842,7 @@ export const handlers = [
     announcement.updatedAt = now;
     return success(announcement);
   }),
-  http.delete('/api/admin/system/users/:id', () =>
+  http.delete('/api/admin/organization/users/:id', () =>
     fail('SYSTEM.USER.NOT_FOUND', '管理员用户不存在或已被删除', {
       reason: 'record_missing',
       traceId: 'mock-trace-user-delete',

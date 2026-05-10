@@ -30,7 +30,7 @@ const normalizePath = (path: string) => path.replace(/\/+$/, '') || '/';
 export const getTabKey = (pathname: string) => normalizePath(pathname);
 
 const toIframeLinkPath = (menu: TabMenuNode): string =>
-  `/system/link-frame/${encodeURIComponent(String(menu.id ?? menu.code ?? menu.key))}`;
+  `/link-frame/${encodeURIComponent(String(menu.id ?? menu.code ?? menu.key))}`;
 
 const findFirstNavigableMenu = (menus: TabMenuNode[]): TabMenuNode | undefined => {
   for (const menu of menus) {

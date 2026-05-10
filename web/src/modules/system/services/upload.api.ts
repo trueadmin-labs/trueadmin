@@ -6,6 +6,8 @@ export const systemUploadApi = {
     const formData = new FormData();
     formData.append('file', file);
 
-    return http.Post<TrueAdminImageUploadResult>('/admin/system/uploads/image', formData).send();
+    return http
+      .Post<TrueAdminImageUploadResult>('/admin/system-config/uploads/image', formData)
+      .send();
   },
 };

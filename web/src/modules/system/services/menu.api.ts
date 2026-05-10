@@ -16,11 +16,13 @@ const toPageResult = (items: AdminMenu[], params: CrudListParams): PageResult<Ad
 export const menuApi = {
   list: async (params: CrudListParams) => toPageResult(await menuApi.tree(params), params),
   tree: (params?: CrudListParams) =>
-    http.Get<AdminMenu[]>('/admin/system/menus/tree', params ? { params } : undefined).send(),
-  detail: (id: React.Key) => http.Get<AdminMenu>(`/admin/system/menus/${id}`).send(),
+    http
+      .Get<AdminMenu[]>('/admin/system-config/menus/tree', params ? { params } : undefined)
+      .send(),
+  detail: (id: React.Key) => http.Get<AdminMenu>(`/admin/system-config/menus/${id}`).send(),
   create: (payload: AdminMenuPayload) =>
-    http.Post<AdminMenu>('/admin/system/menus', payload).send(),
+    http.Post<AdminMenu>('/admin/system-config/menus', payload).send(),
   update: (id: React.Key, payload: AdminMenuPayload) =>
-    http.Put<AdminMenu>(`/admin/system/menus/${id}`, payload).send(),
-  delete: (id: React.Key) => http.Delete<null>(`/admin/system/menus/${id}`).send(),
+    http.Put<AdminMenu>(`/admin/system-config/menus/${id}`, payload).send(),
+  delete: (id: React.Key) => http.Delete<null>(`/admin/system-config/menus/${id}`).send(),
 };

@@ -6,27 +6,27 @@ export default defineModule({
   id: 'system',
   routes: [
     {
-      path: '/system/departments',
+      path: '/organization/departments',
       component: lazy(() => import('./pages/departments')),
       meta: { title: 'system.departments.title', auth: true },
     },
     {
-      path: '/system/users',
+      path: '/organization/users',
       component: lazy(() => import('./pages/users')),
       meta: { title: 'system.users.title', auth: true },
     },
     {
-      path: '/system/roles',
+      path: '/organization/roles',
       component: lazy(() => import('./pages/roles')),
       meta: { title: 'system.roles.title', auth: true },
     },
     {
-      path: '/system/menus',
+      path: '/system-config/menus',
       component: lazy(() => import('./pages/menus')),
       meta: { title: 'system.menus.title', auth: true },
     },
     {
-      path: '/system/link-frame/:id',
+      path: '/link-frame/:id',
       component: lazy(() => import('./pages/link-frame')),
       meta: {
         title: 'system.menus.type.link',
@@ -36,17 +36,17 @@ export default defineModule({
       },
     },
     {
-      path: '/system/messages',
+      path: '/messages',
       component: lazy(() => import('./pages/messages')),
       meta: { title: 'system.messages.title', auth: true },
     },
     {
-      path: '/system/notification-management',
+      path: '/message-management/notifications',
       component: lazy(() => import('./pages/notification-management')),
       meta: { title: 'system.notificationManagement.title', auth: true },
     },
     {
-      path: '/system/announcement-management',
+      path: '/message-management/announcements',
       component: lazy(() => import('./pages/announcement-management')),
       meta: { title: 'system.announcementManagement.title', auth: true },
     },

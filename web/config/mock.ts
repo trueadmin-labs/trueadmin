@@ -43,28 +43,96 @@ const departmentTree = [
 
 const menuTree = [
   {
-    code: 'system',
-    title: '系统管理',
-    i18n: 'menu.system',
-    path: '/system',
-    icon: 'setting',
+    code: 'system.messages',
+    title: '消息中心',
+    i18n: 'menu.system.messages',
+    path: '/messages',
+    icon: 'MailOutlined',
+    type: 'menu',
+    status: 'enabled',
+  },
+  {
+    code: 'organization',
+    title: '组织权限',
+    i18n: 'menu.organization',
+    path: '/organization',
+    icon: 'ApartmentOutlined',
     type: 'directory',
     status: 'enabled',
     children: [
       {
-        code: 'system.users',
-        title: '用户管理',
-        i18n: 'menu.system.users',
-        path: '/system/users',
-        icon: 'user',
+        code: 'system.departments',
+        title: '部门管理',
+        i18n: 'menu.system.departments',
+        path: '/organization/departments',
+        icon: 'TeamOutlined',
         type: 'menu',
         status: 'enabled',
       },
       {
-        code: 'system.departments',
-        title: '部门管理',
-        path: '/system/departments',
-        icon: 'team',
+        code: 'system.users',
+        title: '管理员用户',
+        i18n: 'menu.system.users',
+        path: '/organization/users',
+        icon: 'UserOutlined',
+        type: 'menu',
+        status: 'enabled',
+      },
+      {
+        code: 'system.roles',
+        title: '角色管理',
+        i18n: 'menu.system.roles',
+        path: '/organization/roles',
+        icon: 'LockOutlined',
+        type: 'menu',
+        status: 'enabled',
+      },
+    ],
+  },
+  {
+    code: 'messageManagement',
+    title: '消息管理',
+    i18n: 'menu.messageManagement',
+    path: '/message-management',
+    icon: 'NotificationOutlined',
+    type: 'directory',
+    status: 'enabled',
+    children: [
+      {
+        code: 'system.announcementManagement',
+        title: '公告管理',
+        i18n: 'menu.system.announcementManagement',
+        path: '/message-management/announcements',
+        icon: 'NotificationOutlined',
+        type: 'menu',
+        status: 'enabled',
+      },
+      {
+        code: 'system.notificationManagement',
+        title: '通知管理',
+        i18n: 'menu.system.notificationManagement',
+        path: '/message-management/notifications',
+        icon: 'BellOutlined',
+        type: 'menu',
+        status: 'enabled',
+      },
+    ],
+  },
+  {
+    code: 'systemConfig',
+    title: '系统配置',
+    i18n: 'menu.systemConfig',
+    path: '/system-config',
+    icon: 'SettingOutlined',
+    type: 'directory',
+    status: 'enabled',
+    children: [
+      {
+        code: 'system.menus',
+        title: '菜单管理',
+        i18n: 'menu.system.menus',
+        path: '/system-config/menus',
+        icon: 'MenuOutlined',
         type: 'menu',
         status: 'enabled',
       },
@@ -111,15 +179,15 @@ export const trueAdminMockPlugin = (enabled: boolean): Plugin => ({
       );
     });
 
-    server.middlewares.use('/api/admin/system/menu-tree', (_req, res) => {
+    server.middlewares.use('/api/admin/system-config/menu-tree', (_req, res) => {
       sendJson(res, success(menuTree));
     });
 
-    server.middlewares.use('/api/admin/system/departments/tree', (_req, res) => {
+    server.middlewares.use('/api/admin/organization/departments/tree', (_req, res) => {
       sendJson(res, success(departmentTree));
     });
 
-    server.middlewares.use('/api/admin/system/users', (req, res) => {
+    server.middlewares.use('/api/admin/organization/users', (req, res) => {
       if (req.method === 'DELETE') {
         sendJson(
           res,

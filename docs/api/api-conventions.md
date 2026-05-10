@@ -19,7 +19,7 @@ TrueAdmin 按调用方划分 API 边界：
 示例：
 
 ```php
-#[AdminController(path: '/api/admin/system/users')]
+#[AdminController(path: '/api/admin/organization/users')]
 final class AdminUserController extends AdminController
 {
 }
@@ -112,9 +112,9 @@ Authorization: Bearer <token>
 后台管理列表查询使用统一参数协议：
 
 ```http
-GET /api/admin/system/users?page=1&pageSize=20&keyword=admin
-GET /api/admin/system/users?filter={"status":"enabled"}&op={"status":"="}
-GET /api/admin/system/users?sort=created_at&order=desc
+GET /api/admin/organization/users?page=1&pageSize=20&keyword=admin
+GET /api/admin/organization/users?filter={"status":"enabled"}&op={"status":"="}
+GET /api/admin/organization/users?sort=created_at&order=desc
 ```
 
 `filter` 和 `op` 为 JSON 对象字符串，后端只会应用 Repository 白名单中允许的字段和操作符。常用操作符包括 `=`、`<>`、`>`、`>=`、`<`、`<=`、`like`、`in`、`between`。
@@ -168,11 +168,11 @@ GET /api/admin/system/users?sort=created_at&order=desc
 POST   /api/admin/auth/login
 POST   /api/admin/auth/logout
 GET    /api/admin/auth/me
-GET    /api/admin/system/users
-POST   /api/admin/system/users
-GET    /api/admin/system/users/{id}
-PUT    /api/admin/system/users/{id}
-DELETE /api/admin/system/users/{id}
+GET    /api/admin/organization/users
+POST   /api/admin/organization/users
+GET    /api/admin/organization/users/{id}
+PUT    /api/admin/organization/users/{id}
+DELETE /api/admin/organization/users/{id}
 ```
 
 ## 错误码规范
