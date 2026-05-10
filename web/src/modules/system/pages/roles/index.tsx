@@ -9,10 +9,10 @@ import type { TreeProps, TreeSelectProps } from 'antd';
 import {
   App,
   Button,
+  Card,
   Form,
   Input,
   InputNumber,
-  Radio,
   Select,
   Space,
   Spin,
@@ -674,86 +674,103 @@ export default function AdminRolesPage() {
                                   '数据权限按资源单独配置。未选择的数据资源不会授予任何数据范围。',
                                 )}
                               </Typography.Text>
-                              {dataPolicyMetadata?.resources.map((resource) => (
-                                <div key={resource.key}>
-                                  <Typography.Title level={5} style={{ marginTop: 0 }}>
-                                    {textOf(resource, t)}
-                                  </Typography.Title>
-                                  <Space orientation="vertical" size={12} style={{ width: '100%' }}>
-                                    {resource.strategies.map((strategyKey) => {
-                                      const strategy = dataPolicyStrategyMap.get(strategyKey);
-                                      if (!strategy) {
-                                        return null;
-                                      }
-                                      const fieldKey = dataPolicyItemKey(resource.key, strategyKey);
-                                      const scope = dataPolicyScopes?.[fieldKey];
+                              <div className="trueadmin-data-policy-list">
+                                {dataPolicyMetadata?.resources.map((resource) => (
+                                  <Card
+                                    className="trueadmin-data-policy-card"
+                                    key={resource.key}
+                                    size="small"
+                                    title={textOf(resource, t)}
+                                  >
+                                    <div className="trueadmin-data-policy-card-rows">
+                                      {resource.strategies.map((strategyKey) => {
+                                        const strategy = dataPolicyStrategyMap.get(strategyKey);
+                                        if (!strategy) {
+                                          return null;
+                                        }
+                                        const fieldKey = dataPolicyItemKey(
+                                          resource.key,
+                                          strategyKey,
+                                        );
+                                        const scope = dataPolicyScopes?.[fieldKey];
+                                        const scopeOptions = [
+                                          {
+                                            label: t(
+                                              'system.roles.dataPolicy.scope.none',
+                                              '不授权',
+                                            ),
+                                            value: 'none',
+                                          },
+                                          ...strategy.scopes.map((scopeItem) => ({
+                                            label: textOf(scopeItem, t),
+                                            value: scopeItem.key,
+                                          })),
+                                        ];
 
-                                      return (
-                                        <div key={fieldKey}>
-                                          <Form.Item
-                                            label={textOf(strategy, t)}
-                                            name={['policies', fieldKey]}
-                                            rules={[]}
-                                          >
-                                            <Radio.Group optionType="button">
-                                              <Space wrap>
-                                                <Radio.Button value="none">
-                                                  {t(
-                                                    'system.roles.dataPolicy.scope.none',
-                                                    '不授权',
-                                                  )}
-                                                </Radio.Button>
-                                                {strategy.scopes.map((scopeItem) => (
-                                                  <Radio.Button
-                                                    key={scopeItem.key}
-                                                    value={scopeItem.key}
-                                                  >
-                                                    {textOf(scopeItem, t)}
-                                                  </Radio.Button>
-                                                ))}
-                                              </Space>
-                                            </Radio.Group>
-                                          </Form.Item>
-                                          {scope === 'custom_departments' ||
-                                          scope === 'custom_departments_and_children' ? (
-                                            <div>
+                                        return (
+                                          <div className="trueadmin-data-policy-row" key={fieldKey}>
+                                            <div className="trueadmin-data-policy-main-row">
+                                              <Typography.Text>
+                                                {textOf(strategy, t)}
+                                              </Typography.Text>
                                               <Form.Item
-                                                label={t(
-                                                  'system.roles.dataPolicy.departments',
-                                                  '可见部门',
-                                                )}
-                                                name={['customDepartments', fieldKey]}
-                                                rules={[
-                                                  {
-                                                    required: true,
-                                                    message: t(
-                                                      'system.roles.dataPolicy.departmentsRequired',
-                                                      '请选择可见部门',
-                                                    ),
-                                                  },
-                                                ]}
+                                                className="trueadmin-data-policy-scope-item"
+                                                name={['policies', fieldKey]}
+                                                rules={[]}
                                               >
-                                                <TreeSelect
-                                                  treeData={departmentTreeData}
-                                                  treeCheckable
-                                                  treeCheckStrictly
-                                                  treeDefaultExpandAll
-                                                  showSearch
-                                                  treeNodeFilterProp="title"
+                                                <Select
+                                                  options={scopeOptions}
                                                   placeholder={t(
-                                                    'system.roles.dataPolicy.departmentsPlaceholder',
-                                                    '请选择部门',
+                                                    'system.roles.dataPolicy.scopePlaceholder',
+                                                    '请选择权限类型',
                                                   )}
                                                 />
                                               </Form.Item>
                                             </div>
-                                          ) : null}
-                                        </div>
-                                      );
-                                    })}
-                                  </Space>
-                                </div>
-                              ))}
+                                            {scope === 'custom_departments' ||
+                                            scope === 'custom_departments_and_children' ? (
+                                              <div className="trueadmin-data-policy-departments-row">
+                                                <Typography.Text type="secondary">
+                                                  {t(
+                                                    'system.roles.dataPolicy.departments',
+                                                    '可见部门',
+                                                  )}
+                                                </Typography.Text>
+                                                <Form.Item
+                                                  className="trueadmin-data-policy-departments-item"
+                                                  name={['customDepartments', fieldKey]}
+                                                  rules={[
+                                                    {
+                                                      required: true,
+                                                      message: t(
+                                                        'system.roles.dataPolicy.departmentsRequired',
+                                                        '请选择可见部门',
+                                                      ),
+                                                    },
+                                                  ]}
+                                                >
+                                                  <TreeSelect
+                                                    treeData={departmentTreeData}
+                                                    treeCheckable
+                                                    treeCheckStrictly
+                                                    treeDefaultExpandAll
+                                                    showSearch
+                                                    treeNodeFilterProp="title"
+                                                    placeholder={t(
+                                                      'system.roles.dataPolicy.departmentsPlaceholder',
+                                                      '请选择部门',
+                                                    )}
+                                                  />
+                                                </Form.Item>
+                                              </div>
+                                            ) : null}
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  </Card>
+                                ))}
+                              </div>
                             </Space>
                           </Form>
                         </div>

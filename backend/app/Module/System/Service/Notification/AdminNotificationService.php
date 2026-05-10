@@ -257,6 +257,7 @@ final class AdminNotificationService
 
         $users = Db::table('admin_users')
             ->whereIn('id', $adminIds)
+            ->whereNull('deleted_at')
             ->get()
             ->keyBy('id');
         $resolved = [];

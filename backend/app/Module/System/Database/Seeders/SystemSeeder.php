@@ -38,12 +38,26 @@ final class SystemSeeder extends Seeder
         $deptId = (int) Db::table('admin_departments')->where('code', 'headquarters')->value('id');
 
         Db::table('admin_users')->updateOrInsert(
-            ['username' => 'admin'],
+            ['username' => 'trueadmin'],
             [
-                'password' => Password::make('trueadmin'),
+                'password' => Password::make('123456'),
                 'nickname' => 'TrueAdmin',
                 'status' => 'enabled',
                 'primary_dept_id' => $deptId,
+                'deleted_at' => null,
+                'updated_at' => $now,
+                'created_at' => $now,
+            ]
+        );
+
+        Db::table('admin_users')->updateOrInsert(
+            ['username' => 'admin'],
+            [
+                'password' => Password::make('123456'),
+                'nickname' => 'Admin',
+                'status' => 'enabled',
+                'primary_dept_id' => $deptId,
+                'deleted_at' => null,
                 'updated_at' => $now,
                 'created_at' => $now,
             ]
@@ -71,15 +85,20 @@ final class SystemSeeder extends Seeder
             ]
         );
 
-        $userId = (int) Db::table('admin_users')->where('username', 'admin')->value('id');
+        $superAdminUserId = (int) Db::table('admin_users')->where('username', 'trueadmin')->value('id');
+        $adminUserId = (int) Db::table('admin_users')->where('username', 'admin')->value('id');
         $superAdminRoleId = (int) Db::table('admin_roles')->where('code', 'super-admin')->value('id');
         $adminRoleId = (int) Db::table('admin_roles')->where('code', 'admin')->value('id');
 
-        Db::table('admin_role_user')->updateOrInsert(['user_id' => $userId, 'role_id' => $superAdminRoleId]);
-        Db::table('admin_user_departments')->updateOrInsert(
-            ['user_id' => $userId, 'dept_id' => $deptId],
-            ['is_primary' => true]
-        );
+        Db::table('admin_role_user')->whereIn('user_id', [$superAdminUserId, $adminUserId])->delete();
+        Db::table('admin_role_user')->updateOrInsert(['user_id' => $superAdminUserId, 'role_id' => $superAdminRoleId]);
+        Db::table('admin_role_user')->updateOrInsert(['user_id' => $adminUserId, 'role_id' => $adminRoleId]);
+        foreach ([$superAdminUserId, $adminUserId] as $userId) {
+            Db::table('admin_user_departments')->updateOrInsert(
+                ['user_id' => $userId, 'dept_id' => $deptId],
+                ['is_primary' => true]
+            );
+        }
 
         $this->metadata->sync();
 

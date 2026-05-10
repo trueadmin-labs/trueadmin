@@ -12,6 +12,11 @@ declare(strict_types=1);
 
 namespace HyperfTest\Cases;
 
+use App\Module\System\Event\AdminUserCreated;
+use App\Module\System\Event\AdminUserDeleted;
+use App\Module\System\Event\AdminUserUpdated;
+use Hyperf\Context\ApplicationContext;
+use Psr\EventDispatcher\ListenerProviderInterface;
 use Hyperf\Testing\TestCase;
 
 /**
@@ -37,9 +42,9 @@ class ExampleTest extends TestCase
         ]);
 
         $this->assertSame('SUCCESS', $me['code']);
-        $this->assertSame('admin', $me['data']['username']);
+        $this->assertSame('trueadmin', $me['data']['username']);
         $this->assertGreaterThanOrEqual(1, \Hyperf\DbConnection\Db::table('admin_login_logs')
-            ->where('username', 'admin')
+            ->where('username', 'trueadmin')
             ->where('status', 'success')
             ->count());
     }
@@ -47,7 +52,7 @@ class ExampleTest extends TestCase
     public function testAdminLoginFailureUsesStringErrorCode()
     {
         $login = $this->json('/api/admin/auth/login', [
-            'username' => 'admin',
+            'username' => 'trueadmin',
             'password' => 'wrong-password',
         ]);
 
@@ -55,7 +60,7 @@ class ExampleTest extends TestCase
         $this->assertSame('用户名或密码错误', $login['message']);
         $this->assertNull($login['data']);
         $this->assertGreaterThanOrEqual(1, \Hyperf\DbConnection\Db::table('admin_login_logs')
-            ->where('username', 'admin')
+            ->where('username', 'trueadmin')
             ->where('status', 'failed')
             ->where('reason', 'invalid_credentials')
             ->count());
@@ -64,7 +69,7 @@ class ExampleTest extends TestCase
     public function testAdminLoginFailureUsesRequestLocale()
     {
         $login = $this->json('/api/admin/auth/login', [
-            'username' => 'admin',
+            'username' => 'trueadmin',
             'password' => 'wrong-password',
         ], [
             'Accept-Language' => 'en-US,en;q=0.9',
@@ -93,9 +98,19 @@ class ExampleTest extends TestCase
         $headers = ['Authorization' => 'Bearer ' . $login['data']['accessToken']];
         $suffix = str_replace('.', '', uniqid('', true));
         $operationLogStartId = (int) \Hyperf\DbConnection\Db::table('admin_operation_logs')->max('id');
-        $adminPrimaryDeptId = (int) \Hyperf\DbConnection\Db::table('admin_users')
-            ->where('username', 'admin')
-            ->value('primary_dept_id');
+        $adminPrimaryDeptId = 1;
+        $adminUserEvents = [];
+        $listenerProvider = ApplicationContext::getContainer()->get(ListenerProviderInterface::class);
+        $listenerProvider->on(AdminUserCreated::class, static function (AdminUserCreated $event) use (&$adminUserEvents): void {
+            $adminUserEvents['created'][] = $event;
+        });
+        $listenerProvider->on(AdminUserUpdated::class, static function (AdminUserUpdated $event) use (&$adminUserEvents): void {
+            $adminUserEvents['updated'][] = $event;
+        });
+        $listenerProvider->on(AdminUserDeleted::class, static function (AdminUserDeleted $event) use (&$adminUserEvents): void {
+            $adminUserEvents['deleted'][] = $event;
+        });
+
         $deptA = $this->json('/api/admin/organization/departments', [
             'code' => 'test-dept-a-' . $suffix,
             'name' => '测试部门A' . $suffix,
@@ -186,7 +201,7 @@ class ExampleTest extends TestCase
 
         $user = $this->json('/api/admin/organization/users', [
             'username' => 'test-user-' . $suffix,
-            'password' => 'trueadmin',
+            'password' => '123456',
             'nickname' => '测试用户' . $suffix,
             'status' => 'enabled',
             'roleIds' => [$role['data']['id']],
@@ -241,7 +256,7 @@ class ExampleTest extends TestCase
             'username' => 'client-' . $suffix,
             'phone' => '138' . substr(str_pad((string) crc32($suffix), 8, '0', STR_PAD_LEFT), 0, 8),
             'email' => 'client-' . $suffix . '@example.test',
-            'password' => 'trueadmin',
+            'password' => '123456',
             'nickname' => '用户端账号' . $suffix,
             'status' => 'enabled',
             'registerChannel' => 'admin',
@@ -287,6 +302,33 @@ class ExampleTest extends TestCase
 
         $deleteUser = $this->delete('/api/admin/organization/users/' . $user['data']['id'], [], $headers);
         $this->assertSame('SUCCESS', $deleteUser['code']);
+        $this->assertNotNull(\Hyperf\DbConnection\Db::table('admin_users')->where('id', $user['data']['id'])->value('deleted_at'));
+
+        $deletedUserList = $this->get('/api/admin/organization/users', ['keyword' => 'test-user-' . $suffix], $headers);
+        $this->assertSame('SUCCESS', $deletedUserList['code']);
+        $this->assertSame(0, $deletedUserList['data']['total']);
+
+        $duplicateDeletedUser = $this->json('/api/admin/organization/users', [
+            'username' => 'test-user-' . $suffix,
+            'password' => '123456',
+            'nickname' => '重复成员' . $suffix,
+            'status' => 'enabled',
+            'roleIds' => [$role['data']['id']],
+            'deptIds' => [$deptAId],
+            'primaryDeptId' => $deptAId,
+        ], $headers);
+        $this->assertSame('KERNEL.REQUEST.VALIDATION_FAILED', $duplicateDeletedUser['code']);
+        $this->assertSame('username', $duplicateDeletedUser['data']['field'] ?? null);
+        $this->assertSame('duplicated', $duplicateDeletedUser['data']['reason'] ?? null);
+
+        $this->assertSame($user['data']['id'], $adminUserEvents['created'][0]->userId ?? null);
+        $this->assertSame($user['data']['id'], $adminUserEvents['updated'][0]->userId ?? null);
+        $this->assertSame($user['data']['id'], $adminUserEvents['deleted'][0]->userId ?? null);
+        $this->assertSame('test-user-' . $suffix, $adminUserEvents['deleted'][0]->user['username'] ?? null);
+        $this->assertContains($role['data']['id'], $adminUserEvents['deleted'][0]->roleIds ?? []);
+        $this->assertEqualsCanonicalizing([$deptAId, $deptBId], $adminUserEvents['deleted'][0]->departmentIds ?? []);
+        $this->assertSame(0, \Hyperf\DbConnection\Db::table('admin_role_user')->where('user_id', $user['data']['id'])->count());
+        $this->assertSame(0, \Hyperf\DbConnection\Db::table('admin_user_departments')->where('user_id', $user['data']['id'])->count());
 
         $deleteSecondRole = $this->delete('/api/admin/organization/roles/' . $secondRole['data']['id'], [], $headers);
         $this->assertSame('SUCCESS', $deleteSecondRole['code']);
@@ -432,14 +474,14 @@ class ExampleTest extends TestCase
 
     private function loginAsAdmin()
     {
-        return $this->loginAs('admin');
+        return $this->loginAs('trueadmin');
     }
 
     private function loginAs(string $username)
     {
         $login = $this->json('/api/admin/auth/login', [
             'username' => $username,
-            'password' => 'trueadmin',
+            'password' => '123456',
         ]);
 
         $this->assertSame('SUCCESS', $login['code']);

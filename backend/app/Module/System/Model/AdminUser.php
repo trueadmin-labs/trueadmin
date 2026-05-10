@@ -6,9 +6,12 @@ namespace App\Module\System\Model;
 
 use App\Foundation\Database\Model;
 use Hyperf\Database\Model\Relations\BelongsToMany;
+use Hyperf\Database\Model\SoftDeletes;
 
 final class AdminUser extends Model
 {
+    use SoftDeletes;
+
     protected ?string $table = 'admin_users';
 
     protected array $fillable = [

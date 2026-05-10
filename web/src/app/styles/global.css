@@ -1741,6 +1741,71 @@ body,
   cursor: pointer;
 }
 
+.trueadmin-data-policy-list {
+  display: grid;
+  gap: 10px;
+}
+
+.trueadmin-data-policy-card .ant-card-head {
+  min-height: 38px;
+  padding: 0 12px;
+}
+
+.trueadmin-data-policy-card .ant-card-head-title {
+  padding: 9px 0;
+}
+
+.trueadmin-data-policy-card .ant-card-body {
+  padding: 4px 12px 10px;
+}
+
+.trueadmin-data-policy-card-rows {
+  display: grid;
+  gap: 8px;
+}
+
+.trueadmin-data-policy-row {
+  display: grid;
+  gap: 8px;
+}
+
+.trueadmin-data-policy-main-row {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 240px);
+  gap: 12px;
+  align-items: start;
+}
+
+.trueadmin-data-policy-departments-row {
+  display: grid;
+  min-width: 0;
+  grid-column: 1 / -1;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+
+.trueadmin-data-policy-departments-row > .ant-typography {
+  min-height: 32px;
+  line-height: 32px;
+}
+
+.trueadmin-data-policy-scope-item,
+.trueadmin-data-policy-departments-item {
+  margin-bottom: 0;
+}
+
+.trueadmin-data-policy-scope-item .ant-form-item-explain,
+.trueadmin-data-policy-departments-item .ant-form-item-explain {
+  min-height: 0;
+}
+
+.trueadmin-data-policy-scope-item .ant-select,
+.trueadmin-data-policy-departments-item .ant-select {
+  width: 100%;
+}
+
 .trueadmin-shell.is-dark .trueadmin-workbench-summary {
   border-color: var(--trueadmin-shell-dark-border);
   background: rgba(255, 255, 255, 0.04);
@@ -1760,6 +1825,17 @@ body,
   .trueadmin-workbench-health-item {
     grid-template-columns: 1fr;
     gap: 8px;
+  }
+
+  .trueadmin-data-policy-row,
+  .trueadmin-data-policy-main-row,
+  .trueadmin-data-policy-departments-row {
+    grid-template-columns: 1fr;
+  }
+
+  .trueadmin-data-policy-departments-row > .ant-typography {
+    min-height: 0;
+    line-height: 1.5;
   }
 }
 

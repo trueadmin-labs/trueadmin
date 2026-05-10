@@ -21,7 +21,7 @@ use TrueAdmin\Kernel\Http\Attribute\Menu;
 use TrueAdmin\Kernel\Http\Attribute\Permission;
 use TrueAdmin\Kernel\OperationLog\Attribute\OperationLog;
 
-#[Menu(code: 'system.users', title: '管理员用户', path: '/organization/users', parent: 'organization', permission: 'system:user:list', icon: 'UserOutlined', sort: 20)]
+#[Menu(code: 'system.users', title: '成员管理', path: '/organization/users', parent: 'organization', permission: 'system:user:list', icon: 'UserOutlined', sort: 20)]
 #[AdminRouteController(path: '/api/admin/organization/users', middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
 final class AdminUserController extends AdminController
 {
@@ -30,38 +30,38 @@ final class AdminUserController extends AdminController
     }
 
     #[AdminGet('')]
-    #[Permission('system:user:list', title: '管理员用户列表', group: '系统管理')]
+    #[Permission('system:user:list', title: '成员列表', group: '系统管理')]
     public function list(AdminQueryRequest $request): array
     {
         return ApiResponse::success($this->users->paginate($request->adminQuery())->toArray());
     }
 
     #[AdminGet('{id}')]
-    #[Permission('system:user:detail', title: '管理员用户详情', group: '系统管理')]
+    #[Permission('system:user:detail', title: '成员详情', group: '系统管理')]
     public function detail(int $id): array
     {
         return ApiResponse::success($this->users->detail($id));
     }
 
     #[AdminPost('')]
-    #[Permission('system:user:create', title: '新增管理员用户', group: '系统管理')]
-    #[OperationLog(module: 'system', action: 'admin.user.create', remark: '新增管理员用户')]
+    #[Permission('system:user:create', title: '新增成员', group: '系统管理')]
+    #[OperationLog(module: 'system', action: 'admin.user.create', remark: '新增成员')]
     public function create(CreateAdminUserRequest $request): array
     {
         return ApiResponse::success($this->users->create($request->validated()));
     }
 
     #[AdminPut('{id}')]
-    #[Permission('system:user:update', title: '编辑管理员用户', group: '系统管理')]
-    #[OperationLog(module: 'system', action: 'admin.user.update', remark: '编辑管理员用户')]
+    #[Permission('system:user:update', title: '编辑成员', group: '系统管理')]
+    #[OperationLog(module: 'system', action: 'admin.user.update', remark: '编辑成员')]
     public function update(int $id, UpdateAdminUserRequest $request): array
     {
         return ApiResponse::success($this->users->update($id, $request->validated()));
     }
 
     #[AdminDelete('{id}')]
-    #[Permission('system:user:delete', title: '删除管理员用户', group: '系统管理')]
-    #[OperationLog(module: 'system', action: 'admin.user.delete', remark: '删除管理员用户')]
+    #[Permission('system:user:delete', title: '删除成员', group: '系统管理')]
+    #[OperationLog(module: 'system', action: 'admin.user.delete', remark: '删除成员')]
     public function delete(int $id): array
     {
         $this->users->delete($id);

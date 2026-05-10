@@ -71,7 +71,7 @@ export function TrueAdminCrudPage<
   } as CSSProperties;
   const defaultExtra = service.create ? (
     <Permission code={toPermissionCode(resource, 'create')}>
-      <Button type="primary" icon={<PlusOutlined />} disabled>
+      <Button type="primary" icon={<PlusOutlined />}>
         {t('crud.action.create', '新增')}
       </Button>
     </Permission>

@@ -134,6 +134,7 @@ final class AdminUserRepository extends AbstractRepository
     public function existsUsername(string $username, ?int $exceptId = null): bool
     {
         return AdminUser::query()
+            ->withTrashed()
             ->where('username', $username)
             ->when($exceptId !== null, static function ($query) use ($exceptId): void {
                 $query->where('id', '<>', $exceptId);
@@ -160,9 +161,9 @@ final class AdminUserRepository extends AbstractRepository
     public function delete(AdminUser $user): void
     {
         $userId = (int) $user->getAttribute('id');
+        $this->deleteModel($user);
         Db::table('admin_user_departments')->where('user_id', $userId)->delete();
         Db::table('admin_role_user')->where('user_id', $userId)->delete();
-        $this->deleteModel($user);
     }
 
     /**

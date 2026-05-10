@@ -83,12 +83,19 @@ final class AdminDepartmentRepository extends AbstractRepository
 
     public function assignedUserCount(int $id): int
     {
-        return (int) Db::table('admin_user_departments')->where('dept_id', $id)->count();
+        return (int) Db::table('admin_user_departments')
+            ->join('admin_users', 'admin_users.id', '=', 'admin_user_departments.user_id')
+            ->where('admin_user_departments.dept_id', $id)
+            ->whereNull('admin_users.deleted_at')
+            ->count();
     }
 
     public function primaryUserCount(int $id): int
     {
-        return (int) Db::table('admin_users')->where('primary_dept_id', $id)->count();
+        return (int) Db::table('admin_users')
+            ->where('primary_dept_id', $id)
+            ->whereNull('deleted_at')
+            ->count();
     }
 
     /**

@@ -31,6 +31,7 @@ return new class extends Migration {
             $table->unsignedBigInteger('created_by')->nullable();
             $table->unsignedBigInteger('updated_by')->nullable();
             $table->datetimes();
+            $table->softDeletes();
         });
 
         Schema::create('admin_user_departments', function (Blueprint $table): void {

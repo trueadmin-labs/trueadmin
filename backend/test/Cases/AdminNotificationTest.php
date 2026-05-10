@@ -135,6 +135,7 @@ class AdminNotificationTest extends TestCase
             'password' => 'test',
             'nickname' => '管理员',
             'status' => 'enabled',
+            'deleted_at' => null,
             'created_at' => $now,
             'updated_at' => $now,
         ]);

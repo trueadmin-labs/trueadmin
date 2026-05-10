@@ -9,7 +9,7 @@ return [
     'resources' => [
         [
             'key' => 'admin_user',
-            'label' => '管理员用户',
+            'label' => '成员管理',
             'i18n' => 'dataPolicy.resource.adminUser',
             'strategies' => ['organization'],
             'sort' => 10,

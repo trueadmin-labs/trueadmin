@@ -354,7 +354,7 @@ export const handlers = [
           },
           {
             code: 'system.users',
-            title: '管理员用户',
+            title: '成员管理',
             i18n: 'menu.system.users',
             path: '/organization/users',
             icon: 'UserOutlined',
@@ -843,7 +843,7 @@ export const handlers = [
     return success(announcement);
   }),
   http.delete('/api/admin/organization/users/:id', () =>
-    fail('SYSTEM.USER.NOT_FOUND', '管理员用户不存在或已被删除', {
+    fail('SYSTEM.USER.NOT_FOUND', '成员不存在或已被删除', {
       reason: 'record_missing',
       traceId: 'mock-trace-user-delete',
     }),

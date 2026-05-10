@@ -49,7 +49,7 @@ export default function LoginPage() {
             }}
           >
             <Typography.Paragraph type="secondary" className="trueadmin-login-hint">
-              开发环境默认账号通常为 admin / trueadmin，请以实际种子数据为准。
+              默认账号：trueadmin / 123456，admin / 123456。
             </Typography.Paragraph>
             <ProFormText
               name="username"

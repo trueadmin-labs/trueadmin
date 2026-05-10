@@ -315,7 +315,10 @@ final class AdminAnnouncementRepository extends AbstractRepository
     private function targetCount(AdminAnnouncement $announcement): int
     {
         if ((string) $announcement->getAttribute('scope') !== 'roles') {
-            return (int) Db::table('admin_users')->where('status', 'enabled')->count();
+            return (int) Db::table('admin_users')
+                ->where('status', 'enabled')
+                ->whereNull('deleted_at')
+                ->count();
         }
 
         $roleIds = $this->intList($announcement->getAttribute('role_ids'));
@@ -326,6 +329,7 @@ final class AdminAnnouncementRepository extends AbstractRepository
         return (int) Db::table('admin_users')
             ->join('admin_role_user', 'admin_role_user.user_id', '=', 'admin_users.id')
             ->where('admin_users.status', 'enabled')
+            ->whereNull('admin_users.deleted_at')
             ->whereIn('admin_role_user.role_id', $roleIds)
             ->distinct('admin_users.id')
             ->count('admin_users.id');

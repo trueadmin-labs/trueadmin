@@ -181,8 +181,8 @@ export default function AdminUsersPage() {
 
   return (
     <TrueAdminCrudPage<AdminUser, AdminUserCreatePayload, AdminUserUpdatePayload>
-      title={t('system.users.title', '管理员用户')}
-      description={t('system.users.description', '维护后台管理员账号、状态和角色信息。')}
+      title={t('system.users.title', '成员管理')}
+      description={t('system.users.description', '维护后台成员账号、部门归属、角色和状态。')}
       resource="system.user"
       rowKey="id"
       columns={columns}
@@ -216,8 +216,8 @@ export default function AdminUsersPage() {
       locale={{
         actionColumnTitle: t('crud.column.action', '操作'),
         advancedFilterText: t('crud.filter.advanced', '高级筛选'),
-        deleteConfirmTitle: t('system.users.deleteConfirm', '确认删除该管理员用户吗？'),
-        deleteSuccessMessage: t('system.users.deleteSuccess', '管理员用户已删除'),
+        deleteConfirmTitle: t('system.users.deleteConfirm', '确认删除该成员吗？'),
+        deleteSuccessMessage: t('system.users.deleteSuccess', '成员已删除'),
         deleteText: t('crud.action.delete', '删除'),
         filterResetText: t('crud.filter.reset', '重置'),
         filterSearchText: t('crud.filter.search', '查询'),

@@ -51,7 +51,7 @@ const useWorkbenchData = (t: (key?: string, fallback?: string) => string) => ({
   ],
   todos: [
     {
-      title: t('workbench.todo.userAudit', '复核新管理员账号'),
+      title: t('workbench.todo.userAudit', '复核新成员账号'),
       time: t('workbench.todo.minutesAgo', '18 分钟前').replace('{{count}}', '18'),
       status: 'processing' as const,
     },
@@ -68,7 +68,7 @@ const useWorkbenchData = (t: (key?: string, fallback?: string) => string) => ({
   ],
   shortcuts: [
     {
-      label: t('workbench.quick.users', '用户管理'),
+      label: t('workbench.quick.users', '成员管理'),
       path: '/organization/users',
       icon: <UserOutlined />,
     },
@@ -93,7 +93,7 @@ const useWorkbenchData = (t: (key?: string, fallback?: string) => string) => ({
     { label: t('workbench.health.queue', '后台队列'), value: 88, icon: <ApiOutlined /> },
   ],
   recent: [
-    { label: t('workbench.recent.users', '管理员用户'), path: '/organization/users' },
+    { label: t('workbench.recent.users', '成员管理'), path: '/organization/users' },
     { label: t('workbench.recent.loading', '加载态展示'), path: '/examples/loading' },
     {
       label: t('workbench.recent.multilevel', '多级菜单'),

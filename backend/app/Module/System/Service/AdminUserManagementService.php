@@ -7,12 +7,17 @@ namespace App\Module\System\Service;
 use App\Foundation\Pagination\PageResult;
 use App\Foundation\Query\AdminQuery;
 use App\Foundation\Service\AbstractService;
+use App\Foundation\Database\AfterCommitCallbacks;
 use App\Foundation\Support\Password;
+use App\Module\System\Event\AdminUserCreated;
+use App\Module\System\Event\AdminUserDeleted;
+use App\Module\System\Event\AdminUserUpdated;
 use App\Module\System\Model\AdminUser;
 use App\Module\System\Repository\AdminDepartmentRepository;
 use App\Module\System\Repository\AdminRoleRepository;
 use App\Module\System\Repository\AdminUserRepository;
 use Hyperf\DbConnection\Db;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use TrueAdmin\Kernel\Constant\ErrorCode;
 use TrueAdmin\Kernel\Exception\BusinessException;
 
@@ -22,6 +27,8 @@ final class AdminUserManagementService extends AbstractService
         private readonly AdminUserRepository $users,
         private readonly AdminRoleRepository $roles,
         private readonly AdminDepartmentRepository $departments,
+        private readonly EventDispatcherInterface $dispatcher,
+        private readonly AfterCommitCallbacks $afterCommit,
     ) {
     }
 
@@ -54,6 +61,14 @@ final class AdminUserManagementService extends AbstractService
 
             $this->users->syncRoles($user, $this->roleIds($payload['roleIds'] ?? []));
             $this->users->syncDepartments($user, $departmentIds, $primaryDeptId);
+            $user = $this->users->findById((int) $user->getAttribute('id')) ?? $user;
+            $this->dispatchAfterCommit(new AdminUserCreated(
+                userId: (int) $user->getAttribute('id'),
+                user: $this->eventUser($user),
+                roleIds: $this->users->roleIds($user),
+                departmentIds: $this->users->departmentIds($user),
+                primaryDepartmentId: $user->getAttribute('primary_dept_id') === null ? null : (int) $user->getAttribute('primary_dept_id'),
+            ));
 
             return $this->detail((int) $user->getAttribute('id'));
         });
@@ -63,6 +78,7 @@ final class AdminUserManagementService extends AbstractService
     {
         return Db::transaction(function () use ($id, $payload): array {
             $user = $this->mustFindWithDataPolicy($id);
+            $before = $this->eventUser($user);
             $username = (string) $payload['username'];
             $this->assertUnique($this->users->existsUsername($username, $id), 'username');
 
@@ -93,6 +109,15 @@ final class AdminUserManagementService extends AbstractService
             if ($hasDepartmentPayload) {
                 $this->users->syncDepartments($user, $departmentIds, $primaryDeptId);
             }
+            $user = $this->users->findById((int) $user->getAttribute('id')) ?? $user;
+            $this->dispatchAfterCommit(new AdminUserUpdated(
+                userId: (int) $user->getAttribute('id'),
+                user: $this->eventUser($user),
+                before: $before,
+                roleIds: $this->users->roleIds($user),
+                departmentIds: $this->users->departmentIds($user),
+                primaryDepartmentId: $user->getAttribute('primary_dept_id') === null ? null : (int) $user->getAttribute('primary_dept_id'),
+            ));
 
             return $this->detail((int) $user->getAttribute('id'));
         });
@@ -106,7 +131,16 @@ final class AdminUserManagementService extends AbstractService
                 throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['reason' => 'cannot_delete_builtin_admin']);
             }
 
+            $event = new AdminUserDeleted(
+                userId: (int) $user->getAttribute('id'),
+                user: $this->eventUser($user),
+                roleIds: $this->users->roleIds($user),
+                departmentIds: $this->users->departmentIds($user),
+                primaryDepartmentId: $user->getAttribute('primary_dept_id') === null ? null : (int) $user->getAttribute('primary_dept_id'),
+            );
+
             $this->users->delete($user);
+            $this->dispatchAfterCommit($event);
         });
     }
 
@@ -187,5 +221,24 @@ final class AdminUserManagementService extends AbstractService
         }
 
         return $primaryDeptId;
+    }
+
+    private function dispatchAfterCommit(object $event): void
+    {
+        $this->afterCommit->run(fn () => $this->dispatcher->dispatch($event));
+    }
+
+    /** @return array<string, mixed> */
+    private function eventUser(AdminUser $user): array
+    {
+        return [
+            'id' => (int) $user->getAttribute('id'),
+            'username' => (string) $user->getAttribute('username'),
+            'nickname' => (string) $user->getAttribute('nickname'),
+            'status' => (string) $user->getAttribute('status'),
+            'primaryDeptId' => $user->getAttribute('primary_dept_id') === null ? null : (int) $user->getAttribute('primary_dept_id'),
+            'createdAt' => (string) $user->getAttribute('created_at'),
+            'updatedAt' => (string) $user->getAttribute('updated_at'),
+        ];
     }
 }
