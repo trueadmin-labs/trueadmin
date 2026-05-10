@@ -33,6 +33,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type WheelEvent,
 } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { TrueAdminIcon } from '@/core/icon/TrueAdminIcon';
@@ -84,6 +85,18 @@ const sameGroupCollisionDetection: CollisionDetection = (args) => {
 const normalizePath = (path: string) => path.replace(/\/+$/, '') || '/';
 
 const isSamePath = (left: string, right: string) => normalizePath(left) === normalizePath(right);
+
+const toPixelDelta = (event: WheelEvent<HTMLElement>) => {
+  if (event.deltaMode === 1) {
+    return event.deltaY * 16;
+  }
+
+  if (event.deltaMode === 2) {
+    return event.deltaY * event.currentTarget.clientWidth;
+  }
+
+  return event.deltaY;
+};
 
 const getNextTabAfterClose = (tabs: AppTab[], key: string) => {
   const index = tabs.findIndex((tab) => tab.key === key);
@@ -671,6 +684,23 @@ export function AppTabsBar({ activeKey }: { activeKey?: string }) {
     }
   };
 
+  const handleTabsWheel = (event: WheelEvent<HTMLUListElement>) => {
+    const target = event.currentTarget;
+    const maxScrollLeft = target.scrollWidth - target.clientWidth;
+    if (maxScrollLeft <= 0 || event.deltaY === 0) {
+      return;
+    }
+
+    const delta = toPixelDelta(event);
+    const nextScrollLeft = Math.max(0, Math.min(maxScrollLeft, target.scrollLeft + delta));
+    if (nextScrollLeft === target.scrollLeft) {
+      return;
+    }
+
+    event.preventDefault();
+    target.scrollLeft = nextScrollLeft;
+  };
+
   const handleDragEnd = ({ active, delta, over }: DragEndEvent) => {
     const activeKey = String(active.id);
     const playBack = () => playDropBackAnimation(scrollRef, activeKey, delta.x);
@@ -713,7 +743,7 @@ export function AppTabsBar({ activeKey }: { activeKey?: string }) {
         modifiers={[restrictToHorizontalAxis]}
         onDragEnd={handleDragEnd}
       >
-        <ul ref={scrollRef} className="trueadmin-tabs-scroll">
+        <ul ref={scrollRef} className="trueadmin-tabs-scroll" onWheel={handleTabsWheel}>
           <SortableTabGroup
             activeKey={activeKey}
             closingTabs={closingTabs}

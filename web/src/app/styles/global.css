@@ -20,6 +20,7 @@
   --trueadmin-shell-dark-sider-bg: #000;
   --trueadmin-shell-dark-submenu-bg: transparent;
   --trueadmin-shell-dark-border: rgba(255, 255, 255, 0.12);
+  --trueadmin-modal-viewport-gap: 24px;
 }
 
 html,
@@ -3475,6 +3476,40 @@ body,
 
 .trueadmin-modal-render-root {
   position: relative;
+}
+
+.trueadmin-modal-wrap:not(.is-fullscreen) {
+  padding-block: var(--trueadmin-modal-viewport-gap);
+}
+
+.trueadmin-modal-wrap:not(.is-fullscreen) .trueadmin-modal.ant-modal {
+  top: 0;
+  padding-bottom: 0;
+}
+
+.trueadmin-modal-wrap:not(.is-fullscreen) .trueadmin-modal.ant-modal:not(.ant-modal-centered) {
+  margin-block: 0;
+}
+
+.trueadmin-modal-wrap:not(.is-fullscreen) .trueadmin-modal .trueadmin-modal-render-root,
+.trueadmin-modal-wrap:not(.is-fullscreen) .trueadmin-modal .ant-modal-content {
+  max-height: calc(100vh - var(--trueadmin-modal-viewport-gap) * 2);
+}
+
+.trueadmin-modal-wrap:not(.is-fullscreen) .trueadmin-modal .ant-modal-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.trueadmin-modal-wrap:not(.is-fullscreen) .trueadmin-modal .ant-modal-header,
+.trueadmin-modal-wrap:not(.is-fullscreen) .trueadmin-modal .ant-modal-footer {
+  flex: 0 0 auto;
+}
+
+.trueadmin-modal-wrap:not(.is-fullscreen) .trueadmin-modal .ant-modal-body {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: auto;
 }
 
 .trueadmin-modal.is-fullscreen .ant-modal-render,

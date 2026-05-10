@@ -97,6 +97,7 @@ export function TrueAdminModal({
   scrollShadowProps,
   style,
   styles,
+  wrapClassName,
   ...modalProps
 }: TrueAdminModalProps) {
   const { t } = useI18n();
@@ -114,6 +115,13 @@ export function TrueAdminModal({
     ...style,
   } as CSSProperties;
   const modalStyles = mergeModalStyles(styles, bodyPadding);
+  const modalWrapClassName = [
+    'trueadmin-modal-wrap',
+    mergedFullscreen ? 'is-fullscreen' : '',
+    wrapClassName,
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   const setMergedFullscreen = useCallback(
     (nextFullscreen: boolean) => {
@@ -216,6 +224,7 @@ export function TrueAdminModal({
       style={modalStyle}
       styles={modalStyles}
       width={mergedFullscreen ? '100%' : modalProps.width}
+      wrapClassName={modalWrapClassName}
     >
       {bodyNode}
     </Modal>
