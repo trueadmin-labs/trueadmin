@@ -52,10 +52,7 @@ final class SystemSeeder extends Seeder
         Db::table('admin_roles')->updateOrInsert(
             ['code' => 'super-admin'],
             [
-                'parent_id' => 0,
                 'name' => '超级管理员',
-                'level' => 1,
-                'path' => '',
                 'sort' => 0,
                 'status' => 'enabled',
                 'updated_at' => $now,

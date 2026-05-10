@@ -1,5 +1,5 @@
 import { DatabaseOutlined, PlusOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
-import type { TreeProps, TreeSelectProps } from 'antd';
+import type { TreeProps } from 'antd';
 import {
   App,
   Button,
@@ -15,12 +15,11 @@ import {
   TreeSelect,
   Typography,
 } from 'antd';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { TrueAdminCrudPage } from '@/core/crud';
 import type {
   CrudColumns,
   CrudFilterSchema,
-  CrudListParams,
   CrudService,
   CrudTableAction,
 } from '@/core/crud/types';
@@ -41,8 +40,6 @@ import type {
 
 type RoleFormValues = AdminRolePayload;
 
-const ROOT_PARENT_ID = 0;
-
 type DataPolicyFormValues = {
   policies: Record<string, AdminRoleDataPolicyScope>;
   customDepartments: Record<string, number[]>;
@@ -55,44 +52,12 @@ type DataPolicyItem = {
   strategy: string;
 };
 
-const flattenRoles = (roles: AdminRole[]): AdminRole[] =>
-  roles.flatMap((role) => [role, ...flattenRoles(role.children ?? [])]);
-
-const toPageResult = (items: AdminRole[], params: CrudListParams) => {
-  const total = flattenRoles(items).length;
-
-  return {
-    items,
-    total,
-    page: Number(params.page ?? 1),
-    pageSize: Number(params.pageSize ?? (total || 20)),
-  };
-};
-
-const roleTreeService: CrudService<AdminRole, AdminRolePayload, AdminRolePayload> = {
-  list: async (params) => toPageResult(await roleApi.tree(params), params),
+const roleService: CrudService<AdminRole, AdminRolePayload, AdminRolePayload> = {
+  list: roleApi.list,
   create: roleApi.create,
   update: roleApi.update,
   delete: roleApi.delete,
 };
-
-const toRoleTreeSelectData = (
-  roles: AdminRole[],
-  disabledId?: number,
-  ancestorDisabled = false,
-): TreeSelectProps['treeData'] =>
-  roles.map((role) => {
-    const disabled = ancestorDisabled || role.id === disabledId;
-    return {
-      title: role.name,
-      value: role.id,
-      key: role.id,
-      disabled,
-      children: role.children
-        ? toRoleTreeSelectData(role.children, disabledId, disabled)
-        : undefined,
-    };
-  });
 
 const toMenuTreeData = (menus: AdminMenu[]): TreeProps['treeData'] =>
   menus.map((menu) => ({
@@ -184,7 +149,6 @@ export default function AdminRolesPage() {
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [editing, setEditing] = useState<AdminRole>();
-  const [roleTree, setRoleTree] = useState<AdminRole[]>([]);
   const [menuTree, setMenuTree] = useState<AdminMenu[]>([]);
   const [departmentTree, setDepartmentTree] = useState<DepartmentTreeNode[]>([]);
   const [dataPolicyMetadata, setDataPolicyMetadata] = useState<DataPolicyMetadata>();
@@ -202,10 +166,6 @@ export default function AdminRolesPage() {
     [t],
   );
 
-  const loadRoleTree = async () => {
-    setRoleTree(await roleApi.tree());
-  };
-
   const loadDataPolicyMetadata = async () => {
     const metadata = await roleApi.dataPolicyMetadata();
     setDataPolicyMetadata(metadata);
@@ -213,13 +173,9 @@ export default function AdminRolesPage() {
     return metadata;
   };
 
-  useEffect(() => {
-    void loadRoleTree();
-  }, []);
-
   const openCreate = () => {
     setEditing(undefined);
-    form.setFieldsValue({ parentId: ROOT_PARENT_ID, sort: 0, status: 'enabled' });
+    form.setFieldsValue({ sort: 0, status: 'enabled' });
     setOpen(true);
   };
 
@@ -228,7 +184,6 @@ export default function AdminRolesPage() {
     form.setFieldsValue({
       code: record.code,
       name: record.name,
-      parentId: record.parentId,
       sort: record.sort,
       status: record.status,
     });
@@ -268,7 +223,6 @@ export default function AdminRolesPage() {
       { title: 'ID', dataIndex: 'id', width: 88, sorter: true },
       { title: t('system.roles.column.name', '角色名称'), dataIndex: 'name', width: 220 },
       { title: t('system.roles.column.code', '角色编码'), dataIndex: 'code', width: 220 },
-      { title: t('system.roles.column.level', '层级'), dataIndex: 'level', width: 90 },
       { title: t('system.roles.column.sort', '排序'), dataIndex: 'sort', width: 90, sorter: true },
       {
         title: t('system.roles.column.status', '状态'),
@@ -299,18 +253,6 @@ export default function AdminRolesPage() {
     [statusText, t],
   );
 
-  const parentTreeData = useMemo<TreeSelectProps['treeData']>(
-    () => [
-      {
-        title: t('system.common.rootNode', '根节点'),
-        value: ROOT_PARENT_ID,
-        key: ROOT_PARENT_ID,
-        children: toRoleTreeSelectData(roleTree, editing?.id),
-      },
-    ],
-    [editing?.id, roleTree, t],
-  );
-
   const menuTreeData = useMemo(() => toMenuTreeData(menuTree), [menuTree]);
   const departmentTreeData = useMemo(() => toDepartmentTreeData(departmentTree), [departmentTree]);
   const dataPolicyStrategyMap = useMemo(
@@ -329,7 +271,6 @@ export default function AdminRolesPage() {
         await action.create?.(values);
         message.success(t('system.roles.success.create', '角色已创建'));
       }
-      await loadRoleTree();
       closeForm();
     } finally {
       setSubmitting(false);
@@ -363,12 +304,12 @@ export default function AdminRolesPage() {
       title={t('system.roles.title', '角色管理')}
       description={t(
         'system.roles.description',
-        '维护后台角色和权限范围，角色层级仅用于管理边界。',
+        '维护后台角色、功能权限和数据权限。角色是平铺的权限集合，不表达组织层级。',
       )}
       resource="system.role"
       rowKey="id"
       columns={columns}
-      service={roleTreeService}
+      service={roleService}
       quickSearch={{
         placeholder: t('system.roles.quickSearch.placeholder', '搜索角色名称 / 编码'),
       }}
@@ -434,23 +375,8 @@ export default function AdminRolesPage() {
             <Form<RoleFormValues>
               form={form}
               layout="vertical"
-              initialValues={{ parentId: ROOT_PARENT_ID, sort: 0, status: 'enabled' }}
+              initialValues={{ sort: 0, status: 'enabled' }}
             >
-              <Form.Item
-                label={t('system.roles.form.parentId', '上级角色')}
-                name="parentId"
-                extra={t(
-                  'system.roles.form.parentId.extra',
-                  '上级角色用于限制子角色权限范围，不表示用户归属继承。',
-                )}
-              >
-                <TreeSelect
-                  treeData={parentTreeData}
-                  treeDefaultExpandAll
-                  showSearch
-                  treeNodeFilterProp="title"
-                />
-              </Form.Item>
               <Form.Item
                 label={t('system.roles.form.name', '角色名称')}
                 name="name"
@@ -518,7 +444,7 @@ export default function AdminRolesPage() {
                       <Typography.Text type="secondary">
                         {t(
                           'system.roles.authorize.description',
-                          '勾选该角色可访问的目录、菜单和按钮权限。子角色不能超出父角色权限范围。',
+                          '勾选该角色可访问的目录、菜单和按钮权限。角色之间不继承权限。',
                         )}
                       </Typography.Text>
                       <Tree

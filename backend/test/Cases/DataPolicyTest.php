@@ -49,11 +49,11 @@ final class DataPolicyTest extends TestCase
         $userB = $this->createUser('dp-b-' . $suffix, $deptB, 999001);
         $userC = $this->createUser('dp-c-' . $suffix, $deptC, 999002);
 
-        $this->assertVisibleUserIds(['all' => []], $actorId, $deptA, [$userA, $userB, $userC]);
-        $this->assertVisibleUserIds(['self' => []], $actorId, $deptA, [$userA]);
-        $this->assertVisibleUserIds(['department' => []], $actorId, $deptA, [$userA]);
-        $this->assertVisibleUserIds(['department_and_children' => []], $actorId, $deptA, [$userA, $userB]);
-        $this->assertVisibleUserIds(['custom_departments' => ['deptIds' => [$deptC]]], $actorId, $deptA, [$userC]);
+        $this->assertVisibleUserIds(['all' => []], $actorId, $deptA, $suffix, [$userA, $userB, $userC]);
+        $this->assertVisibleUserIds(['self' => []], $actorId, $deptA, $suffix, [$userA]);
+        $this->assertVisibleUserIds(['department' => []], $actorId, $deptA, $suffix, [$userA]);
+        $this->assertVisibleUserIds(['department_and_children' => []], $actorId, $deptA, $suffix, [$userA, $userB]);
+        $this->assertVisibleUserIds(['custom_departments' => ['deptIds' => [$deptC]]], $actorId, $deptA, $suffix, [$userC]);
     }
 
     public function testRegisteredResourceWithoutPolicyDenies(): void
@@ -136,11 +136,29 @@ final class DataPolicyTest extends TestCase
         $repository->assertIdsAllowedForAction([$allowedUserId, $deniedUserId], 'delete');
     }
 
+    public function testRoleDataPoliciesAreIndependentFlatAssignments(): void
+    {
+        $suffix = str_replace('.', '', uniqid('dp-flat', true));
+        $narrowRoleId = $this->createRole('dp-flat-narrow-' . $suffix);
+        $broadRoleId = $this->createRole('dp-flat-broad-' . $suffix);
+        $this->createPolicy($narrowRoleId, 'list', 'self');
+        $this->createPolicy($broadRoleId, 'list', 'all');
+
+        $rules = Db::table('admin_role_data_policies')
+            ->whereIn('role_id', [$narrowRoleId, $broadRoleId])
+            ->orderBy('role_id')
+            ->pluck('scope', 'role_id')
+            ->all();
+
+        $this->assertSame('self', $rules[$narrowRoleId] ?? null);
+        $this->assertSame('all', $rules[$broadRoleId] ?? null);
+    }
+
     /**
      * @param array<string, array<string, mixed>> $scopeConfig
      * @param list<int> $expectedIds
      */
-    private function assertVisibleUserIds(array $scopeConfig, int $actorId, int $operationDeptId, array $expectedIds): void
+    private function assertVisibleUserIds(array $scopeConfig, int $actorId, int $operationDeptId, string $suffix, array $expectedIds): void
     {
         $scope = array_key_first($scopeConfig);
         $config = $scopeConfig[$scope];
@@ -148,7 +166,7 @@ final class DataPolicyTest extends TestCase
         $this->createPolicy($roleId, 'list', $scope, $config);
         ActorContext::set(ActorFactory::fromAdmin($actorId, 'dp-actor', 'DP Actor', ['dp-role'], [$roleId], [], $operationDeptId, [$operationDeptId]));
 
-        $result = $this->container()->get(AdminUserRepository::class)->paginate(new AdminQuery(page: 1, pageSize: 50));
+        $result = $this->container()->get(AdminUserRepository::class)->paginate(new AdminQuery(page: 1, pageSize: 50, keyword: $suffix));
         $ids = array_column($result->items, 'id');
 
         foreach ($expectedIds as $expectedId) {
@@ -179,11 +197,8 @@ final class DataPolicyTest extends TestCase
     {
         $now = date('Y-m-d H:i:s');
         return (int) Db::table('admin_roles')->insertGetId([
-            'parent_id' => 0,
             'code' => $code,
             'name' => $code,
-            'level' => 1,
-            'path' => '',
             'sort' => 0,
             'status' => 'enabled',
             'created_at' => $now,

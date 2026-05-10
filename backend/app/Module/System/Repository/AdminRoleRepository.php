@@ -18,16 +18,14 @@ final class AdminRoleRepository extends AbstractRepository
 
     protected array $filterable = [
         'id' => ['=', 'in'],
-        'parent_id' => ['=', 'in'],
         'code' => ['=', 'like'],
         'name' => ['=', 'like'],
-        'level' => ['=', 'in', '>=', '<='],
         'status' => ['=', 'in'],
     ];
 
-    protected array $sortable = ['id', 'level', 'sort', 'created_at', 'updated_at'];
+    protected array $sortable = ['id', 'sort', 'created_at', 'updated_at'];
 
-    protected array $defaultSort = ['level' => 'asc', 'sort' => 'asc', 'id' => 'asc'];
+    protected array $defaultSort = ['sort' => 'asc', 'id' => 'asc'];
 
     public function paginate(AdminQuery $adminQuery): PageResult
     {
@@ -79,7 +77,6 @@ final class AdminRoleRepository extends AbstractRepository
     public function delete(AdminRole $role): void
     {
         $roleId = (int) $role->getAttribute('id');
-        AdminRole::query()->where('parent_id', $roleId)->update(['parent_id' => 0, 'level' => 1, 'path' => '']);
         Db::table('admin_role_data_policies')->where('role_id', $roleId)->delete();
         Db::table('admin_role_menu')->where('role_id', $roleId)->delete();
         Db::table('admin_role_user')->where('role_id', $roleId)->delete();
@@ -103,11 +100,6 @@ final class AdminRoleRepository extends AbstractRepository
         return $this->pivotIds('admin_role_menu', 'role_id', (int) $role->getAttribute('id'), 'menu_id');
     }
 
-    public function childCount(int $roleId): int
-    {
-        return (int) AdminRole::query()->where('parent_id', $roleId)->count();
-    }
-
     /**
      * @return list<int>
      */
@@ -123,7 +115,6 @@ final class AdminRoleRepository extends AbstractRepository
     {
         return AdminRole::query()
             ->where('status', 'enabled')
-            ->orderBy('level')
             ->orderBy('sort')
             ->orderBy('id')
             ->get()
@@ -155,11 +146,8 @@ final class AdminRoleRepository extends AbstractRepository
     {
         return [
             'id' => (int) $role->getAttribute('id'),
-            'parentId' => (int) $role->getAttribute('parent_id'),
             'code' => (string) $role->getAttribute('code'),
             'name' => (string) $role->getAttribute('name'),
-            'level' => (int) $role->getAttribute('level'),
-            'path' => (string) $role->getAttribute('path'),
             'sort' => (int) $role->getAttribute('sort'),
             'status' => (string) $role->getAttribute('status'),
         ];

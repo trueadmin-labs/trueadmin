@@ -58,16 +58,16 @@ admin_user_departments.is_primary
 
 `admin_departments` 使用树形结构维护组织部门；`primary_dept_id` 是默认操作部门；`admin_user_departments` 是所属部门集合。迁移应保证一个用户最多一个主部门，且主部门必须属于该用户所属部门集合。PostgreSQL 和 MySQL 对部分唯一索引能力不同，第一版可以在 Service 层保证一致性，数据库层保留普通索引和唯一组合索引。
 
-角色按层级结构预留授权边界字段：
+角色使用平铺结构：
 
 ```text
-admin_roles.parent_id
-admin_roles.level
-admin_roles.path
+admin_roles.code
+admin_roles.name
 admin_roles.sort
+admin_roles.status
 ```
 
-`parent_id` 指向父角色，`level` 便于排序和查询，`path` 存储祖先链，例如 `,1,8,23,`，用于快速判断角色树关系。迁移层只负责字段和索引，是否允许移动、是否越权授权、子角色权限是否超过父角色，必须在 `Module/System` 的 Service 层校验。
+角色不保存父子级关系，不负责表达组织层级、岗位上下级或权限继承。菜单/按钮权限通过 `admin_role_menu` 显式绑定，数据权限通过 `admin_role_data_policies` 显式绑定；授权边界由业务策略或当前 operator 的有效权限校验承载。
 
 第一版内置用户端基础账号表 `client_users`，归属 `Module/System`，只承载认证主体和轻量展示字段。项目需要会员、客户等业务资料时，再按业务语义新增 `Member`、`Customer` 或其他模块，并通过 `client_user_id` 关联 `client_users`；用户端认证入口仍归属 `Module/Auth/Http/Client`，不要新增泛化 `Module/User`。
 

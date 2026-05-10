@@ -1373,35 +1373,6 @@
                 ]
             }
         },
-        "/api/admin/organization/roles/tree": {
-            "get": {
-                "operationId": "App_Module_System_Http_Admin_Controller_AdminRoleController_tree",
-                "summary": "角色树",
-                "description": "",
-                "tags": [
-                    "系统管理"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                },
-                "x-trueadmin": {
-                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\AdminRoleController@tree",
-                    "permission": "system:role:list",
-                    "permissionMode": "single",
-                    "permissions": [
-                        "system:role:list"
-                    ],
-                    "public": false
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
         "/api/admin/organization/roles/{id}": {
             "delete": {
                 "operationId": "App_Module_System_Http_Admin_Controller_AdminRoleController_delete",

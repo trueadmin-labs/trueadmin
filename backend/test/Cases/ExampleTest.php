@@ -105,8 +105,6 @@ class ExampleTest extends TestCase
         $adminPrimaryDeptId = (int) \Hyperf\DbConnection\Db::table('admin_users')
             ->where('username', 'admin')
             ->value('primary_dept_id');
-        $superAdminRoleId = (int) \Hyperf\DbConnection\Db::table('admin_roles')->where('code', 'super-admin')->value('id');
-
         $deptA = $this->json('/api/admin/organization/departments', [
             'code' => 'test-dept-a-' . $suffix,
             'name' => '测试部门A' . $suffix,
@@ -153,18 +151,18 @@ class ExampleTest extends TestCase
         $role = $this->json('/api/admin/organization/roles', [
             'code' => 'test-role-' . $suffix,
             'name' => '测试角色' . $suffix,
-            'parentId' => $superAdminRoleId,
             'sort' => 10,
             'status' => 'enabled',
             'menuIds' => [$menu['data']['id']],
         ], $headers);
         $this->assertSame('SUCCESS', $role['code']);
-        $this->assertSame($superAdminRoleId, $role['data']['parentId']);
-        $this->assertSame(2, $role['data']['level']);
+        $this->assertArrayNotHasKey('parentId', $role['data']);
+        $this->assertArrayNotHasKey('level', $role['data']);
+        $this->assertArrayNotHasKey('path', $role['data']);
         $this->assertContains($menu['data']['id'], $role['data']['menuIds']);
 
-        $menuOutsideParent = $this->json('/api/admin/system-config/menus', [
-            'name' => '父角色外链接' . $suffix,
+        $secondMenu = $this->json('/api/admin/system-config/menus', [
+            'name' => '独立角色链接' . $suffix,
             'permission' => 'test:' . $suffix . ':outside',
             'type' => 'link',
             'url' => 'https://example.com/tests/outside-' . $suffix,
@@ -172,44 +170,28 @@ class ExampleTest extends TestCase
             'sort' => 101,
             'status' => 'enabled',
         ], $headers);
-        $this->assertSame('SUCCESS', $menuOutsideParent['code']);
+        $this->assertSame('SUCCESS', $secondMenu['code']);
 
-        $childRoleDenied = $this->json('/api/admin/organization/roles', [
-            'code' => 'test-child-role-denied-' . $suffix,
-            'name' => '越权子角色' . $suffix,
-            'parentId' => $role['data']['id'],
+        $secondRole = $this->json('/api/admin/organization/roles', [
+            'code' => 'test-second-role-' . $suffix,
+            'name' => '独立角色' . $suffix,
+            'sort' => 11,
             'status' => 'enabled',
-            'menuIds' => [$menuOutsideParent['data']['id']],
+            'menuIds' => [$secondMenu['data']['id']],
         ], $headers);
-        $this->assertSame('KERNEL.REQUEST.VALIDATION_FAILED', $childRoleDenied['code']);
-
-        $childRole = $this->json('/api/admin/organization/roles', [
-            'code' => 'test-child-role-' . $suffix,
-            'name' => '子角色' . $suffix,
-            'parentId' => $role['data']['id'],
-            'status' => 'enabled',
-            'menuIds' => [$menu['data']['id']],
-        ], $headers);
-        $this->assertSame('SUCCESS', $childRole['code']);
-        $this->assertSame($role['data']['id'], $childRole['data']['parentId']);
-        $this->assertSame(3, $childRole['data']['level']);
-        $this->assertSame(rtrim((string) $role['data']['path'], ',') . ',' . $role['data']['id'] . ',', $childRole['data']['path']);
+        $this->assertSame('SUCCESS', $secondRole['code']);
+        $this->assertContains($secondMenu['data']['id'], $secondRole['data']['menuIds']);
 
         $roleOptions = $this->get('/api/admin/organization/roles/options', [], $headers);
         $this->assertSame('SUCCESS', $roleOptions['code']);
         $roleOptionIds = array_column($roleOptions['data'], 'id');
         $this->assertContains($role['data']['id'], $roleOptionIds);
-        $this->assertContains($childRole['data']['id'], $roleOptionIds);
+        $this->assertContains($secondRole['data']['id'], $roleOptionIds);
         $this->assertArrayNotHasKey('children', $roleOptions['data'][0]);
+        $this->assertArrayNotHasKey('parentId', $roleOptions['data'][0]);
         $this->assertArrayNotHasKey('parent_id', $roleOptions['data'][0]);
-
-        $roleTree = $this->get('/api/admin/organization/roles/tree', [], $headers);
-        $this->assertSame('SUCCESS', $roleTree['code']);
-        $treeParent = $this->findNodeById($roleTree['data'], $role['data']['id']);
-        $this->assertIsArray($treeParent);
-        $this->assertArrayHasKey('children', $treeParent);
-        $this->assertContains($childRole['data']['id'], array_column($treeParent['children'], 'id'));
-        $this->assertArrayNotHasKey('parent_id', $treeParent);
+        $this->assertArrayNotHasKey('level', $roleOptions['data'][0]);
+        $this->assertArrayNotHasKey('path', $roleOptions['data'][0]);
 
         $user = $this->json('/api/admin/organization/users', [
             'username' => 'test-user-' . $suffix,
@@ -315,8 +297,8 @@ class ExampleTest extends TestCase
         $deleteUser = $this->delete('/api/admin/organization/users/' . $user['data']['id'], [], $headers);
         $this->assertSame('SUCCESS', $deleteUser['code']);
 
-        $deleteChildRole = $this->delete('/api/admin/organization/roles/' . $childRole['data']['id'], [], $headers);
-        $this->assertSame('SUCCESS', $deleteChildRole['code']);
+        $deleteSecondRole = $this->delete('/api/admin/organization/roles/' . $secondRole['data']['id'], [], $headers);
+        $this->assertSame('SUCCESS', $deleteSecondRole['code']);
 
         $deleteRole = $this->delete('/api/admin/organization/roles/' . $role['data']['id'], [], $headers);
         $this->assertSame('SUCCESS', $deleteRole['code']);
@@ -324,8 +306,8 @@ class ExampleTest extends TestCase
         $deleteMenu = $this->delete('/api/admin/system-config/menus/' . $menu['data']['id'], [], $headers);
         $this->assertSame('SUCCESS', $deleteMenu['code']);
 
-        $deleteMenuOutsideParent = $this->delete('/api/admin/system-config/menus/' . $menuOutsideParent['data']['id'], [], $headers);
-        $this->assertSame('SUCCESS', $deleteMenuOutsideParent['code']);
+        $deleteSecondMenu = $this->delete('/api/admin/system-config/menus/' . $secondMenu['data']['id'], [], $headers);
+        $this->assertSame('SUCCESS', $deleteSecondMenu['code']);
 
         $deleteDeptB = $this->delete('/api/admin/organization/departments/' . $deptBId, [], $headers);
         $this->assertSame('SUCCESS', $deleteDeptB['code']);
@@ -464,24 +446,6 @@ class ExampleTest extends TestCase
         ]);
         $this->assertSame('SUCCESS', $all['code']);
         $this->assertSame('allOf', $all['data']['mode']);
-    }
-
-
-    private function findNodeById(array $nodes, int $id): ?array
-    {
-        foreach ($nodes as $node) {
-            if ((int) ($node['id'] ?? 0) === $id) {
-                return $node;
-            }
-            if (isset($node['children']) && is_array($node['children'])) {
-                $found = $this->findNodeById($node['children'], $id);
-                if ($found !== null) {
-                    return $found;
-                }
-            }
-        }
-
-        return null;
     }
 
     private function loginAsAdmin()

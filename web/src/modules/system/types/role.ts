@@ -50,20 +50,15 @@ export type DataPolicyMetadata = {
 
 export type AdminRole = {
   id: number;
-  parentId: number;
   code: string;
   name: string;
-  level: number;
-  path: string;
   sort: number;
   status: AdminRoleStatus;
   menuIds?: number[];
   dataPolicies?: AdminRoleDataPolicy[];
-  children?: AdminRole[];
 };
 
 export type AdminRolePayload = {
-  parentId?: number;
   code: string;
   name: string;
   sort?: number;

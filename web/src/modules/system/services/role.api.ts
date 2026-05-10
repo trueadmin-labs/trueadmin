@@ -11,17 +11,10 @@ import type {
 
 export type AdminRoleOption = {
   id: number;
-  parentId: number;
   code: string;
   name: string;
-  level: number;
-  path: string;
   sort: number;
   status: string;
-};
-
-export type AdminRoleTreeNode = AdminRoleOption & {
-  children?: AdminRoleTreeNode[];
 };
 
 type RoleListResponse<TRole> = TRole[] | ApiEnvelope<TRole[]>;
@@ -58,10 +51,6 @@ const roleListMethod = <TRole>(url: string, params?: CrudListParams) =>
 export const roleApi = {
   list: (params: CrudListParams) =>
     http.Get<PageResult<AdminRole>>('/admin/organization/roles', { params }).send(),
-  tree: async (params?: CrudListParams) =>
-    unwrapRoleList<AdminRole>(
-      await roleListMethod<AdminRole>('/admin/organization/roles/tree', params).send(),
-    ),
   options: async () =>
     unwrapRoleList<AdminRoleOption>(
       await roleListMethod<AdminRoleOption>('/admin/organization/roles/options').send(),

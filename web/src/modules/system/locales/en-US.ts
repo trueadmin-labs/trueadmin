@@ -38,18 +38,14 @@ export default {
   'system.departments.deleteSuccess': 'Department deleted',
   'system.roles.title': 'Role Management',
   'system.roles.description':
-    'Maintain admin roles and permission scopes. Role hierarchy is only a management boundary.',
+    'Maintain admin roles, feature permissions, and data policies. Roles are flat permission sets, not organization hierarchy.',
   'system.roles.quickSearch.placeholder': 'Search role name / code',
   'system.roles.action.create': 'Create Role',
   'system.roles.action.authorize': 'Authorize',
   'system.roles.column.name': 'Role Name',
   'system.roles.column.code': 'Role Code',
-  'system.roles.column.level': 'Level',
   'system.roles.column.sort': 'Sort',
   'system.roles.column.status': 'Status',
-  'system.roles.form.parentId': 'Parent Role',
-  'system.roles.form.parentId.extra':
-    'The parent role limits child role permissions. It does not imply user membership inheritance.',
   'system.roles.form.name': 'Role Name',
   'system.roles.form.code': 'Role Code',
   'system.roles.form.sort': 'Sort',
@@ -61,7 +57,7 @@ export default {
   'system.roles.modal.authorize': 'Role Authorization',
   'system.roles.modal.authorizeWithName': 'Role Authorization - {{name}}',
   'system.roles.authorize.description':
-    'Select directories, menus, and button permissions this role can access. Child roles cannot exceed the parent role permission scope.',
+    'Select directories, menus, and button permissions this role can access. Roles do not inherit permissions from each other.',
   'system.roles.success.create': 'Role created',
   'system.roles.success.update': 'Role saved',
   'system.roles.success.authorize': 'Role permissions saved',
