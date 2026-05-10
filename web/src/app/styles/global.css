@@ -1727,16 +1727,10 @@ body,
 }
 
 .trueadmin-role-authorize-tree-toolbar {
-  position: sticky;
-  top: 0;
-  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 0 0 8px;
-  border-bottom: 1px solid var(--ant-color-border-secondary);
-  background: var(--ant-color-bg-container);
 }
 
 .trueadmin-role-authorize-tree-label {
