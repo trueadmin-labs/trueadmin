@@ -1,14 +1,8 @@
-import { PlusOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
-import { App, Button, Form, Space, Tag } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
+import { App, Button, Form } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
-import { TrueAdminConfirmAction } from '@/core/action';
 import { TrueAdminCrudPage } from '@/core/crud';
-import type {
-  CrudColumns,
-  CrudFilterSchema,
-  CrudService,
-  CrudTableAction,
-} from '@/core/crud/types';
+import type { CrudService, CrudTableAction } from '@/core/crud/types';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { departmentApi } from '../../services/department.api';
 import { menuApi } from '../../services/menu.api';
@@ -18,6 +12,8 @@ import type { AdminMenu } from '../../types/menu';
 import type { AdminRole, AdminRolePayload, DataPolicyMetadata } from '../../types/role';
 import { RoleAuthorizeModal } from './RoleAuthorizeModal';
 import { RoleFormModal } from './RoleFormModal';
+import { RoleRowActions } from './RoleRowActions';
+import { createRoleColumns } from './RoleTableColumns';
 import {
   type DataPolicyFormValues,
   getMenuTreeKeys,
@@ -28,6 +24,7 @@ import {
   toDepartmentTreeData,
   uniqueKeys,
 } from './roleAuthorization';
+import { createRoleFilters } from './rolePageModel';
 
 const roleService: CrudService<AdminRole, AdminRolePayload, AdminRolePayload> = {
   list: roleApi.list,
@@ -165,51 +162,9 @@ export default function AdminRolesPage() {
     };
   }, [authorizeOpen, pendingAuthorizeRole]);
 
-  const columns = useMemo<CrudColumns<AdminRole>>(
-    () => [
-      { title: 'ID', dataIndex: 'id', width: 88, sorter: true },
-      { title: t('system.roles.column.name', '角色名称'), dataIndex: 'name', width: 220 },
-      { title: t('system.roles.column.code', '角色编码'), dataIndex: 'code', width: 220 },
-      { title: t('system.roles.column.sort', '排序'), dataIndex: 'sort', width: 90, sorter: true },
-      {
-        title: t('system.roles.column.status', '状态'),
-        dataIndex: 'status',
-        width: 110,
-        render: (_, record) => (
-          <Tag color={record.status === 'enabled' ? 'success' : 'default'}>
-            {statusText[record.status]}
-          </Tag>
-        ),
-      },
-      {
-        title: t('system.roles.column.type', '类型'),
-        dataIndex: 'builtin',
-        width: 120,
-        render: (_, record) =>
-          isBuiltinRole(record) ? (
-            <Tag color="gold">{t('system.roles.type.builtin', '系统内置')}</Tag>
-          ) : (
-            <Tag>{t('system.roles.type.custom', '自定义')}</Tag>
-          ),
-      },
-    ],
-    [statusText, t],
-  );
+  const columns = useMemo(() => createRoleColumns({ statusText, t }), [statusText, t]);
 
-  const filters = useMemo<CrudFilterSchema[]>(
-    () => [
-      {
-        label: t('system.roles.column.status', '状态'),
-        name: 'status',
-        type: 'select',
-        options: [
-          { label: statusText.enabled, value: 'enabled' },
-          { label: statusText.disabled, value: 'disabled' },
-        ],
-      },
-    ],
-    [statusText, t],
-  );
+  const filters = useMemo(() => createRoleFilters({ statusText, t }), [statusText, t]);
 
   const departmentTreeData = useMemo(() => toDepartmentTreeData(departmentTree), [departmentTree]);
   const menuGroupKeysMap = useMemo(
@@ -296,38 +251,13 @@ export default function AdminRolesPage() {
         delete: false,
         width: 210,
         render: ({ action, record }) => (
-          <Space size={4} wrap>
-            <Button
-              disabled={isBuiltinRole(record)}
-              size="small"
-              type="link"
-              onClick={() => openEdit(record)}
-            >
-              {t('crud.action.edit', '编辑')}
-            </Button>
-            <Button
-              disabled={isBuiltinRole(record)}
-              size="small"
-              type="link"
-              icon={<SafetyCertificateOutlined />}
-              onClick={() => openAuthorize(record)}
-            >
-              {t('system.roles.action.authorize', '授权')}
-            </Button>
-            <TrueAdminConfirmAction
-              danger
-              disabled={isBuiltinRole(record)}
-              size="small"
-              type="link"
-              action={async () => {
-                await action.delete?.(record.id);
-              }}
-              confirm={t('system.roles.deleteConfirm', '确认删除该角色吗？')}
-              successMessage={t('system.roles.deleteSuccess', '角色已删除')}
-            >
-              {t('crud.action.delete', '删除')}
-            </TrueAdminConfirmAction>
-          </Space>
+          <RoleRowActions
+            action={action}
+            record={record}
+            t={t}
+            onEdit={openEdit}
+            onAuthorize={openAuthorize}
+          />
         ),
       }}
       locale={{
