@@ -2,9 +2,9 @@
 
 TrueAdmin 标准 CRUD 由 `TrueAdminCrudTable` 统一管理列表查询状态、快速搜索、复杂筛选、分页和排序；`TrueAdminCrudPage` 只负责页面级包装。列表状态由 URL 驱动，刷新页面、复制链接、标签页恢复时都应保持同一份列表状态。
 
-## URL 参数规则
+## 浏览器 URL 状态参数规则
 
-筛选字段使用自然字段名，系统参数使用 `_` 前缀：
+浏览器 URL 只保存前端列表状态，用于刷新页面、复制链接和标签页恢复；它不是后端接口查询协议。筛选字段使用页面自然字段名，系统状态参数使用 `_` 前缀，避免和业务筛选字段冲突：
 
 - `_page`：当前页
 - `_pageSize`：每页条数
@@ -68,9 +68,46 @@ TrueAdmin 标准 CRUD 由 `TrueAdminCrudTable` 统一管理列表查询状态、
 - 重置会清空快速搜索、复杂筛选、排序和页码。
 - 通过 toolbar 中的筛选按钮收起筛选面板时，未提交的临时编辑会丢弃，并恢复到当前 URL 中的已提交条件。
 
-## 请求参数
+## 接口请求参数
 
-默认情况下，请求参数沿用 URL 中的字符串格式。字段级 `transform` 可以额外添加或覆盖请求参数。
+`TrueAdminCrudTable` 会把浏览器 URL 状态转换成后端标准查询协议。前端 service 通过 `crudRequestOptions` / `@trueadmin/web-core/crud` 序列化为 bracket query，后端通过 `AdminQueryRequest` 读取。
+
+标准请求对象：
+
+```ts
+{
+  page: 1,
+  pageSize: 20,
+  keyword: 'chen',
+  filter: {
+    status: ['enabled', 'pending'],
+    createdAt: ['2026-01-01', '2026-01-31'],
+  },
+  op: {
+    status: 'in',
+    createdAt: 'between',
+  },
+  sort: 'createdAt',
+  order: 'desc',
+}
+```
+
+序列化后的接口查询：
+
+```text
+page=1&pageSize=20&keyword=chen&filter[status][]=enabled&filter[status][]=pending&op[status]=in&filter[createdAt][]=2026-01-01&filter[createdAt][]=2026-01-31&op[createdAt]=between&sort=createdAt&order=desc
+```
+
+默认映射规则：
+
+- `input`：`filter[field]=value`，默认 `op[field]` 为 `like`
+- 单选 `select`：`filter[field]=value`，默认 `op[field]` 为 `=`
+- 多选 `select`：`filter[field][]=...`，默认 `op[field]` 为 `in`
+- `dateRange`：`filter[field][]=start&filter[field][]=end`，默认 `op[field]` 为 `between`
+
+字段级 `operator` 可以覆盖默认操作符。字段级 `requestMode: 'param'` 可以把筛选值作为普通顶层参数传递。字段级 `requestName` 可以把前端字段名映射到后端字段名；设置 `requestName: false` 时，该字段不会自动进入请求参数。
+
+字段级 `transform` 可以完全接管该筛选项的请求参数，并额外添加或覆盖 `filter` / `op` / 顶层参数：
 
 ```tsx
 {
@@ -79,12 +116,15 @@ TrueAdmin 标准 CRUD 由 `TrueAdminCrudTable` 统一管理列表查询状态、
   type: 'dateRange',
   transform: ({ value }) => {
     const [start, end] = value.split(',');
-    return { createdAtStart: start, createdAtEnd: end };
+    return {
+      filter: { created_at: [start, end] },
+      op: { created_at: 'between' },
+    };
   },
 }
 ```
 
-分页和排序请求参数格式：
+分页和排序始终发送为后端标准字段：
 
 ```ts
 {
