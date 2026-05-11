@@ -1,8 +1,8 @@
 import { RedoOutlined } from '@ant-design/icons';
-import { App, Button, Collapse, Descriptions, Space, Statistic, Tag, Typography } from 'antd';
+import { App, Button, Space, Tag, Typography } from 'antd';
 import { useMemo, useState } from 'react';
 import { TrueAdminConfirmAction } from '@/core/action';
-import { TrueAdminCrudPage, TrueAdminCrudTable } from '@/core/crud';
+import { TrueAdminCrudPage } from '@/core/crud';
 import type {
   CrudColumns,
   CrudExtraQuerySchema,
@@ -11,14 +11,11 @@ import type {
 } from '@/core/crud/types';
 import { TrueAdminQuickFilter } from '@/core/filter/TrueAdminQuickFilter';
 import { useI18n } from '@/core/i18n/I18nProvider';
-import { TrueAdminMarkdown } from '@/core/markdown';
-import { TrueAdminModal } from '@/core/modal';
 import {
   type AdminMessageLevel,
   type AdminNotificationBatch,
   type AdminNotificationBatchListMeta,
   type AdminNotificationBatchStatus,
-  type AdminNotificationDelivery,
   type AdminNotificationDeliveryStatus,
   type AdminNotificationTargetType,
   adminNotificationManagementApi,
@@ -28,35 +25,9 @@ import {
   getRegisteredAdminMessageTypes,
   resolveAdminMessageLabel,
 } from '@/core/notification';
-import { TrueAdminAttachmentUpload } from '@/core/upload';
-
-const levelColor: Record<AdminMessageLevel, string> = {
-  error: 'error',
-  info: 'processing',
-  success: 'success',
-  warning: 'warning',
-};
-
-const batchStatusColor: Record<AdminNotificationBatchStatus, string> = {
-  completed: 'success',
-  failed: 'error',
-  partial_failed: 'warning',
-  sending: 'processing',
-};
-
-const deliveryStatusColor: Record<AdminNotificationDeliveryStatus, string> = {
-  failed: 'error',
-  pending: 'processing',
-  sent: 'success',
-  skipped: 'default',
-};
-
-const toPlainText = (value?: string) =>
-  value
-    ?.replace(/```[\s\S]*?```/g, ' ')
-    .replace(/[#>*_`\-[\]|()]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+import { DeliveryRecordsModal } from './DeliveryRecordsModal';
+import { NotificationDetailModal } from './NotificationDetailModal';
+import { batchStatusColor, levelColor, toPlainText } from './notificationManagementModel';
 
 export default function AdminNotificationManagementPage() {
   const { message } = App.useApp();
@@ -395,251 +366,5 @@ export default function AdminNotificationManagementPage() {
         }}
       />
     </>
-  );
-}
-
-type NotificationDetailModalProps = {
-  open: boolean;
-  batch?: AdminNotificationBatch;
-  statusText: Record<AdminNotificationBatchStatus, string>;
-  levelText: Record<AdminMessageLevel, string>;
-  targetTypeText: Record<AdminNotificationTargetType, string>;
-  onClose: () => void;
-  afterOpenChange?: (open: boolean) => void;
-};
-
-function NotificationDetailModal({
-  open,
-  batch,
-  statusText,
-  levelText,
-  targetTypeText,
-  onClose,
-  afterOpenChange,
-}: NotificationDetailModalProps) {
-  const { t } = useI18n();
-  const typeConfig = batch ? getAdminMessageTypeConfig(batch.type) : undefined;
-  return (
-    <TrueAdminModal
-      destroyOnHidden
-      open={open}
-      title={batch?.title ?? ''}
-      width={920}
-      footer={<Button onClick={onClose}>{t('modal.action.close', '关闭')}</Button>}
-      onCancel={onClose}
-      afterOpenChange={afterOpenChange}
-    >
-      {batch && typeConfig ? (
-        <Space orientation="vertical" size={16} style={{ width: '100%' }}>
-          <Space size={8} wrap>
-            <Tag color={batchStatusColor[batch.status]}>{statusText[batch.status]}</Tag>
-            <Tag color={typeConfig.color}>
-              {resolveAdminMessageLabel(typeConfig.label, t, batch.type)}
-            </Tag>
-            <Tag color={levelColor[batch.level]}>{levelText[batch.level]}</Tag>
-          </Space>
-          <Descriptions size="small" column={{ xs: 1, md: 2 }}>
-            <Descriptions.Item label={t('notification.detail.source', '来源')}>
-              {resolveAdminMessageLabel(
-                getAdminMessageSourceConfig(batch.source)?.label,
-                t,
-                batch.source,
-              )}
-            </Descriptions.Item>
-            <Descriptions.Item label={t('system.notificationManagement.column.target', '接收范围')}>
-              {batch.targetSummary} · {targetTypeText[batch.targetType]}
-            </Descriptions.Item>
-            <Descriptions.Item
-              label={t('system.notificationManagement.column.delivery', '投递概况')}
-            >
-              {batch.sentTotal}/{batch.deliveryTotal}
-              {batch.failedTotal > 0 ? ` · ${String(batch.failedTotal)}` : ''}
-            </Descriptions.Item>
-            <Descriptions.Item label={t('system.notificationManagement.column.operator', '操作人')}>
-              {batch.operatorName ?? '-'}
-            </Descriptions.Item>
-            <Descriptions.Item label={t('notification.detail.createdAt', '时间')}>
-              {batch.createdAt ?? '-'}
-            </Descriptions.Item>
-            <Descriptions.Item label={t('system.notificationManagement.form.expireAt', '过期时间')}>
-              {batch.expireAt ?? '-'}
-            </Descriptions.Item>
-          </Descriptions>
-          <div className="trueadmin-message-detail-content">
-            <TrueAdminMarkdown value={batch.content} />
-          </div>
-          {batch.attachments?.length ? (
-            <TrueAdminAttachmentUpload readonly value={batch.attachments} />
-          ) : null}
-          {batch.payload && Object.keys(batch.payload).length > 0 ? (
-            <Collapse
-              className="trueadmin-message-detail-payload"
-              ghost
-              items={[
-                {
-                  key: 'payload',
-                  label: t('notification.detail.payload', '扩展数据'),
-                  children: (
-                    <Typography.Paragraph
-                      code
-                      className="trueadmin-message-detail-payload-code"
-                      style={{ margin: 0, whiteSpace: 'pre-wrap' }}
-                    >
-                      {JSON.stringify(batch.payload, null, 2)}
-                    </Typography.Paragraph>
-                  ),
-                },
-              ]}
-              size="small"
-            />
-          ) : null}
-        </Space>
-      ) : null}
-    </TrueAdminModal>
-  );
-}
-
-type DeliveryRecordsModalProps = {
-  open: boolean;
-  batch?: AdminNotificationBatch;
-  deliveryStatusText: Record<AdminNotificationDeliveryStatus, string>;
-  onClose: () => void;
-  afterOpenChange?: (open: boolean) => void;
-};
-
-function DeliveryRecordsModal({
-  open,
-  batch,
-  deliveryStatusText,
-  onClose,
-  afterOpenChange,
-}: DeliveryRecordsModalProps) {
-  const { t } = useI18n();
-  const deliveryExtraQuery = useMemo<CrudExtraQuerySchema[]>(
-    () => [
-      {
-        name: 'status',
-        transform: ({ value }) => ({ filter: { status: value }, op: { status: '=' } }),
-      },
-    ],
-    [],
-  );
-  const deliveryService = useMemo<CrudService<AdminNotificationDelivery>>(
-    () => ({
-      list: async (params, options) =>
-        batch
-          ? adminNotificationManagementApi.listDeliveries(batch.id, params).send(options?.force)
-          : { items: [], page: 1, pageSize: 20, total: 0 },
-    }),
-    [batch],
-  );
-  const deliveryColumns = useMemo<CrudColumns<AdminNotificationDelivery>>(
-    () => [
-      {
-        dataIndex: 'receiverName',
-        title: t('system.notificationManagement.column.receiver', '接收人'),
-        width: 160,
-      },
-      {
-        dataIndex: 'status',
-        render: (_, record) => (
-          <Tag color={deliveryStatusColor[record.status]}>{deliveryStatusText[record.status]}</Tag>
-        ),
-        title: t('system.notificationManagement.column.deliveryStatus', '投递状态'),
-        width: 120,
-      },
-      {
-        dataIndex: 'readAt',
-        render: (_, record) => record.readAt ?? '-',
-        title: t('system.notificationManagement.column.readAt', '已读时间'),
-        width: 180,
-      },
-      {
-        dataIndex: 'failedReason',
-        render: (_, record) => record.failedReason ?? '-',
-        title: t('system.notificationManagement.column.failedReason', '失败原因'),
-        width: 220,
-      },
-      {
-        dataIndex: 'retryCount',
-        title: t('system.notificationManagement.column.retryCount', '重试次数'),
-        width: 100,
-      },
-      { dataIndex: 'updatedAt', title: t('notification.detail.createdAt', '时间'), width: 180 },
-    ],
-    [deliveryStatusText, t],
-  );
-
-  return (
-    <TrueAdminModal
-      destroyOnHidden
-      className="trueadmin-notification-delivery-modal"
-      open={open}
-      title={
-        batch
-          ? `${t('system.notificationManagement.modal.deliveries', '投递记录')} - ${batch.title}`
-          : ''
-      }
-      width={980}
-      footer={<Button onClick={onClose}>{t('modal.action.close', '关闭')}</Button>}
-      onCancel={onClose}
-      afterOpenChange={afterOpenChange}
-    >
-      {batch ? (
-        <div className="trueadmin-notification-delivery-modal-body">
-          <div className="trueadmin-notification-management-stats">
-            <Statistic
-              title={t('system.notificationManagement.stats.total', '总投递')}
-              value={batch.deliveryTotal}
-            />
-            <Statistic
-              title={t('system.notificationManagement.stats.sent', '已投递')}
-              value={batch.sentTotal}
-            />
-            <Statistic
-              title={t('system.notificationManagement.stats.failed', '失败')}
-              value={batch.failedTotal}
-              valueStyle={batch.failedTotal > 0 ? { color: 'var(--ant-color-error)' } : undefined}
-            />
-            <Statistic
-              title={t('system.notificationManagement.stats.read', '已读')}
-              value={batch.readTotal}
-            />
-          </div>
-          <TrueAdminCrudTable<AdminNotificationDelivery>
-            resource="system.notificationManagement.delivery"
-            rowKey="id"
-            columns={deliveryColumns}
-            service={deliveryService}
-            quickSearch={{
-              placeholder: t('system.notificationManagement.column.receiver', '接收人'),
-            }}
-            queryMode="local"
-            extraQuery={deliveryExtraQuery}
-            toolbarRender={({ query }) => {
-              const currentStatus =
-                (query.values.status as AdminNotificationDeliveryStatus | undefined) ?? 'all';
-              return (
-                <TrueAdminQuickFilter<AdminNotificationDeliveryStatus | 'all'>
-                  value={currentStatus}
-                  items={[
-                    { label: t('notification.tab.all', '全部'), value: 'all' },
-                    { label: deliveryStatusText.pending, value: 'pending' },
-                    { label: deliveryStatusText.sent, value: 'sent' },
-                    { label: deliveryStatusText.failed, value: 'failed' },
-                    { label: deliveryStatusText.skipped, value: 'skipped' },
-                  ]}
-                  onChange={(nextStatus) =>
-                    query.setValue('status', nextStatus === 'all' ? undefined : nextStatus)
-                  }
-                />
-              );
-            }}
-            tableProps={{ size: 'middle' }}
-            tableScrollX={980}
-          />
-        </div>
-      ) : null}
-    </TrueAdminModal>
   );
 }
