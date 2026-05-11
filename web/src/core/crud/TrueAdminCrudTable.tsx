@@ -1,10 +1,7 @@
 import type { TableProps } from 'antd';
-import { App, Button, Card, Empty, Popconfirm, Result, Table } from 'antd';
-import type { CardProps, CardSemanticStyles, CardStylesType } from 'antd/es/card/Card';
+import { App, Button, Card, Empty, Result, Table } from 'antd';
 import type { SorterResult } from 'antd/es/table/interface';
-import type { Key } from 'react';
 import { useCallback, useMemo, useState } from 'react';
-import { Permission } from '@/core/auth/Permission';
 import { errorCenter } from '@/core/error/errorCenter';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import {
@@ -12,9 +9,10 @@ import {
   getSorterKey,
   getSorterResult,
   joinClassNames,
+  mergeCardBodyStyles,
   toCrudOrder,
-  toPermissionCode,
 } from './crudTableUtils';
+import { createCrudOperationColumns } from './TrueAdminCrudOperationColumn';
 import {
   TrueAdminCrudTablePagination,
   TrueAdminCrudTableSelectionStatus,
@@ -26,28 +24,9 @@ import type { CrudColumns, CrudImportConfig, TrueAdminCrudTableProps } from './t
 import { useCrudTableData } from './useCrudTableData';
 import { useCrudTableLayout } from './useCrudTableLayout';
 import { useCrudTableQueryState } from './useCrudTableQueryState';
+import { useCrudTableSelection } from './useCrudTableSelection';
 
 const DEFAULT_PAGE_SIZE = 20;
-
-const mergeCardBodyStyles = (
-  cardStyles: CardStylesType | undefined,
-  bodyStyle: React.CSSProperties,
-): CardStylesType => {
-  const mergeBodyStyle = (nextStyles?: CardSemanticStyles): CardSemanticStyles => ({
-    ...nextStyles,
-    body: { ...bodyStyle, ...nextStyles?.body },
-  });
-
-  if (typeof cardStyles === 'function') {
-    return (info: { props: CardProps }) => mergeBodyStyle(cardStyles(info));
-  }
-
-  return mergeBodyStyle(cardStyles);
-};
-
-type RowSelectionOnChange<TRecord extends Record<string, unknown>> = NonNullable<
-  NonNullable<TableProps<TRecord>['rowSelection']>['onChange']
->;
 
 export function TrueAdminCrudTable<
   TRecord extends Record<string, unknown>,
@@ -143,8 +122,6 @@ export function TrueAdminCrudTable<
   const { message } = App.useApp();
   const { t } = useI18n();
   const [filtersExpanded, setFiltersExpanded] = useState(defaultFiltersExpanded ?? false);
-  const [innerSelectedRowKeys, setInnerSelectedRowKeys] = useState<Key[]>([]);
-  const [innerSelectedRows, setInnerSelectedRows] = useState<TRecord[]>([]);
   const [queryResetSeed, setQueryResetSeed] = useState(0);
   const [importModalConfig, setImportModalConfig] = useState<
     CrudImportConfig<TRecord, TMeta, TCreate, TUpdate> | undefined
@@ -157,31 +134,20 @@ export function TrueAdminCrudTable<
     queryMode,
   });
   const hasFilters = filters.length > 0;
-  const selectedRowKeys = rowSelection?.selectedRowKeys ?? innerSelectedRowKeys;
-  const selectedRowKeySet = useMemo(() => new Set(selectedRowKeys), [selectedRowKeys]);
-  const getRecordKey = useCallback(
-    (record: TRecord) => {
-      if (typeof rowKey === 'function') {
-        return rowKey(record);
-      }
-      return record[(rowKey ?? 'id') as keyof TRecord] as Key;
-    },
-    [rowKey],
-  );
-  const selectedRows = rowSelection
-    ? innerSelectedRows.filter((record) => selectedRowKeySet.has(getRecordKey(record)))
-    : [];
-  const selectedCount = rowSelection ? selectedRowKeys.length : 0;
+  const {
+    clearSelected,
+    getRecordKey,
+    mergedRowSelection,
+    selectedCount,
+    selectedRowKeys,
+    selectedRows,
+  } = useCrudTableSelection({
+    rowKey,
+    rowSelection,
+  });
   const hasSelectedStatus = Boolean(
     rowSelection && selectedCount > 0 && tableAlertRender !== false,
   );
-  const clearSelected = useCallback(() => {
-    setInnerSelectedRowKeys([]);
-    setInnerSelectedRows([]);
-    rowSelection?.onChange?.([], [], { type: 'none' } as Parameters<
-      RowSelectionOnChange<TRecord>
-    >[2]);
-  }, [rowSelection]);
 
   const { action, dataSource, deleteRecord, error, loading, reload, response, total } =
     useCrudTableData<TRecord, TCreate, TUpdate, TMeta>({
@@ -236,63 +202,34 @@ export function TrueAdminCrudTable<
     ],
   );
 
+  const deleteRow = useCallback(
+    async (record: TRecord) => {
+      try {
+        await deleteRecord(getRecordKey(record));
+        if (!onDeleteSuccess) {
+          message.success(
+            locale?.deleteSuccessMessage ?? t('crud.action.deleteSuccess', '删除成功'),
+          );
+        }
+      } catch (error) {
+        errorCenter.emit(error);
+      }
+    },
+    [deleteRecord, getRecordKey, locale?.deleteSuccessMessage, message, onDeleteSuccess, t],
+  );
+
   const operationColumn = useMemo<CrudColumns<TRecord>>(
     () =>
-      rowActions !== false && (service.delete || rowActions?.render)
-        ? [
-            {
-              title:
-                rowActions?.title ?? locale?.actionColumnTitle ?? t('crud.column.action', '操作'),
-              key: '__actions',
-              fixed: 'right',
-              width: rowActions?.width ?? 120,
-              render: (_, record) => (
-                <>
-                  {rowActions?.render?.({ ...tableRenderContext, record })}
-                  {service.delete && rowActions?.delete !== false ? (
-                    <Permission code={toPermissionCode(resource, 'delete')}>
-                      <Popconfirm
-                        title={
-                          locale?.deleteConfirmTitle ??
-                          t('crud.action.deleteConfirm', '确认删除这条记录吗？')
-                        }
-                        onConfirm={async () => {
-                          try {
-                            await deleteRecord(getRecordKey(record));
-                            if (!onDeleteSuccess) {
-                              message.success(
-                                locale?.deleteSuccessMessage ??
-                                  t('crud.action.deleteSuccess', '删除成功'),
-                              );
-                            }
-                          } catch (error) {
-                            errorCenter.emit(error);
-                          }
-                        }}
-                      >
-                        <Button danger type="link" size="small">
-                          {locale?.deleteText ?? t('crud.action.delete', '删除')}
-                        </Button>
-                      </Popconfirm>
-                    </Permission>
-                  ) : null}
-                </>
-              ),
-            },
-          ]
-        : [],
-    [
-      deleteRecord,
-      getRecordKey,
-      message,
-      onDeleteSuccess,
-      resource,
-      rowActions,
-      service.delete,
-      t,
-      tableRenderContext,
-      locale,
-    ],
+      createCrudOperationColumns({
+        canDelete: Boolean(service.delete),
+        locale,
+        onDelete: deleteRow,
+        renderContext: tableRenderContext,
+        resource,
+        rowActions,
+        t,
+      }),
+    [deleteRow, locale, resource, rowActions, service.delete, t, tableRenderContext],
   );
 
   const mergedColumns = useMemo<CrudColumns<TRecord>>(() => {
@@ -330,22 +267,6 @@ export function TrueAdminCrudTable<
     );
     tableProps?.onChange?.(pagination, filters, sorter, extra);
   };
-
-  const mergedRowSelection = rowSelection
-    ? {
-        ...rowSelection,
-        selectedRowKeys,
-        onChange: (
-          keys: Key[],
-          rows: TRecord[],
-          info: Parameters<RowSelectionOnChange<TRecord>>[2],
-        ) => {
-          setInnerSelectedRowKeys(keys);
-          setInnerSelectedRows(rows);
-          rowSelection.onChange?.(keys, rows, info);
-        },
-      }
-    : undefined;
 
   const resetQuery = useCallback(() => {
     queryState.resetFilters();

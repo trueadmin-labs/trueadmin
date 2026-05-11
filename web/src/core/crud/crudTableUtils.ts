@@ -1,4 +1,6 @@
+import type { CardProps, CardSemanticStyles, CardStylesType } from 'antd/es/card/Card';
 import type { SorterResult, SortOrder } from 'antd/es/table/interface';
+import type { CSSProperties } from 'react';
 import type { CrudColumns, CrudOrder } from './types';
 
 export const joinClassNames = (...classNames: Array<string | undefined | false>) =>
@@ -6,6 +8,22 @@ export const joinClassNames = (...classNames: Array<string | undefined | false>)
 
 export const toPermissionCode = (resource: string, action: string) =>
   `${resource.replaceAll('.', ':')}:${action}`;
+
+export const mergeCardBodyStyles = (
+  cardStyles: CardStylesType | undefined,
+  bodyStyle: CSSProperties,
+): CardStylesType => {
+  const mergeBodyStyle = (nextStyles?: CardSemanticStyles): CardSemanticStyles => ({
+    ...nextStyles,
+    body: { ...bodyStyle, ...nextStyles?.body },
+  });
+
+  if (typeof cardStyles === 'function') {
+    return (info: { props: CardProps }) => mergeBodyStyle(cardStyles(info));
+  }
+
+  return mergeBodyStyle(cardStyles);
+};
 
 export const getColumnSortKey = <TRecord extends Record<string, unknown>>(
   column: CrudColumns<TRecord>[number],
