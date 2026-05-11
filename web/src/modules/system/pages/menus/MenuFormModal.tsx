@@ -12,11 +12,8 @@ import {
   TreeSelect,
 } from 'antd';
 import { useMemo } from 'react';
-import { isImageIconValue } from '@/core/icon/TrueAdminIcon';
 import { TrueAdminIconPicker } from '@/core/icon/TrueAdminIconPicker';
 import { TrueAdminModal } from '@/core/modal';
-import { TrueAdminImageUpload } from '@/core/upload';
-import { systemUploadApi } from '../../services/upload.api';
 import type {
   AdminMenu,
   AdminMenuOpenMode,
@@ -24,61 +21,11 @@ import type {
   AdminMenuStatus,
   AdminMenuType,
 } from '../../types/menu';
+import { MenuIconImageInput } from './MenuIconImageInput';
+import { FORM_GUTTER, type MenuIconMode, ROOT_PARENT_ID, toTreeSelectData } from './menuFormModel';
 
 export type MenuFormValues = AdminMenuPayload;
-
-export type MenuIconMode = 'name' | 'image';
-
-export const ROOT_PARENT_ID = 0;
-
-const FORM_GUTTER: [number, number] = [16, 0];
-
-export const getMenuIconMode = (icon?: string): MenuIconMode =>
-  isImageIconValue(icon) ? 'image' : 'name';
-
-function MenuIconImageInput({
-  value,
-  onChange,
-}: {
-  value?: string;
-  onChange?: (value?: string) => void;
-}) {
-  const imageValue = value
-    ? {
-        id: value,
-        name: 'menu-icon',
-        url: value,
-      }
-    : null;
-
-  return (
-    <TrueAdminImageUpload
-      value={imageValue}
-      onChange={(nextValue) => {
-        const image = Array.isArray(nextValue) ? nextValue[0] : nextValue;
-        onChange?.(image?.url ?? '');
-      }}
-      upload={systemUploadApi.image}
-      previewSize={64}
-    />
-  );
-}
-
-const toTreeSelectData = (
-  menus: AdminMenu[],
-  disabledId?: number,
-  ancestorDisabled = false,
-): TreeSelectProps['treeData'] =>
-  menus.map((menu) => {
-    const disabled = ancestorDisabled || menu.id === disabledId;
-    return {
-      title: menu.name,
-      value: menu.id,
-      key: menu.id,
-      disabled,
-      children: menu.children ? toTreeSelectData(menu.children, disabledId, disabled) : undefined,
-    };
-  });
+export { getMenuIconMode, type MenuIconMode, ROOT_PARENT_ID } from './menuFormModel';
 
 type MenuFormModalProps = {
   editing?: AdminMenu;
