@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7e8c285fd4943d5c5b1cb9a45ad760c1",
+    "content-hash": "159923b497a9addb9e9a9c341aa4ff33",
     "packages": [
         {
             "name": "aliyuncs/oss-sdk-php",
@@ -6457,7 +6457,7 @@
         },
         {
             "name": "trueadmin/kernel",
-            "version": "dev-main",
+            "version": "v0.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/trueadmin-labs/trueadmin-kernel.git",
@@ -6483,7 +6483,6 @@
                 "hyperf/logger": "~3.1.0",
                 "php": ">=8.1"
             },
-            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -10417,9 +10416,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "trueadmin/kernel": 20
-    },
+    "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
