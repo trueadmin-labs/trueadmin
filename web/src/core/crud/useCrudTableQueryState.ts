@@ -1,12 +1,32 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import { updateRawSearchParams } from '@/core/url/searchParams';
+import {
+  createParamsObject,
+  DEFAULT_PAGE,
+  DEFAULT_PAGE_SIZE,
+  EMPTY_EXTRA_QUERY,
+  EMPTY_FILTERS,
+  getExtraQueryNames,
+  getFilterNames,
+  getQuickSearchName,
+  getRequestParams,
+  normalizeValue,
+  ORDER_PARAM,
+  PAGE_PARAM,
+  PAGE_SIZE_PARAM,
+  removeQueryKeys,
+  SORT_PARAM,
+  setPage,
+  setPageSize,
+  setQueryValue,
+  toOrder,
+  toPositiveInteger,
+} from './crudQueryStateUtils';
 import type {
   CrudExtraQuerySchema,
   CrudFilterSchema,
-  CrudFilterValue,
   CrudListParams,
-  CrudOperator,
   CrudOrder,
   CrudQueryController,
   CrudQuickSearchConfig,
@@ -36,232 +56,6 @@ type UseCrudTableQueryStateOptions = {
   quickSearch?: CrudQuickSearchConfig;
   defaultPageSize?: number;
   queryMode?: 'url' | 'local';
-};
-
-const PAGE_PARAM = '_page';
-const PAGE_SIZE_PARAM = '_pageSize';
-const SORT_PARAM = '_sort';
-const ORDER_PARAM = '_order';
-const DEFAULT_PAGE = 1;
-const DEFAULT_PAGE_SIZE = 20;
-const EMPTY_FILTERS: CrudFilterSchema[] = [];
-const EMPTY_EXTRA_QUERY: CrudExtraQuerySchema[] = [];
-
-const toPositiveInteger = (value: string | null, fallback: number) => {
-  const parsed = Number.parseInt(value ?? '', 10);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
-};
-
-const toOrder = (value: string | null): CrudOrder | undefined => {
-  if (value === 'asc' || value === 'desc') {
-    return value;
-  }
-  return undefined;
-};
-
-const normalizeValue = (value: string | undefined) => {
-  const trimmed = value?.trim() ?? '';
-  return trimmed.length > 0 ? trimmed : undefined;
-};
-
-const getQuickSearchName = (quickSearch?: CrudQuickSearchConfig) =>
-  quickSearch ? (quickSearch.name ?? 'keyword') : undefined;
-
-const getFilterNames = (filters: CrudFilterSchema[] = []) =>
-  new Set(filters.map((filter) => filter.name));
-
-const getExtraQueryNames = (extraQuery: CrudExtraQuerySchema[] = []) =>
-  new Set(extraQuery.map((item) => item.name));
-
-const splitListValue = (value: string) => value.split(',').filter(Boolean);
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
-
-const mergeRequestParams = (params: CrudListParams, nextParams: Record<string, unknown>) => {
-  Object.entries(nextParams).forEach(([key, value]) => {
-    if (key === 'filter' && isRecord(value)) {
-      params.filter = {
-        ...(isRecord(params.filter) ? params.filter : {}),
-        ...value,
-      } as CrudListParams['filter'];
-      return;
-    }
-
-    if (key === 'op' && isRecord(value)) {
-      params.op = {
-        ...(isRecord(params.op) ? params.op : {}),
-        ...value,
-      } as CrudListParams['op'];
-      return;
-    }
-
-    params[key] = value;
-  });
-};
-
-const defaultFilterOperator = (filter: CrudFilterSchema): CrudOperator => {
-  if (filter.operator) {
-    return filter.operator;
-  }
-
-  if (filter.type === 'input') {
-    return 'like';
-  }
-
-  if (filter.type === 'select' && filter.mode === 'multiple') {
-    return 'in';
-  }
-
-  if (filter.type === 'dateRange') {
-    return 'between';
-  }
-
-  return '=';
-};
-
-const defaultFilterValue = (filter: CrudFilterSchema, value: string): CrudFilterValue => {
-  if (filter.type === 'select' && filter.mode === 'multiple') {
-    return splitListValue(value);
-  }
-
-  if (filter.type === 'dateRange') {
-    return splitListValue(value);
-  }
-
-  return value;
-};
-
-const setStandardFilterParam = (
-  params: CrudListParams,
-  filter: CrudFilterSchema,
-  value: string | undefined,
-) => {
-  if (value === undefined || filter.requestName === false) {
-    return;
-  }
-
-  const requestName = filter.requestName ?? filter.name;
-  const requestValue = defaultFilterValue(filter, value);
-  if (Array.isArray(requestValue) && requestValue.length === 0) {
-    return;
-  }
-
-  if (filter.requestMode === 'param') {
-    params[requestName] = requestValue;
-    return;
-  }
-
-  params.filter ??= {};
-  params.op ??= {};
-  params.filter[requestName] = requestValue;
-  params.op[requestName] = defaultFilterOperator(filter);
-};
-
-const createParamsObject = (searchParams: URLSearchParams, keys: Iterable<string>) => {
-  const keySet = new Set(keys);
-  const values: Record<string, string> = {};
-  keySet.forEach((key) => {
-    const value = normalizeValue(searchParams.get(key) ?? undefined);
-    if (value !== undefined) {
-      values[key] = value;
-    }
-  });
-  return values;
-};
-
-const removeQueryKeys = (params: URLSearchParams, keys: Iterable<string>) => {
-  Array.from(keys).forEach((key) => {
-    params.delete(key);
-  });
-};
-
-const setQueryValue = (params: URLSearchParams, key: string, value: string | undefined) => {
-  const normalized = normalizeValue(value);
-  if (normalized === undefined) {
-    params.delete(key);
-    return;
-  }
-  params.set(key, normalized);
-};
-
-const setPage = (params: URLSearchParams, page: number) => {
-  if (page <= DEFAULT_PAGE) {
-    params.delete(PAGE_PARAM);
-    return;
-  }
-  params.set(PAGE_PARAM, String(page));
-};
-
-const setPageSize = (params: URLSearchParams, pageSize: number, defaultPageSize: number) => {
-  if (pageSize === defaultPageSize) {
-    params.delete(PAGE_SIZE_PARAM);
-    return;
-  }
-  params.set(PAGE_SIZE_PARAM, String(pageSize));
-};
-
-const getRequestParams = ({
-  filters,
-  extraQuery,
-  order,
-  page,
-  pageSize,
-  sort,
-  values,
-  quickSearchName,
-}: {
-  filters: CrudFilterSchema[];
-  extraQuery: CrudExtraQuerySchema[];
-  order?: CrudOrder;
-  page: number;
-  pageSize: number;
-  quickSearchName?: string;
-  sort?: string;
-  values: Record<string, string>;
-}) => {
-  const params: CrudListParams = {
-    page,
-    pageSize,
-  };
-
-  if (quickSearchName && values[quickSearchName] !== undefined) {
-    params[quickSearchName] = values[quickSearchName];
-  }
-
-  if (sort && order) {
-    params.sort = sort;
-    params.order = order;
-  }
-
-  filters.forEach((filter) => {
-    const value = values[filter.name];
-    if (value === undefined) {
-      return;
-    }
-    if (filter.transform) {
-      mergeRequestParams(params, filter.transform({ name: filter.name, value, values }));
-      return;
-    }
-    setStandardFilterParam(params, filter, value);
-  });
-
-  extraQuery.forEach((item) => {
-    const value = values[item.name] ?? item.defaultValue;
-    delete params[item.name];
-    if (value === undefined) {
-      return;
-    }
-    if (item.transform) {
-      mergeRequestParams(params, item.transform({ name: item.name, value, values }));
-      return;
-    }
-    if (item.requestName !== false) {
-      params[item.requestName ?? item.name] = value;
-    }
-  });
-
-  return params;
 };
 
 export function useCrudTableQueryState({
