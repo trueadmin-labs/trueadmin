@@ -9,12 +9,9 @@ import {
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
-import {
-  removeWorkspaceScroll,
-  removeWorkspaceScrollExcept,
-  requestWorkspaceScrollTop,
-} from '@/core/layout/workspaceScrollStore';
+import { requestWorkspaceScrollTop } from '@/core/layout/workspaceScrollStore';
 import { playDropBackAnimation, useTabMoveAnimation } from './AppTabsBarAnimation';
+import { useAppTabsCloseActions } from './AppTabsBarClose';
 import {
   restrictToHorizontalAxis,
   SortableTabGroup,
@@ -23,30 +20,22 @@ import {
   useTabActions,
 } from './AppTabsBarItems';
 import {
-  CLOSE_ANIMATION_MS,
   type ClosingTabState,
   ENTER_ANIMATION_MS,
-  getNextTabAfterClose,
   isSamePath,
-  keepTabsByCloseScope,
-  type PendingClose,
   type PendingDropAnimation,
   toPixelDelta,
 } from './AppTabsBarUtils';
 import { useTabsStore } from './tabsStore';
-import type { AppTab, TabCloseScope } from './types';
+import type { AppTab } from './types';
 
 export function AppTabsBar({ activeKey }: { activeKey?: string }) {
   const navigate = useNavigate();
   const location = useLocation();
   const tabs = useTabsStore((state) => state.tabs);
-  const closeTab = useTabsStore((state) => state.closeTab);
-  const closeTabs = useTabsStore((state) => state.closeTabs);
   const reorderTabs = useTabsStore((state) => state.reorderTabs);
   const scrollRef = useRef<HTMLUListElement>(null);
   const pendingDropAnimationRef = useRef<PendingDropAnimation | undefined>(undefined);
-  const pendingCloseRef = useRef<PendingClose | undefined>(undefined);
-  const closeAnimationTimersRef = useRef(new Map<string, number | undefined>());
   const seenTabKeysRef = useRef<Set<string> | undefined>(undefined);
   const [closingTabs, setClosingTabs] = useState<Record<string, ClosingTabState>>({});
   const [enteringKeys, setEnteringKeys] = useState<string[]>([]);
@@ -66,63 +55,6 @@ export function AppTabsBar({ activeKey }: { activeKey?: string }) {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
-  const getTabNode = useCallback(
-    (key: string) =>
-      scrollRef.current?.querySelector<HTMLElement>(`[data-tab-key="${window.CSS.escape(key)}"]`),
-    [],
-  );
-
-  const startCloseAnimation = useCallback(
-    (pending: PendingClose) => {
-      if (closeAnimationTimersRef.current.has(pending.key)) {
-        return;
-      }
-      closeAnimationTimersRef.current.set(pending.key, undefined);
-
-      const width = Math.ceil(getTabNode(pending.key)?.getBoundingClientRect().width ?? 0);
-      const initialWidth = width > 0 ? width : 88;
-
-      setClosingTabs((items) => ({
-        ...items,
-        [pending.key]: { width: initialWidth, closing: false },
-      }));
-
-      window.requestAnimationFrame(() => {
-        getTabNode(pending.key)?.getBoundingClientRect();
-        setClosingTabs((items) => ({
-          ...items,
-          [pending.key]: { width: initialWidth, closing: true },
-        }));
-
-        const timer = window.setTimeout(() => {
-          if (pending.scope) {
-            const beforeCloseTabs = useTabsStore.getState().tabs;
-            closeTabs(pending.key, pending.scope);
-            const remainingKeys = useTabsStore.getState().tabs.map((tab) => tab.key);
-            removeWorkspaceScrollExcept(remainingKeys);
-            for (const tab of beforeCloseTabs) {
-              if (!remainingKeys.includes(tab.key)) {
-                removeWorkspaceScroll(tab.path);
-              }
-            }
-          } else {
-            closeTab(pending.key);
-            removeWorkspaceScroll(pending.key);
-            removeWorkspaceScroll(pending.path);
-          }
-          closeAnimationTimersRef.current.delete(pending.key);
-          setClosingTabs((items) => {
-            const { [pending.key]: _removed, ...nextItems } = items;
-            return nextItems;
-          });
-        }, CLOSE_ANIMATION_MS);
-
-        closeAnimationTimersRef.current.set(pending.key, timer);
-      });
-    },
-    [closeTab, closeTabs, getTabNode],
-  );
-
   const navigateToPath = useCallback(
     (path?: string) => {
       if (path && !isSamePath(location.pathname, path)) {
@@ -135,69 +67,13 @@ export function AppTabsBar({ activeKey }: { activeKey?: string }) {
     [location.pathname, navigate],
   );
 
-  const requestClose = useCallback(
-    (key: string) => {
-      const state = useTabsStore.getState();
-      const tab = state.tabs.find((item) => item.key === key);
-      if (!tab || tab.pinned || closingTabs[key]) {
-        return;
-      }
-
-      if (isSamePath(location.pathname, tab.path)) {
-        const nextTab = getNextTabAfterClose(state.tabs, key);
-        pendingCloseRef.current = { key, path: tab.path };
-
-        if (!navigateToPath(nextTab?.path)) {
-          pendingCloseRef.current = undefined;
-          startCloseAnimation({ key, path: tab.path });
-        }
-        return;
-      }
-
-      startCloseAnimation({ key, path: tab.path });
-    },
-    [closingTabs, location.pathname, navigateToPath, startCloseAnimation],
-  );
-
-  const requestCloseByScope = useCallback(
-    (key: string, scope: TabCloseScope) => {
-      const state = useTabsStore.getState();
-      const currentTab = state.tabs.find((tab) => isSamePath(location.pathname, tab.path));
-      const nextTabs = keepTabsByCloseScope(state.tabs, key, scope);
-      const shouldNavigateBeforeClose = Boolean(
-        currentTab && !nextTabs.some((tab) => tab.key === currentTab.key),
-      );
-      const nextTab = nextTabs.find((tab) => tab.key === key) ?? nextTabs[0];
-
-      if (shouldNavigateBeforeClose) {
-        pendingCloseRef.current = { key, path: currentTab?.path ?? '', scope };
-        if (!navigateToPath(nextTab?.path)) {
-          pendingCloseRef.current = undefined;
-          const beforeCloseTabs = useTabsStore.getState().tabs;
-          closeTabs(key, scope);
-          const remainingKeys = useTabsStore.getState().tabs.map((tab) => tab.key);
-          removeWorkspaceScrollExcept(remainingKeys);
-          for (const tab of beforeCloseTabs) {
-            if (!remainingKeys.includes(tab.key)) {
-              removeWorkspaceScroll(tab.path);
-            }
-          }
-        }
-        return;
-      }
-
-      const beforeCloseTabs = useTabsStore.getState().tabs;
-      closeTabs(key, scope);
-      const remainingKeys = useTabsStore.getState().tabs.map((tab) => tab.key);
-      removeWorkspaceScrollExcept(remainingKeys);
-      for (const tab of beforeCloseTabs) {
-        if (!remainingKeys.includes(tab.key)) {
-          removeWorkspaceScroll(tab.path);
-        }
-      }
-    },
-    [closeTabs, location.pathname, navigateToPath],
-  );
+  const { requestClose, requestCloseByScope } = useAppTabsCloseActions({
+    closingTabs,
+    pathname: location.pathname,
+    scrollRef,
+    setClosingTabs,
+    navigateToPath,
+  });
 
   const { getMenuItems } = useTabActions({
     activeKey,
@@ -238,16 +114,6 @@ export function AppTabsBar({ activeKey }: { activeKey?: string }) {
 
     return () => window.clearTimeout(timer);
   }, [closingTabs, tabs]);
-
-  useEffect(() => {
-    const pending = pendingCloseRef.current;
-    if (!pending || isSamePath(location.pathname, pending.path)) {
-      return;
-    }
-
-    pendingCloseRef.current = undefined;
-    startCloseAnimation(pending);
-  }, [location.pathname, startCloseAnimation]);
 
   useEffect(() => {
     const activeNode = scrollRef.current?.querySelector<HTMLElement>(
