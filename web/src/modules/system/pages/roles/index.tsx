@@ -1,30 +1,5 @@
-import {
-  CaretDownOutlined,
-  CaretUpOutlined,
-  DatabaseOutlined,
-  PlusOutlined,
-  SafetyCertificateOutlined,
-} from '@ant-design/icons';
-import type { TreeProps, TreeSelectProps } from 'antd';
-import {
-  App,
-  Button,
-  Card,
-  Checkbox,
-  Form,
-  Input,
-  InputNumber,
-  Select,
-  Space,
-  Spin,
-  Switch,
-  Tabs,
-  Tag,
-  Tooltip,
-  Tree,
-  TreeSelect,
-  Typography,
-} from 'antd';
+import { PlusOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
+import { App, Button, Form, Input, InputNumber, Select, Space, Tag } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { TrueAdminConfirmAction } from '@/core/action';
 import { TrueAdminCrudPage } from '@/core/crud';
@@ -41,37 +16,18 @@ import { menuApi } from '../../services/menu.api';
 import { roleApi } from '../../services/role.api';
 import type { DepartmentTreeNode } from '../../types/department';
 import type { AdminMenu } from '../../types/menu';
-import type {
-  AdminRole,
-  AdminRoleDataPolicy,
-  AdminRoleDataPolicyScope,
-  AdminRolePayload,
-  DataPolicyMetadata,
-} from '../../types/role';
-
-type RoleFormValues = AdminRolePayload;
-
-type DataPolicyScopeSelection = AdminRoleDataPolicyScope | 'none';
-
-type DepartmentSelectionValue = Array<
-  | number
-  | string
-  | {
-      value?: number | string;
-      key?: number | string;
-    }
->;
-
-type DataPolicyFormValues = {
-  policies: Record<string, DataPolicyScopeSelection>;
-  customDepartments: Record<string, DepartmentSelectionValue>;
-};
-
-type DataPolicyItem = {
-  key: string;
-  resource: string;
-  strategy: string;
-};
+import type { AdminRole, AdminRolePayload, DataPolicyMetadata } from '../../types/role';
+import { RoleAuthorizeModal } from './RoleAuthorizeModal';
+import {
+  type DataPolicyFormValues,
+  getMenuTreeKeys,
+  isBuiltinRole,
+  type RoleFormValues,
+  toDataPolicies,
+  toDataPolicyFormValues,
+  toDepartmentTreeData,
+  uniqueKeys,
+} from './roleAuthorization';
 
 const roleService: CrudService<AdminRole, AdminRolePayload, AdminRolePayload> = {
   list: roleApi.list,
@@ -79,154 +35,6 @@ const roleService: CrudService<AdminRole, AdminRolePayload, AdminRolePayload> = 
   update: roleApi.update,
   delete: roleApi.delete,
 };
-
-const SUPER_ADMIN_ROLE_CODE = 'super-admin';
-
-const isBuiltinRole = (role?: Pick<AdminRole, 'builtin' | 'code'>) =>
-  role?.builtin === true || role?.code === SUPER_ADMIN_ROLE_CODE;
-
-const toggleTreeNodeCheckByTitleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-  event.preventDefault();
-  event.stopPropagation();
-  event.currentTarget
-    .closest('.ant-tree-treenode')
-    ?.querySelector<HTMLElement>('.ant-tree-checkbox')
-    ?.click();
-};
-
-const toMenuTreeData = (menus: AdminMenu[]): TreeProps['treeData'] =>
-  menus.map((menu) => ({
-    title: (
-      <button
-        type="button"
-        className="trueadmin-role-authorize-tree-label"
-        onClick={toggleTreeNodeCheckByTitleClick}
-      >
-        {menu.name}
-      </button>
-    ),
-    key: menu.id,
-    children: menu.children ? toMenuTreeData(menu.children) : undefined,
-  }));
-
-const toDepartmentTreeData = (departments: DepartmentTreeNode[]): TreeSelectProps['treeData'] =>
-  departments.map((department) => ({
-    title: department.name,
-    value: department.id,
-    key: department.id,
-    children: department.children ? toDepartmentTreeData(department.children) : undefined,
-  }));
-
-const getMenuTreeKeys = (menus: AdminMenu[]): React.Key[] =>
-  menus.flatMap((menu) => [menu.id, ...(menu.children ? getMenuTreeKeys(menu.children) : [])]);
-
-const getMenuChildTreeKeys = (menu: AdminMenu): React.Key[] =>
-  menu.children ? getMenuTreeKeys(menu.children) : [];
-
-const uniqueKeys = (keys: React.Key[]): React.Key[] => Array.from(new Set(keys));
-
-const mergeMenuGroupCheckedKeys = (
-  checkedKeys: React.Key[],
-  groupKeys: React.Key[],
-  rootKey: React.Key,
-  nextChildKeys: React.Key[],
-): React.Key[] => {
-  const groupKeySet = new Set(groupKeys);
-  const outsideKeys = checkedKeys.filter((key) => !groupKeySet.has(key));
-  const normalizedChildKeys = uniqueKeys(nextChildKeys);
-
-  return uniqueKeys([
-    ...outsideKeys,
-    ...(normalizedChildKeys.length > 0 ? [rootKey] : []),
-    ...normalizedChildKeys,
-  ]);
-};
-
-const normalizeDepartmentSelection = (value: unknown): number[] => {
-  if (!Array.isArray(value)) {
-    return [];
-  }
-
-  const ids = value
-    .map((item) => {
-      if (typeof item === 'object' && item !== null) {
-        const option = item as { value?: number | string; key?: number | string };
-        return Number(option.value ?? option.key ?? 0);
-      }
-
-      return Number(item);
-    })
-    .filter((id) => Number.isInteger(id) && id > 0);
-
-  return Array.from(new Set(ids));
-};
-
-const toDepartmentSelectionValue = (value: unknown): DepartmentSelectionValue =>
-  normalizeDepartmentSelection(value).map((id) => ({ value: id, key: id }));
-
-const dataPolicyItemKey = (resource: string, strategy: string) => `${resource}::${strategy}`;
-
-const textOf = (
-  item: { label: string; i18n?: string },
-  t: (key: string, fallback?: string) => string,
-) => (item.i18n ? t(item.i18n, item.label) : item.label);
-
-const dataPolicyItems = (metadata?: DataPolicyMetadata): DataPolicyItem[] => {
-  if (!metadata) {
-    return [];
-  }
-
-  return metadata.resources.flatMap((resource) =>
-    resource.strategies.map((strategy) => ({
-      key: dataPolicyItemKey(resource.key, strategy),
-      resource: resource.key,
-      strategy,
-    })),
-  );
-};
-
-const toDataPolicyFormValues = (
-  metadata: DataPolicyMetadata | undefined,
-  role?: AdminRole,
-): DataPolicyFormValues => {
-  const policies: Record<string, DataPolicyScopeSelection> = {};
-  const customDepartments: Record<string, DepartmentSelectionValue> = {};
-  const rolePolicies = role?.dataPolicies ?? [];
-
-  for (const item of dataPolicyItems(metadata)) {
-    const policy = rolePolicies.find(
-      (candidate) => candidate.resource === item.resource && candidate.strategy === item.strategy,
-    );
-    policies[item.key] = policy?.scope ?? 'none';
-    customDepartments[item.key] = toDepartmentSelectionValue(policy?.config?.deptIds ?? []);
-  }
-
-  return { policies, customDepartments };
-};
-
-const toDataPolicies = (
-  metadata: DataPolicyMetadata | undefined,
-  values: DataPolicyFormValues,
-): AdminRoleDataPolicy[] =>
-  dataPolicyItems(metadata).flatMap((item, index) => {
-    const scope = values.policies?.[item.key];
-    if (!scope || scope === 'none') {
-      return [];
-    }
-
-    return {
-      resource: item.resource,
-      strategy: item.strategy as AdminRoleDataPolicy['strategy'],
-      effect: 'allow',
-      scope,
-      config:
-        scope === 'custom_departments' || scope === 'custom_departments_and_children'
-          ? { deptIds: normalizeDepartmentSelection(values.customDepartments?.[item.key]) }
-          : {},
-      status: 'enabled',
-      sort: index,
-    };
-  });
 
 export default function AdminRolesPage() {
   const { message } = App.useApp();
@@ -407,10 +215,6 @@ export default function AdminRolesPage() {
   const menuGroupKeysMap = useMemo(
     () => new Map(menuTree.map((menu) => [menu.id, getMenuTreeKeys([menu])])),
     [menuTree],
-  );
-  const dataPolicyStrategyMap = useMemo(
-    () => new Map(dataPolicyMetadata?.strategies.map((strategy) => [strategy.key, strategy]) ?? []),
-    [dataPolicyMetadata],
   );
 
   const toggleMenuGroupRoot = (menu: AdminMenu, checked: boolean) => {
@@ -606,277 +410,29 @@ export default function AdminRolesPage() {
               </Space>
             </Form>
           </TrueAdminModal>
-          <TrueAdminModal
-            destroyOnHidden
-            className="trueadmin-role-authorize-modal"
-            confirmLoading={authorizing}
-            okButtonProps={{ disabled: authorizeLoading || !authorizeRole }}
+          <RoleAuthorizeModal
+            authorizing={authorizing}
+            authorizeLoading={authorizeLoading}
+            authorizeRole={authorizeRole}
+            checkedMenuIds={checkedMenuIds}
+            dataPolicyForm={dataPolicyForm}
+            dataPolicyMetadata={dataPolicyMetadata}
+            dataPolicyScopes={dataPolicyScopes}
+            departmentTreeData={departmentTreeData}
+            expandedMenuIds={expandedMenuIds}
+            menuGroupKeysMap={menuGroupKeysMap}
+            menuTree={menuTree}
             open={authorizeOpen}
-            title={
-              authorizeRole || pendingAuthorizeRole
-                ? t('system.roles.modal.authorizeWithName', '角色授权 - {{name}}').replace(
-                    '{{name}}',
-                    (authorizeRole ?? pendingAuthorizeRole)?.name ?? '',
-                  )
-                : t('system.roles.modal.authorize', '角色授权')
-            }
-            width={820}
-            styles={{ body: { height: 'min(68vh, 680px)', overflow: 'hidden' } }}
+            pendingAuthorizeRole={pendingAuthorizeRole}
+            setCheckedMenuIds={setCheckedMenuIds}
+            setExpandedMenuIds={setExpandedMenuIds}
+            setStrictMenuCheck={setStrictMenuCheck}
+            strictMenuCheck={strictMenuCheck}
+            t={t}
             onCancel={closeAuthorize}
             onOk={() => void submitAuthorize(action)}
-          >
-            <div className="trueadmin-role-authorize-body">
-              <Spin spinning={authorizeLoading}>
-                <Tabs
-                  className="trueadmin-role-authorize-tabs"
-                  items={[
-                    {
-                      key: 'menus',
-                      label: t('system.roles.authorize.tab.menus', '功能权限'),
-                      icon: <SafetyCertificateOutlined />,
-                      children: (
-                        <div className="trueadmin-role-authorize-pane">
-                          <Space orientation="vertical" size={12} style={{ width: '100%' }}>
-                            <div className="trueadmin-role-authorize-tree-toolbar">
-                              <Space size={4}>
-                                <Tooltip title={t('system.roles.authorize.expandAll', '展开全部')}>
-                                  <Button
-                                    disabled={authorizeLoading || menuTree.length === 0}
-                                    icon={<CaretDownOutlined />}
-                                    size="small"
-                                    type="text"
-                                    onClick={() => setExpandedMenuIds(getMenuTreeKeys(menuTree))}
-                                  />
-                                </Tooltip>
-                                <Tooltip
-                                  title={t('system.roles.authorize.collapseAll', '收起全部')}
-                                >
-                                  <Button
-                                    disabled={authorizeLoading || expandedMenuIds.length === 0}
-                                    icon={<CaretUpOutlined />}
-                                    size="small"
-                                    type="text"
-                                    onClick={() => setExpandedMenuIds([])}
-                                  />
-                                </Tooltip>
-                              </Space>
-                              <Space size={8}>
-                                <Typography.Text type="secondary">
-                                  {t('system.roles.authorize.strictCheck', '精准勾选')}
-                                </Typography.Text>
-                                <Switch
-                                  checked={strictMenuCheck}
-                                  disabled={authorizeLoading}
-                                  size="small"
-                                  onChange={setStrictMenuCheck}
-                                />
-                              </Space>
-                            </div>
-                            <div className="trueadmin-menu-permission-card-list">
-                              {menuTree.map((menu) => {
-                                const groupKeys =
-                                  menuGroupKeysMap.get(menu.id) ?? getMenuTreeKeys([menu]);
-                                const childKeys = getMenuChildTreeKeys(menu);
-                                const childCheckedCount = childKeys.filter((key) =>
-                                  checkedMenuIds.includes(key),
-                                ).length;
-                                const childTreeData = toMenuTreeData(menu.children ?? []);
-
-                                return (
-                                  <Card
-                                    className="trueadmin-menu-permission-card"
-                                    key={menu.id}
-                                    size="small"
-                                    title={
-                                      <Checkbox
-                                        checked={checkedMenuIds.includes(menu.id)}
-                                        disabled={authorizeLoading}
-                                        indeterminate={
-                                          !checkedMenuIds.includes(menu.id) && childCheckedCount > 0
-                                        }
-                                        onChange={(event) =>
-                                          toggleMenuGroupRoot(menu, event.target.checked)
-                                        }
-                                      >
-                                        {menu.name}
-                                      </Checkbox>
-                                    }
-                                  >
-                                    {childTreeData && childTreeData.length > 0 ? (
-                                      <Tree
-                                        checkable
-                                        checkStrictly={strictMenuCheck}
-                                        expandedKeys={expandedMenuIds.filter((key) =>
-                                          childKeys.includes(key),
-                                        )}
-                                        treeData={childTreeData}
-                                        checkedKeys={checkedMenuIds.filter((key) =>
-                                          childKeys.includes(key),
-                                        )}
-                                        onCheck={(keys) => {
-                                          const nextChildKeys = Array.isArray(keys)
-                                            ? keys
-                                            : keys.checked;
-                                          setCheckedMenuIds((current) =>
-                                            mergeMenuGroupCheckedKeys(
-                                              current,
-                                              groupKeys,
-                                              menu.id,
-                                              nextChildKeys,
-                                            ),
-                                          );
-                                        }}
-                                        onExpand={(keys) =>
-                                          setExpandedMenuIds((current) => {
-                                            const childKeySet = new Set(childKeys);
-                                            return uniqueKeys([
-                                              ...current.filter((key) => !childKeySet.has(key)),
-                                              ...keys,
-                                            ]);
-                                          })
-                                        }
-                                      />
-                                    ) : (
-                                      <Typography.Text type="secondary">
-                                        {t('system.roles.authorize.emptyGroup', '暂无子权限')}
-                                      </Typography.Text>
-                                    )}
-                                  </Card>
-                                );
-                              })}
-                            </div>
-                          </Space>
-                        </div>
-                      ),
-                    },
-                    {
-                      key: 'data-policy',
-                      label: t('system.roles.authorize.tab.dataPolicy', '数据权限'),
-                      icon: <DatabaseOutlined />,
-                      children: (
-                        <div className="trueadmin-role-authorize-pane">
-                          <Form<DataPolicyFormValues>
-                            form={dataPolicyForm}
-                            layout="vertical"
-                            initialValues={toDataPolicyFormValues(
-                              dataPolicyMetadata,
-                              authorizeRole,
-                            )}
-                          >
-                            <Space orientation="vertical" size={16} style={{ width: '100%' }}>
-                              <Typography.Text type="secondary">
-                                {t(
-                                  'system.roles.dataPolicy.description',
-                                  '数据权限按资源单独配置。未选择的数据资源不会授予任何数据范围。',
-                                )}
-                              </Typography.Text>
-                              <div className="trueadmin-data-policy-list">
-                                {dataPolicyMetadata?.resources.map((resource) => (
-                                  <Card
-                                    className="trueadmin-data-policy-card"
-                                    key={resource.key}
-                                    size="small"
-                                    title={textOf(resource, t)}
-                                  >
-                                    <div className="trueadmin-data-policy-card-rows">
-                                      {resource.strategies.map((strategyKey) => {
-                                        const strategy = dataPolicyStrategyMap.get(strategyKey);
-                                        if (!strategy) {
-                                          return null;
-                                        }
-                                        const fieldKey = dataPolicyItemKey(
-                                          resource.key,
-                                          strategyKey,
-                                        );
-                                        const scope = dataPolicyScopes?.[fieldKey];
-                                        const scopeOptions = [
-                                          {
-                                            label: t(
-                                              'system.roles.dataPolicy.scope.none',
-                                              '不授权',
-                                            ),
-                                            value: 'none',
-                                          },
-                                          ...strategy.scopes.map((scopeItem) => ({
-                                            label: textOf(scopeItem, t),
-                                            value: scopeItem.key,
-                                          })),
-                                        ];
-
-                                        return (
-                                          <div className="trueadmin-data-policy-row" key={fieldKey}>
-                                            <div className="trueadmin-data-policy-main-row">
-                                              <Typography.Text>
-                                                {textOf(strategy, t)}
-                                              </Typography.Text>
-                                              <Form.Item
-                                                className="trueadmin-data-policy-scope-item"
-                                                name={['policies', fieldKey]}
-                                                rules={[]}
-                                              >
-                                                <Select
-                                                  options={scopeOptions}
-                                                  placeholder={t(
-                                                    'system.roles.dataPolicy.scopePlaceholder',
-                                                    '请选择权限类型',
-                                                  )}
-                                                />
-                                              </Form.Item>
-                                            </div>
-                                            {scope === 'custom_departments' ||
-                                            scope === 'custom_departments_and_children' ? (
-                                              <div className="trueadmin-data-policy-departments-row">
-                                                <Typography.Text type="secondary">
-                                                  {t(
-                                                    'system.roles.dataPolicy.departments',
-                                                    '可见部门',
-                                                  )}
-                                                </Typography.Text>
-                                                <Form.Item
-                                                  className="trueadmin-data-policy-departments-item"
-                                                  name={['customDepartments', fieldKey]}
-                                                  rules={[
-                                                    {
-                                                      required: true,
-                                                      message: t(
-                                                        'system.roles.dataPolicy.departmentsRequired',
-                                                        '请选择可见部门',
-                                                      ),
-                                                    },
-                                                  ]}
-                                                >
-                                                  <TreeSelect
-                                                    treeData={departmentTreeData}
-                                                    treeCheckable
-                                                    treeCheckStrictly
-                                                    treeDefaultExpandAll
-                                                    showSearch
-                                                    treeNodeFilterProp="title"
-                                                    placeholder={t(
-                                                      'system.roles.dataPolicy.departmentsPlaceholder',
-                                                      '请选择部门',
-                                                    )}
-                                                  />
-                                                </Form.Item>
-                                              </div>
-                                            ) : null}
-                                          </div>
-                                        );
-                                      })}
-                                    </div>
-                                  </Card>
-                                ))}
-                              </div>
-                            </Space>
-                          </Form>
-                        </div>
-                      ),
-                    },
-                  ]}
-                />
-              </Spin>
-            </div>
-          </TrueAdminModal>
+            onToggleMenuGroupRoot={toggleMenuGroupRoot}
+          />
         </>
       )}
     />
