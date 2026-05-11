@@ -3,7 +3,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 
-const webRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const webRoot = path.resolve(
+  process.env.TRUEADMIN_WEB_ROOT ?? path.join(path.dirname(fileURLToPath(import.meta.url)), '..'),
+);
 const requiredLocales = ['zh-CN', 'en-US'];
 
 const failures = [];
