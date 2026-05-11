@@ -1,6 +1,9 @@
 import type { SorterResult, SortOrder } from 'antd/es/table/interface';
 import type { CrudColumns, CrudOrder } from './types';
 
+export const joinClassNames = (...classNames: Array<string | undefined | false>) =>
+  classNames.filter(Boolean).join(' ');
+
 export const toPermissionCode = (resource: string, action: string) =>
   `${resource.replaceAll('.', ':')}:${action}`;
 

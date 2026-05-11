@@ -1,5 +1,5 @@
 import type { TableProps } from 'antd';
-import { App, Button, Card, Empty, Pagination, Popconfirm, Result, Table, Typography } from 'antd';
+import { App, Button, Card, Empty, Popconfirm, Result, Table } from 'antd';
 import type { CardProps, CardSemanticStyles, CardStylesType } from 'antd/es/card/Card';
 import type { SorterResult } from 'antd/es/table/interface';
 import type { Key } from 'react';
@@ -11,9 +11,14 @@ import {
   getColumnSortKey,
   getSorterKey,
   getSorterResult,
+  joinClassNames,
   toCrudOrder,
   toPermissionCode,
 } from './crudTableUtils';
+import {
+  TrueAdminCrudTablePagination,
+  TrueAdminCrudTableSelectionStatus,
+} from './TrueAdminCrudTablePagination';
 import { TrueAdminImportModal } from './TrueAdminImportModal';
 import { TrueAdminTableFilterPanel } from './TrueAdminTableFilterPanel';
 import { TrueAdminTableToolbar } from './TrueAdminTableToolbar';
@@ -23,9 +28,6 @@ import { useCrudTableLayout } from './useCrudTableLayout';
 import { useCrudTableQueryState } from './useCrudTableQueryState';
 
 const DEFAULT_PAGE_SIZE = 20;
-
-const joinClassNames = (...classNames: Array<string | undefined | false>) =>
-  classNames.filter(Boolean).join(' ');
 
 const mergeCardBodyStyles = (
   cardStyles: CardStylesType | undefined,
@@ -426,51 +428,20 @@ export function TrueAdminCrudTable<
     </div>
   );
 
-  const selectedStatusContent = tableAlertRender ? (
-    tableAlertRender(tableRenderContext)
-  ) : (
-    <Typography.Text type="secondary">
-      {locale?.selectedCountText?.(selectedCount) ??
-        t('crud.selection.count', '已选择 {{count}} 项').replace(
-          '{{count}}',
-          String(selectedCount),
-        )}
-    </Typography.Text>
+  const selectedStatusDom = (
+    <TrueAdminCrudTableSelectionStatus
+      classNames={classNames}
+      clearSelected={clearSelected}
+      locale={locale}
+      open={hasSelectedStatus}
+      renderContext={tableRenderContext}
+      selectedCount={selectedCount}
+      styles={styles}
+      t={t}
+      tableAlertOptionRender={tableAlertOptionRender}
+      tableAlertRender={tableAlertRender}
+    />
   );
-  const selectedStatusOptionContent = tableAlertOptionRender ? (
-    tableAlertOptionRender(tableRenderContext)
-  ) : (
-    <Button type="link" size="small" onClick={clearSelected}>
-      {locale?.clearSelectedText ?? t('crud.selection.clear', '清空')}
-    </Button>
-  );
-  const selectedStatusDom = hasSelectedStatus ? (
-    <div
-      className={joinClassNames('trueadmin-crud-table-selected-status', classNames?.selectedStatus)}
-      style={styles?.selectedStatus}
-    >
-      <div
-        className={joinClassNames(
-          'trueadmin-crud-table-selected-status-content',
-          classNames?.selectedStatusContent,
-        )}
-        style={styles?.selectedStatusContent}
-      >
-        {selectedStatusContent}
-      </div>
-      {tableAlertOptionRender !== false ? (
-        <div
-          className={joinClassNames(
-            'trueadmin-crud-table-selected-status-options',
-            classNames?.selectedStatusOptions,
-          )}
-          style={styles?.selectedStatusOptions}
-        >
-          {selectedStatusOptionContent}
-        </div>
-      ) : null}
-    </div>
-  ) : null;
 
   const emptyContent = locale?.emptyText ??
     emptyRender?.(tableRenderContext) ??
@@ -511,45 +482,18 @@ export function TrueAdminCrudTable<
   );
   const tableViewDom = tableViewRender ? tableViewRender(tableRenderContext, tableDom) : tableDom;
   const paginationDom = (
-    <div
-      className={joinClassNames('trueadmin-crud-table-pagination', classNames?.pagination)}
-      style={styles?.pagination}
-    >
-      <div
-        className={joinClassNames(
-          'trueadmin-crud-table-pagination-left',
-          classNames?.paginationLeft,
-        )}
-        style={styles?.paginationLeft}
-      >
-        {selectedStatusDom}
-      </div>
-      <div
-        className={joinClassNames(
-          'trueadmin-crud-table-pagination-right',
-          classNames?.paginationRight,
-        )}
-        style={styles?.paginationRight}
-      >
-        <Pagination
-          {...paginationProps}
-          current={queryState.current}
-          pageSize={queryState.pageSize}
-          total={total}
-          showSizeChanger={paginationProps?.showSizeChanger ?? true}
-          showTotal={
-            paginationProps?.showTotal ??
-            ((nextTotal) =>
-              locale?.paginationTotalText?.(nextTotal) ??
-              t('crud.pagination.total', '共 {{total}} 条').replace('{{total}}', String(nextTotal)))
-          }
-          onChange={(current, pageSize) => {
-            queryState.changePage(current, pageSize);
-            paginationProps?.onChange?.(current, pageSize);
-          }}
-        />
-      </div>
-    </div>
+    <TrueAdminCrudTablePagination
+      classNames={classNames}
+      current={queryState.current}
+      locale={locale}
+      pageSize={queryState.pageSize}
+      paginationProps={paginationProps}
+      selectedStatus={selectedStatusDom}
+      styles={styles}
+      t={t}
+      total={total}
+      onChange={queryState.changePage}
+    />
   );
   const tableAreaDom = (
     <Card
