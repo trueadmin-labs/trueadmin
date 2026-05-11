@@ -1,15 +1,7 @@
-import { RedoOutlined } from '@ant-design/icons';
-import { App, Button, Space, Tag, Typography } from 'antd';
+import { App } from 'antd';
 import { useMemo, useState } from 'react';
-import { TrueAdminConfirmAction } from '@/core/action';
 import { TrueAdminCrudPage } from '@/core/crud';
-import type {
-  CrudColumns,
-  CrudExtraQuerySchema,
-  CrudFilterSchema,
-  CrudService,
-} from '@/core/crud/types';
-import { TrueAdminQuickFilter } from '@/core/filter/TrueAdminQuickFilter';
+import type { CrudExtraQuerySchema, CrudFilterSchema, CrudService } from '@/core/crud/types';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import {
   type AdminMessageLevel,
@@ -27,7 +19,9 @@ import {
 } from '@/core/notification';
 import { DeliveryRecordsModal } from './DeliveryRecordsModal';
 import { NotificationDetailModal } from './NotificationDetailModal';
-import { batchStatusColor, levelColor, toPlainText } from './notificationManagementModel';
+import { NotificationRowActions } from './NotificationRowActions';
+import { createNotificationColumns } from './NotificationTableColumns';
+import { NotificationToolbar } from './NotificationToolbar';
 
 export default function AdminNotificationManagementPage() {
   const { message } = App.useApp();
@@ -137,94 +131,8 @@ export default function AdminNotificationManagementPage() {
     [refreshSeed],
   );
 
-  const columns = useMemo<CrudColumns<AdminNotificationBatch>>(
-    () => [
-      {
-        dataIndex: 'title',
-        fixed: 'left',
-        render: (_, record) => {
-          const typeConfig = getAdminMessageTypeConfig(record.type);
-          const summary = toPlainText(record.content);
-          return (
-            <div className="trueadmin-message-cell">
-              <div className="trueadmin-message-cell-type">
-                <Tag color={typeConfig.color} style={{ marginInlineEnd: 0 }}>
-                  {resolveAdminMessageLabel(typeConfig.label, t, record.type)}
-                </Tag>
-              </div>
-              <Space orientation="vertical" size={4} style={{ minWidth: 0 }}>
-                <Typography.Text strong>{record.title}</Typography.Text>
-                {summary ? (
-                  <Typography.Text type="secondary" ellipsis>
-                    {summary}
-                  </Typography.Text>
-                ) : null}
-              </Space>
-            </div>
-          );
-        },
-        title: t('system.messages.column.title', '消息'),
-        width: 560,
-      },
-      {
-        dataIndex: 'status',
-        render: (_, record) => (
-          <Tag color={batchStatusColor[record.status]}>{statusText[record.status]}</Tag>
-        ),
-        title: t('system.notificationManagement.column.status', '批次状态'),
-        width: 120,
-      },
-      {
-        dataIndex: 'level',
-        render: (_, record) => (
-          <Tag color={levelColor[record.level]}>{levelText[record.level]}</Tag>
-        ),
-        title: t('system.messages.column.level', '等级'),
-        width: 110,
-      },
-      {
-        dataIndex: 'targetSummary',
-        render: (_, record) => (
-          <Space orientation="vertical" size={2}>
-            <Typography.Text>{record.targetSummary}</Typography.Text>
-            <Typography.Text type="secondary">{targetTypeText[record.targetType]}</Typography.Text>
-          </Space>
-        ),
-        title: t('system.notificationManagement.column.target', '接收范围'),
-        width: 180,
-      },
-      {
-        dataIndex: 'deliveryTotal',
-        render: (_, record) => (
-          <Typography.Text>
-            {record.sentTotal}/{record.deliveryTotal}
-            {record.failedTotal > 0 ? (
-              <Typography.Text type="danger"> · {record.failedTotal}</Typography.Text>
-            ) : null}
-          </Typography.Text>
-        ),
-        title: t('system.notificationManagement.column.delivery', '投递概况'),
-        width: 120,
-      },
-      {
-        dataIndex: 'source',
-        render: (_, record) =>
-          resolveAdminMessageLabel(
-            getAdminMessageSourceConfig(record.source)?.label,
-            t,
-            record.source,
-          ),
-        title: t('notification.detail.source', '来源'),
-        width: 160,
-      },
-      {
-        dataIndex: 'createdAt',
-        key: 'created_at',
-        sorter: true,
-        title: t('notification.detail.createdAt', '时间'),
-        width: 180,
-      },
-    ],
+  const columns = useMemo(
+    () => createNotificationColumns({ levelText, statusText, targetTypeText, t }),
     [levelText, statusText, t, targetTypeText],
   );
 
@@ -264,78 +172,33 @@ export default function AdminNotificationManagementPage() {
         rowActions={{
           width: 190,
           render: ({ record, action }) => (
-            <Space size={4} wrap>
-              <Button
-                size="small"
-                type="link"
-                onClick={() => {
-                  setDetail(record);
-                  setDetailOpen(true);
-                }}
-              >
-                {t('system.notificationManagement.action.detail', '详情')}
-              </Button>
-              <Button
-                size="small"
-                type="link"
-                onClick={() => {
-                  setDeliveryBatch(record);
-                  setDeliveryOpen(true);
-                }}
-              >
-                {t('system.notificationManagement.action.deliveries', '投递记录')}
-              </Button>
-              {record.failedTotal > 0 ? (
-                <TrueAdminConfirmAction
-                  size="small"
-                  type="link"
-                  icon={<RedoOutlined />}
-                  confirm={t(
-                    'system.notificationManagement.confirm.resend',
-                    '确认重发失败投递吗？',
-                  )}
-                  successMessage={t(
-                    'system.notificationManagement.success.resend',
-                    '投递记录已重发',
-                  )}
-                  action={async () => {
-                    const result = await adminNotificationManagementApi
-                      .resendNotification(record.id)
-                      .send();
-                    message.success(
-                      t(
-                        'system.notificationManagement.success.resendCount',
-                        '已重发 {{count}} 条',
-                      ).replace('{{count}}', String(result.resent)),
-                    );
-                    action.reload();
-                    setRefreshSeed((seed) => seed + 1);
-                  }}
-                >
-                  {t('system.notificationManagement.action.resend', '重发')}
-                </TrueAdminConfirmAction>
-              ) : null}
-            </Space>
+            <NotificationRowActions
+              action={action}
+              record={record}
+              t={t}
+              onOpenDetail={(nextDetail) => {
+                setDetail(nextDetail);
+                setDetailOpen(true);
+              }}
+              onOpenDeliveries={(nextDeliveryBatch) => {
+                setDeliveryBatch(nextDeliveryBatch);
+                setDeliveryOpen(true);
+              }}
+              onResendSuccess={(resent) => {
+                message.success(
+                  t(
+                    'system.notificationManagement.success.resendCount',
+                    '已重发 {{count}} 条',
+                  ).replace('{{count}}', String(resent)),
+                );
+                setRefreshSeed((seed) => seed + 1);
+              }}
+            />
           ),
         }}
-        toolbarRender={({ query }) => {
-          const currentStatus =
-            (query.values.status as AdminNotificationBatchStatus | undefined) ?? 'all';
-          return (
-            <TrueAdminQuickFilter<AdminNotificationBatchStatus | 'all'>
-              value={currentStatus}
-              items={[
-                { label: t('notification.tab.all', '全部'), value: 'all' },
-                { label: statusText.completed, value: 'completed' },
-                { label: statusText.partial_failed, value: 'partial_failed' },
-                { label: statusText.failed, value: 'failed' },
-              ]}
-              onChange={(nextStatus) =>
-                query.setValue('status', nextStatus === 'all' ? undefined : nextStatus)
-              }
-            />
-          );
-        }}
+        toolbarRender={({ query }) => (
+          <NotificationToolbar query={query} statusText={statusText} t={t} />
+        )}
         tableProps={{ size: 'middle' }}
         paginationProps={{ showQuickJumper: true }}
         tableScrollX={1320}
