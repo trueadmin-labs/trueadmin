@@ -64,6 +64,9 @@ final class OpenApiDocumentBuilder
         if ($summary === '') {
             $summary = (string) ($permissionRule['title'] ?? $route['name'] ?? $route['action']);
         }
+        if ($summary === '') {
+            $summary = (string) $route['action'];
+        }
 
         $tags = $spec['tags'] ?? [];
         if ($tags === [] && isset($permissionRule['group']) && $permissionRule['group'] !== '') {

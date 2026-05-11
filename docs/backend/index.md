@@ -98,6 +98,7 @@ php bin/hyperf.php trueadmin:routes
 ```bash
 php bin/hyperf.php trueadmin:metadata
 php bin/hyperf.php trueadmin:metadata-sync
+php bin/hyperf.php trueadmin:openapi
 ```
 
 ## 数据库迁移

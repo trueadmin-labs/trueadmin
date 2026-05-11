@@ -14,7 +14,7 @@
         "/api/admin/auth/login": {
             "post": {
                 "operationId": "App_Module_Auth_Http_Admin_Controller_PassportController_login",
-                "summary": "",
+                "summary": "App\\Module\\Auth\\Http\\Admin\\Controller\\PassportController@login",
                 "description": "",
                 "tags": [],
                 "responses": {
@@ -39,7 +39,7 @@
         "/api/admin/auth/logout": {
             "post": {
                 "operationId": "App_Module_Auth_Http_Admin_Controller_PassportController_logout",
-                "summary": "",
+                "summary": "App\\Module\\Auth\\Http\\Admin\\Controller\\PassportController@logout",
                 "description": "",
                 "tags": [],
                 "responses": {
@@ -64,7 +64,7 @@
         "/api/admin/auth/me": {
             "get": {
                 "operationId": "App_Module_Auth_Http_Admin_Controller_PassportController_me",
-                "summary": "",
+                "summary": "App\\Module\\Auth\\Http\\Admin\\Controller\\PassportController@me",
                 "description": "",
                 "tags": [],
                 "responses": {
@@ -89,7 +89,7 @@
         "/api/admin/examples/notification-demo/direct": {
             "post": {
                 "operationId": "Plugin_TrueAdmin_Examples_Http_Admin_Controller_NotificationDemoController_direct",
-                "summary": "",
+                "summary": "Plugin\\TrueAdmin\\Examples\\Http\\Admin\\Controller\\NotificationDemoController@direct",
                 "description": "",
                 "tags": [],
                 "responses": {
@@ -109,7 +109,7 @@
         "/api/admin/examples/notification-demo/template": {
             "post": {
                 "operationId": "Plugin_TrueAdmin_Examples_Http_Admin_Controller_NotificationDemoController_template",
-                "summary": "",
+                "summary": "Plugin\\TrueAdmin\\Examples\\Http\\Admin\\Controller\\NotificationDemoController@template",
                 "description": "",
                 "tags": [],
                 "responses": {
@@ -129,7 +129,7 @@
         "/api/admin/examples/stream-demo/progress": {
             "get": {
                 "operationId": "Plugin_TrueAdmin_Examples_Http_Admin_Controller_StreamDemoController_progress",
-                "summary": "",
+                "summary": "Plugin\\TrueAdmin\\Examples\\Http\\Admin\\Controller\\StreamDemoController@progress",
                 "description": "",
                 "tags": [],
                 "responses": {
@@ -1488,7 +1488,7 @@
         "/api/admin/organization/users": {
             "post": {
                 "operationId": "App_Module_System_Http_Admin_Controller_AdminUserController_create",
-                "summary": "新增管理员用户",
+                "summary": "新增成员",
                 "description": "",
                 "tags": [
                     "系统管理"
@@ -1515,7 +1515,7 @@
             },
             "get": {
                 "operationId": "App_Module_System_Http_Admin_Controller_AdminUserController_list",
-                "summary": "管理员用户列表",
+                "summary": "成员列表",
                 "description": "",
                 "tags": [
                     "系统管理"
@@ -1544,7 +1544,7 @@
         "/api/admin/organization/users/{id}": {
             "delete": {
                 "operationId": "App_Module_System_Http_Admin_Controller_AdminUserController_delete",
-                "summary": "删除管理员用户",
+                "summary": "删除成员",
                 "description": "",
                 "tags": [
                     "系统管理"
@@ -1571,7 +1571,7 @@
             },
             "get": {
                 "operationId": "App_Module_System_Http_Admin_Controller_AdminUserController_detail",
-                "summary": "管理员用户详情",
+                "summary": "成员详情",
                 "description": "",
                 "tags": [
                     "系统管理"
@@ -1598,7 +1598,7 @@
             },
             "put": {
                 "operationId": "App_Module_System_Http_Admin_Controller_AdminUserController_update",
-                "summary": "编辑管理员用户",
+                "summary": "编辑成员",
                 "description": "",
                 "tags": [
                     "系统管理"
@@ -1615,6 +1615,104 @@
                     "permissions": [
                         "system:user:update"
                     ],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/profile": {
+            "get": {
+                "operationId": "App_Module_System_Http_Admin_Controller_AdminProfileController_detail",
+                "summary": "App\\Module\\System\\Http\\Admin\\Controller\\AdminProfileController@detail",
+                "description": "",
+                "tags": [],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\AdminProfileController@detail",
+                    "permission": null,
+                    "permissionMode": null,
+                    "permissions": [],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "operationId": "App_Module_System_Http_Admin_Controller_AdminProfileController_update",
+                "summary": "App\\Module\\System\\Http\\Admin\\Controller\\AdminProfileController@update",
+                "description": "",
+                "tags": [],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\AdminProfileController@update",
+                    "permission": null,
+                    "permissionMode": null,
+                    "permissions": [],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/profile/password": {
+            "put": {
+                "operationId": "App_Module_System_Http_Admin_Controller_AdminProfileController_updatePassword",
+                "summary": "App\\Module\\System\\Http\\Admin\\Controller\\AdminProfileController@updatePassword",
+                "description": "",
+                "tags": [],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\AdminProfileController@updatePassword",
+                    "permission": null,
+                    "permissionMode": null,
+                    "permissions": [],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/profile/preferences": {
+            "put": {
+                "operationId": "App_Module_System_Http_Admin_Controller_AdminProfileController_updatePreferences",
+                "summary": "App\\Module\\System\\Http\\Admin\\Controller\\AdminProfileController@updatePreferences",
+                "description": "",
+                "tags": [],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\AdminProfileController@updatePreferences",
+                    "permission": null,
+                    "permissionMode": null,
+                    "permissions": [],
                     "public": false
                 },
                 "security": [
@@ -1643,6 +1741,35 @@
                     "permissionMode": "single",
                     "permissions": [
                         "system:role:authorize"
+                    ],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/system-config/login-logs": {
+            "get": {
+                "operationId": "App_Module_System_Http_Admin_Controller_AdminLogController_loginLogs",
+                "summary": "登录日志列表",
+                "description": "",
+                "tags": [
+                    "系统管理"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\AdminLogController@loginLogs",
+                    "permission": "system:login-log:list",
+                    "permissionMode": "single",
+                    "permissions": [
+                        "system:login-log:list"
                     ],
                     "public": false
                 },
@@ -1840,6 +1967,35 @@
                     "permissionMode": "single",
                     "permissions": [
                         "system:menu:update"
+                    ],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/system-config/operation-logs": {
+            "get": {
+                "operationId": "App_Module_System_Http_Admin_Controller_AdminLogController_operationLogs",
+                "summary": "操作日志列表",
+                "description": "",
+                "tags": [
+                    "系统管理"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\AdminLogController@operationLogs",
+                    "permission": "system:operation-log:list",
+                    "permissionMode": "single",
+                    "permissions": [
+                        "system:operation-log:list"
                     ],
                     "public": false
                 },

@@ -307,6 +307,7 @@ admin_menus / admin_permissions / admin_role_*
 ```bash
 php bin/hyperf.php trueadmin:metadata
 php bin/hyperf.php trueadmin:metadata-sync
+php bin/hyperf.php trueadmin:openapi
 ```
 
 扫描结果包含：

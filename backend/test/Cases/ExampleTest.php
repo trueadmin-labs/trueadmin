@@ -528,10 +528,20 @@ class ExampleTest extends TestCase
         $this->assertSame('3.1.0', $openapi['openapi']);
         $this->assertArrayHasKey('/api/admin/organization/users', $openapi['paths']);
         $this->assertArrayHasKey('/api/admin/organization/client-users', $openapi['paths']);
+        $this->assertArrayHasKey('/api/admin/profile', $openapi['paths']);
         $this->assertArrayHasKey('/api/admin/system-config/login-logs', $openapi['paths']);
         $this->assertArrayHasKey('/api/admin/system-config/operation-logs', $openapi['paths']);
+        foreach ($openapi['paths'] as $path => $operations) {
+            foreach ($operations as $method => $operation) {
+                $this->assertNotSame('', $operation['summary'], sprintf('OpenAPI summary is empty for %s %s.', $method, $path));
+            }
+        }
         $this->assertSame('system:user:list', $openapi['paths']['/api/admin/organization/users']['get']['x-trueadmin']['permission']);
         $this->assertSame('system:client-user:list', $openapi['paths']['/api/admin/organization/client-users']['get']['x-trueadmin']['permission']);
+        $this->assertSame(
+            'App\\Module\\System\\Http\\Admin\\Controller\\AdminProfileController@detail',
+            $openapi['paths']['/api/admin/profile']['get']['summary']
+        );
         $this->assertSame('system:login-log:list', $openapi['paths']['/api/admin/system-config/login-logs']['get']['x-trueadmin']['permission']);
         $this->assertSame('system:operation-log:list', $openapi['paths']['/api/admin/system-config/operation-logs']['get']['x-trueadmin']['permission']);
         $this->assertSame('single', $openapi['paths']['/api/admin/organization/users']['get']['x-trueadmin']['permissionMode']);
