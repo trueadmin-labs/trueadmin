@@ -5,14 +5,12 @@ import { useCallback, useMemo, useState } from 'react';
 import { errorCenter } from '@/core/error/errorCenter';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import {
-  getColumnSortKey,
   getSorterKey,
   getSorterResult,
   joinClassNames,
   mergeCardBodyStyles,
   toCrudOrder,
 } from './crudTableUtils';
-import { createCrudOperationColumns } from './TrueAdminCrudOperationColumn';
 import {
   TrueAdminCrudTablePagination,
   TrueAdminCrudTableSelectionStatus,
@@ -20,7 +18,8 @@ import {
 import { TrueAdminImportModal } from './TrueAdminImportModal';
 import { TrueAdminTableFilterPanel } from './TrueAdminTableFilterPanel';
 import { TrueAdminTableToolbar } from './TrueAdminTableToolbar';
-import type { CrudColumns, CrudImportConfig, TrueAdminCrudTableProps } from './types';
+import type { CrudImportConfig, TrueAdminCrudTableProps } from './types';
+import { useCrudTableColumns } from './useCrudTableColumns';
 import { useCrudTableData } from './useCrudTableData';
 import { useCrudTableLayout } from './useCrudTableLayout';
 import { useCrudTableQueryState } from './useCrudTableQueryState';
@@ -218,38 +217,18 @@ export function TrueAdminCrudTable<
     [deleteRecord, getRecordKey, locale?.deleteSuccessMessage, message, onDeleteSuccess, t],
   );
 
-  const operationColumn = useMemo<CrudColumns<TRecord>>(
-    () =>
-      createCrudOperationColumns({
-        canDelete: Boolean(service.delete),
-        locale,
-        onDelete: deleteRow,
-        renderContext: tableRenderContext,
-        resource,
-        rowActions,
-        t,
-      }),
-    [deleteRow, locale, resource, rowActions, service.delete, t, tableRenderContext],
-  );
-
-  const mergedColumns = useMemo<CrudColumns<TRecord>>(() => {
-    const merged = [...columns, ...operationColumn];
-    return merged.map((column) => {
-      const sortKey = getColumnSortKey(column);
-      if (!sortKey || !column.sorter) {
-        return column;
-      }
-      return {
-        ...column,
-        sortOrder:
-          queryState.sort === sortKey && queryState.order
-            ? queryState.order === 'asc'
-              ? 'ascend'
-              : 'descend'
-            : undefined,
-      };
-    });
-  }, [columns, operationColumn, queryState.order, queryState.sort]);
+  const mergedColumns = useCrudTableColumns<TRecord, TCreate, TUpdate, TMeta>({
+    canDelete: Boolean(service.delete),
+    columns,
+    locale,
+    onDelete: deleteRow,
+    order: queryState.order,
+    renderContext: tableRenderContext,
+    resource,
+    rowActions,
+    sort: queryState.sort,
+    t,
+  });
 
   const toolbarTitle = toolbarRender?.(tableRenderContext) ?? null;
   const toolbarExtra = toolbarExtraRender?.(tableRenderContext) ?? null;
