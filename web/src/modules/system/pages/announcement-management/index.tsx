@@ -1,17 +1,10 @@
 import { CloudUploadOutlined } from '@ant-design/icons';
-import { App, Button, Form, Space, Tag, Typography } from 'antd';
+import { App, Button, Form } from 'antd';
 import dayjs from 'dayjs';
 import { useEffect, useMemo, useState } from 'react';
-import { TrueAdminConfirmAction } from '@/core/action';
 import { TrueAdminCrudPage } from '@/core/crud';
-import type {
-  CrudColumns,
-  CrudExtraQuerySchema,
-  CrudFilterSchema,
-  CrudService,
-} from '@/core/crud/types';
+import type { CrudExtraQuerySchema, CrudFilterSchema, CrudService } from '@/core/crud/types';
 import { errorCenter } from '@/core/error/errorCenter';
-import { TrueAdminQuickFilter } from '@/core/filter/TrueAdminQuickFilter';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import {
   type AdminAnnouncement,
@@ -28,14 +21,14 @@ import {
 import { roleApi } from '../../services/role.api';
 import { AnnouncementDetailModal } from './AnnouncementDetailModal';
 import { AnnouncementFormModal } from './AnnouncementFormModal';
+import { AnnouncementRowActions } from './AnnouncementRowActions';
+import { AnnouncementStatusFilter } from './AnnouncementStatusFilter';
+import { createAnnouncementColumns } from './AnnouncementTableColumns';
 import {
   type AnnouncementFormValues,
   type AnnouncementSubmitMode,
-  announcementStatusColor,
   getInitialAnnouncementValues,
-  levelColor,
   toMinuteDateTime,
-  toPlainText,
 } from './announcementManagementModel';
 
 export default function AdminAnnouncementManagementPage() {
@@ -137,6 +130,16 @@ export default function AdminAnnouncementManagementPage() {
     [levelText, sourceOptions, t],
   );
 
+  const extraQuery = useMemo<CrudExtraQuerySchema[]>(
+    () => [
+      {
+        name: 'status',
+        transform: ({ value }) => ({ filter: { status: value }, op: { status: '=' } }),
+      },
+    ],
+    [],
+  );
+
   const service = useMemo<
     CrudService<
       AdminAnnouncement,
@@ -152,85 +155,8 @@ export default function AdminAnnouncementManagementPage() {
     [refreshSeed],
   );
 
-  const columns = useMemo<CrudColumns<AdminAnnouncement>>(
-    () => [
-      {
-        dataIndex: 'title',
-        fixed: 'left',
-        render: (_, record) => {
-          const summary = toPlainText(record.content);
-          return (
-            <div className="trueadmin-message-cell">
-              <div className="trueadmin-message-cell-type">
-                <Tag color="purple" style={{ marginInlineEnd: 0 }}>
-                  {t('notification.type.announcement', '公告')}
-                </Tag>
-              </div>
-              <Space orientation="vertical" size={4} style={{ minWidth: 0 }}>
-                <Space size={6} wrap>
-                  <Typography.Text strong>{record.title}</Typography.Text>
-                  {record.pinned ? (
-                    <Tag color="gold">{t('notification.pinned', '置顶')}</Tag>
-                  ) : null}
-                </Space>
-                {summary ? (
-                  <Typography.Text type="secondary" ellipsis>
-                    {summary}
-                  </Typography.Text>
-                ) : null}
-              </Space>
-            </div>
-          );
-        },
-        title: t('system.messages.column.title', '消息'),
-        width: 560,
-      },
-      {
-        dataIndex: 'status',
-        render: (_, record) => (
-          <Tag color={announcementStatusColor[record.status]}>{statusText[record.status]}</Tag>
-        ),
-        title: t('system.announcementManagement.column.status', '状态'),
-        width: 120,
-      },
-      {
-        dataIndex: 'level',
-        render: (_, record) => (
-          <Tag color={levelColor[record.level]}>{levelText[record.level]}</Tag>
-        ),
-        title: t('system.messages.column.level', '等级'),
-        width: 110,
-      },
-      {
-        dataIndex: 'targetSummary',
-        render: (_, record) => (
-          <Space orientation="vertical" size={2}>
-            <Typography.Text>{record.targetSummary}</Typography.Text>
-            <Typography.Text type="secondary">{targetTypeText[record.targetType]}</Typography.Text>
-          </Space>
-        ),
-        title: t('system.announcementManagement.column.target', '可见范围'),
-        width: 180,
-      },
-      {
-        dataIndex: 'readTotal',
-        title: t('system.announcementManagement.stats.read', '已读'),
-        width: 100,
-      },
-      {
-        dataIndex: 'operatorName',
-        title: t('system.announcementManagement.column.operator', '操作人'),
-        width: 130,
-      },
-      {
-        dataIndex: 'publishedAt',
-        key: 'publish_at',
-        render: (_, record) => record.publishedAt ?? record.scheduledAt ?? '-',
-        sorter: true,
-        title: t('system.announcementManagement.column.publishedAt', '发布时间'),
-        width: 180,
-      },
-    ],
+  const columns = useMemo(
+    () => createAnnouncementColumns({ levelText, statusText, targetTypeText, t }),
     [levelText, statusText, t, targetTypeText],
   );
 
@@ -314,15 +240,7 @@ export default function AdminAnnouncementManagementPage() {
           ),
         }}
         filters={filters}
-        extraQuery={useMemo<CrudExtraQuerySchema[]>(
-          () => [
-            {
-              name: 'status',
-              transform: ({ value }) => ({ filter: { status: value }, op: { status: '=' } }),
-            },
-          ],
-          [],
-        )}
+        extraQuery={extraQuery}
         extra={
           <Button type="primary" icon={<CloudUploadOutlined />} onClick={openCreate}>
             {t('system.announcementManagement.action.createAnnouncement', '发布公告')}
@@ -331,133 +249,26 @@ export default function AdminAnnouncementManagementPage() {
         rowActions={{
           width: 190,
           render: ({ record, action }) => (
-            <Space size={4} wrap>
-              <Button
-                size="small"
-                type="link"
-                onClick={() => {
-                  setDetail(record);
-                  setDetailOpen(true);
-                }}
-              >
-                {t('system.announcementManagement.action.detail', '详情')}
-              </Button>
-              {['draft', 'scheduled', 'active', 'expired'].includes(record.status) ? (
-                <Button size="small" type="link" onClick={() => openEdit(record)}>
-                  {t('system.announcementManagement.action.edit', '编辑')}
-                </Button>
-              ) : null}
-              {record.status === 'draft' || record.status === 'scheduled' ? (
-                <TrueAdminConfirmAction
-                  size="small"
-                  type="link"
-                  confirm={t('system.announcementManagement.confirm.publish', '确认发布该公告吗？')}
-                  successMessage={t('system.announcementManagement.success.publish', '公告已发布')}
-                  action={async () => {
-                    await adminNotificationManagementApi.publishAnnouncement(record.id).send();
-                    action.reload();
-                  }}
-                >
-                  {t('system.announcementManagement.action.publish', '发布')}
-                </TrueAdminConfirmAction>
-              ) : null}
-              {record.status === 'scheduled' ? (
-                <TrueAdminConfirmAction
-                  danger
-                  size="small"
-                  type="link"
-                  confirm={t(
-                    'system.announcementManagement.confirm.cancelScheduled',
-                    '取消后会退回草稿状态。',
-                  )}
-                  successMessage={t(
-                    'system.announcementManagement.success.cancelScheduled',
-                    '定时发布已取消',
-                  )}
-                  action={async () => {
-                    await adminNotificationManagementApi
-                      .cancelScheduledAnnouncement(record.id)
-                      .send();
-                    action.reload();
-                  }}
-                >
-                  {t('system.announcementManagement.action.cancelScheduled', '取消')}
-                </TrueAdminConfirmAction>
-              ) : null}
-              {record.status === 'draft' ? (
-                <TrueAdminConfirmAction
-                  danger
-                  size="small"
-                  type="link"
-                  confirm={t(
-                    'system.announcementManagement.confirm.deleteDraft',
-                    '删除后不可恢复。',
-                  )}
-                  successMessage={t(
-                    'system.announcementManagement.success.deleteDraft',
-                    '草稿已删除',
-                  )}
-                  action={async () => {
-                    await adminNotificationManagementApi.deleteDraftAnnouncement(record.id).send();
-                    action.reload();
-                  }}
-                >
-                  {t('system.announcementManagement.action.delete', '删除')}
-                </TrueAdminConfirmAction>
-              ) : null}
-              {record.status === 'active' ? (
-                <TrueAdminConfirmAction
-                  danger
-                  size="small"
-                  type="link"
-                  confirm={t('system.announcementManagement.confirm.offline', '确认下线该公告吗？')}
-                  successMessage={t('system.announcementManagement.success.offline', '公告已下线')}
-                  action={async () => {
-                    await adminNotificationManagementApi.offlineAnnouncement(record.id).send();
-                    action.reload();
-                  }}
-                >
-                  {t('system.announcementManagement.action.offline', '下线')}
-                </TrueAdminConfirmAction>
-              ) : null}
-              {record.status === 'offline' || record.status === 'expired' ? (
-                <TrueAdminConfirmAction
-                  size="small"
-                  type="link"
-                  confirm={t('system.announcementManagement.confirm.restore', '确认恢复该公告吗？')}
-                  successMessage={t('system.announcementManagement.success.restore', '公告已恢复')}
-                  action={async () => {
-                    await adminNotificationManagementApi.restoreAnnouncement(record.id).send();
-                    action.reload();
-                  }}
-                >
-                  {t('system.announcementManagement.action.restore', '恢复')}
-                </TrueAdminConfirmAction>
-              ) : null}
-            </Space>
+            <AnnouncementRowActions
+              action={action}
+              record={record}
+              t={t}
+              onDetail={(nextRecord) => {
+                setDetail(nextRecord);
+                setDetailOpen(true);
+              }}
+              onEdit={openEdit}
+            />
           ),
         }}
-        toolbarRender={({ query, response }) => {
-          const currentStatus =
-            (query.values.status as AdminAnnouncementStatus | undefined) ?? 'all';
-          const scheduledCount = response?.meta?.statusStats?.scheduled ?? 0;
-          return (
-            <TrueAdminQuickFilter<AdminAnnouncementStatus | 'all'>
-              value={currentStatus}
-              items={[
-                { label: t('notification.tab.all', '全部'), value: 'all' },
-                { label: statusText.draft, value: 'draft' },
-                { count: scheduledCount, label: statusText.scheduled, value: 'scheduled' },
-                { label: statusText.active, value: 'active' },
-                { label: statusText.expired, value: 'expired' },
-                { label: statusText.offline, value: 'offline' },
-              ]}
-              onChange={(nextStatus) =>
-                query.setValue('status', nextStatus === 'all' ? undefined : nextStatus)
-              }
-            />
-          );
-        }}
+        toolbarRender={({ query, response }) => (
+          <AnnouncementStatusFilter
+            query={query}
+            response={response}
+            statusText={statusText}
+            t={t}
+          />
+        )}
         tableProps={{ size: 'middle' }}
         paginationProps={{ showQuickJumper: true }}
         tableScrollX={1180}
