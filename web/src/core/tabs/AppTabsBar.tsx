@@ -7,11 +7,16 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { requestWorkspaceScrollTop } from '@/core/layout/workspaceScrollStore';
 import { playDropBackAnimation, useTabMoveAnimation } from './AppTabsBarAnimation';
 import { useAppTabsCloseActions } from './AppTabsBarClose';
+import {
+  useEnteringTabKeys,
+  useScrollActiveTabIntoView,
+  useTabsWheelScroll,
+} from './AppTabsBarEffects';
 import {
   restrictToHorizontalAxis,
   SortableTabGroup,
@@ -19,13 +24,7 @@ import {
   TabsMoreButton,
   useTabActions,
 } from './AppTabsBarItems';
-import {
-  type ClosingTabState,
-  ENTER_ANIMATION_MS,
-  isSamePath,
-  type PendingDropAnimation,
-  toPixelDelta,
-} from './AppTabsBarUtils';
+import { type ClosingTabState, isSamePath, type PendingDropAnimation } from './AppTabsBarUtils';
 import { useTabsStore } from './tabsStore';
 import type { AppTab } from './types';
 
@@ -36,9 +35,8 @@ export function AppTabsBar({ activeKey }: { activeKey?: string }) {
   const reorderTabs = useTabsStore((state) => state.reorderTabs);
   const scrollRef = useRef<HTMLUListElement>(null);
   const pendingDropAnimationRef = useRef<PendingDropAnimation | undefined>(undefined);
-  const seenTabKeysRef = useRef<Set<string> | undefined>(undefined);
   const [closingTabs, setClosingTabs] = useState<Record<string, ClosingTabState>>({});
-  const [enteringKeys, setEnteringKeys] = useState<string[]>([]);
+  const enteringKeys = useEnteringTabKeys(tabs, closingTabs);
   const pinnedTabs = useMemo(() => tabs.filter((tab) => tab.pinned), [tabs]);
   const normalTabs = useMemo(() => tabs.filter((tab) => !tab.pinned), [tabs]);
   const tabLayoutKey = useMemo(
@@ -88,39 +86,8 @@ export function AppTabsBar({ activeKey }: { activeKey?: string }) {
   }, []);
 
   useTabMoveAnimation(scrollRef, tabLayoutKey, takePendingDropAnimation);
-
-  useLayoutEffect(() => {
-    const nextKeys = new Set(tabs.map((tab) => tab.key));
-    const previousKeys = seenTabKeysRef.current;
-
-    if (!previousKeys) {
-      seenTabKeysRef.current = nextKeys;
-      return;
-    }
-
-    const newKeys = tabs
-      .map((tab) => tab.key)
-      .filter((key) => !previousKeys.has(key) && !closingTabs[key]);
-
-    seenTabKeysRef.current = nextKeys;
-    if (newKeys.length === 0) {
-      return;
-    }
-
-    setEnteringKeys((keys) => Array.from(new Set([...keys, ...newKeys])));
-    const timer = window.setTimeout(() => {
-      setEnteringKeys((keys) => keys.filter((key) => !newKeys.includes(key)));
-    }, ENTER_ANIMATION_MS);
-
-    return () => window.clearTimeout(timer);
-  }, [closingTabs, tabs]);
-
-  useEffect(() => {
-    const activeNode = scrollRef.current?.querySelector<HTMLElement>(
-      `[data-tab-key="${window.CSS.escape(activeKey ?? '')}"]`,
-    );
-    activeNode?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-  }, [activeKey, tabs.length]);
+  useScrollActiveTabIntoView(scrollRef, activeKey, tabs.length);
+  useTabsWheelScroll(scrollRef);
 
   const activateTab = (tab: AppTab) => {
     if (!isSamePath(location.pathname, tab.path)) {
@@ -133,40 +100,6 @@ export function AppTabsBar({ activeKey }: { activeKey?: string }) {
       requestWorkspaceScrollTop(tab.key);
     }
   };
-
-  const handleTabsWheel = useCallback((event: WheelEvent) => {
-    const target = scrollRef.current;
-    if (!target) {
-      return;
-    }
-
-    const maxScrollLeft = target.scrollWidth - target.clientWidth;
-    if (maxScrollLeft <= 0 || event.deltaY === 0) {
-      return;
-    }
-
-    const delta = toPixelDelta(event, target);
-    const nextScrollLeft = Math.max(0, Math.min(maxScrollLeft, target.scrollLeft + delta));
-    if (nextScrollLeft === target.scrollLeft) {
-      return;
-    }
-
-    event.preventDefault();
-    target.scrollLeft = nextScrollLeft;
-  }, []);
-
-  useEffect(() => {
-    const target = scrollRef.current;
-    if (!target) {
-      return;
-    }
-
-    target.addEventListener('wheel', handleTabsWheel, { passive: false });
-
-    return () => {
-      target.removeEventListener('wheel', handleTabsWheel);
-    };
-  }, [handleTabsWheel]);
 
   const handleDragEnd = ({ active, delta, over }: DragEndEvent) => {
     const activeKey = String(active.id);
