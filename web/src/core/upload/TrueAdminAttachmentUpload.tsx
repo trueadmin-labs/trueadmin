@@ -1,44 +1,30 @@
-import {
-  DeleteOutlined,
-  DownloadOutlined,
-  EditOutlined,
-  EyeOutlined,
-  FileOutlined,
-  InboxOutlined,
-} from '@ant-design/icons';
+import { InboxOutlined } from '@ant-design/icons';
 import type { UploadProps } from 'antd';
-import { Button, Empty, Input, message, Space, Tooltip, Upload } from 'antd';
+import { Empty, message, Upload } from 'antd';
 import type { RcFile, UploadFile } from 'antd/es/upload/interface';
 import type { ReactNode } from 'react';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useTrueAdminDownload } from '@/core/download';
 import { useI18n } from '@/core/i18n/I18nProvider';
+import type {
+  AnimatedAttachment,
+  TrueAdminAttachmentId,
+  TrueAdminAttachmentUploadResult,
+  TrueAdminAttachmentValue,
+} from './attachmentUploadUtils';
+import {
+  attachmentMotionDuration,
+  getAttachmentDisplayName,
+  normalizeAttachmentResult,
+} from './attachmentUploadUtils';
+import { TrueAdminAttachmentList } from './TrueAdminAttachmentList';
 import { TrueAdminUploadPreview, type TrueAdminUploadPreviewProps } from './TrueAdminUploadPreview';
 
-export type TrueAdminAttachmentId = string | number;
-
-export type TrueAdminAttachmentValue = {
-  id: TrueAdminAttachmentId;
-  name: string;
-  url: string;
-  extension?: string;
-  size?: number;
-  mimeType?: string;
-};
-
-export type TrueAdminAttachmentUploadResult = Partial<TrueAdminAttachmentValue> & {
-  id?: TrueAdminAttachmentId;
-  name?: string;
-  originalName?: string;
-  originName?: string;
-  origin_name?: string;
-  url?: string;
-  extension?: string;
-  suffix?: string;
-  size?: number;
-  mimeType?: string;
-  type?: string;
-};
+export type {
+  TrueAdminAttachmentId,
+  TrueAdminAttachmentUploadResult,
+  TrueAdminAttachmentValue,
+} from './attachmentUploadUtils';
 
 export type TrueAdminAttachmentUploadProps = Omit<
   UploadProps,
@@ -65,72 +51,6 @@ export type TrueAdminAttachmentUploadProps = Omit<
   editableName?: boolean;
   emptyText?: ReactNode;
 };
-
-const imageExtensions = new Set(['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp']);
-const attachmentMotionDuration = 220;
-
-type AnimatedAttachment = {
-  file: TrueAdminAttachmentValue;
-  phase: 'enter' | 'active' | 'leave';
-};
-
-function splitName(filename: string) {
-  const index = filename.lastIndexOf('.');
-  if (index <= 0 || index === filename.length - 1) {
-    return { name: filename, extension: undefined };
-  }
-
-  return {
-    name: filename.slice(0, index),
-    extension: filename.slice(index + 1).toLowerCase(),
-  };
-}
-
-function normalizeAttachmentResult(
-  result: TrueAdminAttachmentUploadResult | undefined,
-  file: File,
-): TrueAdminAttachmentValue {
-  const fallback = splitName(file.name);
-  const raw = result ?? {};
-  const rawName = raw.name ?? raw.originalName ?? raw.originName ?? raw.origin_name ?? file.name;
-  const rawExtension = raw.extension ?? raw.suffix;
-  const normalizedName = rawExtension
-    ? rawName.replace(new RegExp(`\\.${rawExtension}$`, 'i'), '')
-    : splitName(rawName).name;
-
-  return {
-    id: raw.id ?? `${Date.now()}-${file.name}`,
-    name: normalizedName || fallback.name,
-    url: raw.url ?? URL.createObjectURL(file),
-    extension: (rawExtension ?? splitName(rawName).extension ?? fallback.extension)?.toLowerCase(),
-    size: raw.size ?? file.size,
-    mimeType: raw.mimeType ?? raw.type ?? file.type,
-  };
-}
-
-function getAttachmentDisplayName(file: TrueAdminAttachmentValue) {
-  return file.extension ? `${file.name}.${file.extension}` : file.name;
-}
-
-function getFileTypeLabel(file: TrueAdminAttachmentValue) {
-  return (file.extension || 'file').slice(0, 4).toUpperCase();
-}
-
-function formatFileSize(size?: number) {
-  if (!size) {
-    return '';
-  }
-
-  if (size < 1024) {
-    return `${size} B`;
-  }
-
-  if (size < 1024 * 1024) {
-    return `${(size / 1024).toFixed(1)} KB`;
-  }
-
-  return `${(size / 1024 / 1024).toFixed(1)} MB`;
-}
 
 export function TrueAdminAttachmentUpload({
   drag = true,
@@ -359,98 +279,19 @@ export function TrueAdminAttachmentUpload({
       >
         <div ref={contentRef} className="trueadmin-attachment-upload">
           {animatedFiles.length ? (
-            <div className="trueadmin-attachment-list">
-              {animatedFiles.map(({ file, phase }) => {
-                const isEditing = editingId === file.id;
-                const isImage = imageExtensions.has(file.extension?.toLowerCase() ?? '');
-                return (
-                  <div
-                    key={file.id}
-                    className={`trueadmin-attachment-item-shell is-${phase}`}
-                    aria-hidden={phase === 'leave' ? true : undefined}
-                  >
-                    <div className="trueadmin-attachment-item-clip">
-                      <div className="trueadmin-attachment-item">
-                        <div className="trueadmin-attachment-thumb">
-                          {isImage ? (
-                            <img src={file.url} alt={file.name} />
-                          ) : (
-                            <span>{getFileTypeLabel(file)}</span>
-                          )}
-                        </div>
-                        <div className="trueadmin-attachment-meta">
-                          {isEditing ? (
-                            <Input
-                              size="small"
-                              value={editingName}
-                              autoFocus
-                              onChange={(event) => setEditingName(event.target.value)}
-                              onBlur={() => confirmEdit(file)}
-                              onPressEnter={() => confirmEdit(file)}
-                            />
-                          ) : (
-                            <Tooltip title={getAttachmentDisplayName(file)}>
-                              <button
-                                type="button"
-                                className="trueadmin-attachment-name"
-                                onClick={() => preview(file)}
-                              >
-                                <FileOutlined />
-                                <span>{getAttachmentDisplayName(file)}</span>
-                              </button>
-                            </Tooltip>
-                          )}
-                          <div className="trueadmin-attachment-subtitle">
-                            {[file.extension?.toUpperCase(), formatFileSize(file.size)]
-                              .filter(Boolean)
-                              .join(' · ')}
-                          </div>
-                        </div>
-                        <Space size={2} className="trueadmin-attachment-actions">
-                          <Tooltip title={t('upload.attachment.preview', '预览')}>
-                            <Button
-                              type="text"
-                              size="small"
-                              icon={<EyeOutlined />}
-                              onClick={() => preview(file)}
-                            />
-                          </Tooltip>
-                          <Tooltip title={t('upload.attachment.download', '下载')}>
-                            <Button
-                              type="text"
-                              size="small"
-                              icon={<DownloadOutlined />}
-                              onClick={() => downloadAttachment(file)}
-                            />
-                          </Tooltip>
-                          {!readonly && editableName ? (
-                            <Tooltip title={t('upload.attachment.editName', '编辑名称')}>
-                              <Button
-                                type="text"
-                                size="small"
-                                icon={<EditOutlined />}
-                                onClick={() => startEdit(file)}
-                              />
-                            </Tooltip>
-                          ) : null}
-                          {!readonly ? (
-                            <Tooltip title={t('upload.attachment.remove', '删除')}>
-                              <Button
-                                danger
-                                type="text"
-                                size="small"
-                                icon={<DeleteOutlined />}
-                                onClick={() => handleRemove(file.id)}
-                              />
-                            </Tooltip>
-                          ) : null}
-                        </Space>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <TrueAdminAttachmentList
+              editableName={editableName}
+              editingId={editingId}
+              editingName={editingName}
+              files={animatedFiles}
+              readonly={readonly}
+              onConfirmEdit={confirmEdit}
+              onDownload={downloadAttachment}
+              onEditingNameChange={setEditingName}
+              onPreview={preview}
+              onRemove={handleRemove}
+              onStartEdit={startEdit}
+            />
           ) : null}
           {canUpload ? <div className="trueadmin-attachment-upload-trigger">{uploader}</div> : null}
           {showEmpty ? (

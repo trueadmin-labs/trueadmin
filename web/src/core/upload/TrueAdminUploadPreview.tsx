@@ -6,7 +6,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { useTrueAdminDownload } from '@/core/download';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { TrueAdminModal } from '@/core/modal';
-import type { TrueAdminAttachmentValue } from './TrueAdminAttachmentUpload';
+import type { TrueAdminAttachmentValue } from './attachmentUploadUtils';
 
 export type TrueAdminUploadPreviewClassNames = {
   root?: string;
