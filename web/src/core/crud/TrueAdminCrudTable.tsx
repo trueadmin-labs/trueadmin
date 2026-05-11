@@ -1,5 +1,5 @@
 import type { TableProps } from 'antd';
-import { App, Button, Card, Empty, Result, Table } from 'antd';
+import { App, Card } from 'antd';
 import type { SorterResult } from 'antd/es/table/interface';
 import { useCallback, useMemo, useState } from 'react';
 import { errorCenter } from '@/core/error/errorCenter';
@@ -15,6 +15,7 @@ import {
   TrueAdminCrudTablePagination,
   TrueAdminCrudTableSelectionStatus,
 } from './TrueAdminCrudTablePagination';
+import { TrueAdminCrudTableView } from './TrueAdminCrudTableView';
 import { TrueAdminImportModal } from './TrueAdminImportModal';
 import { TrueAdminTableFilterPanel } from './TrueAdminTableFilterPanel';
 import { TrueAdminTableToolbar } from './TrueAdminTableToolbar';
@@ -343,40 +344,23 @@ export function TrueAdminCrudTable<
     />
   );
 
-  const emptyContent = locale?.emptyText ??
-    emptyRender?.(tableRenderContext) ??
-    tableProps?.locale?.emptyText ?? <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />;
-  const tableDom = error ? (
-    (errorRender?.(tableRenderContext) ?? (
-      <Result
-        status="error"
-        title={locale?.errorTitle ?? t('crud.error.loadFailed', '数据加载失败')}
-        subTitle={
-          locale?.errorDescription ??
-          t('crud.error.loadFailedDescription', '请稍后重试或联系管理员。')
-        }
-        extra={
-          <Button type="primary" onClick={reload}>
-            {locale?.reloadText ?? t('crud.action.reload', '刷新')}
-          </Button>
-        }
-      />
-    ))
-  ) : (
-    <Table<TRecord>
-      {...tableProps}
-      rowKey={rowKey as TableProps<TRecord>['rowKey']}
+  const tableDom = (
+    <TrueAdminCrudTableView<TRecord, TCreate, TUpdate, TMeta>
       columns={mergedColumns}
       dataSource={dataSource}
+      emptyRender={emptyRender}
+      error={error}
+      errorRender={errorRender}
       loading={loading}
-      locale={{ ...tableProps?.locale, emptyText: emptyContent }}
-      pagination={false}
-      rowSelection={mergedRowSelection}
-      scroll={{
-        ...tableProps?.scroll,
-        x: tableProps?.scroll?.x ?? tableScrollX,
-        y: tableProps?.scroll?.y ?? tableBodyScrollY,
-      }}
+      locale={locale}
+      mergedRowSelection={mergedRowSelection}
+      renderContext={tableRenderContext}
+      reload={reload}
+      rowKey={rowKey}
+      tableBodyScrollY={tableBodyScrollY}
+      tableProps={tableProps}
+      tableScrollX={tableScrollX}
+      t={t}
       onChange={handleTableChange}
     />
   );
