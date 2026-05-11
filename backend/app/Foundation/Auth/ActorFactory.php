@@ -18,6 +18,8 @@ final class ActorFactory
         ?int $primaryDeptId = null,
         array $deptIds = [],
         ?int $operationDeptId = null,
+        string $avatar = '',
+        array $preferences = [],
     ): Actor {
         $operationDeptId ??= $primaryDeptId;
 
@@ -28,12 +30,14 @@ final class ActorFactory
             source: 'http',
             claims: [
                 'nickname' => $nickname,
+                'avatar' => $avatar,
                 'roles' => $roles,
                 'roleIds' => $roleIds,
                 'permissions' => $permissions,
                 'primaryDeptId' => $primaryDeptId,
                 'deptIds' => $deptIds,
                 'operationDeptId' => $operationDeptId,
+                'preferences' => $preferences,
             ],
         );
     }

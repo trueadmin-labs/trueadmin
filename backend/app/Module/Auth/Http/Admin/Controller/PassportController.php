@@ -63,11 +63,13 @@ final class PassportController extends AdminController
             'id' => $actor->id,
             'username' => $actor->name,
             'nickname' => $actor->claims['nickname'] ?? $actor->name,
+            'avatar' => $actor->claims['avatar'] ?? '',
             'roles' => $actor->claims['roles'] ?? [],
             'permissions' => $actor->claims['permissions'] ?? [],
             'primaryDeptId' => $actor->claims['primaryDeptId'] ?? null,
             'deptIds' => $actor->claims['deptIds'] ?? [],
             'operationDeptId' => $actor->claims['operationDeptId'] ?? null,
+            'preferences' => $actor->claims['preferences'] ?? [],
         ]);
     }
 }

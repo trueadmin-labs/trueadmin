@@ -42,11 +42,13 @@ final class AdminIdentityService implements AdminIdentityProviderInterface
             (int) $user->getAttribute('id'),
             (string) $user->getAttribute('username'),
             (string) $user->getAttribute('nickname'),
+            (string) $user->getAttribute('avatar'),
             $this->users->roleCodes($user),
             $this->users->roleIds($user),
             $this->users->permissions($user),
             $user->getAttribute('primary_dept_id') === null ? null : (int) $user->getAttribute('primary_dept_id'),
             $this->users->departmentIds($user),
+            is_array($user->getAttribute('preferences')) ? $user->getAttribute('preferences') : [],
         );
     }
 }

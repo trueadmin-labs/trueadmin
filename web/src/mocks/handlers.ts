@@ -20,6 +20,8 @@ const users = [
     id: 1,
     username: 'admin',
     nickname: '超级管理员',
+    avatar: '',
+    preferences: {},
     status: 'enabled',
     primaryDeptId: null,
     deptIds: [],
@@ -279,6 +281,48 @@ const notificationDeliveries: AdminNotificationDelivery[] = [
   },
 ];
 
+const loginLogs = [
+  {
+    id: 1,
+    adminUserId: 1,
+    username: 'admin',
+    ip: '127.0.0.1',
+    userAgent: 'Mozilla/5.0 Mock Browser',
+    status: 'success',
+    reason: '',
+    createdAt: '2026-05-09 10:30:00',
+    updatedAt: '2026-05-09 10:30:00',
+  },
+  {
+    id: 2,
+    adminUserId: null,
+    username: 'demo',
+    ip: '127.0.0.1',
+    userAgent: 'Mozilla/5.0 Mock Browser',
+    status: 'failed',
+    reason: 'password_not_match',
+    createdAt: '2026-05-09 10:20:00',
+    updatedAt: '2026-05-09 10:20:00',
+  },
+];
+
+const operationLogs = [
+  {
+    id: 1,
+    module: 'system',
+    action: 'admin.profile.update',
+    remark: '更新个人资料',
+    principalType: 'admin_user',
+    principalId: '1',
+    operatorType: 'admin',
+    operatorId: '1',
+    operationDeptId: null,
+    context: { nickname: '超级管理员' },
+    createdAt: '2026-05-09 10:35:00',
+    updatedAt: '2026-05-09 10:35:00',
+  },
+];
+
 const getNotificationTargetSummary = (body: {
   targetType?: AdminAnnouncementTargetType;
   targetRoleIds?: number[];
@@ -316,6 +360,8 @@ export const handlers = [
       id: 1,
       username: 'admin',
       nickname: '超级管理员',
+      avatar: '',
+      preferences: users[0].preferences,
       roles: ['super-admin'],
       permissions: ['*'],
       primaryDeptId: null,
@@ -419,10 +465,81 @@ export const handlers = [
             type: 'menu',
             status: 'enabled',
           },
+          {
+            code: 'system.loginLogs',
+            title: '登录日志',
+            i18n: 'menu.system.loginLogs',
+            path: '/system-config/login-logs',
+            icon: 'LoginOutlined',
+            type: 'menu',
+            status: 'enabled',
+          },
+          {
+            code: 'system.operationLogs',
+            title: '操作日志',
+            i18n: 'menu.system.operationLogs',
+            path: '/system-config/operation-logs',
+            icon: 'AuditOutlined',
+            type: 'menu',
+            status: 'enabled',
+          },
         ],
       },
     ]),
   ),
+  http.get('/api/admin/profile', () => success(users[0])),
+  http.put('/api/admin/profile', async ({ request }) => {
+    const body = (await request.json()) as { nickname?: string; avatar?: string };
+    Object.assign(users[0], {
+      nickname: body.nickname || users[0].nickname,
+      avatar: body.avatar ?? users[0].avatar,
+      updatedAt: now,
+    });
+    return success(users[0]);
+  }),
+  http.put('/api/admin/profile/password', () => success(null)),
+  http.put('/api/admin/profile/preferences', async ({ request }) => {
+    const body = (await request.json()) as {
+      namespace?: string;
+      values?: Record<string, unknown>;
+    };
+    if (!body.namespace || !body.values) {
+      return fail('KERNEL.REQUEST.VALIDATION_FAILED', '参数错误');
+    }
+
+    Object.assign(users[0], {
+      preferences: {
+        ...users[0].preferences,
+        [body.namespace]: body.values,
+      },
+      updatedAt: now,
+    });
+    return success(users[0]);
+  }),
+  http.get('/api/admin/system-config/login-logs', ({ request }) => {
+    const url = new URL(request.url);
+    const page = Number(url.searchParams.get('page') || 1);
+    const pageSize = Number(url.searchParams.get('pageSize') || 20);
+    const start = Math.max(0, (page - 1) * pageSize);
+    return success({
+      items: loginLogs.slice(start, start + pageSize),
+      total: loginLogs.length,
+      page,
+      pageSize,
+    });
+  }),
+  http.get('/api/admin/system-config/operation-logs', ({ request }) => {
+    const url = new URL(request.url);
+    const page = Number(url.searchParams.get('page') || 1);
+    const pageSize = Number(url.searchParams.get('pageSize') || 20);
+    const start = Math.max(0, (page - 1) * pageSize);
+    return success({
+      items: operationLogs.slice(start, start + pageSize),
+      total: operationLogs.length,
+      page,
+      pageSize,
+    });
+  }),
   http.get('/api/admin/organization/departments/tree', () => success(departmentTree)),
   http.get('/api/admin/organization/users', ({ request }) => {
     const url = new URL(request.url);

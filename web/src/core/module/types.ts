@@ -1,5 +1,6 @@
-import type { ComponentType, LazyExoticComponent } from 'react';
+import type { ComponentType, LazyExoticComponent, ReactNode } from 'react';
 import type { ErrorRegistry } from '@/core/error/types';
+import type { TranslateFunction, TransText } from '@/core/i18n/trans';
 import type { TrueAdminIconInput } from '@/core/icon/TrueAdminIcon';
 import type { AppMenu } from '@/core/menu/types';
 import type { AdminMessageSourceConfig, AdminMessageTypeConfig } from '@/core/notification/types';
@@ -56,6 +57,34 @@ export type ModuleNotificationManifest = {
   types?: Record<string, ModuleNotificationTypeConfig>;
 };
 
+export type ProfilePreferenceRenderContext<TValue = Record<string, unknown>> = {
+  namespace: string;
+  value: TValue;
+  preferences: Record<string, unknown>;
+  saving: boolean;
+  save: (values: TValue) => Promise<void>;
+  t: TranslateFunction;
+};
+
+export type ProfilePreferenceApplyContext = {
+  namespace: string;
+  value: unknown;
+  preferences: Record<string, unknown>;
+};
+
+export type ProfilePreferenceManifest<TValue = Record<string, unknown>> = {
+  key: string;
+  title: string | TransText;
+  description?: string | TransText;
+  sort?: number;
+  apply?: (context: ProfilePreferenceApplyContext) => void;
+  render: (context: ProfilePreferenceRenderContext<TValue>) => ReactNode;
+};
+
+export type ModuleProfileManifest = {
+  preferences?: ProfilePreferenceManifest[];
+};
+
 export type ModuleManifest = {
   id: string;
   routes?: FrontendRoute[];
@@ -64,6 +93,7 @@ export type ModuleManifest = {
   icons?: IconLoader;
   errors?: ErrorRegistry;
   notification?: ModuleNotificationManifest;
+  profile?: ModuleProfileManifest;
 };
 
 export const defineModule = <T extends ModuleManifest>(manifest: T): T => manifest;

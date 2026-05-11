@@ -235,6 +235,8 @@ final class AdminUserManagementService extends AbstractService
             'id' => (int) $user->getAttribute('id'),
             'username' => (string) $user->getAttribute('username'),
             'nickname' => (string) $user->getAttribute('nickname'),
+            'avatar' => (string) $user->getAttribute('avatar'),
+            'preferences' => is_array($user->getAttribute('preferences')) ? $user->getAttribute('preferences') : [],
             'status' => (string) $user->getAttribute('status'),
             'primaryDeptId' => $user->getAttribute('primary_dept_id') === null ? null : (int) $user->getAttribute('primary_dept_id'),
             'createdAt' => (string) $user->getAttribute('created_at'),

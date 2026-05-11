@@ -10,11 +10,13 @@ final readonly class AuthUser
         public int $id,
         public string $username,
         public string $nickname,
+        public string $avatar,
         public array $roles,
         public array $roleIds,
         public array $permissions,
         public ?int $primaryDeptId,
         public array $deptIds,
+        public array $preferences,
     ) {
     }
 
@@ -24,11 +26,13 @@ final readonly class AuthUser
             'id' => $this->id,
             'username' => $this->username,
             'nickname' => $this->nickname,
+            'avatar' => $this->avatar,
             'roles' => $this->roles,
             'roleIds' => $this->roleIds,
             'permissions' => $this->permissions,
             'primaryDeptId' => $this->primaryDeptId,
             'deptIds' => $this->deptIds,
+            'preferences' => $this->preferences,
         ];
     }
 }

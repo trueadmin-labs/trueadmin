@@ -2,6 +2,10 @@ import { Descriptions, Tag } from 'antd';
 import { createElement, lazy } from 'react';
 import { trans } from '@/core/i18n/trans';
 import { defineModule } from '@/core/module/types';
+import {
+  EXAMPLE_PROFILE_PREFERENCE_KEY,
+  ExampleProfilePreferencePanel,
+} from './pages/ExampleProfilePreferencePanel';
 
 export default defineModule({
   id: 'true-admin.examples',
@@ -340,5 +344,20 @@ export default defineModule({
           ),
       },
     },
+  },
+  profile: {
+    preferences: [
+      {
+        key: EXAMPLE_PROFILE_PREFERENCE_KEY,
+        title: trans('examples.profilePreference.title', '开发示例偏好'),
+        description: trans(
+          'examples.profilePreference.description',
+          '演示插件如何向个人中心注册自己的配置面板。',
+        ),
+        sort: 9000,
+        render: ({ value, saving, save }) =>
+          createElement(ExampleProfilePreferencePanel, { value, saving, onSave: save }),
+      },
+    ],
   },
 });

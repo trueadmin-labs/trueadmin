@@ -213,13 +213,93 @@ final class AdminUserRepository extends AbstractRepository
             'id' => (int) $user->getAttribute('id'),
             'username' => (string) $user->getAttribute('username'),
             'nickname' => (string) $user->getAttribute('nickname'),
+            'avatar' => (string) $user->getAttribute('avatar'),
+            'preferences' => $this->preferences($user),
             'status' => (string) $user->getAttribute('status'),
             'primaryDeptId' => $user->getAttribute('primary_dept_id') === null ? null : (int) $user->getAttribute('primary_dept_id'),
+            'primaryDeptName' => $this->primaryDepartmentName($user),
+            'primaryDeptPath' => $this->primaryDepartmentPath($user),
             'deptIds' => $this->departmentIds($user),
             'roles' => $this->roleCodes($user),
+            'roleNames' => $this->roleNames($user),
             'roleIds' => $this->roleIds($user),
             'createdAt' => (string) $user->getAttribute('created_at'),
             'updatedAt' => (string) $user->getAttribute('updated_at'),
         ];
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function roleNames(AdminUser $user): array
+    {
+        return $user->roles()
+            ->where('admin_roles.status', 'enabled')
+            ->pluck('name')
+            ->map(static fn ($name): string => (string) $name)
+            ->values()
+            ->all();
+    }
+
+    private function primaryDepartmentName(AdminUser $user): string
+    {
+        $department = $this->primaryDepartment($user);
+
+        return $department === null ? '' : (string) $department->name;
+    }
+
+    private function primaryDepartmentPath(AdminUser $user): string
+    {
+        $department = $this->primaryDepartment($user);
+        if ($department === null) {
+            return '';
+        }
+
+        $ids = array_values(array_filter(
+            array_map('intval', explode(',', (string) $department->path)),
+            static fn (int $id): bool => $id > 0,
+        ));
+        $ids[] = (int) $department->id;
+
+        $names = Db::table('admin_departments')
+            ->whereIn('id', $ids)
+            ->pluck('name', 'id')
+            ->all();
+
+        $pathNames = [];
+        foreach ($ids as $id) {
+            if (isset($names[$id])) {
+                $pathNames[] = (string) $names[$id];
+            }
+        }
+
+        return implode('/', $pathNames);
+    }
+
+    private function primaryDepartment(AdminUser $user): ?object
+    {
+        $primaryDeptId = $user->getAttribute('primary_dept_id');
+        if ($primaryDeptId === null) {
+            return null;
+        }
+
+        $department = Db::table('admin_departments')
+            ->where('id', (int) $primaryDeptId)
+            ->first(['id', 'name', 'path']);
+
+        return is_object($department) ? $department : null;
+    }
+
+    public function passwordHash(AdminUser $user): string
+    {
+        return (string) $user->getAttribute('password');
+    }
+
+    /** @return array<string, mixed> */
+    private function preferences(AdminUser $user): array
+    {
+        $preferences = $user->getAttribute('preferences');
+
+        return is_array($preferences) ? $preferences : [];
     }
 }

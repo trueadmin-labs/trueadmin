@@ -1,6 +1,11 @@
-import { lazy } from 'react';
+import { createElement, lazy } from 'react';
 import { trans } from '@/core/i18n/trans';
 import { defineModule } from '@/core/module/types';
+import { SystemLayoutPreferencePanel } from './pages/profile/SystemLayoutPreferencePanel';
+import {
+  applySystemLayoutPreference,
+  SYSTEM_LAYOUT_PREFERENCE_KEY,
+} from './profile/layoutPreference';
 
 export default defineModule({
   id: 'system',
@@ -24,6 +29,21 @@ export default defineModule({
       path: '/system-config/menus',
       component: lazy(() => import('./pages/menus')),
       meta: { title: 'system.menus.title', auth: true },
+    },
+    {
+      path: '/system-config/login-logs',
+      component: lazy(() => import('./pages/login-logs')),
+      meta: { title: 'system.loginLogs.title', auth: true },
+    },
+    {
+      path: '/system-config/operation-logs',
+      component: lazy(() => import('./pages/operation-logs')),
+      meta: { title: 'system.operationLogs.title', auth: true },
+    },
+    {
+      path: '/profile',
+      component: lazy(() => import('./pages/profile')),
+      meta: { title: 'system.profile.title', auth: true },
     },
     {
       path: '/link-frame/:id',
@@ -55,6 +75,22 @@ export default defineModule({
     sources: {
       system: { label: trans('system.messages.source.system', '系统') },
     },
+  },
+  profile: {
+    preferences: [
+      {
+        key: SYSTEM_LAYOUT_PREFERENCE_KEY,
+        title: trans('system.profile.preferences.interface', '界面设置'),
+        description: trans(
+          'system.profile.preferences.interfaceDescription',
+          '配置当前账号的主题、布局和显示偏好。',
+        ),
+        sort: 10,
+        apply: ({ value }) => applySystemLayoutPreference(value),
+        render: ({ saving, save }) =>
+          createElement(SystemLayoutPreferencePanel, { saving, onSave: save }),
+      },
+    ],
   },
   locales: {
     'zh-CN': () => import('./locales/zh-CN'),

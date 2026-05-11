@@ -57,6 +57,21 @@ export default {
   'examples.notification.result.titleField': 'Title',
   'examples.notification.result.delivery': 'Delivery',
   'examples.notification.result.empty': 'No result yet',
+  'examples.profilePreference.title': 'Example Preferences',
+  'examples.profilePreference.description':
+    'Demonstrates how a plugin registers its own profile settings panel.',
+  'examples.profilePreference.notice': 'This profile preferences panel is registered by a plugin',
+  'examples.profilePreference.noticeDesc':
+    'It demonstrates how a plugin registers custom settings, reads current values, and saves them to its own namespace.',
+  'examples.profilePreference.density': 'Example display density',
+  'examples.profilePreference.density.comfortable': 'Comfortable',
+  'examples.profilePreference.density.compact': 'Compact',
+  'examples.profilePreference.showTips': 'Show example tips',
+  'examples.profilePreference.defaultCategory': 'Default example category',
+  'examples.profilePreference.category.components': 'Components',
+  'examples.profilePreference.category.crud': 'CRUD Page',
+  'examples.profilePreference.category.feedback': 'Action Feedback',
+  'examples.profilePreference.namespace': 'Storage namespace',
   'menu.examples.components': 'Components',
   'examples.markdown.title': 'Markdown Demo',
   'examples.markdown.description':

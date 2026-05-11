@@ -43,10 +43,72 @@ class ExampleTest extends TestCase
 
         $this->assertSame('SUCCESS', $me['code']);
         $this->assertSame('trueadmin', $me['data']['username']);
+        $this->assertArrayHasKey('avatar', $me['data']);
+        $this->assertArrayHasKey('preferences', $me['data']);
         $this->assertGreaterThanOrEqual(1, \Hyperf\DbConnection\Db::table('admin_login_logs')
             ->where('username', 'trueadmin')
             ->where('status', 'success')
             ->count());
+    }
+
+    public function testAdminProfileAndLogEntrances()
+    {
+        $login = $this->loginAsAdmin();
+        $headers = ['Authorization' => 'Bearer ' . $login['data']['accessToken']];
+        $suffix = str_replace('.', '', uniqid('', true));
+
+        $profile = $this->get('/api/admin/profile', [], $headers);
+        $this->assertSame('SUCCESS', $profile['code']);
+        $this->assertSame('trueadmin', $profile['data']['username']);
+        $this->assertArrayHasKey('avatar', $profile['data']);
+        $this->assertArrayHasKey('preferences', $profile['data']);
+
+        $updatedProfile = $this->put('/api/admin/profile', [
+            'nickname' => 'TrueAdmin ' . $suffix,
+            'avatar' => 'https://example.com/avatar/' . $suffix . '.png',
+        ], $headers);
+        $this->assertSame('SUCCESS', $updatedProfile['code']);
+        $this->assertSame('TrueAdmin ' . $suffix, $updatedProfile['data']['nickname']);
+        $this->assertSame('https://example.com/avatar/' . $suffix . '.png', $updatedProfile['data']['avatar']);
+
+        $password = $this->put('/api/admin/profile/password', [
+            'oldPassword' => '123456',
+            'newPassword' => '123456',
+        ], $headers);
+        $this->assertSame('SUCCESS', $password['code']);
+
+        $layoutPreference = $this->put('/api/admin/profile/preferences', [
+            'namespace' => 'system.layout',
+            'values' => [
+                'layoutMode' => 'mixed',
+                'showTabs' => true,
+            ],
+        ], $headers);
+        $this->assertSame('SUCCESS', $layoutPreference['code']);
+        $this->assertSame('mixed', $layoutPreference['data']['preferences']['system.layout']['layoutMode']);
+        $this->assertTrue($layoutPreference['data']['preferences']['system.layout']['showTabs']);
+
+        $erpPreference = $this->put('/api/admin/profile/preferences', [
+            'namespace' => 'erp.sales',
+            'values' => ['defaultCustomerView' => 'mine'],
+        ], $headers);
+        $this->assertSame('SUCCESS', $erpPreference['code']);
+        $this->assertSame('mixed', $erpPreference['data']['preferences']['system.layout']['layoutMode']);
+        $this->assertSame('mine', $erpPreference['data']['preferences']['erp.sales']['defaultCustomerView']);
+
+        $invalidPreference = $this->put('/api/admin/profile/preferences', [
+            'namespace' => 'Bad Namespace',
+            'values' => [],
+        ], $headers);
+        $this->assertSame('KERNEL.REQUEST.VALIDATION_FAILED', $invalidPreference['code']);
+
+        $loginLogs = $this->get('/api/admin/system-config/login-logs', [], $headers);
+        $this->assertSame('SUCCESS', $loginLogs['code']);
+        $this->assertArrayHasKey('items', $loginLogs['data']);
+
+        $operationLogs = $this->get('/api/admin/system-config/operation-logs', [], $headers);
+        $this->assertSame('SUCCESS', $operationLogs['code']);
+        $this->assertGreaterThanOrEqual(1, $operationLogs['data']['total']);
     }
 
     public function testAdminLoginFailureUsesStringErrorCode()
@@ -420,6 +482,14 @@ class ExampleTest extends TestCase
         $this->assertSame(1, \Hyperf\DbConnection\Db::table('admin_menus')->where('code', 'system.messages')->count());
         $this->assertSame(1, \Hyperf\DbConnection\Db::table('admin_menus')->where('code', 'system.notificationManagement')->count());
         $this->assertSame(1, \Hyperf\DbConnection\Db::table('admin_menus')->where('code', 'system.announcementManagement')->count());
+        $this->assertSame(1, \Hyperf\DbConnection\Db::table('admin_menus')->where('code', 'system.loginLogs')->count());
+        $this->assertSame(1, \Hyperf\DbConnection\Db::table('admin_menus')->where('code', 'system.operationLogs')->count());
+        $this->assertSame('system:login-log:list', \Hyperf\DbConnection\Db::table('admin_menus')
+            ->where('code', 'system.loginLogs')
+            ->value('permission'));
+        $this->assertSame('system:operation-log:list', \Hyperf\DbConnection\Db::table('admin_menus')
+            ->where('code', 'system.operationLogs')
+            ->value('permission'));
         $this->assertSame('system:user:create', \Hyperf\DbConnection\Db::table('admin_menus')
             ->where('code', 'system:user:create')
             ->value('permission'));
@@ -428,8 +498,12 @@ class ExampleTest extends TestCase
         $this->assertSame('3.1.0', $openapi['openapi']);
         $this->assertArrayHasKey('/api/admin/organization/users', $openapi['paths']);
         $this->assertArrayHasKey('/api/admin/organization/client-users', $openapi['paths']);
+        $this->assertArrayHasKey('/api/admin/system-config/login-logs', $openapi['paths']);
+        $this->assertArrayHasKey('/api/admin/system-config/operation-logs', $openapi['paths']);
         $this->assertSame('system:user:list', $openapi['paths']['/api/admin/organization/users']['get']['x-trueadmin']['permission']);
         $this->assertSame('system:client-user:list', $openapi['paths']['/api/admin/organization/client-users']['get']['x-trueadmin']['permission']);
+        $this->assertSame('system:login-log:list', $openapi['paths']['/api/admin/system-config/login-logs']['get']['x-trueadmin']['permission']);
+        $this->assertSame('system:operation-log:list', $openapi['paths']['/api/admin/system-config/operation-logs']['get']['x-trueadmin']['permission']);
         $this->assertSame('single', $openapi['paths']['/api/admin/organization/users']['get']['x-trueadmin']['permissionMode']);
         $this->assertSame(['system:user:list'], $openapi['paths']['/api/admin/organization/users']['get']['x-trueadmin']['permissions']);
 

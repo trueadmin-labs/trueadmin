@@ -62,6 +62,10 @@ export function useHeaderActions() {
       menu={{
         items: userItems,
         onClick: async ({ key }) => {
+          if (key === 'profile') {
+            navigate('/profile');
+            return;
+          }
           if (key !== 'logout') {
             return;
           }
@@ -72,7 +76,10 @@ export function useHeaderActions() {
         },
       }}
     >
-      <Button type="text" icon={<Avatar size={24} icon={<UserOutlined />} />}>
+      <Button
+        type="text"
+        icon={<Avatar size={24} src={data?.avatar || undefined} icon={<UserOutlined />} />}
+      >
         {data?.nickname || data?.username || '管理员'}
       </Button>
     </Dropdown>,

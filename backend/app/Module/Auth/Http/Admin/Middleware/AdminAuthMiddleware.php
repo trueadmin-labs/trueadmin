@@ -38,12 +38,14 @@ final class AdminAuthMiddleware implements MiddlewareInterface
             id: $user->id,
             username: $user->username,
             nickname: $user->nickname,
+            avatar: $user->avatar,
             roles: $user->roles,
             roleIds: $user->roleIds,
             permissions: $user->permissions,
             primaryDeptId: $user->primaryDeptId,
             deptIds: $user->deptIds,
             operationDeptId: $operationDeptId,
+            preferences: $user->preferences,
         ));
 
         return $handler->handle($request);

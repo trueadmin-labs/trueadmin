@@ -42,6 +42,8 @@ final class SystemSeeder extends Seeder
             [
                 'password' => Password::make('123456'),
                 'nickname' => 'TrueAdmin',
+                'avatar' => '',
+                'preferences' => json_encode([], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
                 'status' => 'enabled',
                 'primary_dept_id' => $deptId,
                 'deleted_at' => null,
@@ -55,6 +57,8 @@ final class SystemSeeder extends Seeder
             [
                 'password' => Password::make('123456'),
                 'nickname' => 'Admin',
+                'avatar' => '',
+                'preferences' => json_encode([], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
                 'status' => 'enabled',
                 'primary_dept_id' => $deptId,
                 'deleted_at' => null,

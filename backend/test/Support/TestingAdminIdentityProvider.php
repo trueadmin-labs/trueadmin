@@ -38,11 +38,11 @@ final class TestingAdminIdentityProvider implements AdminIdentityProviderInterfa
     private function users(): array
     {
         return [
-            'trueadmin' => new AuthUser(1, 'trueadmin', 'TrueAdmin', ['super-admin'], [1], ['*'], 1, [1]),
-            'admin' => new AuthUser(2, 'admin', 'Admin', ['admin'], [2], ['*'], 1, [1]),
-            'permission-any-a' => new AuthUser(3, 'permission-any-a', 'Permission Any A', ['tester'], [3], ['testing:permission:any-a'], 1, [1]),
-            'permission-all-a' => new AuthUser(4, 'permission-all-a', 'Permission All A', ['tester'], [3], ['testing:permission:all-a'], 1, [1]),
-            'permission-all-ab' => new AuthUser(5, 'permission-all-ab', 'Permission All AB', ['tester'], [3], ['testing:permission:all-a', 'testing:permission:all-b'], 1, [1]),
+            'trueadmin' => new AuthUser(1, 'trueadmin', 'TrueAdmin', '', ['super-admin'], [1], ['*'], 1, [1], []),
+            'admin' => new AuthUser(2, 'admin', 'Admin', '', ['admin'], [2], ['*'], 1, [1], []),
+            'permission-any-a' => new AuthUser(3, 'permission-any-a', 'Permission Any A', '', ['tester'], [3], ['testing:permission:any-a'], 1, [1], []),
+            'permission-all-a' => new AuthUser(4, 'permission-all-a', 'Permission All A', '', ['tester'], [3], ['testing:permission:all-a'], 1, [1], []),
+            'permission-all-ab' => new AuthUser(5, 'permission-all-ab', 'Permission All AB', '', ['tester'], [3], ['testing:permission:all-a', 'testing:permission:all-b'], 1, [1], []),
         ];
     }
 }

@@ -18,6 +18,8 @@ final class AdminUser extends Model
         'username',
         'password',
         'nickname',
+        'avatar',
+        'preferences',
         'status',
         'primary_dept_id',
         'created_by',
@@ -26,6 +28,10 @@ final class AdminUser extends Model
 
     protected array $hidden = [
         'password',
+    ];
+
+    protected array $casts = [
+        'preferences' => 'array',
     ];
 
     public function roles(): BelongsToMany

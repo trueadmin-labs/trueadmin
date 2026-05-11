@@ -26,6 +26,8 @@ return new class extends Migration {
             $table->string('username', 64)->unique();
             $table->string('password');
             $table->string('nickname', 64)->default('');
+            $table->string('avatar', 512)->default('');
+            $table->json('preferences')->nullable();
             $table->string('status', 32)->default('enabled');
             $table->unsignedBigInteger('primary_dept_id')->nullable();
             $table->unsignedBigInteger('created_by')->nullable();

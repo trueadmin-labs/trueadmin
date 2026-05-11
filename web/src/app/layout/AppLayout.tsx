@@ -4,6 +4,7 @@ import type { MenuProps } from 'antd';
 import { Button, Layout, Menu, Result, Spin, Tooltip } from 'antd';
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router';
+import { PreferenceBootstrap } from '@/app/providers/PreferenceBootstrap';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { TrueAdminIcon, type TrueAdminIconInput } from '@/core/icon/TrueAdminIcon';
 import { getRouteLayoutMeta } from '@/core/layout/routeLayoutMeta';
@@ -734,6 +735,7 @@ export function AppLayout() {
 
   return (
     <Layout className={shellClassName}>
+      <PreferenceBootstrap />
       {layoutMode === 'mixed' ? (
         <MixedLayout
           collapsed={collapsed}
