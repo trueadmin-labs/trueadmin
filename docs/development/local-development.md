@@ -113,9 +113,12 @@ composer restart
 ```bash
 npm run plugin:sync
 npm run doctor
+npm run web:module:validate
 ```
 
 `doctor` 会检查 `plugins.config.json`、`backend/config/autoload/plugins.php`、`web/config/plugin.ts` 是否一致，并确认后端和 Web 没有跨端读取插件配置。
+
+`web:module:validate` 会检查前端模块和插件 manifest 的重复路由、重复菜单 code、locale 缺失和插件 id 与目录不匹配等问题。
 
 默认服务地址：
 

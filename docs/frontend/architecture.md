@@ -109,6 +109,14 @@ import { TrueAdminUserSelect } from '@/modules/system/components/TrueAdminUserSe
 
 Web 端只读取 `web/config/plugin.ts` 作为插件启用和前端覆盖配置。该文件由框架级插件 CLI 从根目录 `plugins.config.json` 分发生成；Web 运行时不读取根插件配置，也不读取后端配置或根目录插件包源。第一版不设计 `web/config/plugins/*.ts` 自动扫描。`trueadmin doctor` 会检查生成文件是否过期，以及 Web 端是否出现跨端配置引用。
 
+模块 manifest 必须通过开发期校验：
+
+```bash
+pnpm --dir web module:validate
+```
+
+校验内容包括模块 id 与目录匹配、插件 id 与 `src/plugins/<vendor>/<name>` 匹配、重复路由、重复菜单 code、菜单 i18n、路由标题和 manifest 内 `trans()` key 是否在 `zh-CN`、`en-US` locale 中声明。`pnpm --dir web check` 会先运行该校验。
+
 Env 遵循 Vite 官方规则：`.env` 是所有环境基础默认值，`.env.local` 是本地私有覆盖，`.env.[mode]` 是指定环境覆盖，`.env.[mode].local` 是指定环境本地私有覆盖。优先级是 `.env.[mode].local > .env.[mode] > .env.local > .env`。命令必须显式指定 mode。前端 env 只使用 `VITE_` 前缀变量，不放真正密钥。
 
 ## 模块系统

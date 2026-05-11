@@ -10,10 +10,11 @@
     "build": "tsc -b && vite build --mode production",
     "build:test": "tsc -b && vite build --mode test",
     "preview": "vite preview --host 0.0.0.0",
+    "module:validate": "node scripts/validate-modules.mjs",
     "lint": "biome check .",
     "format": "biome check --write .",
     "typecheck": "tsc -b --pretty false",
-    "check": "pnpm lint && pnpm typecheck && pnpm build",
+    "check": "pnpm module:validate && pnpm lint && pnpm typecheck && pnpm build",
     "test:run": "vitest run"
   },
   "dependencies": {

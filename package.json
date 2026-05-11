@@ -9,7 +9,8 @@
     "plugin:list": "trueadmin plugin list",
     "plugin:install": "trueadmin plugin install",
     "plugin:sync": "trueadmin plugin sync",
-    "plugin:validate": "trueadmin plugin validate"
+    "plugin:validate": "trueadmin plugin validate",
+    "web:module:validate": "pnpm --dir web module:validate"
   },
   "devDependencies": {
     "@trueadmin/cli": "^0.1.0"
