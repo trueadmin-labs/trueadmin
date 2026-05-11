@@ -3,22 +3,18 @@ import type { UploadProps } from 'antd';
 import { Empty, message, Upload } from 'antd';
 import type { RcFile, UploadFile } from 'antd/es/upload/interface';
 import type { ReactNode } from 'react';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTrueAdminDownload } from '@/core/download';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import type {
-  AnimatedAttachment,
   TrueAdminAttachmentId,
   TrueAdminAttachmentUploadResult,
   TrueAdminAttachmentValue,
 } from './attachmentUploadUtils';
-import {
-  attachmentMotionDuration,
-  getAttachmentDisplayName,
-  normalizeAttachmentResult,
-} from './attachmentUploadUtils';
+import { getAttachmentDisplayName, normalizeAttachmentResult } from './attachmentUploadUtils';
 import { TrueAdminAttachmentList } from './TrueAdminAttachmentList';
 import { TrueAdminUploadPreview, type TrueAdminUploadPreviewProps } from './TrueAdminUploadPreview';
+import { useAttachmentUploadAnimation } from './useAttachmentUploadAnimation';
 
 export type {
   TrueAdminAttachmentId,
@@ -73,16 +69,12 @@ export function TrueAdminAttachmentUpload({
 }: TrueAdminAttachmentUploadProps) {
   const { t } = useI18n();
   const { download } = useTrueAdminDownload();
-  const contentRef = useRef<HTMLDivElement>(null);
-  const [contentHeight, setContentHeight] = useState<number>();
   const [uploading, setUploading] = useState(false);
   const [editingId, setEditingId] = useState<TrueAdminAttachmentId>();
   const [editingName, setEditingName] = useState('');
   const [previewFile, setPreviewFile] = useState<TrueAdminAttachmentValue>();
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [animatedFiles, setAnimatedFiles] = useState<AnimatedAttachment[]>(() =>
-    value.map((file) => ({ file, phase: 'active' })),
-  );
+  const { animatedFiles, contentHeight, contentRef } = useAttachmentUploadAnimation(value);
 
   const uploadFileList = useMemo<UploadFile[]>(
     () =>
@@ -99,81 +91,6 @@ export function TrueAdminAttachmentUpload({
 
   const canUpload = !readonly && !disabled && (!maxCount || value.length < maxCount);
   const showEmpty = !canUpload && animatedFiles.length === 0 && !uploading;
-
-  useLayoutEffect(() => {
-    const element = contentRef.current;
-    if (!element) {
-      return undefined;
-    }
-
-    const updateHeight = () => setContentHeight(element.scrollHeight);
-    updateHeight();
-
-    if (typeof ResizeObserver === 'undefined') {
-      return undefined;
-    }
-
-    const observer = new ResizeObserver(updateHeight);
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    setAnimatedFiles((previous) => {
-      const incomingById = new Map(value.map((file) => [file.id, file]));
-      const next: AnimatedAttachment[] = [];
-
-      previous.forEach((item) => {
-        const incoming = incomingById.get(item.file.id);
-        if (incoming) {
-          next.push({
-            file: incoming,
-            phase: item.phase === 'leave' ? 'enter' : item.phase,
-          });
-          incomingById.delete(item.file.id);
-          return;
-        }
-
-        if (item.phase !== 'leave') {
-          next.push({ ...item, phase: 'leave' });
-        }
-      });
-
-      value.forEach((file) => {
-        if (incomingById.has(file.id)) {
-          next.push({ file, phase: 'enter' });
-        }
-      });
-
-      return next;
-    });
-  }, [value]);
-
-  useEffect(() => {
-    if (!animatedFiles.some((item) => item.phase === 'enter')) {
-      return undefined;
-    }
-
-    const frame = requestAnimationFrame(() => {
-      setAnimatedFiles((previous) =>
-        previous.map((item) => (item.phase === 'enter' ? { ...item, phase: 'active' } : item)),
-      );
-    });
-
-    return () => cancelAnimationFrame(frame);
-  }, [animatedFiles]);
-
-  useEffect(() => {
-    if (!animatedFiles.some((item) => item.phase === 'leave')) {
-      return undefined;
-    }
-
-    const timer = window.setTimeout(() => {
-      setAnimatedFiles((previous) => previous.filter((item) => item.phase !== 'leave'));
-    }, attachmentMotionDuration);
-
-    return () => window.clearTimeout(timer);
-  }, [animatedFiles]);
 
   const emitChange = (nextFiles: TrueAdminAttachmentValue[]) => {
     onChange?.(nextFiles);
