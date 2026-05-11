@@ -1,5 +1,5 @@
 import { PlusOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
-import { App, Button, Form, Input, InputNumber, Select, Space, Tag } from 'antd';
+import { App, Button, Form, Space, Tag } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { TrueAdminConfirmAction } from '@/core/action';
 import { TrueAdminCrudPage } from '@/core/crud';
@@ -10,7 +10,6 @@ import type {
   CrudTableAction,
 } from '@/core/crud/types';
 import { useI18n } from '@/core/i18n/I18nProvider';
-import { TrueAdminModal } from '@/core/modal';
 import { departmentApi } from '../../services/department.api';
 import { menuApi } from '../../services/menu.api';
 import { roleApi } from '../../services/role.api';
@@ -18,6 +17,7 @@ import type { DepartmentTreeNode } from '../../types/department';
 import type { AdminMenu } from '../../types/menu';
 import type { AdminRole, AdminRolePayload, DataPolicyMetadata } from '../../types/role';
 import { RoleAuthorizeModal } from './RoleAuthorizeModal';
+import { RoleFormModal } from './RoleFormModal';
 import {
   type DataPolicyFormValues,
   getMenuTreeKeys,
@@ -352,64 +352,16 @@ export default function AdminRolesPage() {
       tableRender={({ action }, defaultDom) => (
         <>
           {defaultDom}
-          <TrueAdminModal
-            destroyOnHidden
-            confirmLoading={submitting}
+          <RoleFormModal
+            editing={editing}
+            form={form}
             open={open}
-            title={
-              editing
-                ? t('system.roles.modal.edit', '编辑角色')
-                : t('system.roles.modal.create', '新增角色')
-            }
-            width={560}
+            statusText={statusText}
+            submitting={submitting}
+            t={t}
             onCancel={closeForm}
-            onOk={() => void submit(action)}
-          >
-            <Form<RoleFormValues>
-              form={form}
-              layout="vertical"
-              initialValues={{ sort: 0, status: 'enabled' }}
-            >
-              <Form.Item
-                label={t('system.roles.form.name', '角色名称')}
-                name="name"
-                rules={[
-                  {
-                    required: true,
-                    message: t('system.roles.form.nameRequired', '请输入角色名称'),
-                  },
-                ]}
-              >
-                <Input maxLength={64} />
-              </Form.Item>
-              <Form.Item
-                label={t('system.roles.form.code', '角色编码')}
-                name="code"
-                rules={[
-                  {
-                    required: true,
-                    message: t('system.roles.form.codeRequired', '请输入角色编码'),
-                  },
-                ]}
-              >
-                <Input maxLength={64} />
-              </Form.Item>
-              <Space size={12} style={{ width: '100%' }} align="start">
-                <Form.Item label={t('system.roles.form.sort', '排序')} name="sort">
-                  <InputNumber style={{ width: 160 }} />
-                </Form.Item>
-                <Form.Item label={t('system.roles.form.status', '状态')} name="status">
-                  <Select
-                    style={{ width: 180 }}
-                    options={[
-                      { label: statusText.enabled, value: 'enabled' },
-                      { label: statusText.disabled, value: 'disabled' },
-                    ]}
-                  />
-                </Form.Item>
-              </Space>
-            </Form>
-          </TrueAdminModal>
+            onSubmit={() => void submit(action)}
+          />
           <RoleAuthorizeModal
             authorizing={authorizing}
             authorizeLoading={authorizeLoading}
