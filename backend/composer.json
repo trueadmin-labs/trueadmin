@@ -73,15 +73,6 @@
         "optimize-autoloader": true,
         "sort-packages": true
     },
-    "repositories": [
-        {
-            "type": "path",
-            "url": "../../trueadmin-kernel",
-            "options": {
-                "symlink": true
-            }
-        }
-    ],
     "extra": [],
     "scripts": {
         "post-root-package-install": [

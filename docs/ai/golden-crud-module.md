@@ -226,7 +226,7 @@ AI 生成一个标准 CRUD 模块时，至少完成：
 后端生成完成后至少运行：
 
 ```bash
-find backend/app backend/test trueadmin-kernel/src -name '*.php' -print0 | xargs -0 -n1 php -l
+find backend/app backend/test backend/vendor/trueadmin/kernel/src -name '*.php' -print0 | xargs -0 -n1 php -l
 cd backend && composer test
 ```
 

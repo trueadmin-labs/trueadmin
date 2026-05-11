@@ -9,6 +9,12 @@
 - Docker。
 - Docker Compose。
 
+安装根目录框架工具依赖：
+
+```bash
+npm install
+```
+
 ## 基础设施
 
 本地默认使用 PostgreSQL 和 Redis。

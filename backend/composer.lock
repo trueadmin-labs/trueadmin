@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c933412e97707fb0ceea8b7f320cf260",
+    "content-hash": "7e8c285fd4943d5c5b1cb9a45ad760c1",
     "packages": [
         {
             "name": "aliyuncs/oss-sdk-php",
@@ -6458,10 +6458,16 @@
         {
             "name": "trueadmin/kernel",
             "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/trueadmin-labs/trueadmin-kernel.git",
+                "reference": "3905a7bd5b972a60378189fced81202de2302bff"
+            },
             "dist": {
-                "type": "path",
-                "url": "../../trueadmin-kernel",
-                "reference": "22d937f9bdc0cd0ec49ae5a35b283f165a988b3e"
+                "type": "zip",
+                "url": "https://api.github.com/repos/trueadmin-labs/trueadmin-kernel/zipball/3905a7bd5b972a60378189fced81202de2302bff",
+                "reference": "3905a7bd5b972a60378189fced81202de2302bff",
+                "shasum": ""
             },
             "require": {
                 "hyperf/config": "~3.1.0",
@@ -6477,20 +6483,24 @@
                 "hyperf/logger": "~3.1.0",
                 "php": ">=8.1"
             },
+            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
                     "TrueAdmin\\Kernel\\": "src/"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
             "description": "TrueAdmin reusable backend kernel package.",
-            "transport-options": {
-                "symlink": true,
-                "relative": true
-            }
+            "homepage": "https://github.com/trueadmin-labs/trueadmin-kernel",
+            "support": {
+                "issues": "https://github.com/trueadmin-labs/trueadmin-kernel/issues",
+                "source": "https://github.com/trueadmin-labs/trueadmin-kernel/tree/v0.1.0"
+            },
+            "time": "2026-05-11T14:33:19+00:00"
         },
         {
             "name": "vlucas/phpdotenv",
