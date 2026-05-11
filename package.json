@@ -10,7 +10,11 @@
     "plugin:install": "trueadmin plugin install",
     "plugin:sync": "trueadmin plugin sync",
     "plugin:validate": "trueadmin plugin validate",
-    "web:module:validate": "pnpm --dir web module:validate"
+    "web:module:validate": "pnpm --dir web module:validate",
+    "backend:analyse": "composer analyse --working-dir=backend",
+    "backend:test": "composer test --working-dir=backend",
+    "web:check": "pnpm --dir web check",
+    "check": "npm run doctor && npm run plugin:validate && npm run web:check && npm run backend:analyse && npm run backend:test"
   },
   "devDependencies": {
     "@trueadmin/cli": "^0.1.0"

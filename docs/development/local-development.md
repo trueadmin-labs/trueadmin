@@ -120,6 +120,14 @@ npm run web:module:validate
 
 `web:module:validate` 会检查前端模块和插件 manifest 的重复路由、重复菜单 code、locale 缺失和插件 id 与目录不匹配等问题。
 
+提交前可运行完整本地验收：
+
+```bash
+npm run check
+```
+
+该命令串行执行 `doctor`、插件配置校验、Web 校验/构建、后端静态分析和后端测试。
+
 默认服务地址：
 
 ```text
