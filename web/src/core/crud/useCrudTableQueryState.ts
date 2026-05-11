@@ -4,12 +4,13 @@ import { updateRawSearchParams } from '@/core/url/searchParams';
 import type {
   CrudExtraQuerySchema,
   CrudFilterSchema,
+  CrudFilterValue,
   CrudListParams,
+  CrudOperator,
+  CrudOrder,
   CrudQueryController,
   CrudQuickSearchConfig,
 } from './types';
-
-export type CrudOrder = 'asc' | 'desc';
 
 export type CrudTableQueryState = {
   current: number;
@@ -72,6 +73,91 @@ const getFilterNames = (filters: CrudFilterSchema[] = []) =>
 const getExtraQueryNames = (extraQuery: CrudExtraQuerySchema[] = []) =>
   new Set(extraQuery.map((item) => item.name));
 
+const splitListValue = (value: string) => value.split(',').filter(Boolean);
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const mergeRequestParams = (params: CrudListParams, nextParams: Record<string, unknown>) => {
+  Object.entries(nextParams).forEach(([key, value]) => {
+    if (key === 'filter' && isRecord(value)) {
+      params.filter = {
+        ...(isRecord(params.filter) ? params.filter : {}),
+        ...value,
+      } as CrudListParams['filter'];
+      return;
+    }
+
+    if (key === 'op' && isRecord(value)) {
+      params.op = {
+        ...(isRecord(params.op) ? params.op : {}),
+        ...value,
+      } as CrudListParams['op'];
+      return;
+    }
+
+    params[key] = value;
+  });
+};
+
+const defaultFilterOperator = (filter: CrudFilterSchema): CrudOperator => {
+  if (filter.operator) {
+    return filter.operator;
+  }
+
+  if (filter.type === 'input') {
+    return 'like';
+  }
+
+  if (filter.type === 'select' && filter.mode === 'multiple') {
+    return 'in';
+  }
+
+  if (filter.type === 'dateRange') {
+    return 'between';
+  }
+
+  return '=';
+};
+
+const defaultFilterValue = (filter: CrudFilterSchema, value: string): CrudFilterValue => {
+  if (filter.type === 'select' && filter.mode === 'multiple') {
+    return splitListValue(value);
+  }
+
+  if (filter.type === 'dateRange') {
+    return splitListValue(value);
+  }
+
+  return value;
+};
+
+const setStandardFilterParam = (
+  params: CrudListParams,
+  filter: CrudFilterSchema,
+  value: string | undefined,
+) => {
+  if (value === undefined || filter.requestName === false) {
+    return;
+  }
+
+  const requestName = filter.requestName ?? filter.name;
+  const requestValue = defaultFilterValue(filter, value);
+  if (Array.isArray(requestValue) && requestValue.length === 0) {
+    return;
+  }
+
+  if (filter.requestMode === 'param') {
+    params[requestName] = requestValue;
+    return;
+  }
+
+  params.filter ??= {};
+  params.op ??= {};
+  params.filter[requestName] = requestValue;
+  params.op[requestName] = defaultFilterOperator(filter);
+};
+
 const createParamsObject = (searchParams: URLSearchParams, keys: Iterable<string>) => {
   const keySet = new Set(keys);
   const values: Record<string, string> = {};
@@ -123,20 +209,25 @@ const getRequestParams = ({
   pageSize,
   sort,
   values,
+  quickSearchName,
 }: {
   filters: CrudFilterSchema[];
   extraQuery: CrudExtraQuerySchema[];
   order?: CrudOrder;
   page: number;
   pageSize: number;
+  quickSearchName?: string;
   sort?: string;
   values: Record<string, string>;
 }) => {
   const params: CrudListParams = {
-    ...values,
     page,
     pageSize,
   };
+
+  if (quickSearchName && values[quickSearchName] !== undefined) {
+    params[quickSearchName] = values[quickSearchName];
+  }
 
   if (sort && order) {
     params.sort = sort;
@@ -145,10 +236,14 @@ const getRequestParams = ({
 
   filters.forEach((filter) => {
     const value = values[filter.name];
-    if (value === undefined || !filter.transform) {
+    if (value === undefined) {
       return;
     }
-    Object.assign(params, filter.transform({ name: filter.name, value, values }));
+    if (filter.transform) {
+      mergeRequestParams(params, filter.transform({ name: filter.name, value, values }));
+      return;
+    }
+    setStandardFilterParam(params, filter, value);
   });
 
   extraQuery.forEach((item) => {
@@ -158,7 +253,7 @@ const getRequestParams = ({
       return;
     }
     if (item.transform) {
-      Object.assign(params, item.transform({ name: item.name, value, values }));
+      mergeRequestParams(params, item.transform({ name: item.name, value, values }));
       return;
     }
     if (item.requestName !== false) {
@@ -356,10 +451,11 @@ export function useCrudTableQueryState({
         order,
         page: current,
         pageSize,
+        quickSearchName,
         sort,
         values,
       }),
-    [current, stableExtraQuery, stableFilters, order, pageSize, sort, values],
+    [current, stableExtraQuery, stableFilters, order, pageSize, quickSearchName, sort, values],
   );
 
   return {

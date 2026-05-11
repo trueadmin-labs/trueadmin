@@ -314,6 +314,36 @@ class ExampleTest extends TestCase
         $this->assertSame('SUCCESS', $users['code']);
         $this->assertGreaterThanOrEqual(1, $users['data']['total']);
 
+        $filteredUsers = $this->get('/api/admin/organization/users', [
+            'filter' => [
+                'created_at' => ['2000-01-01', '2999-12-31'],
+                'status' => 'enabled',
+            ],
+            'op' => [
+                'created_at' => 'between',
+                'status' => '=',
+            ],
+            'page' => 1,
+            'pageSize' => 5,
+            'roleCodes' => ['test-role-' . $suffix],
+            'sort' => 'id',
+            'order' => 'desc',
+        ], $headers);
+        $this->assertSame('SUCCESS', $filteredUsers['code']);
+        $this->assertContains($user['data']['id'], array_column($filteredUsers['data']['items'], 'id'));
+        foreach ($filteredUsers['data']['items'] as $item) {
+            $this->assertSame('enabled', $item['status']);
+            $this->assertContains('test-role-' . $suffix, $item['roles']);
+        }
+
+        $departmentUsers = $this->get('/api/admin/organization/users', [
+            'deptId' => $deptAId,
+            'includeChildren' => '1',
+            'keyword' => 'test-user-' . $suffix,
+        ], $headers);
+        $this->assertSame('SUCCESS', $departmentUsers['code']);
+        $this->assertContains($user['data']['id'], array_column($departmentUsers['data']['items'], 'id'));
+
         $clientUser = $this->json('/api/admin/organization/client-users', [
             'username' => 'client-' . $suffix,
             'phone' => '138' . substr(str_pad((string) crc32($suffix), 8, '0', STR_PAD_LEFT), 0, 8),

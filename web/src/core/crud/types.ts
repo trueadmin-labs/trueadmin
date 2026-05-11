@@ -1,4 +1,10 @@
 import type {
+  CrudOperator,
+  CrudOrder,
+  CrudFilterValue as ProtocolCrudFilterValue,
+  CrudListParams as ProtocolCrudListParams,
+} from '@trueadmin/web-core/crud';
+import type {
   ButtonProps,
   CardProps,
   FormProps,
@@ -11,16 +17,11 @@ import type {
 import type { CSSProperties, ReactNode } from 'react';
 import type { PageResult } from '@/core/http/types';
 
-export type CrudListParams = {
-  page?: number;
-  pageSize?: number;
-  keyword?: string;
-  sort?: string;
-  order?: 'asc' | 'desc';
-  [key: string]: unknown;
-};
+export type { CrudOperator, CrudOrder };
 
-export type CrudFilterValue = string | number | boolean | Array<string | number | boolean>;
+export type CrudListParams = ProtocolCrudListParams;
+
+export type CrudFilterValue = ProtocolCrudFilterValue;
 
 export type CrudFilterOption = {
   label: ReactNode;
@@ -37,6 +38,9 @@ export type CrudFilterBase = {
   name: string;
   label: ReactNode;
   placeholder?: string;
+  operator?: CrudOperator;
+  requestMode?: 'filter' | 'param';
+  requestName?: string | false;
   transform?: (context: CrudFilterTransformContext) => Record<string, unknown>;
 };
 

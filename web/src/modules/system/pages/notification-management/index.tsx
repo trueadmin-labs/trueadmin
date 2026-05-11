@@ -248,6 +248,7 @@ export default function AdminNotificationManagementPage() {
       },
       {
         dataIndex: 'createdAt',
+        key: 'created_at',
         sorter: true,
         title: t('notification.detail.createdAt', '时间'),
         width: 180,
@@ -280,7 +281,15 @@ export default function AdminNotificationManagementPage() {
           ),
         }}
         filters={filters}
-        extraQuery={useMemo<CrudExtraQuerySchema[]>(() => [{ name: 'status' }], [])}
+        extraQuery={useMemo<CrudExtraQuerySchema[]>(
+          () => [
+            {
+              name: 'status',
+              transform: ({ value }) => ({ filter: { status: value }, op: { status: '=' } }),
+            },
+          ],
+          [],
+        )}
         rowActions={{
           width: 190,
           render: ({ record, action }) => (
@@ -506,7 +515,15 @@ function DeliveryRecordsModal({
   afterOpenChange,
 }: DeliveryRecordsModalProps) {
   const { t } = useI18n();
-  const deliveryExtraQuery = useMemo<CrudExtraQuerySchema[]>(() => [{ name: 'status' }], []);
+  const deliveryExtraQuery = useMemo<CrudExtraQuerySchema[]>(
+    () => [
+      {
+        name: 'status',
+        transform: ({ value }) => ({ filter: { status: value }, op: { status: '=' } }),
+      },
+    ],
+    [],
+  );
   const deliveryService = useMemo<CrudService<AdminNotificationDelivery>>(
     () => ({
       list: async (params, options) =>

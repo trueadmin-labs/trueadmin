@@ -1,3 +1,4 @@
+import { crudRequestOptions } from '@/core/crud/request';
 import type { CrudListParams } from '@/core/crud/types';
 import { http } from '@/core/http/client';
 import type { PageResult } from '@/core/http/types';
@@ -15,7 +16,7 @@ const normalizePageResult = (result: PageResult<AdminUser>): PageResult<AdminUse
 export const adminUserApi = {
   list: async (params: CrudListParams, options?: { force?: boolean }) => {
     const result = await http
-      .Get<PageResult<AdminUser>>('/admin/organization/users', { params })
+      .Get<PageResult<AdminUser>>('/admin/organization/users', crudRequestOptions(params))
       .send(options?.force);
     return normalizePageResult(result);
   },

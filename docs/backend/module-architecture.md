@@ -210,7 +210,6 @@ Module/System/Repository/AdminMenuRepository.php
 通用基类采用两层：kernel 放稳定原语，Foundation 放项目可改默认实现。业务模块默认依赖 Foundation：
 
 ```text
-backend/app/Foundation/Crud/AbstractCrudController.php
 backend/app/Foundation/Service/AbstractService.php
 backend/app/Foundation/Repository/AbstractRepository.php
 backend/app/Foundation/Database/Model.php

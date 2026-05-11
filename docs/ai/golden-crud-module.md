@@ -181,12 +181,15 @@ page=1
 pageSize=20
 keyword=abc
 filter[status]=enabled
-op[status]=in
+op[status]=%3D
+filter[id][]=1
+filter[id][]=2
+op[id]=in
 sort=created_at
 order=desc
 ```
 
-响应分页字段保持 camelCase，例如 `pageSize`。
+筛选字段和排序字段使用 Repository 白名单中的后端字段名；数组值使用 `filter[field][]=...`；前端统一使用 `@trueadmin/web-core/crud` 序列化。响应分页字段保持 camelCase，例如 `pageSize`。
 
 ## 生成清单
 

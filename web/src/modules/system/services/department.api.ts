@@ -1,3 +1,4 @@
+import { crudRequestOptions } from '@/core/crud/request';
 import type { CrudListParams } from '@/core/crud/types';
 import { http } from '@/core/http/client';
 import type { PageResult } from '@/core/http/types';
@@ -24,10 +25,7 @@ export const departmentApi = {
   treeMethod: () => http.Get<DepartmentTreeNode[]>('/admin/organization/departments/tree'),
   tree: (params?: CrudListParams) =>
     http
-      .Get<DepartmentTreeNode[]>(
-        '/admin/organization/departments/tree',
-        params ? { params } : undefined,
-      )
+      .Get<DepartmentTreeNode[]>('/admin/organization/departments/tree', crudRequestOptions(params))
       .send(),
   detail: (id: React.Key) =>
     http.Get<DepartmentTreeNode>(`/admin/organization/departments/${id}`).send(),

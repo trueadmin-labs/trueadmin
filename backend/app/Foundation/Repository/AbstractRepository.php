@@ -203,6 +203,9 @@ abstract class AbstractRepository
             if (! is_string($field)) {
                 continue;
             }
+            if ($value === null || $value === '' || $value === 'all') {
+                continue;
+            }
 
             if (! $this->isFilterable($field, $adminQuery->operator($field))) {
                 continue;

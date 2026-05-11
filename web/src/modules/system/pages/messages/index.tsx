@@ -114,6 +114,7 @@ export default function AdminMessagesPage() {
       {
         label: t('system.messages.kind.placeholder', '消息分类'),
         name: 'kind',
+        requestMode: 'param',
         options: [
           { label: kindText.notification, value: 'notification' },
           { label: kindText.announcement, value: 'announcement' },
@@ -124,6 +125,7 @@ export default function AdminMessagesPage() {
       {
         label: t('system.messages.level.placeholder', '等级'),
         name: 'level',
+        requestMode: 'param',
         options: [
           { label: levelText.info, value: 'info' },
           { label: levelText.success, value: 'success' },
@@ -135,6 +137,7 @@ export default function AdminMessagesPage() {
       {
         label: t('system.messages.type.placeholder', '消息类型'),
         name: 'type',
+        requestMode: 'param',
         options: typeOptions,
         placeholder: t('system.messages.type.placeholder', '消息类型'),
         type: 'select',
@@ -142,6 +145,7 @@ export default function AdminMessagesPage() {
       {
         label: t('notification.detail.source', '来源'),
         name: 'source',
+        requestMode: 'param',
         options: sourceOptions,
         placeholder: t('notification.detail.source', '来源'),
         type: 'select',
@@ -234,6 +238,7 @@ export default function AdminMessagesPage() {
       },
       {
         dataIndex: 'createdAt',
+        key: 'created_at',
         sorter: true,
         title: t('notification.detail.createdAt', '时间'),
         width: 180,

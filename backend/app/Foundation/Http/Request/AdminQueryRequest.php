@@ -38,6 +38,7 @@ class AdminQueryRequest extends FormRequest
     {
         $params = $this->flatParams($this->all());
         $filters = array_slice($this->decodeMap($data['filter'] ?? []), 0, $this->maxFilterFields, true);
+        $sort = trim((string) ($data['sort'] ?? ''));
 
         return [
             'page' => (int) ($data['page'] ?? 1),
@@ -46,8 +47,8 @@ class AdminQueryRequest extends FormRequest
             'filter' => $filters,
             'op' => $this->decodeOperators($data['op'] ?? [], array_keys($filters)),
             'params' => $params,
-            'sort' => trim((string) ($data['sort'] ?? '')),
-            'order' => strtolower((string) ($data['order'] ?? 'asc')),
+            'sort' => $this->isAllowedField($sort) ? $sort : '',
+            'order' => strtolower((string) ($data['order'] ?? 'asc')) === 'desc' ? 'desc' : 'asc',
         ];
     }
 
@@ -77,11 +78,11 @@ class AdminQueryRequest extends FormRequest
             if (! is_string($field) || in_array($field, $this->reservedQueryKeys, true)) {
                 continue;
             }
-            if (! preg_match('/^[A-Za-z0-9_.]+$/', $field) || $value === null || $value === '' || $value === 'all') {
+            if (! $this->isAllowedField($field) || $this->isEmptyValue($value)) {
                 continue;
             }
             if (is_scalar($value) || is_array($value)) {
-                $params[$field] = $value;
+                $params[$field] = $this->normalizeValue($value);
             }
         }
 
@@ -103,10 +104,10 @@ class AdminQueryRequest extends FormRequest
 
         $result = [];
         foreach ($value as $field => $fieldValue) {
-            if (! is_string($field) || ! preg_match('/^[A-Za-z0-9_.]+$/', $field)) {
+            if (! is_string($field) || ! $this->isAllowedField($field) || $this->isEmptyValue($fieldValue)) {
                 continue;
             }
-            $result[$field] = $fieldValue;
+            $result[$field] = $this->normalizeValue($fieldValue);
         }
 
         return $result;
@@ -122,10 +123,51 @@ class AdminQueryRequest extends FormRequest
         $allowed = ['=', '<>', '>', '>=', '<', '<=', 'like', 'in', 'between'];
         $result = [];
         foreach ($filterFields as $field) {
-            $operator = strtolower((string) ($operators[$field] ?? '='));
+            $operatorValue = $operators[$field] ?? '=';
+            $operator = is_scalar($operatorValue) ? strtolower(trim((string) $operatorValue)) : '=';
             $result[$field] = in_array($operator, $allowed, true) ? $operator : '=';
         }
 
         return $result;
+    }
+
+    private function isAllowedField(string $field): bool
+    {
+        return preg_match('/^[A-Za-z0-9_.]+$/', $field) === 1;
+    }
+
+    private function isEmptyValue(mixed $value): bool
+    {
+        if (is_string($value)) {
+            $value = trim($value);
+        }
+
+        if ($value === null || $value === '' || $value === 'all') {
+            return true;
+        }
+
+        if (! is_array($value)) {
+            return false;
+        }
+
+        return $this->normalizeValue($value) === [];
+    }
+
+    private function normalizeValue(mixed $value): mixed
+    {
+        if (! is_array($value)) {
+            return is_string($value) ? trim($value) : $value;
+        }
+
+        return array_values(array_filter(
+            array_map(static function (mixed $item): mixed {
+                if (! is_scalar($item)) {
+                    return null;
+                }
+
+                return is_string($item) ? trim($item) : $item;
+            }, $value),
+            static fn (mixed $item): bool => $item !== null && $item !== '' && $item !== 'all',
+        ));
     }
 }

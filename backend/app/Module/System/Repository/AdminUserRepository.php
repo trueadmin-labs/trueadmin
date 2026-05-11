@@ -7,6 +7,7 @@ namespace App\Module\System\Repository;
 use App\Foundation\Query\AdminQuery;
 use App\Foundation\Pagination\PageResult;
 use App\Foundation\Repository\AbstractRepository;
+use App\Module\System\Model\AdminDepartment;
 use App\Module\System\Model\AdminUser;
 use Hyperf\DbConnection\Db;
 
@@ -94,6 +95,34 @@ final class AdminUserRepository extends AbstractRepository
             $adminQuery,
             fn (AdminUser $user): array => $this->toArray($user),
         );
+    }
+
+    protected function handleSearch(mixed $query, AdminQuery $adminQuery): void
+    {
+        $this->applyKeyword($query, $adminQuery);
+        $this->applyFilters($query, $adminQuery);
+        $this->applyParams($query, $adminQuery);
+        $this->applySort($query, $adminQuery);
+    }
+
+    private function applyParams(mixed $query, AdminQuery $adminQuery): void
+    {
+        $deptId = (int) $adminQuery->param('deptId', 0);
+        if ($deptId > 0) {
+            $deptIds = $this->truthy($adminQuery->param('includeChildren', false))
+                ? $this->selfAndDescendantDepartmentIds($deptId)
+                : [$deptId];
+            if ($deptIds !== []) {
+                $query->whereIn('primary_dept_id', $deptIds);
+            }
+        }
+
+        $roleCodes = $this->stringList($adminQuery->param('roleCodes', []));
+        if ($roleCodes !== []) {
+            $query->whereHas('roles', static function ($query) use ($roleCodes): void {
+                $query->whereIn('admin_roles.code', $roleCodes);
+            });
+        }
     }
 
     public function findById(int $id): ?AdminUser
@@ -239,6 +268,38 @@ final class AdminUserRepository extends AbstractRepository
             ->map(static fn ($name): string => (string) $name)
             ->values()
             ->all();
+    }
+
+    /**
+     * @return list<int>
+     */
+    private function selfAndDescendantDepartmentIds(int $departmentId): array
+    {
+        return AdminDepartment::query()
+            ->where('id', $departmentId)
+            ->orWhere('path', 'like', '%,' . $departmentId . ',%')
+            ->pluck('id')
+            ->map(static fn (mixed $id): int => (int) $id)
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function stringList(mixed $value): array
+    {
+        $items = is_array($value) ? $value : explode(',', (string) $value);
+
+        return array_values(array_unique(array_filter(
+            array_map(static fn (mixed $item): string => trim((string) $item), $items),
+            static fn (string $item): bool => $item !== '',
+        )));
+    }
+
+    private function truthy(mixed $value): bool
+    {
+        return in_array(strtolower((string) $value), ['1', 'true', 'yes', 'on'], true);
     }
 
     private function primaryDepartmentName(AdminUser $user): string

@@ -113,11 +113,12 @@ Authorization: Bearer <token>
 
 ```http
 GET /api/admin/organization/users?page=1&pageSize=20&keyword=admin
-GET /api/admin/organization/users?filter={"status":"enabled"}&op={"status":"="}
+GET /api/admin/organization/users?filter[status]=enabled&op[status]=%3D
+GET /api/admin/organization/users?filter[id][]=1&filter[id][]=2&op[id]=in
 GET /api/admin/organization/users?sort=created_at&order=desc
 ```
 
-`filter` 和 `op` 为 JSON 对象字符串，后端只会应用 Repository 白名单中允许的字段和操作符。常用操作符包括 `=`、`<>`、`>`、`>=`、`<`、`<=`、`like`、`in`、`between`。
+`filter[field]` 和 `op[field]` 是标准写法，数组使用 `filter[field][]=...`。后端仍兼容旧的 JSON 字符串格式，但前端和文档只生成 bracket query。后端只会应用 Repository 白名单中允许的字段和操作符。常用操作符包括 `=`、`<>`、`>`、`>=`、`<`、`<=`、`like`、`in`、`between`。
 
 ## HTTP 方法
 

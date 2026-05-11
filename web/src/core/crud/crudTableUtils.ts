@@ -1,6 +1,5 @@
 import type { SorterResult, SortOrder } from 'antd/es/table/interface';
-import type { CrudColumns } from './types';
-import type { CrudOrder } from './useCrudTableQueryState';
+import type { CrudColumns, CrudOrder } from './types';
 
 export const toPermissionCode = (resource: string, action: string) =>
   `${resource.replaceAll('.', ':')}:${action}`;

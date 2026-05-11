@@ -1,3 +1,4 @@
+import { crudRequestOptions } from '@/core/crud/request';
 import type { CrudListParams } from '@/core/crud/types';
 import { http } from '@/core/http/client';
 import type { PageResult } from '@/core/http/types';
@@ -16,9 +17,7 @@ const toPageResult = (items: AdminMenu[], params: CrudListParams): PageResult<Ad
 export const menuApi = {
   list: async (params: CrudListParams) => toPageResult(await menuApi.tree(params), params),
   tree: (params?: CrudListParams) =>
-    http
-      .Get<AdminMenu[]>('/admin/system-config/menus/tree', params ? { params } : undefined)
-      .send(),
+    http.Get<AdminMenu[]>('/admin/system-config/menus/tree', crudRequestOptions(params)).send(),
   detail: (id: React.Key) => http.Get<AdminMenu>(`/admin/system-config/menus/${id}`).send(),
   create: (payload: AdminMenuPayload) =>
     http.Post<AdminMenu>('/admin/system-config/menus', payload).send(),

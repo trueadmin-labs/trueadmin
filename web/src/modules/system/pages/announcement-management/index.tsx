@@ -278,6 +278,7 @@ export default function AdminAnnouncementManagementPage() {
       },
       {
         dataIndex: 'publishedAt',
+        key: 'publish_at',
         render: (_, record) => record.publishedAt ?? record.scheduledAt ?? '-',
         sorter: true,
         title: t('system.announcementManagement.column.publishedAt', '发布时间'),
@@ -367,7 +368,15 @@ export default function AdminAnnouncementManagementPage() {
           ),
         }}
         filters={filters}
-        extraQuery={useMemo<CrudExtraQuerySchema[]>(() => [{ name: 'status' }], [])}
+        extraQuery={useMemo<CrudExtraQuerySchema[]>(
+          () => [
+            {
+              name: 'status',
+              transform: ({ value }) => ({ filter: { status: value }, op: { status: '=' } }),
+            },
+          ],
+          [],
+        )}
         extra={
           <Button type="primary" icon={<CloudUploadOutlined />} onClick={openCreate}>
             {t('system.announcementManagement.action.createAnnouncement', '发布公告')}

@@ -64,6 +64,7 @@ export default function AdminUsersPage() {
 
   const roleText = useMemo<Record<string, string>>(
     () => ({
+      admin: t('system.users.role.admin', '管理员'),
       auditor: t('system.users.role.auditor', '审计员'),
       operator: t('system.users.role.operator', '运营管理员'),
       'super-admin': t('system.users.role.superAdmin', '超级管理员'),
@@ -88,8 +89,13 @@ export default function AdminUsersPage() {
         label: t('system.users.column.roles', '角色'),
         type: 'select',
         mode: 'multiple',
+        transform: ({ value }) => {
+          const roleCodes = value.split(',').filter(Boolean);
+          return roleCodes.length > 0 ? { roleCodes } : {};
+        },
         options: [
-          { label: roleText.super_admin, value: 'super_admin' },
+          { label: roleText['super-admin'], value: 'super-admin' },
+          { label: roleText.admin, value: 'admin' },
           { label: roleText.operator, value: 'operator' },
           { label: roleText.auditor, value: 'auditor' },
         ],
@@ -97,6 +103,7 @@ export default function AdminUsersPage() {
       {
         name: 'createdAt',
         label: t('system.users.column.createdAt', '创建时间'),
+        requestName: 'created_at',
         type: 'dateRange',
       },
     ],
@@ -172,6 +179,7 @@ export default function AdminUsersPage() {
       {
         title: t('system.users.column.createdAt', '创建时间'),
         dataIndex: 'createdAt',
+        key: 'created_at',
         width: 180,
         sorter: true,
       },

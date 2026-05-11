@@ -415,7 +415,6 @@ app/Model
 ```text
 backend/app/Foundation/Service/AbstractService.php
 backend/app/Foundation/Repository/AbstractRepository.php
-backend/app/Foundation/Crud/AbstractCrudController.php
 backend/app/Foundation/Database/Model.php
 ```
 
@@ -514,7 +513,7 @@ llms.txt
 
 1. 固化 `app/Module + MineAdmin 内部分层` 文档。
 2. 实现 `ActorContext`，解决当前用户、操作人、定时任务操作身份问题。
-3. 实现轻量 `AbstractRepository`、`AbstractService`、`AbstractCrudController`。
+3. 实现轻量 `AbstractRepository`、`AbstractService`，Controller 保持显式路由和权限声明。
 4. 用一个真实 CRUD 模块验证，例如 `Banner` 或 `Dictionary`。
 5. 接入 Hyperf migration，建设后台基础表。
 6. 再补完整数据权限规则和操作日志入库。

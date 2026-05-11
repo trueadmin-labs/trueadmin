@@ -50,6 +50,7 @@ export default function AdminLoginLogsPage() {
       {
         title: t('system.loginLogs.column.createdAt', '登录时间'),
         dataIndex: 'createdAt',
+        key: 'created_at',
         width: 180,
         sorter: true,
       },

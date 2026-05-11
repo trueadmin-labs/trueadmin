@@ -1,3 +1,4 @@
+import { crudRequestOptions } from '@/core/crud/request';
 import type { CrudListParams } from '@/core/crud/types';
 import { ApiError } from '@/core/error/ApiError';
 import { http } from '@/core/http/client';
@@ -46,11 +47,11 @@ const unwrapRoleList = <TRole>(value: RoleListResponse<TRole> | unknown): TRole[
 };
 
 const roleListMethod = <TRole>(url: string, params?: CrudListParams) =>
-  http.Get<RoleListResponse<TRole>>(url, params ? { params } : undefined);
+  http.Get<RoleListResponse<TRole>>(url, crudRequestOptions(params));
 
 export const roleApi = {
   list: (params: CrudListParams) =>
-    http.Get<PageResult<AdminRole>>('/admin/organization/roles', { params }).send(),
+    http.Get<PageResult<AdminRole>>('/admin/organization/roles', crudRequestOptions(params)).send(),
   options: async () =>
     unwrapRoleList<AdminRoleOption>(
       await roleListMethod<AdminRoleOption>('/admin/organization/roles/options').send(),

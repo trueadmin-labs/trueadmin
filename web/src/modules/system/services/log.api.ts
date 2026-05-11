@@ -1,3 +1,4 @@
+import { crudRequestOptions } from '@/core/crud/request';
 import type { CrudListParams } from '@/core/crud/types';
 import { http } from '@/core/http/client';
 import type { PageResult } from '@/core/http/types';
@@ -11,7 +12,7 @@ const normalizePageResult = <TRecord>(result: PageResult<TRecord>): PageResult<T
 export const loginLogApi = {
   list: async (params: CrudListParams, options?: { force?: boolean }) => {
     const result = await http
-      .Get<PageResult<AdminLoginLog>>('/admin/system-config/login-logs', { params })
+      .Get<PageResult<AdminLoginLog>>('/admin/system-config/login-logs', crudRequestOptions(params))
       .send(options?.force);
     return normalizePageResult(result);
   },
@@ -20,7 +21,10 @@ export const loginLogApi = {
 export const operationLogApi = {
   list: async (params: CrudListParams, options?: { force?: boolean }) => {
     const result = await http
-      .Get<PageResult<AdminOperationLog>>('/admin/system-config/operation-logs', { params })
+      .Get<PageResult<AdminOperationLog>>(
+        '/admin/system-config/operation-logs',
+        crudRequestOptions(params),
+      )
       .send(options?.force);
     return normalizePageResult(result);
   },

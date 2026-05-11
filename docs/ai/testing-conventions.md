@@ -13,7 +13,7 @@
 标准后台 CRUD 还应覆盖：
 
 - `list/detail/create/update/delete` 主路径。
-- `page/pageSize/keyword/filter/op/sort/order` 查询协议。
+- `page/pageSize/keyword/filter[field]/op[field]/sort/order` 查询协议。
 - 重复编码、资源不存在、删除保护等业务失败场景。
 - 按钮权限码写入接口元数据或菜单权限同步结果。
 - `admin.<module>.<resource>.<action>` 操作日志落库。

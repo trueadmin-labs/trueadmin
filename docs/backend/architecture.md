@@ -334,13 +334,16 @@ Repository 负责数据访问。
 page=1
 pageSize=20
 keyword=admin
-filter={"status":"enabled"}
-op={"status":"="}
+filter[status]=enabled
+op[status]=%3D
+filter[id][]=1
+filter[id][]=2
+op[id]=in
 sort=created_at
 order=desc
 ```
 
-分页响应统一输出 `pageSize`，请求参数和 JSON 字段都使用 camelCase，数据库字段仍使用 snake_case。`filter`、`op`、`sort` 只允许命中 Repository 声明的白名单字段，禁止把前端参数直接映射成任意 SQL 字段。
+分页响应统一输出 `pageSize`，请求参数和 JSON 字段都使用 camelCase，数据库字段仍使用 snake_case。`filter[field]`、`op[field]`、`sort` 只允许命中 Repository 声明的白名单字段，禁止把前端参数直接映射成任意 SQL 字段。后端兼容旧的 JSON 字符串 `filter/op`，但前端统一使用 `@trueadmin/web-core/crud` 的序列化结果。
 
 搜索条件优先通过 `handleSearch()` 扩展。简单场景只需要配置 `$keywordFields`、`$filterable`、`$sortable`、`$defaultSort`；复杂场景可以在具体 Repository 覆盖 `handleSearch()`，但仍应保留字段白名单和业务语义清晰的查询封装。
 
@@ -842,14 +845,13 @@ Module/System/Listener/Logstash/WriteOperationLogListener.php
 
 业务模块也可以有自己的 Listener。
 
-## 12. CRUD 基类设计
+## 12. CRUD 标准设计
 
 参考 MineAdmin 的 `IService`、`IRepository`，但 TrueAdmin 第一版保持轻量。
 
 推荐目录：
 
 ```text
-backend/app/Foundation/Crud/AbstractCrudController.php
 backend/app/Foundation/Service/AbstractService.php
 backend/app/Foundation/Repository/AbstractRepository.php
 backend/app/Foundation/Database/Model.php
@@ -865,7 +867,6 @@ findById
 create
 updateById
 deleteById
-existsById
 handleSearch
 handleItems
 ```
@@ -882,7 +883,7 @@ handleItems
 批量审批
 ```
 
-复杂业务允许不继承 CRUD 基类。
+第一版不提供空壳 `AbstractCrudController`。Controller 显式声明路由、权限、Request 和 Service 调用；通用能力收敛在 `AdminQueryRequest`、`AdminQuery`、`PageResult`、`AbstractRepository`、`AbstractService`。复杂业务允许不走标准 CRUD 模板。
 
 ## 13. 事件、监听器、队列、定时任务
 

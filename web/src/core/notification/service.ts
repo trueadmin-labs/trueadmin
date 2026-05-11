@@ -1,3 +1,5 @@
+import { crudRequestOptions } from '@/core/crud/request';
+import type { CrudListParams } from '@/core/crud/types';
 import { http } from '@/core/http/client';
 import type {
   AdminAnnouncement,
@@ -21,8 +23,8 @@ export type AdminMessageIdentity = {
 };
 
 export const adminMessageApi = {
-  list: (params?: AdminMessageQuery) =>
-    http.Get<AdminMessageListResult>('/admin/messages', { params }),
+  list: (params?: AdminMessageQuery | CrudListParams) =>
+    http.Get<AdminMessageListResult>('/admin/messages', crudRequestOptions(params)),
   unreadCount: () => http.Get<AdminMessageUnreadCount>('/admin/messages/unread-count'),
   detail: ({ kind, id }: AdminMessageIdentity) =>
     http.Get<AdminMessageItem>(`/admin/messages/${kind}/${String(id)}`),
@@ -37,12 +39,16 @@ export const adminMessageApi = {
 };
 
 export const adminNotificationManagementApi = {
-  listNotifications: (params?: AdminNotificationBatchQuery) =>
-    http.Get<AdminNotificationBatchListResult>('/admin/message-management/notifications', {
-      params,
-    }),
-  listAnnouncements: (params?: AdminAnnouncementQuery) =>
-    http.Get<AdminAnnouncementListResult>('/admin/message-management/announcements', { params }),
+  listNotifications: (params?: AdminNotificationBatchQuery | CrudListParams) =>
+    http.Get<AdminNotificationBatchListResult>(
+      '/admin/message-management/notifications',
+      crudRequestOptions(params),
+    ),
+  listAnnouncements: (params?: AdminAnnouncementQuery | CrudListParams) =>
+    http.Get<AdminAnnouncementListResult>(
+      '/admin/message-management/announcements',
+      crudRequestOptions(params),
+    ),
   createAnnouncement: (payload: AdminAnnouncementCreatePayload) =>
     http.Post<AdminAnnouncement>('/admin/message-management/announcements', payload),
   updateAnnouncement: (id: number, payload: AdminAnnouncementUpdatePayload) =>
@@ -59,10 +65,10 @@ export const adminNotificationManagementApi = {
     http.Post<AdminAnnouncement>(`/admin/message-management/announcements/${String(id)}/offline`),
   restoreAnnouncement: (id: number) =>
     http.Post<AdminAnnouncement>(`/admin/message-management/announcements/${String(id)}/restore`),
-  listDeliveries: (batchId: number, params?: AdminNotificationDeliveryQuery) =>
+  listDeliveries: (batchId: number, params?: AdminNotificationDeliveryQuery | CrudListParams) =>
     http.Get<AdminNotificationDeliveryListResult>(
       `/admin/message-management/notifications/${String(batchId)}/deliveries`,
-      { params },
+      crudRequestOptions(params),
     ),
   resendNotification: (batchId: number) =>
     http.Post<{ resent: number }>(

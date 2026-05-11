@@ -132,7 +132,6 @@ OpenAPI 输出定制
 ```text
 backend/app/Foundation/Http/Controller/AdminController.php
 backend/app/Foundation/Http/Controller/ClientController.php
-backend/app/Foundation/Crud/AbstractCrudController.php
 backend/app/Foundation/Auth/ActorResolver/AdminActorResolver.php
 backend/app/Foundation/Exception/ExceptionMapper.php
 backend/app/Foundation/OpenApi/OpenApiCustomizer.php

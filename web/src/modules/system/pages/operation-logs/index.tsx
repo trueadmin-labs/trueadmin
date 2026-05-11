@@ -35,6 +35,7 @@ export default function AdminOperationLogsPage() {
       {
         title: t('system.operationLogs.column.createdAt', '操作时间'),
         dataIndex: 'createdAt',
+        key: 'created_at',
         width: 180,
         sorter: true,
       },
