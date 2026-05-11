@@ -128,9 +128,9 @@ backend/app/Module/Auth/Http/Admin/Vo/AuthUser.php
 backend/app/Module/Auth/Service/PassportService.php
 backend/app/Module/Auth/Service/JwtService.php
 
-packages/kernel/src/DataPermission/Attribute/DataScope.php
-packages/kernel/src/DataPermission/Aspects/DataScopeAspect.php
-packages/kernel/src/OperationLog/Attribute/OperationLog.php
+trueadmin-kernel/src/DataPermission/Attribute/DataScope.php
+trueadmin-kernel/src/DataPermission/Aspects/DataScopeAspect.php
+trueadmin-kernel/src/OperationLog/Attribute/OperationLog.php
 backend/app/Module/System/Listener/Logstash/WriteOperationLogListener.php
 ```
 
@@ -182,15 +182,15 @@ Module/System/Listener/Logstash/WriteOperationLogListener.php
 
 ## 注解驱动横切能力
 
-稳定的注解契约、AOP 原语和上下文能力放在 `packages/kernel`：
+稳定的注解契约、AOP 原语和上下文能力放在 `trueadmin-kernel`：
 
 ```text
-packages/kernel/src/Http/Attribute/Permission.php
-packages/kernel/src/Http/Attribute/OpenApi.php
-packages/kernel/src/DataPermission/Attribute/DataScope.php
-packages/kernel/src/DataPermission/Aspects/DataScopeAspect.php
-packages/kernel/src/OperationLog/Attribute/OperationLog.php
-packages/kernel/src/OperationLog/Event/OperationLogged.php
+trueadmin-kernel/src/Http/Attribute/Permission.php
+trueadmin-kernel/src/Http/Attribute/OpenApi.php
+trueadmin-kernel/src/DataPermission/Attribute/DataScope.php
+trueadmin-kernel/src/DataPermission/Aspects/DataScopeAspect.php
+trueadmin-kernel/src/OperationLog/Attribute/OperationLog.php
+trueadmin-kernel/src/OperationLog/Event/OperationLogged.php
 ```
 
 依赖后台权限表、部门表、日志表的具体实现留在 `Module/System`：
@@ -215,8 +215,8 @@ backend/app/Foundation/Service/AbstractService.php
 backend/app/Foundation/Repository/AbstractRepository.php
 backend/app/Foundation/Database/Model.php
 backend/app/Foundation/Tree/TreeHelper.php
-packages/kernel/src/Context/Actor.php
-packages/kernel/src/Context/ActorContext.php
+trueadmin-kernel/src/Context/Actor.php
+trueadmin-kernel/src/Context/ActorContext.php
 ```
 
 `Module/System` 只做系统业务能力，例如菜单、权限、部门、岗位、字典、配置、系统日志。
@@ -237,7 +237,7 @@ plugins/true-admin/order
 
 模块内部结构保持一致，迁移成本会比较低。
 
-插件不是简单复制模块目录。插件必须提供根目录 `plugin.json` 描述插件身份、插件依赖、兼容性和生命周期；PHP 后端如需 Composer 依赖，在 `backend/php/composer.json` 中声明。插件后端目录与模块目录保持同构，不额外包 `src/`；安装器把 runtime 复制到各端运行时目录并写入宿主项目注册表，根目录 `plugins/` 不参与宿主代码扫描。完整规范见 [插件系统规范](plugin-system.md)。
+插件不是简单复制模块目录。插件必须提供根目录 `plugin.json` 描述插件身份、插件依赖、兼容性和生命周期；PHP 后端如需 Composer 依赖，在 `backend/php/composer.json` 中声明。插件后端目录与模块目录保持同构，不额外包 `src/`；框架级插件 CLI 把 runtime 复制到各端运行时目录，并分发生成各端自己的插件配置文件。根目录 `plugins/` 不参与宿主代码扫描。完整规范见 [插件系统规范](plugin-system.md)。
 
 ## AI 新增模块检查清单
 

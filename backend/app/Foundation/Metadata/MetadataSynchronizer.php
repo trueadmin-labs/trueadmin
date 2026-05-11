@@ -34,51 +34,17 @@ final class MetadataSynchronizer
                 }
             }
 
-            $menuPermissions = array_values(array_filter(array_map(
-                static fn (array $menu): string => (string) ($menu['permission'] ?? ''),
-                $menus,
-            )));
-
-            $syncedCodes = array_keys($menus);
-
-            foreach ($metadata['permissions'] ?? [] as $permission) {
-                if ((bool) ($permission['public'] ?? false) || in_array((string) $permission['code'], $menuPermissions, true)) {
-                    continue;
+            foreach ($menus as $menu) {
+                if ((string) ($menu['permission'] ?? '') !== '') {
+                    ++$synced['permissions'];
                 }
-
-                $parentCode = (string) ($permission['menu'] ?? '');
-                $parentId = $parentCode !== '' ? ($menuIds[$parentCode] ?? 0) : 0;
-                $this->menus->upsertMenu([
-                    'code' => $permission['code'],
-                    'title' => $permission['title'] ?: $permission['code'],
-                    'path' => '',
-                    'permission' => $permission['code'],
-                    'type' => 'button',
-                    'sort' => 0,
-                    'icon' => '',
-                ], $parentId, $now, $force);
-                $syncedCodes[] = (string) $permission['code'];
-                ++$synced['permissions'];
-            }
-
-            foreach ($metadata['menuButtons'] ?? [] as $button) {
-                $parentCode = (string) ($button['parent'] ?? '');
-                $parentId = $parentCode !== '' ? $this->requireSyncedMenuId($parentCode, $menuIds, (string) $button['code']) : 0;
-                $this->menus->upsertMenu([
-                    'code' => $button['code'],
-                    'title' => $button['title'],
-                    'path' => '',
-                    'permission' => $button['permission'] ?: $button['code'],
-                    'type' => 'button',
-                    'sort' => $button['sort'],
-                    'icon' => '',
-                ], $parentId, $now, $force);
-                $syncedCodes[] = (string) $button['code'];
-                ++$synced['buttons'];
+                if ((string) ($menu['type'] ?? '') === 'button') {
+                    ++$synced['buttons'];
+                }
             }
 
             if ($force) {
-                $this->menus->deleteCodeMenusExcept(array_values(array_unique($syncedCodes)));
+                $this->menus->deleteCodeMenusExcept(array_keys($menus));
             }
         });
 
@@ -109,17 +75,5 @@ final class MetadataSynchronizer
             : 0;
 
         return $menuIds[$code] = $this->menus->upsertMenu($menu, $parentId, $now, $force);
-    }
-
-    /**
-     * @param array<string, int> $menuIds
-     */
-    private function requireSyncedMenuId(string $parentCode, array $menuIds, string $childCode): int
-    {
-        if (! isset($menuIds[$parentCode])) {
-            throw new \RuntimeException(sprintf('Menu button [%s] references missing parent menu [%s].', $childCode, $parentCode));
-        }
-
-        return $menuIds[$parentCode];
     }
 }

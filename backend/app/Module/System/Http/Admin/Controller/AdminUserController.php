@@ -17,11 +17,9 @@ use TrueAdmin\Kernel\Http\Attribute\AdminDelete;
 use TrueAdmin\Kernel\Http\Attribute\AdminGet;
 use TrueAdmin\Kernel\Http\Attribute\AdminPost;
 use TrueAdmin\Kernel\Http\Attribute\AdminPut;
-use TrueAdmin\Kernel\Http\Attribute\Menu;
 use TrueAdmin\Kernel\Http\Attribute\Permission;
 use TrueAdmin\Kernel\OperationLog\Attribute\OperationLog;
 
-#[Menu(code: 'system.users', title: '成员管理', path: '/organization/users', parent: 'organization', permission: 'system:user:list', icon: 'UserOutlined', sort: 20)]
 #[AdminRouteController(path: '/api/admin/organization/users', middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
 final class AdminUserController extends AdminController
 {

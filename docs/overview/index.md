@@ -40,7 +40,7 @@ Monorepo
 Hyperf backend
 Vite + React modular admin web
 uni-app mobile
-packages/kernel
+trueadmin-kernel
 backend/app/Foundation
 backend/app/Infrastructure
 backend/app/Module

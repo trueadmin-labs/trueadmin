@@ -31,7 +31,6 @@ use TrueAdmin\Kernel\Exception\BusinessException;
 use TrueAdmin\Kernel\Http\Attribute\AdminController as AdminRouteController;
 use TrueAdmin\Kernel\Http\Attribute\AdminGet;
 use TrueAdmin\Kernel\Http\Attribute\AdminPost;
-use TrueAdmin\Kernel\Http\Attribute\MenuButton;
 use TrueAdmin\Kernel\Http\Attribute\Permission;
 use TrueAdmin\Kernel\OperationLog\Attribute\OperationLog;
 
@@ -44,7 +43,6 @@ final class AdminFileController extends AdminController
 
     #[AdminGet('')]
     #[Permission('system:file:list', title: '文件列表', group: '系统管理')]
-    #[MenuButton(code: 'system:file:all', title: '全部文件权限', parent: 'systemConfig')]
     public function list(AdminQueryRequest $request): array
     {
         $actor = ActorContext::requirePrincipal();

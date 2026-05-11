@@ -16,10 +16,8 @@ use App\Module\System\Service\Notification\AdminMessageCenterService;
 use TrueAdmin\Kernel\Http\Attribute\AdminController as AdminRouteController;
 use TrueAdmin\Kernel\Http\Attribute\AdminGet;
 use TrueAdmin\Kernel\Http\Attribute\AdminPost;
-use TrueAdmin\Kernel\Http\Attribute\Menu;
 use TrueAdmin\Kernel\Http\Attribute\Permission;
 
-#[Menu(code: 'system.messages', title: '消息中心', path: '/messages', permission: 'system:message:list', icon: 'MailOutlined', sort: 20)]
 #[AdminRouteController(path: '/api/admin/messages', middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
 final class AdminMessageController extends AdminController
 {

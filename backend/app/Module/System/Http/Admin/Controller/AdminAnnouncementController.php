@@ -16,11 +16,9 @@ use TrueAdmin\Kernel\Http\Attribute\AdminDelete;
 use TrueAdmin\Kernel\Http\Attribute\AdminGet;
 use TrueAdmin\Kernel\Http\Attribute\AdminPost;
 use TrueAdmin\Kernel\Http\Attribute\AdminPut;
-use TrueAdmin\Kernel\Http\Attribute\Menu;
 use TrueAdmin\Kernel\Http\Attribute\Permission;
 use TrueAdmin\Kernel\OperationLog\Attribute\OperationLog;
 
-#[Menu(code: 'system.announcementManagement', title: '公告管理', path: '/message-management/announcements', parent: 'messageManagement', permission: 'system:announcement:list', icon: 'NotificationOutlined', sort: 10)]
 #[AdminRouteController(path: '/api/admin/message-management/announcements', middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
 final class AdminAnnouncementController extends AdminController
 {

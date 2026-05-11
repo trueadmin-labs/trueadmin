@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "88dcfbcadb9c3db62c5d29c7114ac302",
+    "content-hash": "c933412e97707fb0ceea8b7f320cf260",
     "packages": [
         {
             "name": "aliyuncs/oss-sdk-php",
@@ -6460,7 +6460,7 @@
             "version": "dev-main",
             "dist": {
                 "type": "path",
-                "url": "../packages/kernel",
+                "url": "../../trueadmin-kernel",
                 "reference": "22d937f9bdc0cd0ec49ae5a35b283f165a988b3e"
             },
             "require": {

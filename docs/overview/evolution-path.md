@@ -68,7 +68,7 @@
 当前说明：
 
 - 后台认证已切换为 `admin_users` 数据库用户。
-- 默认管理员账号由 System 模块 Seeder 创建，账号为 `admin / trueadmin`；菜单和权限默认元数据由 Controller Attribute 扫描入库。
+- 默认管理员账号由 System 模块 Seeder 创建，账号为 `admin / trueadmin`；菜单和按钮权限默认元数据由模块 `resources/menus.php` 同步入库，接口权限由 Controller Attribute 校验。
 - OpenAPI 文档入口为 `/api/v1/open/openapi.json`。
 - PostgreSQL 本地端口映射为 `15432`，避免和本机默认 `5432` 冲突。
 

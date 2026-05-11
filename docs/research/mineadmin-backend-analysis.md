@@ -450,8 +450,8 @@ reason    代操作原因
 推荐第一版直接放在 kernel：
 
 ```text
-packages/kernel/src/Context/Actor.php
-packages/kernel/src/Context/ActorContext.php
+trueadmin-kernel/src/Context/Actor.php
+trueadmin-kernel/src/Context/ActorContext.php
 ```
 
 HTTP 中间件默认：

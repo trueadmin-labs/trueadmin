@@ -199,7 +199,7 @@ DELETE /api/admin/organization/users/{id}
 
 后端异常响应必须包含 `code`、`message`、`data`。`message` 来自错误码 enum 上的 `#[Message]` 翻译 key，并通过 `hyperf/translation` 返回当前语言文案，但不作为前端逻辑判断依据。需要插值展示的信息放入 `data.params` 或具体业务字段中，禁止把动态变量拼进 `code` 或在业务抛错时临时拼接 `message`。
 
-错误码是运行时异常响应契约，不是框架资产清单。第一版不做错误码收集、注册、同步和扫描命令，也不要求每个模块维护 `error_codes.php`。开发者新增错误码时，只需要在对应模块的 `Constant/*ErrorCode.php` 中声明 string backed enum，并使用 `TrueAdmin\Kernel\Constant\ErrorCodeTrait` 复用 Hyperf 官方 `hyperf/constants` 的 `EnumConstantsTrait`、`code()` 和 `message()` 默认实现。错误文案应通过 `#[Message]` 放在对应模块的 `resources/lang/{locale}/errors.php` 中；`app/Foundation/resources/lang` 只维护 `KERNEL.*` 通用文案，项目根级 `resources/lang` 作为最终覆盖层。`packages/kernel` 只保留 `SUCCESS` 和 `KERNEL.*` 通用错误码，业务模块和插件不得把自己的业务错误码放进 kernel。
+错误码是运行时异常响应契约，不是框架资产清单。第一版不做错误码收集、注册、同步和扫描命令，也不要求每个模块维护 `error_codes.php`。开发者新增错误码时，只需要在对应模块的 `Constant/*ErrorCode.php` 中声明 string backed enum，并使用 `TrueAdmin\Kernel\Constant\ErrorCodeTrait` 复用 Hyperf 官方 `hyperf/constants` 的 `EnumConstantsTrait`、`code()` 和 `message()` 默认实现。错误文案应通过 `#[Message]` 放在对应模块的 `resources/lang/{locale}/errors.php` 中；`app/Foundation/resources/lang` 只维护 `KERNEL.*` 通用文案，项目根级 `resources/lang` 作为最终覆盖层。`trueadmin-kernel` 只保留 `SUCCESS` 和 `KERNEL.*` 通用错误码，业务模块和插件不得把自己的业务错误码放进 kernel。
 
 是否需要错误码清单、重复检查、OpenAPI 错误响应导出，留到后续确有明确场景时再设计。若以后需要，也应优先基于专门的错误码 Attribute 或独立构建期检查，而不是复用 `#[Constants]` 这个通用枚举注解。
 

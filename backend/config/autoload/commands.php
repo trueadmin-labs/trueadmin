@@ -14,5 +14,4 @@ return [
     App\Foundation\Http\Command\TrueAdminRoutesCommand::class,
     App\Foundation\Metadata\Command\TrueAdminMetadataCommand::class,
     App\Foundation\Metadata\Command\TrueAdminMetadataSyncCommand::class,
-    App\Foundation\Plugin\Command\TrueAdminPluginListCommand::class,
 ];

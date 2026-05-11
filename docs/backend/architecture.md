@@ -78,7 +78,7 @@ packages/
 
 核心原则：
 
-- `packages/kernel` 只放真正通用、稳定、可复用的框架基础能力。
+- `trueadmin-kernel` 只放真正通用、稳定、可复用的框架基础能力。
 - `backend/app/Foundation` 放项目级可改基础行为，承接 kernel 的默认实现和项目定制。
 - `backend/app/Infrastructure` 放项目级技术适配，例如缓存、锁、存储、队列、短信、邮件、支付。
 - `backend/app/Module` 是业务和系统能力主目录。
@@ -391,7 +391,7 @@ Model       数据库模型
 
 ## 6. Kernel 边界
 
-`packages/kernel` 是 TrueAdmin 第一版就要建设的 Composer 核心包。
+`trueadmin-kernel` 是 TrueAdmin 第一版就要建设的 Composer 核心包。
 
 它只放跨模块基础设施，不放后台业务能力。
 
@@ -542,8 +542,8 @@ admin_user_departments.is_primary
 推荐目录：
 
 ```text
-packages/kernel/src/Context/Actor.php
-packages/kernel/src/Context/ActorContext.php
+trueadmin-kernel/src/Context/Actor.php
+trueadmin-kernel/src/Context/ActorContext.php
 ```
 
 推荐能力：
@@ -1077,7 +1077,7 @@ plugins/true-admin/product/
   llms.txt
 ```
 
-插件根目录 `plugin.json` 是包级插件清单，描述插件身份、插件依赖、兼容性和生命周期。Composer 只作为 PHP 后端 runtime 的依赖工具，PHP 插件在 `backend/php/composer.json` 中声明 autoload 和 PHP 包依赖。插件后端目录与 `backend/app/Module/*` 保持同构，不额外包 `src/`；安装器把插件包内的 runtime 目录复制到各端运行时目录，并写入宿主项目插件注册表。根目录 `plugins/` 不参与宿主代码扫描。完整规范见 [插件系统规范](plugin-system.md)。
+插件根目录 `plugin.json` 是包级插件清单，描述插件身份、插件依赖、兼容性和生命周期。Composer 只作为 PHP 后端 runtime 的依赖工具，PHP 插件在 `backend/php/composer.json` 中声明 autoload 和 PHP 包依赖。插件后端目录与 `backend/app/Module/*` 保持同构，不额外包 `src/`；框架级插件 CLI 把插件包内的 runtime 目录复制到各端运行时目录，并分发生成各端自己的插件配置文件。根目录 `plugins/` 不参与宿主代码扫描。完整规范见 [插件系统规范](plugin-system.md)。
 
 插件可变行为必须优先设计为配置项。插件安装后的默认配置写在宿主项目 `config/autoload/plugins.php` 的 `installed.<plugin>.defaults`，项目覆盖配置写在 `config.<plugin>`，插件代码通过 `PluginConfigRepository` 获取合并后的配置。这样开发者可以调整插件能力而不修改插件源码，后续升级插件时保留项目配置即可。
 
@@ -1218,8 +1218,8 @@ data: [DONE]
 ### 阶段一：后端基础架构稳定
 
 - 固化 `app/Module + MineAdmin 内部分层`。
-- 在 `packages/kernel` 实现 ActorContext。
-- 在 `packages/kernel` 实现轻量 CRUD 基类。
+- 在 `trueadmin-kernel` 实现 ActorContext。
+- 在 `trueadmin-kernel` 实现轻量 CRUD 基类。
 - 接入 Hyperf migration。
 - 建设 admin 用户、角色、菜单、权限、部门、岗位表。
 

@@ -52,7 +52,7 @@ Controller 只负责 HTTP 边界。
 必须包含：
 
 - `#[AdminRouteController]`：完整后台路由前缀。
-- `#[Menu]`：菜单默认元数据。
+- `resources/menus.php`：菜单和按钮权限默认元数据。
 - `#[Permission]`：接口权限点。
 - `#[OperationLog]`：会产生数据变更的动作。
 - `ApiResponse::success()`：统一响应出口。
@@ -223,7 +223,7 @@ AI 生成一个标准 CRUD 模块时，至少完成：
 后端生成完成后至少运行：
 
 ```bash
-find backend/app backend/test packages/kernel/src -name '*.php' -print0 | xargs -0 -n1 php -l
+find backend/app backend/test trueadmin-kernel/src -name '*.php' -print0 | xargs -0 -n1 php -l
 cd backend && composer test
 ```
 

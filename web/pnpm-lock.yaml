@@ -29,6 +29,9 @@ importers:
       '@tanstack/react-query':
         specifier: latest
         version: 5.100.9(react@19.2.6)
+      '@trueadmin/web-core':
+        specifier: file:../../trueadmin-web-core
+        version: file:../../trueadmin-web-core
       alova:
         specifier: latest
         version: 3.5.1
@@ -1108,6 +1111,9 @@ packages:
         optional: true
       '@types/react-dom':
         optional: true
+
+  '@trueadmin/web-core@file:../../trueadmin-web-core':
+    resolution: {directory: ../../trueadmin-web-core, type: directory}
 
   '@tybys/wasm-util@0.10.2':
     resolution: {integrity: sha512-RoBvJ2X0wuKlWFIjrwffGw1IqZHKQqzIchKaadZZfnNpsAYp2mM0h36JtPCjNDAHGgYez/15uMBpfGwchhiMgg==}
@@ -3832,6 +3838,8 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.14
       '@types/react-dom': 19.2.3(@types/react@19.2.14)
+
+  '@trueadmin/web-core@file:../../trueadmin-web-core': {}
 
   '@tybys/wasm-util@0.10.2':
     dependencies:

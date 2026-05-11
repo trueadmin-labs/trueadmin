@@ -1,0 +1,14 @@
+{
+  "name": "trueadmin-workspace",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "trueadmin": "node ../trueadmin-cli/src/index.mjs",
+    "doctor": "node ../trueadmin-cli/src/index.mjs doctor",
+    "plugin:list": "node ../trueadmin-cli/src/index.mjs plugin list",
+    "plugin:install": "node ../trueadmin-cli/src/index.mjs plugin install",
+    "plugin:sync": "node ../trueadmin-cli/src/index.mjs plugin sync",
+    "plugin:validate": "node ../trueadmin-cli/src/index.mjs plugin validate"
+  }
+}

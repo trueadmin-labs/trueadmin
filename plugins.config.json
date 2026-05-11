@@ -1,0 +1,15 @@
+{
+  "installed": {
+    "true-admin.examples": {
+      "source": "plugins/true-admin/examples",
+      "backendPath": "backend/plugins/true-admin/examples",
+      "webPath": "web/src/plugins/true-admin/examples",
+      "version": "0.1.0",
+      "enabled": true,
+      "defaults": {}
+    }
+  },
+  "disabled": [],
+  "config": {},
+  "marketplaces": []
+}

@@ -19,7 +19,7 @@ TrueAdmin 后端会参考 MineAdmin 的 Hyperf 使用方式，多使用 PHP Attr
 - 定时任务，例如 Hyperf Crontab 注解能力。
 - 权限点声明，例如未来的 `#[Permission]`。
 - OpenAPI 文档生成，例如未来接入 Swagger/OpenAPI 注解。
-- 接口元数据，例如 `#[AdminGet]`、`#[Permission]`、`#[MenuButton]`、`#[OpenApi]`。
+- 接口元数据，例如 `#[AdminGet]`、`#[Permission]`、`#[OpenApi]`。菜单和按钮权限放在模块或插件 `resources/menus.php`。
 
 不推荐用注解承载数据库、Redis、JWT、全局扫描路径、异常处理器等框架装配能力。这些能力应保持配置模式，便于开发者只修改配置就能覆盖框架默认行为。
 
@@ -122,16 +122,16 @@ final class WriteOperationLogListener implements ListenerInterface
 
 ## 放置规则
 
-框架级、可复用的注解契约和 AOP 原语放在 `packages/kernel`：
+框架级、可复用的注解契约和 AOP 原语放在 `trueadmin-kernel`：
 
 ```text
-packages/kernel/src/Http/Attribute/Permission.php
-packages/kernel/src/Http/Attribute/OpenApi.php
-packages/kernel/src/DataPermission/Attribute/DataScope.php
-packages/kernel/src/DataPermission/Aspects/DataScopeAspect.php
-packages/kernel/src/OperationLog/Attribute/OperationLog.php
-packages/kernel/src/OperationLog/Aspects/OperationLogAspect.php
-packages/kernel/src/OperationLog/Event/OperationLogged.php
+trueadmin-kernel/src/Http/Attribute/Permission.php
+trueadmin-kernel/src/Http/Attribute/OpenApi.php
+trueadmin-kernel/src/DataPermission/Attribute/DataScope.php
+trueadmin-kernel/src/DataPermission/Aspects/DataScopeAspect.php
+trueadmin-kernel/src/OperationLog/Attribute/OperationLog.php
+trueadmin-kernel/src/OperationLog/Aspects/OperationLogAspect.php
+trueadmin-kernel/src/OperationLog/Event/OperationLogged.php
 ```
 
 依赖后台数据库表的具体实现留在 `Module/System`：
@@ -150,7 +150,7 @@ backend/app/Module/Order/Listener/IncreaseProductSalesListener.php
 backend/app/Module/Workflow/Library/Attribute/WorkflowAction.php
 ```
 
-如果一个能力是稳定契约或通用 AOP 原语，优先放进 `packages/kernel`。如果它依赖具体业务表、菜单权限规则或项目落库策略，留在模块内。
+如果一个能力是稳定契约或通用 AOP 原语，优先放进 `trueadmin-kernel`。如果它依赖具体业务表、菜单权限规则或项目落库策略，留在模块内。
 
 ## 与 MineAdmin 的关系
 

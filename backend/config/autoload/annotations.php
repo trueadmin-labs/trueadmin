@@ -54,7 +54,7 @@ return [
         'paths' => array_values(array_filter([
             BASE_PATH . '/app',
             $appEnv === 'testing' ? BASE_PATH . '/test/Support/Controller' : null,
-            BASE_PATH . '/../packages/kernel/src',
+            BASE_PATH . '/../../trueadmin-kernel/src',
             ...$enabledPluginSourcePaths(),
         ])),
         'ignore_annotations' => [

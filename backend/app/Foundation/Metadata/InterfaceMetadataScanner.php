@@ -7,8 +7,6 @@ namespace App\Foundation\Metadata;
 use App\Foundation\Http\Routing\AttributeRouteRegistrar;
 use App\Foundation\Plugin\PluginRepository;
 use Hyperf\Di\Annotation\AnnotationCollector;
-use TrueAdmin\Kernel\Http\Attribute\Menu;
-use TrueAdmin\Kernel\Http\Attribute\MenuButton;
 use TrueAdmin\Kernel\Http\Attribute\OpenApi;
 use TrueAdmin\Kernel\Http\Attribute\Permission;
 
@@ -39,7 +37,6 @@ final class InterfaceMetadataScanner
             'menus' => $this->menus(),
             'permissions' => $this->permissions(),
             'permissionRules' => $this->permissionRules(),
-            'menuButtons' => $this->menuButtons(),
             'openapi' => $this->openapi(),
         ];
     }
@@ -49,25 +46,6 @@ final class InterfaceMetadataScanner
         $menus = [];
         foreach ($this->resourceMenus() as $menu) {
             $this->appendMenu($menus, $menu);
-        }
-
-        foreach (AnnotationCollector::getClassesByAnnotation(Menu::class) as $class => $annotation) {
-            if (! $annotation instanceof Menu) {
-                continue;
-            }
-
-            $this->appendMenu($menus, [
-                'class' => $class,
-                'code' => $annotation->code,
-                'title' => $annotation->title,
-                'path' => $annotation->path,
-                'parent' => $annotation->parent,
-                'permission' => $annotation->permission,
-                'icon' => $annotation->icon,
-                'sort' => $annotation->sort,
-                'type' => $annotation->type,
-                'status' => $annotation->status,
-            ]);
         }
 
         uasort($menus, static fn (array $a, array $b): int => [$a['sort'], $a['code']] <=> [$b['sort'], $b['code']]);
@@ -199,12 +177,25 @@ final class InterfaceMetadataScanner
     {
         $files = [
             ...(glob(BASE_PATH . '/app/Module/*/resources/menus.php') ?: []),
+            ...$this->testingMenuResourceFiles(),
             ...$this->plugins->menuResourceFiles(),
         ];
 
         sort($files);
 
         return array_values(array_unique($files));
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function testingMenuResourceFiles(): array
+    {
+        if ((getenv('APP_ENV') ?: '') !== 'testing') {
+            return [];
+        }
+
+        return glob(BASE_PATH . '/test/Support/Module/*/resources/menus.php') ?: [];
     }
 
     private function permissions(): array
@@ -232,14 +223,12 @@ final class InterfaceMetadataScanner
             $class = (string) $item['class'];
             $method = isset($item['method']) ? (string) $item['method'] : null;
             $action = $method === null ? null : $class . '@' . $method;
-            $menu = AnnotationCollector::getClassAnnotation($class, Menu::class);
-
             $permissions[$annotation->code] ??= [
                 'class' => $class,
                 'method' => $method,
                 'action' => $action,
                 'route' => $action === null ? null : ($routes[$action] ?? null),
-                'menu' => $menu instanceof Menu ? $menu->code : '',
+                'menu' => $this->menuCodeForPermission($annotation->code),
                 'code' => $annotation->code,
                 'title' => $annotation->title,
                 'group' => $annotation->group,
@@ -264,14 +253,12 @@ final class InterfaceMetadataScanner
             $class = (string) $item['class'];
             $method = isset($item['method']) ? (string) $item['method'] : null;
             $action = $method === null ? null : $class . '@' . $method;
-            $menu = AnnotationCollector::getClassAnnotation($class, Menu::class);
-
             $rules[] = [
                 'class' => $class,
                 'method' => $method,
                 'action' => $action,
                 'route' => $action === null ? null : ($routes[$action] ?? null),
-                'menu' => $menu instanceof Menu ? $menu->code : '',
+                'menu' => $annotation->mode() === 'single' ? $this->menuCodeForPermission($annotation->code) : '',
                 'code' => $annotation->mode() === 'single' ? $annotation->code : null,
                 'mode' => $annotation->mode(),
                 'codes' => $annotation->codes(),
@@ -295,32 +282,18 @@ final class InterfaceMetadataScanner
             }
         }
 
-        foreach (AnnotationCollector::getClassesByAnnotation(Menu::class) as $annotation) {
-            if ($annotation instanceof Menu && $annotation->permission !== '') {
-                $codes[$annotation->permission] = true;
-            }
-        }
-
-        foreach (AnnotationCollector::getMethodsByAnnotation(MenuButton::class) as $item) {
-            $annotation = $item['annotation'];
-            if (! $annotation instanceof MenuButton) {
-                continue;
-            }
-
-            $code = $annotation->permission !== '' ? $annotation->permission : $annotation->code;
-            if ($code !== '') {
-                $codes[$code] = true;
-            }
-        }
-
-        foreach ($this->permissionItems() as $item) {
-            $annotation = $item['annotation'];
-            if ($annotation instanceof Permission && $annotation->mode() === 'single') {
-                $codes[$annotation->code] = true;
-            }
-        }
-
         return $codes;
+    }
+
+    private function menuCodeForPermission(string $permission): string
+    {
+        foreach ($this->resourceMenus() as $menu) {
+            if ((string) ($menu['permission'] ?? '') === $permission) {
+                return (string) ($menu['code'] ?? '');
+            }
+        }
+
+        return '';
     }
 
     private function permissionItems(): array
@@ -333,22 +306,6 @@ final class InterfaceMetadataScanner
             ),
             ...AnnotationCollector::getMethodsByAnnotation(Permission::class),
         ];
-    }
-
-    private function menuButtons(): array
-    {
-        return array_values(array_map(
-            static fn (array $item): array => [
-                'class' => $item['class'],
-                'method' => $item['method'],
-                'code' => $item['annotation']->code,
-                'title' => $item['annotation']->title,
-                'parent' => $item['annotation']->parent,
-                'permission' => $item['annotation']->permission,
-                'sort' => $item['annotation']->sort,
-            ],
-            AnnotationCollector::getMethodsByAnnotation(MenuButton::class),
-        ));
     }
 
     private function openapi(): array

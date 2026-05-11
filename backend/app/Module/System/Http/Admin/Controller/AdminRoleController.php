@@ -17,11 +17,9 @@ use TrueAdmin\Kernel\Http\Attribute\AdminDelete;
 use TrueAdmin\Kernel\Http\Attribute\AdminGet;
 use TrueAdmin\Kernel\Http\Attribute\AdminPost;
 use TrueAdmin\Kernel\Http\Attribute\AdminPut;
-use TrueAdmin\Kernel\Http\Attribute\Menu;
 use TrueAdmin\Kernel\Http\Attribute\Permission;
 use TrueAdmin\Kernel\OperationLog\Attribute\OperationLog;
 
-#[Menu(code: 'system.roles', title: '角色管理', path: '/organization/roles', parent: 'organization', permission: 'system:role:list', icon: 'LockOutlined', sort: 30)]
 #[AdminRouteController(path: '/api/admin/organization/roles', middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
 final class AdminRoleController extends AdminController
 {

@@ -12,10 +12,8 @@ use App\Foundation\DataPermission\DataPolicyRegistry;
 use App\Module\Auth\Http\Admin\Middleware\AdminAuthMiddleware;
 use TrueAdmin\Kernel\Http\Attribute\AdminController as AdminRouteController;
 use TrueAdmin\Kernel\Http\Attribute\AdminGet;
-use TrueAdmin\Kernel\Http\Attribute\Menu;
 use TrueAdmin\Kernel\Http\Attribute\Permission;
 
-#[Menu(code: 'system.permissions', title: '权限点', path: '', parent: 'systemConfig', permission: 'system:permission:list', sort: 0, type: 'button')]
 #[AdminRouteController(path: '/api/admin/system-config', middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
 final class PermissionController extends AdminController
 {

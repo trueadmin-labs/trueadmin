@@ -1,13 +1,13 @@
 # 后端架构
 
-TrueAdmin 后端是 Hyperf 企业后台脚手架，参考 MineAdmin 的高效率后台分层，同时增加模块化上下文、`packages/kernel`、项目级 Foundation、技术适配 Infrastructure 和 AI 友好规范。
+TrueAdmin 后端是 Hyperf 企业后台脚手架，参考 MineAdmin 的高效率后台分层，同时增加模块化上下文、`trueadmin-kernel`、项目级 Foundation、技术适配 Infrastructure 和 AI 友好规范。
 
 它不是重 DDD 框架，也不是简单 CRUD 模板。第一版采用“模块化外壳 + MineAdmin 内部分层 + AI 友好生成规范”：普通 CRUD 足够快，复杂业务可以逐步引入事件、策略、契约和插件化能力。
 
 ## 核心结构
 
 ```text
-packages/kernel
+trueadmin-kernel
   src/
     Context/
     DataPermission/
@@ -93,7 +93,7 @@ Module/Xxx/
 php bin/hyperf.php trueadmin:routes
 ```
 
-业务开发推荐使用 Attribute 声明路由、权限、操作日志、数据权限、OpenAPI 和接口元数据。第一版已经把接口元数据、`DataScope`、`OperationLog` 的基础 Attribute/AOP/Event 原语放入 `packages/kernel`，并启用注解路由注册、接口元数据扫描、菜单权限同步和 OpenAPI 输出。
+业务开发推荐使用 Attribute 声明路由、权限、操作日志、数据权限、OpenAPI 和接口元数据。第一版已经把接口元数据、`DataScope`、`OperationLog` 的基础 Attribute/AOP/Event 原语放入 `trueadmin-kernel`，并启用注解路由注册、接口元数据扫描、菜单权限同步和 OpenAPI 输出。
 
 ```bash
 php bin/hyperf.php trueadmin:metadata

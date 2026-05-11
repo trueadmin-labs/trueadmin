@@ -1,6 +1,6 @@
 # 接口元数据体系设计
 
-TrueAdmin 的接口元数据体系用于统一描述后台、用户端和开放平台接口的路由、权限、菜单按钮、操作日志、数据权限和 OpenAPI 信息。
+TrueAdmin 的接口元数据体系用于统一描述后台、用户端和开放平台接口的路由、权限规则、操作日志、数据权限和 OpenAPI 信息。
 
 它不是一个万能 `OA` 注解，而是一组职责单一的 Attribute，加上后续的元数据扫描器、模块清单和数据库同步机制。
 
@@ -25,12 +25,23 @@ MetadataScanner 负责扫描和聚合。
 
 这种写法短期快，长期会变成巨型注解。字段越加越多，边界越来越模糊，也不利于局部替换。
 
-TrueAdmin 使用多注解组合：
+TrueAdmin 使用接口 Attribute 和资源文件组合：
 
 ```php
+// app/Module/Product/resources/menus.php
+return [
+    [
+        'code' => 'product.list',
+        'title' => '商品列表',
+        'path' => '/products',
+        'permission' => 'product:list',
+        'type' => 'menu',
+    ],
+];
+
+// Controller
 #[AdminGet('/products', name: 'product.list')]
 #[Permission('product:list', title: '商品列表')]
-#[MenuButton('product:list', title: '查询', parent: 'product')]
 #[DataScope(resource: 'product')]
 #[OperationLog(module: 'product', action: 'list', remark: '查询商品列表')]
 #[OpenApi(summary: '商品列表', response: ProductVo::class)]
@@ -109,7 +120,7 @@ final class ProductController extends AdminController
 
 - `code` 必须全局唯一。
 - 后台接口默认应声明权限，除非明确 `public: true`。
-- 权限注解用于生成权限默认清单和接口权限元数据。
+- 权限注解用于接口权限校验、OpenAPI 和权限规则元数据；原子权限点必须先在 `resources/menus.php` 中声明。
 - 运行时角色授权以数据库为准。
 
 权限注册和权限校验是两层概念：数据库只注册原子权限点，接口校验可以使用权限规则。
@@ -150,40 +161,81 @@ permissionRules  接口权限规则，用于运行时校验、OpenAPI 和 AI 理
 
 ### 菜单和按钮元数据
 
-菜单资源不是动态页面配置。TrueAdmin 把菜单树当成后台资源树：代码定义内部页面和按钮权限，数据库保存运行时树形结构、角色授权和展示状态。
+菜单资源不是动态页面配置。TrueAdmin 把菜单树当成后台资源树：模块或插件通过 `resources/menus.php` 声明内部页面、按钮权限和外部链接；数据库保存运行时树形结构、角色授权和展示状态。Controller 不再声明菜单，只保留路由、接口权限、操作日志和 OpenAPI 等接口元数据。
 
-内部页面入口使用 `#[Menu]` 声明：
+模块菜单示例：
 
 ```php
-#[Menu(
-    code: 'product.orders',
-    title: '订单管理',
-    path: '/product/orders',
-    parent: 'product',
-    permission: 'product:order:list',
-    icon: 'ShoppingCartOutlined',
-    sort: 20,
-)]
-final class OrderController extends AdminController
-{
-}
+// app/Module/Product/resources/menus.php
+return [
+    [
+        'code' => 'product',
+        'title' => '商品管理',
+        'path' => '/product',
+        'type' => 'directory',
+        'sort' => 20,
+    ],
+    [
+        'code' => 'product.orders',
+        'title' => '订单管理',
+        'path' => '/product/orders',
+        'parent' => 'product',
+        'permission' => 'product:order:list',
+        'icon' => 'ShoppingCartOutlined',
+        'sort' => 10,
+        'type' => 'menu',
+    ],
+    [
+        'code' => 'product.orders.create',
+        'title' => '新增订单',
+        'parent' => 'product.orders',
+        'permission' => 'product:order:create',
+        'sort' => 20,
+        'type' => 'button',
+    ],
+];
+```
+
+`resources/menus.php` 刻意保持扁平数组，不写嵌套 `children`。分组和层级通过 `parent` 字段表达：先声明一个 `type=directory` 的分组节点，再让页面菜单、子分组或按钮节点的 `parent` 指向父节点 `code`。同步时会按 `parent -> code` 关系写入数据库的 `parent_id`，所以声明顺序不要求父节点一定写在子节点前面。
+
+例如：
+
+```php
+return [
+    [
+        'code' => 'product',
+        'title' => '商品中心',
+        'type' => 'directory',
+        'sort' => 20,
+    ],
+    [
+        'code' => 'product.trade',
+        'title' => '交易管理',
+        'parent' => 'product',
+        'type' => 'directory',
+        'sort' => 10,
+    ],
+    [
+        'code' => 'product.trade.orders',
+        'title' => '订单管理',
+        'path' => '/product/trade/orders',
+        'parent' => 'product.trade',
+        'permission' => 'product:order:list',
+        'type' => 'menu',
+        'sort' => 10,
+    ],
+];
 ```
 
 规则：
 
 - `code` 必须全局唯一。
-- `path` 是前后端内部页面契约，必须由前端模块或插件 `manifest.ts` 提供对应 route component。
-- `permission` 是进入该页面的权限点，接口级权限仍由 `#[Permission]` 或权限规则控制。
-- `type` 默认是 `menu`，也可以用于声明代码定义的 `directory`。
+- 没有 `parent` 的节点会成为根节点；有 `parent` 的节点必须引用同一批菜单资源里已经定义的 `code`。
+- `menu.path` 是前后端内部页面契约，必须由前端模块或插件 `manifest.ts` 提供对应 route component。
+- `permission` 是页面、按钮或接口的授权原子权限点；接口上的 `#[Permission]` 只能引用已经在 `resources/menus.php` 声明过的权限。
+- `button` 用于声明按钮或接口权限点，不承载页面路由。
+- `link` 用于声明外部链接，必须提供 `url`，支持 `openMode=blank|self|iframe`。
 - 代码定义资源同步到数据库后标记为 `source=code`，后台管理只能调整展示属性和层级，不应修改 `type`、`path`、`permission` 等关键字段。
-
-按钮权限使用 `#[MenuButton]` 描述接口附近的按钮权限默认资产：
-
-```php
-#[MenuButton('product:create', title: '新增', parent: 'product', permission: 'product:create')]
-```
-
-`MenuButton` 只适合描述查询、新增、编辑、删除、导出等按钮或接口权限点，不承载页面路由。
 
 后台菜单管理允许创建的自定义资源只有：
 
@@ -192,7 +244,7 @@ directory  运行时分组目录
 link       外部链接入口
 ```
 
-自定义 `link` 支持 `url` 和 `openMode`，其中 `openMode` 可选 `blank`、`self`、`iframe`。后台不能创建内部 `menu` 或 `button`，因为内部页面和按钮必须有代码事实来源，避免数据库菜单指向不存在的前端组件或不存在的接口权限。
+后台不能创建内部 `menu` 或 `button`，因为内部页面和按钮必须有代码事实来源，避免数据库菜单指向不存在的前端组件或不存在的接口权限。
 
 ### OpenAPI 元数据
 
@@ -221,7 +273,7 @@ OpenAPI 注解不直接负责路由注册，只负责接口文档元数据。
 
 数据权限第一版主要用于 Admin。Client 端通常使用业务授权策略，不套后台数据权限模型。
 
-`DataScope`、`OperationLog` 的 Attribute、Context、Event 和 AOP 原语位于 `packages/kernel`。真正依赖后台表结构的权限策略、日志落库和后台配置仍然位于 `Module/System`。
+`DataScope`、`OperationLog` 的 Attribute、Context、Event 和 AOP 原语位于 `trueadmin-kernel`。真正依赖后台表结构的权限策略、日志落库和后台配置仍然位于 `Module/System`。
 
 ## 模块清单和数据库关系
 
@@ -246,9 +298,9 @@ admin_menus / admin_permissions / admin_role_*
 
 ## 元数据扫描与同步
 
-当前已提供 `InterfaceMetadataScanner`、`MetadataSynchronizer` 和 `OpenApiDocumentBuilder`，用于扫描 Controller Attribute，输出统一接口元数据，同步菜单/按钮权限默认元数据，并生成 OpenAPI 文档。
+当前已提供 `InterfaceMetadataScanner`、`MetadataSynchronizer` 和 `OpenApiDocumentBuilder`，用于扫描 Controller Attribute，输出统一接口元数据，同步资源菜单和权限点，并生成 OpenAPI 文档。
 
-菜单、按钮权限和接口权限的默认元数据来源只能是 Controller Attribute。Seeder 可以在初始化时调用 `MetadataSynchronizer` 触发同步，但不应该手写菜单清单，避免注解和 Seeder 形成两套来源。
+菜单和按钮权限的默认元数据来源只能是模块或插件 `resources/menus.php`。Seeder 可以在初始化时调用 `MetadataSynchronizer` 触发同步，但不应该手写菜单清单，避免 Seeder 和资源文件形成两套来源。
 
 可用命令：
 
@@ -262,7 +314,6 @@ php bin/hyperf.php trueadmin:metadata-sync
 ```text
 routes
 permissions
-menu_buttons
 openapi
 ```
 
@@ -297,7 +348,6 @@ TrueAdmin\Kernel\Http\Attribute\AdminGet / AdminPost / AdminPut / AdminDelete
 TrueAdmin\Kernel\Http\Attribute\ClientGet / ClientPost / ClientPut / ClientDelete
 TrueAdmin\Kernel\Http\Attribute\OpenGet / OpenPost / OpenPut / OpenDelete
 TrueAdmin\Kernel\Http\Attribute\Permission
-TrueAdmin\Kernel\Http\Attribute\MenuButton
 TrueAdmin\Kernel\Http\Attribute\OpenApi
 ```
 

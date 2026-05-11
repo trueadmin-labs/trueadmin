@@ -41,7 +41,7 @@ Library         数据权限、操作日志、AOP、Attribute 等横切能力
 Schema          结构化输出和代码生成元数据预留
 ```
 
-`packages/kernel` 保留错误码、业务异常、ActorContext、接口元数据 Attribute、数据权限 Attribute/AOP、操作日志 Attribute/Event/AOP 等可复用基础原语。`app/Foundation` 放项目级可改基础行为，例如统一响应、异常处理、健康检查、OpenAPI 入口、CRUD 默认行为、密码策略、模块路由扫描和模块迁移扫描规则。`app/Infrastructure` 放缓存、存储、队列、短信、邮件等技术适配。
+`trueadmin-kernel` 保留错误码、业务异常、ActorContext、接口元数据 Attribute、数据权限 Attribute/AOP、操作日志 Attribute/Event/AOP 等可复用基础原语。`app/Foundation` 放项目级可改基础行为，例如统一响应、异常处理、健康检查、OpenAPI 入口、CRUD 默认行为、密码策略、模块路由扫描和模块迁移扫描规则。`app/Infrastructure` 放缓存、存储、队列、短信、邮件等技术适配。
 
 ## 当前接口
 

@@ -478,7 +478,7 @@ class ExampleTest extends TestCase
         $this->assertSame(1, \Hyperf\DbConnection\Db::table('admin_menus')->where('code', 'systemConfig')->count());
         $this->assertSame(1, \Hyperf\DbConnection\Db::table('admin_menus')->where('code', 'system.departments')->count());
         $this->assertSame(1, \Hyperf\DbConnection\Db::table('admin_menus')->where('code', 'system.users')->count());
-        $this->assertSame(1, \Hyperf\DbConnection\Db::table('admin_menus')->where('code', 'system.client-users')->count());
+        $this->assertSame(1, \Hyperf\DbConnection\Db::table('admin_menus')->where('code', 'system.clientUsers')->count());
         $this->assertSame(1, \Hyperf\DbConnection\Db::table('admin_menus')->where('code', 'system.messages')->count());
         $this->assertSame(1, \Hyperf\DbConnection\Db::table('admin_menus')->where('code', 'system.notificationManagement')->count());
         $this->assertSame(1, \Hyperf\DbConnection\Db::table('admin_menus')->where('code', 'system.announcementManagement')->count());
@@ -491,7 +491,7 @@ class ExampleTest extends TestCase
             ->where('code', 'system.operationLogs')
             ->value('permission'));
         $this->assertSame('system:user:create', \Hyperf\DbConnection\Db::table('admin_menus')
-            ->where('code', 'system:user:create')
+            ->where('code', 'system.users.create')
             ->value('permission'));
 
         $openapi = $this->get('/api/v1/open/openapi.json');
