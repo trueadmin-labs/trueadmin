@@ -1,3 +1,4 @@
+import { env } from '@config/index';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { App } from '@/app/App';
@@ -5,7 +6,7 @@ import { AppProviders } from '@/app/providers/AppProviders';
 import '@/app/styles/global.css';
 
 async function enableMock() {
-  if (!import.meta.env.DEV || import.meta.env.VITE_ENABLE_MSW !== 'true') {
+  if (!env.isDev || !env.enableMsw) {
     return;
   }
 
