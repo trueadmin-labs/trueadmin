@@ -116,7 +116,7 @@ npm run doctor
 npm run web:module:validate
 ```
 
-`doctor` 会检查 `plugins.config.json`、`backend/config/autoload/plugins.php`、`web/config/plugin.ts` 是否一致，并确认后端和 Web 没有跨端读取插件配置。
+`doctor` 会检查 `plugins.config.json`、`backend/config/autoload/plugins.php`、`web/config/plugin.ts` 是否一致，并确认后端和 Web 没有跨端读取插件配置；同时检查后端菜单事实来源是否仍统一在 `resources/menus.php`，以及 Web 运行时代码是否只通过 `web/config` 读取环境变量。
 
 `web:module:validate` 会检查前端模块和插件 manifest 的重复路由、重复菜单 code、locale 缺失和插件 id 与目录不匹配等问题。
 

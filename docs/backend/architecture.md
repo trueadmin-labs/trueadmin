@@ -1080,7 +1080,7 @@ plugins/true-admin/product/
 
 插件根目录 `plugin.json` 是包级插件清单，描述插件身份、插件依赖、兼容性和生命周期。Composer 只作为 PHP 后端 runtime 的依赖工具，PHP 插件在 `backend/php/composer.json` 中声明 autoload 和 PHP 包依赖。插件后端目录与 `backend/app/Module/*` 保持同构，不额外包 `src/`；框架级插件 CLI 把插件包内的 runtime 目录复制到各端运行时目录，并分发生成各端自己的插件配置文件。根目录 `plugins/` 不参与宿主代码扫描。完整规范见 [插件系统规范](plugin-system.md)。
 
-插件可变行为必须优先设计为配置项。插件安装后的默认配置写在宿主项目 `config/autoload/plugins.php` 的 `installed.<plugin>.defaults`，项目覆盖配置写在 `config.<plugin>`，插件代码通过 `PluginConfigRepository` 获取合并后的配置。这样开发者可以调整插件能力而不修改插件源码，后续升级插件时保留项目配置即可。
+插件可变行为必须优先设计为配置项。根目录 `plugins.config.json` 是框架级插件管理输入，只允许 `trueadmin` CLI 读取和维护；插件安装后的默认配置写入 `plugins.config.json` 的 `installed.<plugin>.defaults`，项目覆盖配置写入 `plugins.config.json` 的 `config.<plugin>`，再由 CLI 分发生成各端自己的事实文件。后端运行时只读取 `backend/config/autoload/plugins.php`，插件代码通过 `PluginConfigRepository` 获取合并后的配置。这样开发者可以调整插件能力而不修改插件源码，后续升级插件时保留项目配置即可。
 
 插件生命周期：
 
@@ -1095,7 +1095,7 @@ sync menu
 sync permissions
 ```
 
-第一版插件主要面向开发者，不做后台运行时动态插件管理。启用和禁用通过宿主项目 `config/autoload/plugins.php` 控制，变更后走正常发布流程。
+第一版插件主要面向开发者，不做后台运行时动态插件管理。启用和禁用由框架级 CLI 写入 `plugins.config.json`，再分发生成 `backend/config/autoload/plugins.php`、`web/config/plugin.ts` 等端内事实文件；各端运行时只读取自己的事实文件，变更后走正常发布流程。
 
 ## 18. Web 管理端架构
 
