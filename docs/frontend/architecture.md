@@ -107,7 +107,7 @@ import { TrueAdminUserSelect } from '@/modules/system/components/TrueAdminUserSe
 
 `web/config/app.ts` 管应用名称、Logo、默认语言、默认首页；`layout.ts` 管 ProLayout 默认配置、工作区 feature 和尺寸策略；`theme.ts` 管 Ant Design 主题；`request.ts` 管 API baseURL、超时、Mock 和错误策略；`crud.ts` 管 CRUD 默认分页和交互；`plugin.ts` 管插件启用和项目覆盖配置；`env.ts` 管 env 类型转换；`index.ts` 聚合配置。
 
-Web 端只读取 `web/config/plugin.ts` 作为插件启用和前端覆盖配置。该文件由框架级插件 CLI 从根目录 `plugins.config.json` 分发生成；Web 运行时不读取根插件配置，也不读取后端配置。第一版不设计 `web/config/plugins/*.ts` 自动扫描。
+Web 端只读取 `web/config/plugin.ts` 作为插件启用和前端覆盖配置。该文件由框架级插件 CLI 从根目录 `plugins.config.json` 分发生成；Web 运行时不读取根插件配置，也不读取后端配置或根目录插件包源。第一版不设计 `web/config/plugins/*.ts` 自动扫描。`trueadmin doctor` 会检查生成文件是否过期，以及 Web 端是否出现跨端配置引用。
 
 Env 遵循 Vite 官方规则：`.env` 是所有环境基础默认值，`.env.local` 是本地私有覆盖，`.env.[mode]` 是指定环境覆盖，`.env.[mode].local` 是指定环境本地私有覆盖。优先级是 `.env.[mode].local > .env.[mode] > .env.local > .env`。命令必须显式指定 mode。前端 env 只使用 `VITE_` 前缀变量，不放真正密钥。
 

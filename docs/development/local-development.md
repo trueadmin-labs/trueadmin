@@ -100,6 +100,17 @@ composer start
 composer restart
 ```
 
+## 框架自检
+
+插件安装、启停或配置变更后，先同步各端事实文件，再运行 doctor：
+
+```bash
+npm run plugin:sync
+npm run doctor
+```
+
+`doctor` 会检查 `plugins.config.json`、`backend/config/autoload/plugins.php`、`web/config/plugin.ts` 是否一致，并确认后端和 Web 没有跨端读取插件配置。
+
 默认服务地址：
 
 ```text

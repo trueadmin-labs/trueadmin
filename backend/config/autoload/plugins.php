@@ -15,5 +15,4 @@ return [
     ],
     'disabled' => [],
     'config' => [],
-    'marketplaces' => [],
 ];

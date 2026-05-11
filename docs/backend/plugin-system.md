@@ -193,6 +193,26 @@ backend/config/autoload/plugins.php
 
 第一版插件主要面向开发者，不做后台动态插件管理，也不设计插件状态表。插件是否启用由框架级插件 CLI 写入根目录 `plugins.config.json`，再分发生成各端配置文件，变更后通过正常发布流程上线。
 
+## 配置边界
+
+插件配置分三层，每一层只能被对应责任方读取：
+
+```text
+plugins.config.json                    框架级插件管理输入，只允许 trueadmin CLI 读取和维护。
+backend/config/autoload/plugins.php    后端端内事实文件，后端运行时只读取这里。
+web/config/plugin.ts                   Web 端内事实文件，Web 运行时只读取这里。
+```
+
+安装后的 runtime 目录也按端隔离：
+
+```text
+backend/plugins/<vendor>/<name>        后端 runtime，只由后端读取。
+web/src/plugins/<vendor>/<name>        Web runtime，只由 Web 读取。
+plugins/<vendor>/<name>                插件包源，只由框架级 CLI 读取。
+```
+
+任何端都不允许跨端读取配置或直接读取根插件源目录。变更插件安装、启停或配置后，必须通过 `trueadmin plugin sync` 重新生成各端事实文件；`trueadmin doctor` 会检查生成文件是否过期、runtime 是否缺失，以及端内代码是否出现跨端配置引用。
+
 框架级配置示例：
 
 ```json
@@ -240,9 +260,11 @@ return [
 
 - `plugins.config.json` 是框架级插件管理配置，只允许框架级 CLI 读取和维护。
 - `backend/config/autoload/plugins.php` 是后端端内事实文件，后端运行时只读取它。
+- `web/config/plugin.ts` 是 Web 端内事实文件，Web 运行时只读取它。
 - `installed.<plugin>.path` 指向安装后的后端 runtime 目录，不指向根目录插件包源。
 - `installed.<plugin>.enabled` 控制默认启用状态。
 - `disabled` 优先级最高，用于强制禁用插件。
+- `marketplaces` 等插件市场配置只属于框架级 CLI，不分发到任意端运行时配置。
 - 修改启停配置后需要重新部署或重启应用，不追求运行时热切换。
 
 ## 插件配置覆盖
@@ -368,7 +390,7 @@ trueadmin doctor
 - `trueadmin plugin validate`：校验 `plugins.config.json` 和插件包 `plugin.json` 身份是否一致。
 - `trueadmin plugin install vendor/name`：读取 `plugins/<vendor>/<name>/plugin.json`，校验插件身份和依赖，复制 `backend/php` 到 `backend/plugins/<vendor>/<name>`，复制 `web` 到 `web/src/plugins/<vendor>/<name>`，写入 `plugins.config.json`，并生成各端配置。
 - `trueadmin plugin sync`：以 `plugins.config.json` 为框架级管理配置，生成 `backend/config/autoload/plugins.php` 和 `web/config/plugin.ts`。
-- `trueadmin doctor`：检查工作区结构、插件配置、生成文件同步状态和已安装插件 runtime。
+- `trueadmin doctor`：检查工作区结构、插件配置、生成文件同步状态、已安装插件 runtime 和跨端配置边界。
 
 安装命令默认拒绝覆盖已有 runtime；本地开发需要重装时使用 `--force`。需要安装但默认不启用时使用 `--disabled`。卸载、升级命令应基于本规范继续实现；启用和禁用第一版通过 `plugins.config.json` 修改，再运行 `trueadmin plugin sync` 分发到各端。
 
