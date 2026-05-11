@@ -1,10 +1,9 @@
 import { PlusOutlined } from '@ant-design/icons';
-import { App, Button, Dropdown, Form, Popconfirm, Space, Tag, Typography } from 'antd';
+import { App, Button, Dropdown, Form } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { TrueAdminCrudPage } from '@/core/crud';
-import type { CrudColumns, CrudFilterSchema, CrudTableAction } from '@/core/crud/types';
+import type { CrudTableAction } from '@/core/crud/types';
 import { useI18n } from '@/core/i18n/I18nProvider';
-import { TrueAdminIcon } from '@/core/icon/TrueAdminIcon';
 import { menuApi } from '../../services/menu.api';
 import type {
   AdminMenu,
@@ -20,6 +19,9 @@ import {
   type MenuIconMode,
   ROOT_PARENT_ID,
 } from './MenuFormModal';
+import { MenuRowActions } from './MenuRowActions';
+import { createMenuColumns } from './MenuTableColumns';
+import { createMenuFilters } from './menuPageModel';
 
 export default function AdminMenusPage() {
   const { message } = App.useApp();
@@ -121,126 +123,13 @@ export default function AdminMenusPage() {
     form.setFieldValue('icon', '');
   };
 
-  const columns = useMemo<CrudColumns<AdminMenu>>(
-    () => [
-      { title: 'ID', dataIndex: 'id', width: 88, sorter: true },
-      {
-        title: t('system.menus.column.name', '菜单名称'),
-        dataIndex: 'name',
-        width: 240,
-        render: (_, record) => (
-          <Space size={8}>
-            <span className="trueadmin-system-menu-icon">
-              <TrueAdminIcon icon={record.icon || record.code} />
-            </span>
-            <span>{record.name}</span>
-          </Space>
-        ),
-      },
-      {
-        title: t('system.menus.column.type', '类型'),
-        dataIndex: 'type',
-        width: 100,
-        render: (_, record) => (
-          <Tag
-            color={
-              record.type === 'button'
-                ? 'default'
-                : record.type === 'directory'
-                  ? 'processing'
-                  : record.type === 'link'
-                    ? 'warning'
-                    : 'success'
-            }
-          >
-            {typeText[record.type]}
-          </Tag>
-        ),
-      },
-      {
-        title: t('system.menus.column.source', '来源'),
-        dataIndex: 'source',
-        width: 110,
-        render: (_, record) => (
-          <Tag color={record.source === 'code' ? 'blue' : 'green'}>{sourceText[record.source]}</Tag>
-        ),
-      },
-      { title: t('system.menus.column.code', '编码'), dataIndex: 'code', width: 220 },
-      { title: t('system.menus.column.path', '路径'), dataIndex: 'path', width: 220 },
-      {
-        title: t('system.menus.column.link', '链接'),
-        dataIndex: 'url',
-        width: 260,
-        render: (_, record) =>
-          record.type === 'link' ? (
-            <Space orientation="vertical" size={2}>
-              <Typography.Link
-                href={record.url}
-                target="_blank"
-                rel="noreferrer"
-                ellipsis
-                style={{ maxWidth: 230 }}
-              >
-                {record.url}
-              </Typography.Link>
-              <Tag>{record.openMode ? openModeText[record.openMode] : '-'}</Tag>
-            </Space>
-          ) : (
-            '-'
-          ),
-      },
-      {
-        title: t('system.menus.column.permission', '权限标识'),
-        dataIndex: 'permission',
-        width: 220,
-      },
-      { title: t('system.menus.column.sort', '排序'), dataIndex: 'sort', width: 90, sorter: true },
-      {
-        title: t('system.menus.column.status', '状态'),
-        dataIndex: 'status',
-        width: 110,
-        render: (_, record) => (
-          <Tag color={record.status === 'enabled' ? 'success' : 'default'}>
-            {statusText[record.status]}
-          </Tag>
-        ),
-      },
-    ],
+  const columns = useMemo(
+    () => createMenuColumns({ openModeText, sourceText, statusText, t, typeText }),
     [openModeText, sourceText, statusText, t, typeText],
   );
 
-  const filters = useMemo<CrudFilterSchema[]>(
-    () => [
-      {
-        label: t('system.menus.column.type', '类型'),
-        name: 'type',
-        type: 'select',
-        options: [
-          { label: typeText.directory, value: 'directory' },
-          { label: typeText.menu, value: 'menu' },
-          { label: typeText.link, value: 'link' },
-          { label: typeText.button, value: 'button' },
-        ],
-      },
-      {
-        label: t('system.menus.column.source', '来源'),
-        name: 'source',
-        type: 'select',
-        options: [
-          { label: sourceText.code, value: 'code' },
-          { label: sourceText.custom, value: 'custom' },
-        ],
-      },
-      {
-        label: t('system.menus.column.status', '状态'),
-        name: 'status',
-        type: 'select',
-        options: [
-          { label: statusText.enabled, value: 'enabled' },
-          { label: statusText.disabled, value: 'disabled' },
-        ],
-      },
-    ],
+  const filters = useMemo(
+    () => createMenuFilters({ sourceText, statusText, t, typeText }),
     [sourceText, statusText, t, typeText],
   );
 
@@ -301,25 +190,16 @@ export default function AdminMenusPage() {
         delete: false,
         width: 150,
         render: ({ action, record }) => (
-          <Space size={0}>
-            <Button size="small" type="link" onClick={() => openEdit(record)}>
-              {t('crud.action.edit', '编辑')}
-            </Button>
-            {record.source === 'custom' ? (
-              <Popconfirm
-                title={t('system.menus.deleteConfirm', '确认删除该资源吗？')}
-                onConfirm={async () => {
-                  await action.delete?.(record.id);
-                  message.success(t('system.menus.deleteSuccess', '资源已删除'));
-                  await loadMenuTree();
-                }}
-              >
-                <Button danger size="small" type="link">
-                  {t('crud.action.delete', '删除')}
-                </Button>
-              </Popconfirm>
-            ) : null}
-          </Space>
+          <MenuRowActions
+            action={action}
+            record={record}
+            t={t}
+            onEdit={openEdit}
+            onDeleteSuccess={async () => {
+              message.success(t('system.menus.deleteSuccess', '资源已删除'));
+              await loadMenuTree();
+            }}
+          />
         ),
       }}
       locale={{
