@@ -6,7 +6,7 @@ namespace App\Module\System\Service;
 
 use TrueAdmin\Kernel\Pagination\PageResult;
 use TrueAdmin\Kernel\Crud\CrudQuery;
-use App\Foundation\Service\AbstractService;
+use TrueAdmin\Kernel\Service\AbstractService;
 use App\Foundation\Support\Password;
 use App\Module\System\Model\ClientUser;
 use App\Module\System\Repository\ClientUserRepository;

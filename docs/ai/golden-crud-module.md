@@ -110,7 +110,7 @@ Service 负责业务流程和不变量。
 - 删除前业务保护。
 - 组装 Repository 需要的持久化数据。
 
-可以继承 `App\Foundation\Service\AbstractService`，使用：
+可以继承 `TrueAdmin\Kernel\Service\AbstractService`，使用：
 
 - `assertUnique()`
 - `assertExistingIds()`

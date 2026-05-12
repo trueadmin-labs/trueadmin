@@ -6,7 +6,7 @@ namespace App\Module\System\Service\Notification;
 
 use TrueAdmin\Kernel\Pagination\PageResult;
 use TrueAdmin\Kernel\Crud\CrudQuery;
-use App\Foundation\Service\AbstractService;
+use TrueAdmin\Kernel\Service\AbstractService;
 use App\Module\System\Repository\Notification\AdminNotificationBatchRepository;
 use App\Module\System\Repository\Notification\AdminNotificationDeliveryRepository;
 use Hyperf\DbConnection\Db;
