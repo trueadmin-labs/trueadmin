@@ -1,12 +1,5 @@
-import { ApartmentOutlined } from '@ant-design/icons';
-import { Tag } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { TrueAdminCrudPage } from '@/core/crud/TrueAdminCrudPage';
-import type { CrudColumns, CrudExtraQuerySchema, CrudFilterSchema } from '@/core/crud/types';
-import {
-  TrueAdminTreeFilter,
-  type TrueAdminTreeFilterItem,
-} from '@/core/filter/TrueAdminTreeFilter';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { adminUserApi } from '../../services/admin-user.api';
 import { departmentApi } from '../../services/department.api';
@@ -16,25 +9,9 @@ import type {
   AdminUserUpdatePayload,
 } from '../../types/admin-user';
 import type { DepartmentTreeNode } from '../../types/department';
-
-const roleColorMap: Record<string, string> = {
-  auditor: 'default',
-  operator: 'processing',
-  'super-admin': 'gold',
-  super_admin: 'gold',
-};
-
-const ALL_DEPARTMENTS_VALUE = 'all';
-
-const toDepartmentTreeItems = (
-  departments: DepartmentTreeNode[],
-): Array<TrueAdminTreeFilterItem<string>> =>
-  departments.map((department) => ({
-    children: department.children ? toDepartmentTreeItems(department.children) : undefined,
-    label: department.name,
-    searchText: [department.name, department.code].filter(Boolean).join(' '),
-    value: String(department.id),
-  }));
+import { UserDepartmentFilter } from './UserDepartmentFilter';
+import { createUserColumns } from './UserTableColumns';
+import { createUserExtraQuery, createUserFilters } from './userPageModel';
 
 export default function AdminUsersPage() {
   const { t } = useI18n();
@@ -73,117 +50,15 @@ export default function AdminUsersPage() {
     [t],
   );
 
-  const filters = useMemo<CrudFilterSchema[]>(
-    () => [
-      {
-        name: 'status',
-        label: t('system.users.column.status', '状态'),
-        type: 'select',
-        options: [
-          { label: statusText.enabled, value: 'enabled' },
-          { label: statusText.disabled, value: 'disabled' },
-        ],
-      },
-      {
-        name: 'roles',
-        label: t('system.users.column.roles', '角色'),
-        type: 'select',
-        mode: 'multiple',
-        transform: ({ value }) => {
-          const roleCodes = value.split(',').filter(Boolean);
-          return roleCodes.length > 0 ? { roleCodes } : {};
-        },
-        options: [
-          { label: roleText['super-admin'], value: 'super-admin' },
-          { label: roleText.admin, value: 'admin' },
-          { label: roleText.operator, value: 'operator' },
-          { label: roleText.auditor, value: 'auditor' },
-        ],
-      },
-      {
-        name: 'createdAt',
-        label: t('system.users.column.createdAt', '创建时间'),
-        requestName: 'created_at',
-        type: 'dateRange',
-      },
-    ],
+  const filters = useMemo(
+    () => createUserFilters({ roleText, statusText, t }),
     [roleText, statusText, t],
   );
 
-  const extraQuery = useMemo<CrudExtraQuerySchema[]>(
-    () => [
-      {
-        name: 'deptId',
-        requestName: false,
-        transform: ({ value }) => (value === ALL_DEPARTMENTS_VALUE ? {} : { deptId: value }),
-      },
-      {
-        defaultValue: '1',
-        name: 'includeChildren',
-      },
-    ],
-    [],
-  );
+  const extraQuery = useMemo(() => createUserExtraQuery(), []);
 
-  const departmentItems = useMemo<Array<TrueAdminTreeFilterItem<string>>>(
-    () => [
-      {
-        icon: <ApartmentOutlined />,
-        label: t('system.users.department.all', '全部组织'),
-        value: ALL_DEPARTMENTS_VALUE,
-      },
-      ...toDepartmentTreeItems(departmentTree),
-    ],
-    [departmentTree, t],
-  );
-
-  const columns = useMemo<CrudColumns<AdminUser>>(
-    () => [
-      {
-        title: 'ID',
-        dataIndex: 'id',
-        width: 72,
-        sorter: true,
-      },
-      {
-        title: t('system.users.column.username', '用户名'),
-        dataIndex: 'username',
-        width: 180,
-      },
-      {
-        title: t('system.users.column.nickname', '昵称'),
-        dataIndex: 'nickname',
-        width: 180,
-      },
-      {
-        title: t('system.users.column.status', '状态'),
-        dataIndex: 'status',
-        width: 110,
-        render: (_, record) => (
-          <Tag color={record.status === 'enabled' ? 'success' : 'default'}>
-            {statusText[record.status]}
-          </Tag>
-        ),
-      },
-      {
-        title: t('system.users.column.roles', '角色'),
-        dataIndex: 'roles',
-        width: 260,
-        render: (_, record) =>
-          record.roles.map((role) => (
-            <Tag color={roleColorMap[role] ?? 'default'} key={role}>
-              {roleText[role] ?? role}
-            </Tag>
-          )),
-      },
-      {
-        title: t('system.users.column.createdAt', '创建时间'),
-        dataIndex: 'createdAt',
-        key: 'created_at',
-        width: 180,
-        sorter: true,
-      },
-    ],
+  const columns = useMemo(
+    () => createUserColumns({ roleText, statusText, t }),
     [roleText, statusText, t],
   );
 
@@ -199,28 +74,17 @@ export default function AdminUsersPage() {
       quickSearch={{ placeholder: t('system.users.quickSearch.placeholder', '搜索用户名 / 昵称') }}
       filters={filters}
       asideWidth={260}
-      aside={({ query }) => {
-        const departmentValue = query.values.deptId ?? ALL_DEPARTMENTS_VALUE;
-        return (
-          <TrueAdminTreeFilter<string>
-            title={t('system.users.department.title', '组织架构')}
-            value={departmentValue}
-            items={departmentItems}
-            loading={departmentTreeLoading}
-            placeholder={t('system.users.department.placeholder', '搜索部门')}
-            emptyText={t('system.users.department.empty', '暂无匹配部门')}
-            reloadText={t('system.users.department.reload', '刷新组织架构')}
-            expandAllText={t('system.users.department.expandAll', '展开全部')}
-            collapseAllText={t('system.users.department.collapseAll', '收起全部')}
-            onReload={() => {
-              void reloadDepartmentTree();
-            }}
-            onChange={(value) => {
-              query.setValue('deptId', value === ALL_DEPARTMENTS_VALUE ? undefined : String(value));
-            }}
-          />
-        );
-      }}
+      aside={({ query }) => (
+        <UserDepartmentFilter
+          departmentTree={departmentTree}
+          loading={departmentTreeLoading}
+          query={query}
+          t={t}
+          onReload={() => {
+            void reloadDepartmentTree();
+          }}
+        />
+      )}
       locale={{
         actionColumnTitle: t('crud.column.action', '操作'),
         advancedFilterText: t('crud.filter.advanced', '高级筛选'),
