@@ -6457,16 +6457,16 @@
         },
         {
             "name": "trueadmin/kernel",
-            "version": "v0.1.11",
+            "version": "v0.1.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/trueadmin-labs/trueadmin-kernel.git",
-                "reference": "14a1d170fd16be6e7a5cc0da506256389d5bf559"
+                "reference": "a5ab056230d6b9e0e32ac56c33bedeaf7a8defdf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/trueadmin-labs/trueadmin-kernel/zipball/14a1d170fd16be6e7a5cc0da506256389d5bf559",
-                "reference": "14a1d170fd16be6e7a5cc0da506256389d5bf559",
+                "url": "https://api.github.com/repos/trueadmin-labs/trueadmin-kernel/zipball/a5ab056230d6b9e0e32ac56c33bedeaf7a8defdf",
+                "reference": "a5ab056230d6b9e0e32ac56c33bedeaf7a8defdf",
                 "shasum": ""
             },
             "require": {
@@ -6501,9 +6501,9 @@
             "homepage": "https://github.com/trueadmin-labs/trueadmin-kernel",
             "support": {
                 "issues": "https://github.com/trueadmin-labs/trueadmin-kernel/issues",
-                "source": "https://github.com/trueadmin-labs/trueadmin-kernel/tree/v0.1.11"
+                "source": "https://github.com/trueadmin-labs/trueadmin-kernel/tree/v0.1.12"
             },
-            "time": "2026-05-12T11:17:40+00:00"
+            "time": "2026-05-12T16:05:58+00:00"
         },
         {
             "name": "vlucas/phpdotenv",
