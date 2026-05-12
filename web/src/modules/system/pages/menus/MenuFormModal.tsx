@@ -1,18 +1,6 @@
 import type { FormInstance, TreeSelectProps } from 'antd';
-import {
-  Checkbox,
-  Col,
-  Form,
-  Input,
-  InputNumber,
-  Row,
-  Segmented,
-  Select,
-  Space,
-  TreeSelect,
-} from 'antd';
+import { Col, Form, Input, InputNumber, Row, Select, TreeSelect } from 'antd';
 import { useMemo } from 'react';
-import { TrueAdminIconPicker } from '@/core/icon/TrueAdminIconPicker';
 import { TrueAdminModal } from '@/core/modal';
 import type {
   AdminMenu,
@@ -21,7 +9,8 @@ import type {
   AdminMenuStatus,
   AdminMenuType,
 } from '../../types/menu';
-import { MenuIconImageInput } from './MenuIconImageInput';
+import { MenuFormIconField } from './MenuFormIconField';
+import { MenuFormLinkFields } from './MenuFormLinkFields';
 import { FORM_GUTTER, type MenuIconMode, ROOT_PARENT_ID, toTreeSelectData } from './menuFormModel';
 
 export type MenuFormValues = AdminMenuPayload;
@@ -153,83 +142,10 @@ export function MenuFormModal({
             <Input disabled maxLength={255} />
           </Form.Item>
         ) : null}
-        {watchedType === 'link' ? (
-          <Row gutter={FORM_GUTTER}>
-            <Col xs={24} md={16}>
-              <Form.Item
-                label={t('system.menus.form.url', '链接地址')}
-                name="url"
-                rules={[
-                  {
-                    required: true,
-                    message: t('system.menus.form.urlRequired', '请输入链接地址'),
-                  },
-                  {
-                    type: 'url',
-                    message: t('system.menus.form.urlInvalid', '请输入有效链接地址'),
-                  },
-                ]}
-              >
-                <Input maxLength={1024} placeholder="https://example.com" />
-              </Form.Item>
-            </Col>
-            <Col xs={24} md={8}>
-              <Form.Item
-                label={t('system.menus.form.openMode', '打开方式')}
-                name="openMode"
-                rules={[
-                  {
-                    required: watchedType === 'link',
-                    message: t('system.menus.form.openModeRequired', '请选择打开方式'),
-                  },
-                ]}
-              >
-                <Select
-                  options={[
-                    { label: openModeText.blank, value: 'blank' },
-                    { label: openModeText.self, value: 'self' },
-                    { label: openModeText.iframe, value: 'iframe' },
-                  ]}
-                />
-              </Form.Item>
-            </Col>
-            <Col xs={24} md={8}>
-              <Form.Item name="showLinkHeader" valuePropName="checked">
-                <Checkbox>{t('system.menus.form.showLinkHeader', '显示顶部链接栏')}</Checkbox>
-              </Form.Item>
-            </Col>
-          </Row>
-        ) : null}
+        {watchedType === 'link' ? <MenuFormLinkFields openModeText={openModeText} t={t} /> : null}
         <Row gutter={FORM_GUTTER}>
           <Col xs={24} md={12}>
-            <Form.Item label={t('system.menus.form.icon', '图标')}>
-              <Space orientation="vertical" size={8} style={{ width: '100%' }}>
-                <Segmented<MenuIconMode>
-                  block
-                  value={iconMode}
-                  options={[
-                    {
-                      label: t('system.menus.form.iconMode.name', '图标名称'),
-                      value: 'name',
-                    },
-                    {
-                      label: t('system.menus.form.iconMode.image', '图片图标'),
-                      value: 'image',
-                    },
-                  ]}
-                  onChange={onChangeIconMode}
-                />
-                {iconMode === 'name' ? (
-                  <Form.Item name="icon" noStyle>
-                    <TrueAdminIconPicker placeholder="SettingOutlined" />
-                  </Form.Item>
-                ) : (
-                  <Form.Item name="icon" noStyle>
-                    <MenuIconImageInput />
-                  </Form.Item>
-                )}
-              </Space>
-            </Form.Item>
+            <MenuFormIconField iconMode={iconMode} t={t} onChangeIconMode={onChangeIconMode} />
           </Col>
           <Col xs={24} md={12}>
             <Form.Item label={t('system.menus.form.permission', '权限标识')} name="permission">
