@@ -185,11 +185,11 @@ filters[1][field]=id
 filters[1][op]=in
 filters[1][value][]=1
 filters[1][value][]=2
-sorts[0][field]=created_at
+sorts[0][field]=createdAt
 sorts[0][order]=desc
 ```
 
-筛选字段和排序字段使用 Repository 白名单中的后端字段名；数组值放在 `filters[n][value][]`；前端统一使用 `@trueadmin/web-core/crud` 序列化。响应分页字段保持 camelCase，例如 `pageSize`。
+筛选字段和排序字段使用 Repository 白名单中的 API 字段名，统一保持 camelCase；数组值放在 `filters[n][value][]`；前端统一使用 `@trueadmin/web-core/crud` 序列化。响应分页字段保持 camelCase，例如 `pageSize`。
 
 ## 生成清单
 

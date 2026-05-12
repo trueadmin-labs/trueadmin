@@ -21,7 +21,7 @@ final class AdminDepartmentRepository extends AbstractRepository
 
     protected array $filterable = [
         'id' => ['eq', 'in'],
-        'parent_id' => ['eq', 'in'],
+        'parentId' => ['eq', 'in'],
         'code' => ['eq', 'like'],
         'name' => ['eq', 'like'],
         'level' => ['eq', 'in', 'gte', 'lte'],

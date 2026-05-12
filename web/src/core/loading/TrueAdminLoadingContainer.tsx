@@ -5,18 +5,18 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { useLayoutStore } from '@/core/store/layoutStore';
 
-export type LoadingContainerMode = 'spin' | 'none';
+export type TrueAdminLoadingContainerMode = 'spin' | 'none';
 
-export type LoadingContainerLayout = 'content' | 'viewport';
+export type TrueAdminLoadingContainerLayout = 'content' | 'viewport';
 
-export type LoadingContainerProps = {
+export type TrueAdminLoadingContainerProps = {
   loading?: boolean;
   children: ReactNode;
   tip?: ReactNode;
   initialLoadingHeight?: number | string;
   viewportHeight?: number | string;
-  layout?: LoadingContainerLayout;
-  mode?: LoadingContainerMode;
+  layout?: TrueAdminLoadingContainerLayout;
+  mode?: TrueAdminLoadingContainerMode;
   fallback?: ReactNode;
   keepChildren?: boolean;
   reserveHeight?: boolean;
@@ -38,7 +38,7 @@ const toPixelValue = (value: number | string): number | undefined => {
 
 const transition = { duration: 0.18, ease: [0.22, 1, 0.36, 1] } as const;
 
-export function LoadingContainer({
+export function TrueAdminLoadingContainer({
   loading = false,
   children,
   tip,
@@ -52,7 +52,7 @@ export function LoadingContainer({
   animateHeight = true,
   className,
   style,
-}: LoadingContainerProps) {
+}: TrueAdminLoadingContainerProps) {
   const { t } = useI18n();
   const darkMode = useLayoutStore((state) => state.darkMode);
   const contentRef = useRef<HTMLDivElement>(null);

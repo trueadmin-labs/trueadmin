@@ -3,7 +3,7 @@ import { App, Button, Input, Result, Tooltip } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router';
 import { useI18n } from '@/core/i18n/I18nProvider';
-import { LoadingContainer } from '@/core/loading/LoadingContainer';
+import { TrueAdminLoadingContainer } from '@/core/loading';
 import { TrueAdminPage } from '@/core/page';
 import { menuApi } from '../../services/menu.api';
 import type { AdminMenu } from '../../types/menu';
@@ -61,7 +61,7 @@ export default function LinkFramePage() {
       contentPadding={false}
       bodyClassName="trueadmin-system-link-frame-page-body"
     >
-      <LoadingContainer
+      <TrueAdminLoadingContainer
         loading={loading}
         keepChildren={false}
         layout="viewport"
@@ -114,7 +114,7 @@ export default function LinkFramePage() {
             />
           </div>
         )}
-      </LoadingContainer>
+      </TrueAdminLoadingContainer>
     </TrueAdminPage>
   );
 }

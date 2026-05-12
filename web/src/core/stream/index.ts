@@ -1,9 +1,9 @@
 export { requestMaybeStream } from './requestMaybeStream';
-export type { StreamErrorReason } from './StreamError';
-export { StreamError } from './StreamError';
-export type { StreamProgressPanelStatus } from './StreamProgressPanel';
-export { StreamProgressPanel } from './StreamProgressPanel';
 export { streamRequest } from './streamRequest';
+export type { TrueAdminStreamErrorReason } from './TrueAdminStreamError';
+export { TrueAdminStreamError } from './TrueAdminStreamError';
+export type { TrueAdminStreamProgressPanelStatus } from './TrueAdminStreamProgressPanel';
+export { TrueAdminStreamProgressPanel } from './TrueAdminStreamProgressPanel';
 export type {
   StreamEventPayload,
   StreamEventType,

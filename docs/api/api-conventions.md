@@ -115,7 +115,7 @@ Authorization: Bearer <token>
 GET /api/admin/organization/users?page=1&pageSize=20&keyword=admin
 GET /api/admin/organization/users?filters[0][field]=status&filters[0][op]=eq&filters[0][value]=enabled
 GET /api/admin/organization/users?filters[0][field]=id&filters[0][op]=in&filters[0][value][]=1&filters[0][value][]=2
-GET /api/admin/organization/users?sorts[0][field]=created_at&sorts[0][order]=desc&sorts[1][field]=id&sorts[1][order]=asc
+GET /api/admin/organization/users?sorts[0][field]=createdAt&sorts[0][order]=desc&sorts[1][field]=id&sorts[1][order]=asc
 ```
 
 `filters[n][field/op/value]`、`sorts[n][field/order]` 和 `params[key]` 是标准写法。后端不兼容旧 `filter[field]`、`op[field]`、`sort/order` 和平铺业务参数；未知顶层参数会直接校验失败。后端只会应用 Repository 白名单中允许的字段和操作符。常用操作符包括 `eq`、`ne`、`gt`、`gte`、`lt`、`lte`、`like`、`in`、`between`、`is_null`、`not_null`。

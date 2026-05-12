@@ -94,9 +94,9 @@ TrueAdmin\Kernel\Crud\CrudQueryApplierOptions
 protected array $keywordFields = ['code', 'name'];
 protected array $filterable = [
     'status' => ['eq', 'in'],
-    'created_at' => ['between', 'gte', 'lte'],
+    'createdAt' => ['between', 'gte', 'lte'],
 ];
-protected array $sortable = ['id', 'created_at'];
+protected array $sortable = ['id', 'createdAt'];
 protected array $defaultSort = ['id' => 'desc'];
 ```
 

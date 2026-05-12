@@ -97,7 +97,7 @@
 
 - `surface` 只用于确实需要独立面板边界的区域。
 - 不要把卡片再套卡片；如果内部已经是 Ant Design `Card`，外层 section 通常不需要 `surface`。
-- 区块级加载优先放在 `TrueAdminPageSection` 或 `LoadingContainer`，不要让整页 loading 覆盖局部刷新。
+- 区块级加载优先放在 `TrueAdminPageSection` 或 `TrueAdminLoadingContainer`，不要让整页 loading 覆盖局部刷新。
 - `fullHeight` 只让区块在父级 flex 布局中填满剩余空间，区块 body 是否滚动由业务内容决定。
 
 ## 标题与操作区标准
@@ -142,7 +142,7 @@ import { TrueAdminPageModal } from '@core/modal';
 框架级通用组件只沉淀无领域归属的交互模式，组件 API 参考 Ant Design：优先透传原生组件 props，补充 `className`、`style`、`classNames`、`styles` 和 render/trigger 扩展点。
 
 - `TrueAdminActionBar`：由 `@trueadmin/web-antd/action` 提供，统一页面标题、详情页、弹窗 footer 和表格上下文操作。支持 `actions`、`max`、更多下拉和 `children` 混排。
-- `TrueAdminPermissionButton`：按钮级权限封装。基于 `Permission` 能力，支持无权限隐藏或禁用、tooltip、confirm 和 AntD Button props。
+- `TrueAdminPermissionButton`：按钮级权限封装。基于 `TrueAdminPermission` 能力，支持无权限隐藏或禁用、tooltip、confirm 和 AntD Button props。
 - `TrueAdminResultState`：页面、区块、弹窗内统一结果态。支持 `empty`、`403`、`404`、`500`、`error`、`success` 等 AntD Result 状态，并提供紧凑模式和重试入口。
 - `TrueAdminUploadPreview`：附件预览弹窗。图片和 PDF 直接预览，其他文件提供下载兜底；支持受控/非受控 open 和 trigger。
 - `TrueAdminAuditPanel`：审计/审批信息面板。复用 `TrueAdminAuditTimeline`，补充标题、描述、当前状态和操作区。

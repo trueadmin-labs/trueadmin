@@ -341,7 +341,7 @@ filters[1][field]=id
 filters[1][op]=in
 filters[1][value][]=1
 filters[1][value][]=2
-sorts[0][field]=created_at
+sorts[0][field]=createdAt
 sorts[0][order]=desc
 ```
 

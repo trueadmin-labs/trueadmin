@@ -13,8 +13,6 @@ export const PAGE_PARAM = 'page';
 export const PAGE_SIZE_PARAM = 'pageSize';
 export const DEFAULT_PAGE = 1;
 export const DEFAULT_PAGE_SIZE = 20;
-const LEGACY_PAGE_PARAM = '_page';
-const LEGACY_PAGE_SIZE_PARAM = '_pageSize';
 const SORT_FIELD_PATTERN = /^sorts\[(\d+)]\[field]$/;
 const FILTER_FIELD_PATTERN = /^filters\[(\d+)]\[field]$/;
 export const EMPTY_FILTERS: CrudFilterSchema[] = [];
@@ -172,8 +170,6 @@ export const removeSortParams = (params: URLSearchParams) => {
 export const removeCrudParams = (params: URLSearchParams, legacyKeys: Iterable<string> = []) => {
   params.delete(PAGE_PARAM);
   params.delete(PAGE_SIZE_PARAM);
-  params.delete(LEGACY_PAGE_PARAM);
-  params.delete(LEGACY_PAGE_SIZE_PARAM);
   params.delete('keyword');
   Array.from(legacyKeys).forEach((key) => {
     params.delete(key);

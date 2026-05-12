@@ -2,7 +2,7 @@ import { ReloadOutlined } from '@ant-design/icons';
 import { Button, Card, Descriptions, Drawer, Form, Input, Space, Switch, Typography } from 'antd';
 import { useEffect, useState } from 'react';
 import { useI18n } from '@/core/i18n/I18nProvider';
-import { LoadingContainer } from '@/core/loading/LoadingContainer';
+import { TrueAdminLoadingContainer } from '@/core/loading';
 import { TrueAdminModal } from '@/core/modal';
 import { TrueAdminPage } from '@/core/page/TrueAdminPage';
 
@@ -208,7 +208,7 @@ export default function LoadingExamplePage() {
               'examples.loading.strategy.beforeCode',
               '路由切换使用页面级加载；详情页、编辑页、抽屉和局部内容建议使用',
             )}{' '}
-            <Text code>{'<LoadingContainer />'}</Text>
+            <Text code>{'<TrueAdminLoadingContainer />'}</Text>
             {t(
               'examples.loading.strategy.afterCode',
               '。默认只绑定首次加载，后台刷新是否遮罩由业务显式决定。',
@@ -234,14 +234,14 @@ export default function LoadingExamplePage() {
         </Card>
 
         <Card title={t('examples.loading.detail.title', '详情容器加载')} size="small">
-          <LoadingContainer
+          <TrueAdminLoadingContainer
             loading={effectiveLoading}
             keepChildren={keepChildren}
             initialLoadingHeight={240}
             tip={t('examples.loading.detail.tip', '正在读取详情')}
           >
             {profile ? <ProfileDescriptions profile={profile} t={t} /> : null}
-          </LoadingContainer>
+          </TrueAdminLoadingContainer>
         </Card>
 
         <Card
@@ -279,7 +279,7 @@ export default function LoadingExamplePage() {
         </Card>
 
         <Card title={t('examples.loading.form.title', '编辑表单加载')} size="small">
-          <LoadingContainer loading={effectiveLoading} initialLoadingHeight={220}>
+          <TrueAdminLoadingContainer loading={effectiveLoading} initialLoadingHeight={220}>
             <Form className="trueadmin-examples-loading-form" layout="vertical" disabled={!profile}>
               <Form.Item label={t('examples.loading.form.configName', '配置名称')}>
                 <Input value={profile?.name ?? ''} readOnly />
@@ -288,7 +288,7 @@ export default function LoadingExamplePage() {
                 <Input value={profile?.owner ?? ''} readOnly />
               </Form.Item>
             </Form>
-          </LoadingContainer>
+          </TrueAdminLoadingContainer>
         </Card>
       </Space>
 
@@ -311,7 +311,7 @@ export default function LoadingExamplePage() {
           </Button>,
         ]}
       >
-        <LoadingContainer
+        <TrueAdminLoadingContainer
           loading={modalLoading}
           layout="viewport"
           viewportHeight={320}
@@ -322,7 +322,7 @@ export default function LoadingExamplePage() {
               <ModalProfileContent profile={modalProfile} version={modalVersion} t={t} />
             ) : null}
           </div>
-        </LoadingContainer>
+        </TrueAdminLoadingContainer>
       </TrueAdminModal>
 
       <Drawer
@@ -331,14 +331,14 @@ export default function LoadingExamplePage() {
         onClose={() => setDrawerOpen(false)}
         width={420}
       >
-        <LoadingContainer
+        <TrueAdminLoadingContainer
           loading={drawerLoading}
           mode="spin"
           initialLoadingHeight={220}
           tip={t('examples.loading.drawer.tip', '正在加载抽屉数据')}
         >
           {drawerProfile ? <ProfileDescriptions profile={drawerProfile} t={t} /> : null}
-        </LoadingContainer>
+        </TrueAdminLoadingContainer>
       </Drawer>
     </TrueAdminPage>
   );

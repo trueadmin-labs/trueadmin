@@ -14,7 +14,7 @@ TrueAdmin Web 管理端采用自研模块化前端底座，复用 Ant Design v6 
 
 Admin 端可共享的是后台管理体验和通用组件，例如 CRUD、菜单、权限按钮、后台消息、工作区和管理端选择器。Client 端可共享的是协议包、请求规范、错误结构、基础 UI 原语和领域 service，不应直接复用 Admin Layout、Admin 菜单、Admin 权限码和 Admin 消息中心。
 
-完整包边界见 [TrueAdmin 包与端边界](../package-boundaries.md)，组件 API 规范见 [前端组件 API 规范](component-api.md)。
+完整包边界见 [TrueAdmin 包与端边界](../package-boundaries.md)，组件 API 规范见 [前端组件 API 规范](component-api.md)，命名和目录归属见 [前端命名与目录边界规范](naming-and-structure.md)。
 
 ## 目录结构
 
@@ -36,6 +36,7 @@ web/
       providers/
       router/
       layout/
+        tabs/
       styles/
     core/
       module/
@@ -228,9 +229,9 @@ iframe  在 TrueAdmin 工作区 iframe 承载页中打开
 权限最佳实践是后端注册权限、后端校验权限、前端消费权限。当前用户权限由 `/api/admin/auth/me` 返回。前端只用 `permissions` 控制按钮和区域显示，后端 `PermissionMiddleware` 是最终安全边界。
 
 ```tsx
-<Permission code="system.user.create">
+<TrueAdminPermission code="system.user.create">
   <Button type="primary">新增</Button>
-</Permission>
+</TrueAdminPermission>
 ```
 
 CRUD 组件支持按 `resource` 推导常见权限，例如 `system.user.create`、`system.user.update`、`system.user.delete`、`system.user.export`。
@@ -299,12 +300,12 @@ const showModal = (nextPayload: Payload) => {
 
 页面级无权限使用标准 403 页面。当前 `/403` 路由提供全页 `ForbiddenPage`，适合路由守卫或后端菜单确认当前用户不可进入某个页面时使用。
 
-局部组件级无权限使用 `Permission`。按钮和表格操作默认无权限时不渲染；抽屉、详情区、卡片内容等需要占位说明的场景使用 `fallback="block"`：
+局部组件级无权限使用 `TrueAdminPermission`。按钮和表格操作默认无权限时不渲染；抽屉、详情区、卡片内容等需要占位说明的场景使用 `fallback="block"`：
 
 ```tsx
-<Permission code="system.department.view" fallback="block">
+<TrueAdminPermission code="system.department.view" fallback="block">
   <DepartmentDrawerContent />
-</Permission>
+</TrueAdminPermission>
 ```
 
 接口级无权限继续走全局错误弹窗。当前用户打开组件后接口返回 `403` 或 `KERNEL.AUTH.FORBIDDEN`，说明后端权限兜底触发、权限状态变化或前端权限判断不完整，应由错误弹窗解释原因和建议，不要静默替换成页面 403。
@@ -385,7 +386,7 @@ const result = await streamRequest<Result>('/admin/example/run', {
 
 如果一个业务调用需要在普通请求和流式请求之间切换，可以使用 `requestMaybeStream()`。`stream: false` 时走普通 alova JSON 请求，`stream: true` 时走 SSE，但最终都返回同一份业务数据。
 
-展示层使用 `StreamProgressPanel`。组件必须同时支持确定进度和不确定进度：有 `percent` 时显示百分比进度条，没有 `percent` 时显示 active 状态和步骤列表。
+展示层使用 `TrueAdminStreamProgressPanel`。组件必须同时支持确定进度和不确定进度：有 `percent` 时显示百分比进度条，没有 `percent` 时显示 active 状态和步骤列表。
 
 异常规则：收到 `type=error` 时优先从 `error.response` 按普通 `ApiEnvelope` 生成 `ApiError`；连接结束但没有收到 `[DONE]` 时按网络中断处理；用户主动 `abort()` 时按取消处理；收到 `[DONE]` 但没有 `result` 或 `completed` 时按协议异常处理。流式响应不进入普通 alova JSON 解包链路，但最终结果解包规则必须与普通请求一致。
 
@@ -405,7 +406,7 @@ Mock 只保留最小开发 Mock，默认优先真实后端。Mock 技术使用 M
 
 ## 第一版落地范围
 
-第一版目标是“框架 + System/admin-users 黄金 CRUD 闭环”。必须完成工程底座、配置体系、module/plugin manifest 扫描、plugin enabled 配置、ProLayout、后端 menu-tree 驱动菜单、auth/me、Permission 组件、alova + TanStack Query、Zustand、i18n、icon registry、TrueAdminPage、WorkspaceViewport、TrueAdminCrudPage、System/admin-users 黄金 CRUD、最小 MSW mock、错误处理和 `pnpm --dir web check`。
+第一版目标是“框架 + System/admin-users 黄金 CRUD 闭环”。必须完成工程底座、配置体系、module/plugin manifest 扫描、plugin enabled 配置、ProLayout、后端 menu-tree 驱动菜单、auth/me、TrueAdminPermission 组件、alova + TanStack Query、Zustand、i18n、icon registry、TrueAdminPage、WorkspaceViewport、TrueAdminCrudPage、System/admin-users 黄金 CRUD、最小 MSW mock、错误处理和 `pnpm --dir web check`。
 
 第一版不强制完成完整 System 所有页面、RouteTabs、KeepAlive、插件市场、OpenAPI 生成器、完整代码生成器和 E2E 测试。System 模块作为第一版黄金模块，`system/admin-users` 作为黄金 CRUD 页面。后续 roles、menus、departments、client-users 都基于黄金 CRUD 模板扩展。
 

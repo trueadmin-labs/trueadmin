@@ -1,3 +1,3 @@
 export * from './hooks';
-export * from './Permission';
+export * from './TrueAdminPermission';
 export * from './TrueAdminPermissionButton';

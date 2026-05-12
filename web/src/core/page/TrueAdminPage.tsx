@@ -4,7 +4,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { useLocation } from 'react-router';
 import { getRouteLayoutMeta } from '@/core/layout/routeLayoutMeta';
 import { useOptionalWorkspaceViewport } from '@/core/layout/WorkspaceViewport';
-import { LoadingContainer } from '@/core/loading/LoadingContainer';
+import { TrueAdminLoadingContainer } from '@/core/loading';
 import { PageTransition } from './PageTransition';
 
 export type TrueAdminPageLayout = 'natural' | 'workspace';
@@ -129,7 +129,7 @@ export function TrueAdminPage({
               {children}
             </div>
           ) : (
-            <LoadingContainer
+            <TrueAdminLoadingContainer
               loading={loading}
               tip={loadingTip}
               initialLoadingHeight={initialLoadingHeight}
@@ -138,7 +138,7 @@ export function TrueAdminPage({
               style={bodyStyle}
             >
               {children}
-            </LoadingContainer>
+            </TrueAdminLoadingContainer>
           )}
         </main>
       </PageTransition>

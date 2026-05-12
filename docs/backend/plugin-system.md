@@ -337,9 +337,9 @@ plugins/<vendor>/<name>/backend/php
 复制目标是宿主项目唯一会参与运行时扫描的插件代码目录；根目录 `plugins/` 只供框架级 CLI 读取，不进入 TypeScript、Vite、Biome、PHPStan 或 Hyperf 注解扫描。后端安装副本采用模块同构结构，注解扫描只扫描类目录，不扫描 `resources` 和 `Database`。
 
 - `plugin.json.dependencies.plugins` 用于校验插件依赖是否存在且版本兼容。
-- `web/package.json` 由框架级 CLI 合并到 `web/package.json` 或生成 pnpm 安装计划，再统一执行 `pnpm --dir web install`。
-- `backend/php/composer.json` 由框架级 CLI 合并到 PHP runtime 的 Composer 安装计划，再统一执行 Composer。
-- 第一版可以先只做人工或脚本提示，不要求自动修改宿主 `package.json` / `composer.json`。
+- `web/package.json` 由框架级 CLI 读取并输出 pnpm 安装计划，再统一执行 `pnpm --dir web add ...` 或 `pnpm --dir web install`。
+- `backend/php/composer.json` 由框架级 CLI 读取并输出 Composer 安装计划，再统一执行 `composer --working-dir=backend require ...` 或 Composer 安装。
+- 第一版不自动修改宿主 `package.json` / `composer.json`，但 `trueadmin plugin install` 必须明确输出待安装端依赖和可执行命令。
 
 ## 生命周期
 
@@ -388,7 +388,7 @@ trueadmin doctor
 
 - `trueadmin plugin list`：查看框架级已安装插件。
 - `trueadmin plugin validate`：校验 `plugins.config.json` 和插件包 `plugin.json` 身份是否一致。
-- `trueadmin plugin install vendor/name`：读取 `plugins/<vendor>/<name>/plugin.json`，校验插件身份和依赖，复制 `backend/php` 到 `backend/plugins/<vendor>/<name>`，复制 `web` 到 `web/src/plugins/<vendor>/<name>`，写入 `plugins.config.json`，并生成各端配置。
+- `trueadmin plugin install vendor/name`：读取 `plugins/<vendor>/<name>/plugin.json`，校验插件身份和依赖，读取 `web/package.json` 与 `backend/php/composer.json` 输出端依赖安装计划，复制 `backend/php` 到 `backend/plugins/<vendor>/<name>`，复制 `web` 到 `web/src/plugins/<vendor>/<name>`，写入 `plugins.config.json`，并生成各端配置。
 - `trueadmin plugin sync`：以 `plugins.config.json` 为框架级管理配置，生成 `backend/config/autoload/plugins.php` 和 `web/config/plugin.ts`。
 - `trueadmin doctor`：检查工作区结构、插件配置、生成文件同步状态、已安装插件 runtime 和跨端配置边界。
 

@@ -3,7 +3,7 @@ import { useLocation } from 'react-router';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { useMenuTreeQuery } from '@/core/menu/hooks';
 import type { BackendMenu } from '@/core/menu/types';
-import { PageLoading } from '@/core/page/PageLoading';
+import { TrueAdminPageLoading } from '@/core/page';
 import { TrueAdminPage } from '@/core/page/TrueAdminPage';
 
 const normalizePath = (path: string) => path.replace(/\/+$/, '') || '/';
@@ -26,7 +26,7 @@ export function ModuleMissing() {
   const { data: menus, isLoading } = useMenuTreeQuery();
 
   if (isLoading) {
-    return <PageLoading />;
+    return <TrueAdminPageLoading />;
   }
 
   const menuExists = hasMenuPath(menus, location.pathname);

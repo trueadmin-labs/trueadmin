@@ -1,6 +1,6 @@
 import { Button, Collapse, Descriptions, Space, Tag, Typography } from 'antd';
 import { useI18n } from '@/core/i18n/I18nProvider';
-import { LoadingContainer } from '@/core/loading/LoadingContainer';
+import { TrueAdminLoadingContainer } from '@/core/loading';
 import { TrueAdminMarkdown } from '@/core/markdown';
 import { TrueAdminModal } from '@/core/modal';
 import {
@@ -48,7 +48,7 @@ export function NotificationDetailModal({
       onCancel={onClose}
       afterOpenChange={afterOpenChange}
     >
-      <LoadingContainer loading={loading} initialLoadingHeight={360}>
+      <TrueAdminLoadingContainer loading={loading} initialLoadingHeight={360}>
         {batch && typeConfig ? (
           <Space orientation="vertical" size={16} style={{ width: '100%' }}>
             <Space size={8} wrap>
@@ -121,7 +121,7 @@ export function NotificationDetailModal({
             ) : null}
           </Space>
         ) : null}
-      </LoadingContainer>
+      </TrueAdminLoadingContainer>
     </TrueAdminModal>
   );
 }

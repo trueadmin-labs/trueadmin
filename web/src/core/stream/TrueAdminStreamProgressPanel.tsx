@@ -2,13 +2,18 @@ import { CheckCircleOutlined, CloseCircleOutlined, LoadingOutlined } from '@ant-
 import { Progress, Space, Timeline, Typography } from 'antd';
 import type { StreamEventPayload } from './types';
 
-export type StreamProgressPanelStatus = 'idle' | 'processing' | 'success' | 'error' | 'aborted';
+export type TrueAdminStreamProgressPanelStatus =
+  | 'idle'
+  | 'processing'
+  | 'success'
+  | 'error'
+  | 'aborted';
 
-type StreamProgressPanelProps = {
-  status: StreamProgressPanelStatus;
+export type TrueAdminStreamProgressPanelProps = {
+  status: TrueAdminStreamProgressPanelStatus;
   events: StreamEventPayload[];
   errorMessage?: string;
-  labels?: Partial<Record<StreamProgressPanelStatus, string>>;
+  labels?: Partial<Record<TrueAdminStreamProgressPanelStatus, string>>;
 };
 
 const latestProgress = (events: StreamEventPayload[]) => {
@@ -22,7 +27,7 @@ const latestProgress = (events: StreamEventPayload[]) => {
   return undefined;
 };
 
-const statusText: Record<StreamProgressPanelStatus, string> = {
+const statusText: Record<TrueAdminStreamProgressPanelStatus, string> = {
   idle: '等待开始',
   processing: '处理中',
   success: '处理完成',
@@ -30,12 +35,12 @@ const statusText: Record<StreamProgressPanelStatus, string> = {
   aborted: '已取消',
 };
 
-export function StreamProgressPanel({
+export function TrueAdminStreamProgressPanel({
   status,
   events,
   errorMessage,
   labels,
-}: StreamProgressPanelProps) {
+}: TrueAdminStreamProgressPanelProps) {
   const progress = latestProgress(events);
   const percent = progress?.percent;
   const timelineEvents = events.filter((event) => event.type !== 'debug');

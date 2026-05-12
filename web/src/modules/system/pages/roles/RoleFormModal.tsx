@@ -1,7 +1,7 @@
 import type { TranslateFunction } from '@trueadmin/web-core/i18n';
 import type { FormInstance } from 'antd';
 import { Form, Input, InputNumber, Select, Space } from 'antd';
-import { LoadingContainer } from '@/core/loading/LoadingContainer';
+import { TrueAdminLoadingContainer } from '@/core/loading';
 import { TrueAdminModal } from '@/core/modal';
 import type { AdminRole } from '../../types/role';
 import type { RoleFormValues } from './roleAuthorization';
@@ -44,7 +44,7 @@ export function RoleFormModal({
       onCancel={onCancel}
       onOk={onSubmit}
     >
-      <LoadingContainer loading={loading} initialLoadingHeight={220}>
+      <TrueAdminLoadingContainer loading={loading} initialLoadingHeight={220}>
         <Form<RoleFormValues>
           form={form}
           layout="vertical"
@@ -89,7 +89,7 @@ export function RoleFormModal({
             </Form.Item>
           </Space>
         </Form>
-      </LoadingContainer>
+      </TrueAdminLoadingContainer>
     </TrueAdminModal>
   );
 }

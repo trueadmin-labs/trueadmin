@@ -1,11 +1,11 @@
 import { Spin, Typography } from 'antd';
 import { useI18n } from '@/core/i18n/I18nProvider';
 
-export type PageLoadingProps = {
+export type TrueAdminPageLoadingProps = {
   fullscreen?: boolean;
 };
 
-export function PageLoading({ fullscreen = false }: PageLoadingProps) {
+export function TrueAdminPageLoading({ fullscreen = false }: TrueAdminPageLoadingProps) {
   const { t } = useI18n();
   const text = t('page.loading.enter', '正在进入页面');
 

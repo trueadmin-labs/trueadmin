@@ -1,12 +1,12 @@
 import { Result } from 'antd';
 import { useI18n } from '@/core/i18n/I18nProvider';
 
-type ForbiddenBlockProps = {
+type TrueAdminForbiddenBlockProps = {
   title?: string;
   subTitle?: string;
 };
 
-export function ForbiddenBlock({ title, subTitle }: ForbiddenBlockProps) {
+export function TrueAdminForbiddenBlock({ title, subTitle }: TrueAdminForbiddenBlockProps) {
   const { t } = useI18n();
 
   return (

@@ -22,13 +22,13 @@ final class AdminMenuRepository extends AbstractRepository implements MetadataMe
 
     protected array $filterable = [
         'id' => ['eq', 'in'],
-        'parent_id' => ['eq', 'in'],
+        'parentId' => ['eq', 'in'],
         'code' => ['eq', 'like'],
         'type' => ['eq', 'in'],
         'name' => ['eq', 'like'],
         'path' => ['eq', 'like'],
         'url' => ['eq', 'like'],
-        'open_mode' => ['eq', 'in'],
+        'openMode' => ['eq', 'in'],
         'permission' => ['eq', 'like'],
         'source' => ['eq', 'in'],
         'status' => ['eq', 'in'],

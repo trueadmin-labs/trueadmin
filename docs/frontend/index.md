@@ -5,13 +5,14 @@
 ## 阅读路径
 
 1. [前端总体架构](architecture.md)
-2. [页面容器规范](page-container.md)
-3. [前端组件 API 规范](component-api.md)
-4. [CRUD 搜索与筛选规范](crud-search-filter.md)
-5. [总体架构](../architecture/index.md)
-6. [技术栈说明](../overview/tech-stack.md)
-7. [API 规范](../api/index.md)
-8. [AI 开发指南](../ai/ai-development-guide.md)
+2. [前端命名与目录边界规范](naming-and-structure.md)
+3. [页面容器规范](page-container.md)
+4. [前端组件 API 规范](component-api.md)
+5. [CRUD 搜索与筛选规范](crud-search-filter.md)
+6. [总体架构](../architecture/index.md)
+7. [技术栈说明](../overview/tech-stack.md)
+8. [API 规范](../api/index.md)
+9. [AI 开发指南](../ai/ai-development-guide.md)
 
 ## 核心结论
 

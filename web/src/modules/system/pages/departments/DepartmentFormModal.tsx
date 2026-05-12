@@ -1,7 +1,7 @@
 import type { TranslateFunction } from '@trueadmin/web-core/i18n';
 import type { FormInstance, TreeSelectProps } from 'antd';
 import { Form, Input, InputNumber, Select, Space, TreeSelect } from 'antd';
-import { LoadingContainer } from '@/core/loading/LoadingContainer';
+import { TrueAdminLoadingContainer } from '@/core/loading';
 import { TrueAdminModal } from '@/core/modal';
 import type { DepartmentTreeNode } from '../../types/department';
 import { type DepartmentFormValues, ROOT_PARENT_ID } from './departmentPageModel';
@@ -46,7 +46,7 @@ export function DepartmentFormModal({
       onCancel={onCancel}
       onOk={onSubmit}
     >
-      <LoadingContainer loading={loading} initialLoadingHeight={280}>
+      <TrueAdminLoadingContainer loading={loading} initialLoadingHeight={280}>
         <Form<DepartmentFormValues>
           form={form}
           layout="vertical"
@@ -99,7 +99,7 @@ export function DepartmentFormModal({
             </Form.Item>
           </Space>
         </Form>
-      </LoadingContainer>
+      </TrueAdminLoadingContainer>
     </TrueAdminModal>
   );
 }

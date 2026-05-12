@@ -1,21 +1,21 @@
 import type { ReactNode } from 'react';
-import { ForbiddenBlock } from './ForbiddenBlock';
 import { useCurrentUserQuery } from './hooks';
+import { TrueAdminForbiddenBlock } from './TrueAdminForbiddenBlock';
 
-export type PermissionMode = 'and' | 'or';
+export type TrueAdminPermissionMode = 'and' | 'or';
 
-type PermissionProps = {
+export type TrueAdminPermissionProps = {
   code?: string | string[];
-  mode?: PermissionMode;
+  mode?: TrueAdminPermissionMode;
   deny?: boolean;
   fallback?: ReactNode | 'block';
   children: ReactNode;
 };
 
-export const hasPermission = (
+export const hasTrueAdminPermission = (
   permissions: string[] | undefined,
   code?: string | string[],
-  mode: PermissionMode = 'or',
+  mode: TrueAdminPermissionMode = 'or',
 ): boolean => {
   if (!code) {
     return true;
@@ -30,20 +30,20 @@ export const hasPermission = (
     : codes.some((item) => permissions?.includes(item));
 };
 
-export function Permission({
+export function TrueAdminPermission({
   code,
   mode = 'or',
   deny = false,
   fallback = null,
   children,
-}: PermissionProps) {
+}: TrueAdminPermissionProps) {
   const { data } = useCurrentUserQuery();
-  if (!deny && hasPermission(data?.permissions, code, mode)) {
+  if (!deny && hasTrueAdminPermission(data?.permissions, code, mode)) {
     return children;
   }
 
   if (fallback === 'block') {
-    return <ForbiddenBlock />;
+    return <TrueAdminForbiddenBlock />;
   }
 
   return fallback;

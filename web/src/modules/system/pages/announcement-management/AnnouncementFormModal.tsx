@@ -1,7 +1,7 @@
 import { CloudUploadOutlined, SaveOutlined } from '@ant-design/icons';
 import type { FormInstance } from 'antd';
 import { Button, DatePicker, Form, Input, Select, Space, Switch } from 'antd';
-import { LoadingContainer } from '@/core/loading/LoadingContainer';
+import { TrueAdminLoadingContainer } from '@/core/loading';
 import { TrueAdminMarkdownEditor } from '@/core/markdown';
 import { TrueAdminModal } from '@/core/modal';
 import type {
@@ -79,7 +79,7 @@ export function AnnouncementFormModal({
       }
       onCancel={onClose}
     >
-      <LoadingContainer loading={loading} initialLoadingHeight={560}>
+      <TrueAdminLoadingContainer loading={loading} initialLoadingHeight={560}>
         <Form<AnnouncementFormValues>
           form={form}
           layout="vertical"
@@ -196,7 +196,7 @@ export function AnnouncementFormModal({
             />
           </Form.Item>
         </Form>
-      </LoadingContainer>
+      </TrueAdminLoadingContainer>
     </TrueAdminModal>
   );
 }

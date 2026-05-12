@@ -1,6 +1,6 @@
 import { Typography } from 'antd';
 import type { CSSProperties, ReactNode } from 'react';
-import { LoadingContainer } from '@/core/loading/LoadingContainer';
+import { TrueAdminLoadingContainer } from '@/core/loading';
 
 type TrueAdminPageSectionPadding = boolean | 'horizontal' | 'vertical';
 
@@ -91,7 +91,7 @@ export function TrueAdminPageSection({
           {children}
         </div>
       ) : (
-        <LoadingContainer
+        <TrueAdminLoadingContainer
           loading={loading}
           tip={loadingTip}
           initialLoadingHeight={initialLoadingHeight}
@@ -100,7 +100,7 @@ export function TrueAdminPageSection({
           style={bodyStyle}
         >
           {children}
-        </LoadingContainer>
+        </TrueAdminLoadingContainer>
       )}
     </section>
   );

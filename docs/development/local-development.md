@@ -49,19 +49,15 @@ docker compose -f deploy/docker/docker-compose.yml down
 
 TrueAdmin 默认优先使用 PostgreSQL，后端通过 Hyperf 官方扩展包 `hyperf/database-pgsql` 支持 `DB_DRIVER=pgsql`。如需兼容 MySQL，可切换 `DB_DRIVER=mysql` 并使用对应的 MySQL 连接信息。
 
-## 后续补充
-
-当 Web 应用初始化后，本文件应继续补充实际启动命令和常见问题：
-
-- Web 启动命令。
-- 移动端启动命令。
-- 常见问题。
-
 ## Web 管理端
 
-当前 `web/` 目录处于清空待初始化状态。实现前必须先阅读 [前端架构](../frontend/index.md)，按自研模块化底座初始化，不直接使用 Ant Design Pro v6 官方工程作为项目底座。
-
 前端包管理器固定为 pnpm，依赖在 `web` 目录内自包含管理，只提交 `web/pnpm-lock.yaml`，禁止提交 `package-lock.json` 和 `yarn.lock`。
+
+安装 Web 依赖：
+
+```bash
+pnpm --dir web install
+```
 
 前端命令必须显式指定 Vite mode，推荐脚本：
 
@@ -81,6 +77,12 @@ TrueAdmin 默认优先使用 PostgreSQL，后端通过 Hyperf 官方扩展包 `h
 
 在仓库根目录执行前端命令时统一使用 `pnpm --dir web <script>`，例如 `pnpm --dir web check`。如果已经进入 `web/` 目录，也可以直接执行 `pnpm check`。
 
+启动 Web 管理端：
+
+```bash
+pnpm --dir web dev
+```
+
 前端 env 遵循 Vite 官方优先级：
 
 ```text
@@ -91,13 +93,12 @@ TrueAdmin 默认优先使用 PostgreSQL，后端通过 Hyperf 官方扩展包 `h
 
 ## 后端启动
 
-进入后端目录：
+安装后端依赖、初始化数据库并启动服务：
 
 ```bash
-cd backend
-composer install
-php bin/hyperf.php migrate:fresh --seed
-composer start
+composer --working-dir=backend install
+php backend/bin/hyperf.php migrate:fresh --seed
+composer --working-dir=backend start
 ```
 
 修改注解、AOP、插件扫描路径或执行 `composer dump-autoload` 后，必须重启 Hyperf。`composer dump-autoload` 会清理 `runtime/container`，运行中的 worker 如果继续引用旧代理文件，可能出现偶发 `KERNEL.SERVER.INTERNAL_ERROR`。本地可用以下命令重启：

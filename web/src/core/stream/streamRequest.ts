@@ -1,8 +1,8 @@
 import { ApiError } from '@trueadmin/web-core/error';
 import type { ApiEnvelope } from '@trueadmin/web-core/http';
 import { buildStreamUrl, createStreamHeaders } from './requestUtils';
-import { StreamError } from './StreamError';
 import { SseDataParser } from './streamParser';
+import { TrueAdminStreamError } from './TrueAdminStreamError';
 import type {
   StreamEventPayload,
   StreamRequestBody,
@@ -54,10 +54,10 @@ export const streamRequest = async <
     });
   } catch (error) {
     if (options.signal?.aborted) {
-      throw new StreamError('aborted', '操作已取消', 'STREAM.ABORTED', error);
+      throw new TrueAdminStreamError('aborted', '操作已取消', 'STREAM.ABORTED', error);
     }
 
-    throw new StreamError('network', '流式连接建立失败', 'STREAM.NETWORK', error);
+    throw new TrueAdminStreamError('network', '流式连接建立失败', 'STREAM.NETWORK', error);
   }
 
   if (!response.ok) {
@@ -71,7 +71,7 @@ export const streamRequest = async <
       );
     }
 
-    throw new StreamError(
+    throw new TrueAdminStreamError(
       'network',
       response.statusText || '流式请求失败',
       `HTTP.${response.status}`,
@@ -79,7 +79,7 @@ export const streamRequest = async <
   }
 
   if (!response.body) {
-    throw new StreamError('protocol', '当前浏览器不支持流式响应读取');
+    throw new TrueAdminStreamError('protocol', '当前浏览器不支持流式响应读取');
   }
 
   const decoder = new TextDecoder();
@@ -95,7 +95,7 @@ export const streamRequest = async <
 
     if (event.type === 'result') {
       if (!isEnvelope<TData>(event.response)) {
-        throw new StreamError(
+        throw new TrueAdminStreamError(
           'protocol',
           '流式响应 result 块缺少标准接口响应',
           'STREAM.MISSING_RESULT_RESPONSE',
@@ -128,7 +128,7 @@ export const streamRequest = async <
         );
       }
 
-      throw new StreamError('backend', event.message || '后端处理失败', event.code, event);
+      throw new TrueAdminStreamError('backend', event.message || '后端处理失败', event.code, event);
     }
   };
 
@@ -156,29 +156,43 @@ export const streamRequest = async <
     handleParsed(parser.push(decoder.decode()));
     handleParsed(parser.flush());
   } catch (error) {
-    if (error instanceof StreamError || error instanceof ApiError) {
+    if (error instanceof TrueAdminStreamError || error instanceof ApiError) {
       throw error;
     }
 
     if (options.signal?.aborted) {
-      throw new StreamError('aborted', '操作已取消', 'STREAM.ABORTED', error);
+      throw new TrueAdminStreamError('aborted', '操作已取消', 'STREAM.ABORTED', error);
     }
 
-    throw new StreamError('network', '流式连接中断', 'STREAM.NETWORK_INTERRUPTED', error);
+    throw new TrueAdminStreamError('network', '流式连接中断', 'STREAM.NETWORK_INTERRUPTED', error);
   } finally {
     reader.releaseLock();
   }
 
   if (!doneReceived) {
-    throw new StreamError('network', '流式连接异常中断，未收到结束标记', 'STREAM.MISSING_DONE');
+    throw new TrueAdminStreamError(
+      'network',
+      '流式连接异常中断，未收到结束标记',
+      'STREAM.MISSING_DONE',
+    );
   }
 
   if (!completed) {
-    throw new StreamError('protocol', '流式响应未返回完成状态', 'STREAM.MISSING_COMPLETED', events);
+    throw new TrueAdminStreamError(
+      'protocol',
+      '流式响应未返回完成状态',
+      'STREAM.MISSING_COMPLETED',
+      events,
+    );
   }
 
   if (!envelope) {
-    throw new StreamError('protocol', '流式响应未返回最终结果', 'STREAM.MISSING_RESULT', events);
+    throw new TrueAdminStreamError(
+      'protocol',
+      '流式响应未返回最终结果',
+      'STREAM.MISSING_RESULT',
+      events,
+    );
   }
 
   return { events, envelope, data: envelope.data, completed };

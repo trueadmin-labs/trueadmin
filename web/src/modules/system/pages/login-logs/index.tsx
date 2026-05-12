@@ -1,7 +1,7 @@
 import { EyeOutlined } from '@ant-design/icons';
 import { Button, Tag, Typography } from 'antd';
 import { useMemo } from 'react';
-import { Permission } from '@/core/auth/Permission';
+import { TrueAdminPermission } from '@/core/auth';
 import { TrueAdminCrudPage, useCrudRecordDetail } from '@/core/crud';
 import type { CrudColumns, CrudFilterSchema } from '@/core/crud/types';
 import { useI18n } from '@/core/i18n/I18nProvider';
@@ -102,7 +102,7 @@ export default function AdminLoginLogsPage() {
           delete: false,
           width: 108,
           render: ({ record }) => (
-            <Permission code="system:login-log:detail">
+            <TrueAdminPermission code="system:login-log:detail">
               <Button
                 icon={<EyeOutlined />}
                 size="small"
@@ -111,7 +111,7 @@ export default function AdminLoginLogsPage() {
               >
                 {t('crud.action.detail', '详情')}
               </Button>
-            </Permission>
+            </TrueAdminPermission>
           ),
         }}
         toolbarProps={{

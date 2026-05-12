@@ -2,7 +2,7 @@ import { PlusOutlined } from '@ant-design/icons';
 import { Button, Card, Typography } from 'antd';
 import type { CardProps, CardSemanticStyles, CardStylesType } from 'antd/es/card/Card';
 import type { CSSProperties } from 'react';
-import { Permission } from '@/core/auth/Permission';
+import { TrueAdminPermission } from '@/core/auth';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { TrueAdminPage } from '@/core/page/TrueAdminPage';
 import { TrueAdminCrudTable } from './TrueAdminCrudTable';
@@ -70,11 +70,11 @@ export function TrueAdminCrudPage<
     ...styles?.layout,
   } as CSSProperties;
   const defaultExtra = service.create ? (
-    <Permission code={toPermissionCode(resource, 'create')}>
+    <TrueAdminPermission code={toPermissionCode(resource, 'create')}>
       <Button type="primary" icon={<PlusOutlined />}>
         {t('crud.action.create', '新增')}
       </Button>
-    </Permission>
+    </TrueAdminPermission>
   ) : null;
   const pageExtra = extra ?? defaultExtra;
 

@@ -4,8 +4,8 @@ import { useI18n } from '@/core/i18n/I18nProvider';
 import { getRouteLayoutMeta } from '@/core/layout/routeLayoutMeta';
 import { useMenuTreeQuery } from '@/core/menu/hooks';
 import { useLayoutStore } from '@/core/store/layoutStore';
-import { useRouteTabs } from '@/core/tabs/useRouteTabs';
 import { findMenuMatch, getSideOpenKeys, resolveActiveRoot, toRuntimeMenus } from './AppLayoutMenu';
+import { useRouteTabs } from './tabs/useRouteTabs';
 
 export function useAppLayoutController() {
   const location = useLocation();

@@ -7,9 +7,9 @@ import { getRouteLayoutMeta } from '@/core/layout/routeLayoutMeta';
 import { WorkspaceScrollRestoration } from '@/core/layout/WorkspaceScrollRestoration';
 import { useWorkspaceViewport, WorkspaceViewportProvider } from '@/core/layout/WorkspaceViewport';
 import { type LayoutMode, useLayoutStore } from '@/core/store/layoutStore';
-import { AppTabsBar } from '@/core/tabs/AppTabsBar';
 import { AppRootMenu, type RuntimeMenuNode } from './AppLayoutMenu';
 import { useHeaderActions } from './RightContent';
+import { AppTabsBar } from './tabs/AppTabsBar';
 
 const { Header } = Layout;
 

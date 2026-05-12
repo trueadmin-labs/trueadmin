@@ -1,4 +1,4 @@
-import { StreamError } from './StreamError';
+import { TrueAdminStreamError } from './TrueAdminStreamError';
 import type { StreamEventPayload } from './types';
 
 export type ParsedStreamChunk = { type: 'event'; event: StreamEventPayload } | { type: 'done' };
@@ -49,7 +49,7 @@ export class SseDataParser {
 
       return [{ type: 'event', event }];
     } catch (error) {
-      throw new StreamError('protocol', '流式响应格式解析失败', 'STREAM.PROTOCOL', {
+      throw new TrueAdminStreamError('protocol', '流式响应格式解析失败', 'STREAM.PROTOCOL', {
         data,
         error,
       });

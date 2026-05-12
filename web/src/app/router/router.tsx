@@ -4,13 +4,13 @@ import { createBrowserRouter, Navigate } from 'react-router';
 import { AppLayout } from '@/app/layout/AppLayout';
 import { ModuleMissing } from '@/app/layout/ModuleMissing';
 import { frontendRoutes } from '@/core/module/registry';
-import { PageLoading } from '@/core/page/PageLoading';
+import { TrueAdminPageLoading } from '@/core/page';
 
 const LoginPage = lazy(() => import('@/app/pages/LoginPage'));
 const ForbiddenPage = lazy(() => import('@/app/pages/ForbiddenPage'));
 
 const withSuspense = (element: React.ReactNode, fullscreen = false) => (
-  <Suspense fallback={<PageLoading fullscreen={fullscreen} />}>{element}</Suspense>
+  <Suspense fallback={<TrueAdminPageLoading fullscreen={fullscreen} />}>{element}</Suspense>
 );
 
 export const router = createBrowserRouter([

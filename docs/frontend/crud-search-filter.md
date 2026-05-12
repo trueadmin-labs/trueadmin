@@ -4,17 +4,17 @@ TrueAdmin 标准 CRUD 由 `TrueAdminCrudTable` 统一管理列表查询状态、
 
 ## 浏览器 URL 状态参数规则
 
-浏览器 URL 只保存前端列表状态，用于刷新页面、复制链接和标签页恢复；它不是后端接口查询协议。筛选字段使用页面自然字段名，系统状态参数使用 `_` 前缀，避免和业务筛选字段冲突：
+浏览器 URL 只保存前端列表状态，用于刷新页面、复制链接和标签页恢复；它不是后端接口查询协议。筛选字段使用页面自然字段名，分页状态使用和后端一致的 `page/pageSize`：
 
-- `_page`：当前页
-- `_pageSize`：每页条数
+- `page`：当前页
+- `pageSize`：每页条数
 - `sorts[n][field]`：第 n 个排序字段
 - `sorts[n][order]`：第 n 个排序方向，`asc` 或 `desc`
 
 示例：
 
 ```text
-?keyword=chen&status=enabled,pending&createdAt=2026-01-01,2026-01-31&_page=2&_pageSize=20&sorts[0][field]=createdAt&sorts[0][order]=desc
+?keyword=chen&status=enabled,pending&createdAt=2026-01-01,2026-01-31&page=2&pageSize=20&sorts[0][field]=createdAt&sorts[0][order]=desc
 ```
 
 数组类值统一用逗号拼接。空数组不写入 URL。筛选值约定不包含逗号；如果未来出现自由文本数组这类值可能包含逗号的场景，应为该字段增加自定义序列化或 `transform`。
@@ -64,7 +64,7 @@ TrueAdmin 标准 CRUD 由 `TrueAdminCrudTable` 统一管理列表查询状态、
 
 - 快速搜索通过回车或搜索按钮提交。
 - 复杂筛选通过面板里的“查询”按钮提交。
-- 提交快速搜索或复杂筛选后，`_page` 重置为 1。
+- 提交快速搜索或复杂筛选后，`page` 重置为 1。
 - 重置会清空快速搜索、复杂筛选、排序和页码。
 - 通过 toolbar 中的筛选按钮收起筛选面板时，未提交的临时编辑会丢弃，并恢复到当前 URL 中的已提交条件。
 
@@ -113,7 +113,7 @@ page=1&pageSize=20&keyword=chen&filters[0][field]=status&filters[0][op]=in&filte
   transform: ({ value }) => {
     const [start, end] = value.split(',');
     return {
-      filters: [{ field: 'created_at', op: 'between', value: [start, end] }],
+      filters: [{ field: 'createdAt', op: 'between', value: [start, end] }],
     };
   },
 }

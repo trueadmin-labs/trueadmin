@@ -9,6 +9,7 @@ import type {
   TrueAdminAttachmentValue,
 } from './attachmentUploadUtils';
 import { getAttachmentDisplayName, normalizeAttachmentResult } from './attachmentUploadUtils';
+import { useTrueAdminUpload } from './useTrueAdminUpload';
 
 type UseAttachmentUploadControllerOptions = {
   canUpload: boolean;
@@ -33,11 +34,20 @@ export function useAttachmentUploadController({
 }: UseAttachmentUploadControllerOptions) {
   const { t } = useI18n();
   const { download } = useTrueAdminDownload();
-  const [uploading, setUploading] = useState(false);
   const [editingId, setEditingId] = useState<TrueAdminAttachmentId>();
   const [editingName, setEditingName] = useState('');
   const [previewFile, setPreviewFile] = useState<TrueAdminAttachmentValue>();
   const [previewOpen, setPreviewOpen] = useState(false);
+  const uploadFile = useCallback(
+    (file: File): Promise<TrueAdminAttachmentUploadResult | undefined> =>
+      upload ? upload(file) : Promise.resolve(undefined),
+    [upload],
+  );
+  const { upload: runUpload, uploading } = useTrueAdminUpload<
+    TrueAdminAttachmentUploadResult | undefined
+  >({
+    uploadFile,
+  });
 
   const uploadFileList = useMemo<UploadFile[]>(
     () =>
@@ -66,22 +76,19 @@ export function useAttachmentUploadController({
         return Upload.LIST_IGNORE;
       }
 
-      setUploading(true);
       try {
-        const result = upload ? await upload(file) : undefined;
+        const result = await runUpload(file);
         const nextFile = normalizeAttachmentResult(result, file);
         const nextFiles = multiple ? [...value, nextFile] : [nextFile];
         emitChange(maxCount ? nextFiles.slice(0, maxCount) : nextFiles);
       } catch (error) {
         message.error(t('upload.attachment.uploadFailed', '文件上传失败'));
         throw error;
-      } finally {
-        setUploading(false);
       }
 
       return Upload.LIST_IGNORE;
     },
-    [canUpload, emitChange, maxCount, multiple, t, upload, value],
+    [canUpload, emitChange, maxCount, multiple, runUpload, t, value],
   );
 
   const handleRemove = useCallback(

@@ -2,11 +2,11 @@ import type { ButtonProps, PopconfirmProps, TooltipProps } from 'antd';
 import { Button, Popconfirm, Tooltip } from 'antd';
 import type { ReactNode } from 'react';
 import { useCurrentUserQuery } from './hooks';
-import { hasPermission, type PermissionMode } from './Permission';
+import { hasTrueAdminPermission, type TrueAdminPermissionMode } from './TrueAdminPermission';
 
 export type TrueAdminPermissionButtonProps = ButtonProps & {
   permission?: string | string[];
-  permissionMode?: PermissionMode;
+  permissionMode?: TrueAdminPermissionMode;
   deniedMode?: 'hide' | 'disable';
   deniedTooltip?: ReactNode;
   tooltip?: ReactNode;
@@ -30,7 +30,7 @@ export function TrueAdminPermissionButton({
   ...buttonProps
 }: TrueAdminPermissionButtonProps) {
   const { data } = useCurrentUserQuery();
-  const allowed = hasPermission(data?.permissions, permission, permissionMode);
+  const allowed = hasTrueAdminPermission(data?.permissions, permission, permissionMode);
 
   if (!allowed && deniedMode === 'hide') {
     return null;

@@ -1,7 +1,7 @@
 import type { FormInstance, TreeSelectProps } from 'antd';
 import { Col, Form, Input, InputNumber, Row, Select, TreeSelect } from 'antd';
 import { useMemo } from 'react';
-import { LoadingContainer } from '@/core/loading/LoadingContainer';
+import { TrueAdminLoadingContainer } from '@/core/loading';
 import { TrueAdminModal } from '@/core/modal';
 import type {
   AdminMenu,
@@ -79,7 +79,7 @@ export function MenuFormModal({
       onCancel={onCancel}
       onOk={onOk}
     >
-      <LoadingContainer loading={loading} initialLoadingHeight={420}>
+      <TrueAdminLoadingContainer loading={loading} initialLoadingHeight={420}>
         <Form<MenuFormValues>
           form={form}
           layout="vertical"
@@ -184,7 +184,7 @@ export function MenuFormModal({
             </Col>
           </Row>
         </Form>
-      </LoadingContainer>
+      </TrueAdminLoadingContainer>
     </TrueAdminModal>
   );
 }

@@ -1,6 +1,6 @@
 import type { TranslateFunction } from '@trueadmin/web-core/i18n';
 import { Button, Popconfirm } from 'antd';
-import { Permission } from '@/core/auth/Permission';
+import { TrueAdminPermission } from '@/core/auth';
 import { toPermissionCode } from './crudTableUtils';
 import type {
   CrudColumns,
@@ -52,7 +52,7 @@ export function createCrudOperationColumns<
         <>
           {rowActions?.render?.({ ...renderContext, record })}
           {canDelete && rowActions?.delete !== false ? (
-            <Permission code={toPermissionCode(resource, 'delete')}>
+            <TrueAdminPermission code={toPermissionCode(resource, 'delete')}>
               <Popconfirm
                 title={
                   locale?.deleteConfirmTitle ??
@@ -64,7 +64,7 @@ export function createCrudOperationColumns<
                   {locale?.deleteText ?? t('crud.action.delete', '删除')}
                 </Button>
               </Popconfirm>
-            </Permission>
+            </TrueAdminPermission>
           ) : null}
         </>
       ),

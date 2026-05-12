@@ -8,6 +8,7 @@ import type {
   TrueAdminImageValue,
 } from './imageUploadUtils';
 import { normalizeImageUploadResult, toImageValueArray } from './imageUploadUtils';
+import { useTrueAdminUpload } from './useTrueAdminUpload';
 
 type UseImageUploadControllerOptions = {
   maxCount?: number;
@@ -27,10 +28,19 @@ export function useImageUploadController({
   value,
 }: UseImageUploadControllerOptions) {
   const { t } = useI18n();
-  const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState<TrueAdminImageValue>();
   const files = useMemo(() => toImageValueArray(value), [value]);
   const limit = multiple ? maxCount : 1;
+  const uploadFile = useCallback(
+    (file: File): Promise<TrueAdminImageUploadResult | undefined> =>
+      upload ? upload(file) : Promise.resolve(undefined),
+    [upload],
+  );
+  const { upload: runUpload, uploading } = useTrueAdminUpload<
+    TrueAdminImageUploadResult | undefined
+  >({
+    uploadFile,
+  });
 
   const uploadFileList = useMemo<UploadFile[]>(
     () =>
@@ -65,21 +75,18 @@ export function useImageUploadController({
         return Upload.LIST_IGNORE;
       }
 
-      setUploading(true);
       try {
-        const nextFile = normalizeImageUploadResult(upload ? await upload(file) : undefined, file);
+        const nextFile = normalizeImageUploadResult(await runUpload(file), file);
         const nextFiles = multiple ? [...files, nextFile] : [nextFile];
         emitChange(limit ? nextFiles.slice(0, limit) : nextFiles);
       } catch (error) {
         message.error(t('upload.image.uploadFailed', '图片上传失败'));
         throw error;
-      } finally {
-        setUploading(false);
       }
 
       return Upload.LIST_IGNORE;
     },
-    [emitChange, files, limit, multiple, t, upload],
+    [emitChange, files, limit, multiple, runUpload, t],
   );
 
   const handleRemove = useCallback(
