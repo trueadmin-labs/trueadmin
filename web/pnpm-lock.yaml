@@ -30,8 +30,8 @@ importers:
         specifier: latest
         version: 5.100.9(react@19.2.6)
       '@trueadmin/web-core':
-        specifier: ^0.1.6
-        version: 0.1.6
+        specifier: ^0.1.7
+        version: 0.1.7
       alova:
         specifier: latest
         version: 3.5.1
@@ -1112,8 +1112,8 @@ packages:
       '@types/react-dom':
         optional: true
 
-  '@trueadmin/web-core@0.1.6':
-    resolution: {integrity: sha512-/fX9XxbM1/HXX193HheRQp7fJb88rNKDejfLggERMdrGwAyTxg6V4YbF2vUdRn9KrlqF6xs7+LXxYyza4ux+JA==}
+  '@trueadmin/web-core@0.1.7':
+    resolution: {integrity: sha512-wsRMAIOpMPTxswqKjDcze3k2oyPeJdciEEpH06d5DrDgDz1q33NAAtNHwCPDR0BQI16IGn2XxPahAlnTqxrBNw==}
 
   '@tybys/wasm-util@0.10.2':
     resolution: {integrity: sha512-RoBvJ2X0wuKlWFIjrwffGw1IqZHKQqzIchKaadZZfnNpsAYp2mM0h36JtPCjNDAHGgYez/15uMBpfGwchhiMgg==}
@@ -3839,7 +3839,7 @@ snapshots:
       '@types/react': 19.2.14
       '@types/react-dom': 19.2.3(@types/react@19.2.14)
 
-  '@trueadmin/web-core@0.1.6': {}
+  '@trueadmin/web-core@0.1.7': {}
 
   '@tybys/wasm-util@0.10.2':
     dependencies:
