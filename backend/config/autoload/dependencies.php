@@ -13,9 +13,11 @@ use TrueAdmin\Kernel\Database\Seeder\NamespacedSeed;
 use TrueAdmin\Kernel\Http\PermissionProviderInterface;
 use TrueAdmin\Kernel\DataPermission\DataPolicyProviderInterface;
 use TrueAdmin\Kernel\Metadata\MetadataMenuRepositoryInterface;
+use App\Foundation\DataPermission\Organization\OrganizationScopeProviderInterface;
 use App\Module\System\Contract\AdminIdentityProviderInterface;
 use App\Module\System\Repository\AdminMenuRepository;
 use App\Module\System\Service\DataPermission\AdminRoleDataPolicyProvider;
+use App\Module\System\Service\DataPermission\SystemOrganizationScopeProvider;
 use App\Module\System\Service\AdminIdentityService;
 use App\Module\System\Service\AdminPermissionService;
 use Hyperf\Contract\TranslatorLoaderInterface;
@@ -33,5 +35,6 @@ return [
         ? HyperfTest\Support\TestingAdminPermissionProvider::class
         : AdminPermissionService::class,
     DataPolicyProviderInterface::class => AdminRoleDataPolicyProvider::class,
+    OrganizationScopeProviderInterface::class => SystemOrganizationScopeProvider::class,
     MetadataMenuRepositoryInterface::class => AdminMenuRepository::class,
 ];

@@ -10,6 +10,9 @@ use App\Foundation\Repository\AbstractRepository;
 use App\Module\System\Model\AdminRole;
 use Hyperf\DbConnection\Db;
 
+/**
+ * @extends AbstractRepository<AdminRole>
+ */
 final class AdminRoleRepository extends AbstractRepository
 {
     public const SUPER_ADMIN_CODE = 'super-admin';
@@ -57,7 +60,9 @@ final class AdminRoleRepository extends AbstractRepository
 
     public function findByCode(string $code): ?AdminRole
     {
-        return AdminRole::query()->where('code', $code)->first();
+        $role = AdminRole::query()->where('code', $code)->first();
+
+        return $role instanceof AdminRole ? $role : null;
     }
 
     public function create(array $data): AdminRole
@@ -91,7 +96,14 @@ final class AdminRoleRepository extends AbstractRepository
     public function syncMenus(AdminRole $role, array $menuIds): void
     {
         $roleId = (int) $role->getAttribute('id');
-        $this->syncPivot('admin_role_menu', 'role_id', $roleId, 'menu_id', $menuIds);
+        Db::table('admin_role_menu')->where('role_id', $roleId)->delete();
+
+        foreach (array_values(array_unique($menuIds)) as $menuId) {
+            Db::table('admin_role_menu')->insert([
+                'role_id' => $roleId,
+                'menu_id' => $menuId,
+            ]);
+        }
     }
 
     /**
@@ -99,7 +111,12 @@ final class AdminRoleRepository extends AbstractRepository
      */
     public function menuIds(AdminRole $role): array
     {
-        return $this->pivotIds('admin_role_menu', 'role_id', (int) $role->getAttribute('id'), 'menu_id');
+        return Db::table('admin_role_menu')
+            ->where('role_id', (int) $role->getAttribute('id'))
+            ->pluck('menu_id')
+            ->map(static fn ($id): int => (int) $id)
+            ->values()
+            ->all();
     }
 
     /**

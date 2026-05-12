@@ -126,6 +126,7 @@ SSE / Streamable 运行时
 项目级 CRUD 默认行为
 项目默认健康检查端点
 项目级 Repository 组合层
+模板默认组织数据权限策略和数据来源接口
 通过 DI/config 明确替换 kernel 行为的项目覆盖实现
 ```
 
@@ -134,11 +135,13 @@ SSE / Streamable 运行时
 ```text
 backend/app/Foundation/Http/Controller/HealthController.php
 backend/app/Foundation/Repository/AbstractRepository.php
+backend/app/Foundation/DataPermission/Organization/OrganizationDataPolicyStrategy.php
+backend/app/Foundation/DataPermission/Organization/OrganizationScopeProviderInterface.php
 ```
 
 Foundation 可以依赖 kernel。
 
-Foundation 不应该依赖具体业务模块。如果某个能力需要依赖 `Module/System` 的角色、菜单、部门、岗位表，它通常不再是 Foundation，而应该进入 `Module/System` 或由 Foundation 定义接口、System 提供实现。
+Foundation 不应该依赖具体业务模块。如果某个能力需要依赖 `Module/System` 的角色、菜单、部门、岗位表，它通常不再是 Foundation，而应该进入 `Module/System` 或由 Foundation 定义接口、System 提供实现。例如组织数据权限策略留在 Foundation，但部门树数据由 System 实现 `OrganizationScopeProviderInterface`。
 
 ## backend/app/Infrastructure 边界
 

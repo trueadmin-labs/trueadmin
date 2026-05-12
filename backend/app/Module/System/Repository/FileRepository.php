@@ -19,6 +19,9 @@ use App\Module\System\Model\File;
 use Hyperf\Database\Model\Builder;
 use TrueAdmin\Kernel\Context\Actor;
 
+/**
+ * @extends AbstractRepository<File>
+ */
 final class FileRepository extends AbstractRepository
 {
     protected ?string $modelClass = File::class;

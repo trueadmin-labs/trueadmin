@@ -1,7 +1,7 @@
 import { PlusOutlined } from '@ant-design/icons';
 import { App, Button, Dropdown, Form } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
-import { TrueAdminCrudPage } from '@/core/crud';
+import { TrueAdminCrudPage, useCrudRecordDetail } from '@/core/crud';
 import type { CrudTableAction } from '@/core/crud/types';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { menuApi } from '../../services/menu.api';
@@ -27,11 +27,13 @@ export default function AdminMenusPage() {
   const { message } = App.useApp();
   const { t } = useI18n();
   const [form] = Form.useForm<MenuFormValues>();
-  const [open, setOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [editing, setEditing] = useState<AdminMenu>();
+  const editRecord = useCrudRecordDetail<AdminMenu>({ load: menuApi.detail });
   const [iconMode, setIconMode] = useState<MenuIconMode>('name');
   const [menuTree, setMenuTree] = useState<AdminMenu[]>([]);
+  const editing = editRecord.record;
+  const open = createOpen || editRecord.open;
 
   const statusText = useMemo<Record<AdminMenu['status'], string>>(
     () => ({
@@ -76,8 +78,31 @@ export default function AdminMenusPage() {
     void loadMenuTree();
   }, []);
 
+  useEffect(() => {
+    if (!editRecord.open || !editing) {
+      return;
+    }
+
+    setIconMode(getMenuIconMode(editing.icon));
+    form.setFieldsValue({
+      code: editing.code,
+      icon: editing.icon,
+      name: editing.name,
+      openMode: editing.openMode || 'blank',
+      parentId: editing.parentId,
+      path: editing.path,
+      permission: editing.permission,
+      showLinkHeader: editing.showLinkHeader,
+      sort: editing.sort,
+      status: editing.status,
+      type: editing.type,
+      url: editing.url,
+    });
+  }, [editRecord.open, editing, form]);
+
   const openCreate = (type: Extract<AdminMenuType, 'directory' | 'link'>) => {
-    setEditing(undefined);
+    editRecord.close();
+    setCreateOpen(true);
     setIconMode('name');
     form.resetFields();
     form.setFieldsValue({
@@ -88,32 +113,18 @@ export default function AdminMenusPage() {
       openMode: type === 'link' ? 'blank' : undefined,
       showLinkHeader: false,
     });
-    setOpen(true);
   };
 
   const openEdit = (record: AdminMenu) => {
-    setEditing(record);
+    setCreateOpen(false);
     setIconMode(getMenuIconMode(record.icon));
-    form.setFieldsValue({
-      code: record.code,
-      icon: record.icon,
-      name: record.name,
-      openMode: record.openMode || 'blank',
-      parentId: record.parentId,
-      path: record.path,
-      permission: record.permission,
-      showLinkHeader: record.showLinkHeader,
-      sort: record.sort,
-      status: record.status,
-      type: record.type,
-      url: record.url,
-    });
-    setOpen(true);
+    form.resetFields();
+    void editRecord.openRecord(record.id, { initialRecord: record });
   };
 
   const closeForm = () => {
-    setOpen(false);
-    setEditing(undefined);
+    setCreateOpen(false);
+    editRecord.close();
     setIconMode('name');
     form.resetFields();
   };
@@ -228,6 +239,7 @@ export default function AdminMenusPage() {
             editing={editing}
             form={form}
             iconMode={iconMode}
+            loading={editRecord.loading}
             menuTree={menuTree}
             open={open}
             openModeText={openModeText}

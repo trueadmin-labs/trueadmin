@@ -9,6 +9,9 @@ use TrueAdmin\Kernel\Pagination\PageResult;
 use App\Foundation\Repository\AbstractRepository;
 use App\Module\System\Model\AdminOperationLog;
 
+/**
+ * @extends AbstractRepository<AdminOperationLog>
+ */
 final class AdminOperationLogRepository extends AbstractRepository
 {
     protected ?string $modelClass = AdminOperationLog::class;
@@ -37,7 +40,10 @@ final class AdminOperationLogRepository extends AbstractRepository
      */
     public function create(array $payload): AdminOperationLog
     {
-        return AdminOperationLog::query()->create($payload);
+        /** @var AdminOperationLog $log */
+        $log = $this->createModel($payload);
+
+        return $log;
     }
 
     public function paginate(CrudQuery $adminQuery): PageResult
@@ -47,6 +53,14 @@ final class AdminOperationLogRepository extends AbstractRepository
             $adminQuery,
             fn (AdminOperationLog $log): array => $this->toArray($log),
         );
+    }
+
+    public function findById(int $id): ?AdminOperationLog
+    {
+        /** @var null|AdminOperationLog $log */
+        $log = $this->findModelById($id);
+
+        return $log;
     }
 
     public function toArray(AdminOperationLog $log): array

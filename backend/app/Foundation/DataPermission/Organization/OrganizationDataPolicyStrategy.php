@@ -2,19 +2,18 @@
 
 declare(strict_types=1);
 
-namespace App\Module\System\Service\DataPermission;
+namespace App\Foundation\DataPermission\Organization;
 
-use TrueAdmin\Kernel\DataPermission\DataPolicyStrategyInterface;
-use App\Module\System\Repository\AdminDepartmentRepository;
 use Hyperf\Database\Model\Builder as ModelBuilder;
 use Hyperf\Database\Query\Builder as QueryBuilder;
 use TrueAdmin\Kernel\Context\Actor;
 use TrueAdmin\Kernel\DataPermission\DataPolicyRule;
+use TrueAdmin\Kernel\DataPermission\DataPolicyStrategyInterface;
 use TrueAdmin\Kernel\DataPermission\DataPolicyTarget;
 
 final class OrganizationDataPolicyStrategy implements DataPolicyStrategyInterface
 {
-    public function __construct(private readonly AdminDepartmentRepository $departments)
+    public function __construct(private readonly OrganizationScopeProviderInterface $scopeProvider)
     {
     }
 
@@ -105,11 +104,11 @@ final class OrganizationDataPolicyStrategy implements DataPolicyStrategyInterfac
         }
 
         if ($rule->scope === 'custom_departments_and_children') {
-            return $this->departments->selfAndDescendantIds($this->normalizeDeptIds($rule->config['deptIds'] ?? []));
+            return $this->scopeProvider->selfAndDescendantDepartmentIds($this->normalizeDeptIds($rule->config['deptIds'] ?? []));
         }
 
-        $operationDeptId = (int) ($actor->claims['operationDeptId'] ?? 0);
-        if ($operationDeptId <= 0) {
+        $operationDeptId = $this->scopeProvider->operationDepartmentId($actor);
+        if ($operationDeptId === null) {
             return [];
         }
 
@@ -118,7 +117,7 @@ final class OrganizationDataPolicyStrategy implements DataPolicyStrategyInterfac
         }
 
         if ($rule->scope === 'department_and_children') {
-            return $this->departments->selfAndDescendantIds($operationDeptId);
+            return $this->scopeProvider->selfAndDescendantDepartmentIds($operationDeptId);
         }
 
         return [];
@@ -143,10 +142,13 @@ final class OrganizationDataPolicyStrategy implements DataPolicyStrategyInterfac
         }
 
         return $rule->scope === 'custom_departments_and_children'
-            ? $this->departments->selfAndDescendantIds($deptIds)
+            ? $this->scopeProvider->selfAndDescendantDepartmentIds($deptIds)
             : $deptIds;
     }
 
+    /**
+     * @return list<int>
+     */
     private function normalizeDeptIds(mixed $value): array
     {
         return is_array($value)

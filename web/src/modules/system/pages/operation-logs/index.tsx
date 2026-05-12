@@ -1,14 +1,17 @@
-import { Button, Descriptions, Drawer, Typography } from 'antd';
-import { useMemo, useState } from 'react';
-import { TrueAdminCrudPage } from '@/core/crud/TrueAdminCrudPage';
+import { EyeOutlined } from '@ant-design/icons';
+import { Button } from 'antd';
+import { useMemo } from 'react';
+import { Permission } from '@/core/auth/Permission';
+import { TrueAdminCrudPage, useCrudRecordDetail } from '@/core/crud';
 import type { CrudColumns, CrudFilterSchema } from '@/core/crud/types';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { operationLogApi } from '../../services/log.api';
 import type { AdminOperationLog } from '../../types/log';
+import { OperationLogDetailDrawer } from './OperationLogDetailDrawer';
 
 export default function AdminOperationLogsPage() {
   const { t } = useI18n();
-  const [detail, setDetail] = useState<AdminOperationLog>();
+  const detail = useCrudRecordDetail<AdminOperationLog>({ load: operationLogApi.detail });
 
   const columns = useMemo<CrudColumns<AdminOperationLog>>(
     () => [
@@ -38,17 +41,6 @@ export default function AdminOperationLogsPage() {
         key: 'created_at',
         width: 180,
         sorter: true,
-      },
-      {
-        title: t('crud.column.action', '操作'),
-        dataIndex: 'id',
-        width: 100,
-        fixed: 'right',
-        render: (_, record) => (
-          <Button size="small" type="link" onClick={() => setDetail(record)}>
-            {t('crud.action.detail', '详情')}
-          </Button>
-        ),
       },
     ],
     [t],
@@ -91,6 +83,22 @@ export default function AdminOperationLogsPage() {
             '搜索模块 / 动作 / 说明 / 操作者',
           ),
         }}
+        rowActions={{
+          delete: false,
+          width: 108,
+          render: ({ record }) => (
+            <Permission code="system:operation-log:detail">
+              <Button
+                icon={<EyeOutlined />}
+                size="small"
+                type="link"
+                onClick={() => void detail.openRecord(record.id, { initialRecord: record })}
+              >
+                {t('crud.action.detail', '详情')}
+              </Button>
+            </Permission>
+          ),
+        }}
         toolbarProps={{
           quickSearchInputProps: { allowClear: true },
           reloadButtonProps: { title: t('crud.action.reload', '刷新') },
@@ -99,44 +107,13 @@ export default function AdminOperationLogsPage() {
         paginationProps={{ showQuickJumper: true }}
         tableScrollX={1280}
       />
-      <Drawer
-        width={560}
-        open={Boolean(detail)}
-        title={t('system.operationLogs.detail.title', '操作日志详情')}
-        onClose={() => setDetail(undefined)}
-      >
-        {detail ? (
-          <Descriptions column={1} bordered size="small">
-            <Descriptions.Item label="ID">{detail.id}</Descriptions.Item>
-            <Descriptions.Item label={t('system.operationLogs.column.module', '模块')}>
-              {detail.module}
-            </Descriptions.Item>
-            <Descriptions.Item label={t('system.operationLogs.column.action', '动作')}>
-              {detail.action}
-            </Descriptions.Item>
-            <Descriptions.Item label={t('system.operationLogs.column.remark', '说明')}>
-              {detail.remark || '-'}
-            </Descriptions.Item>
-            <Descriptions.Item label={t('system.operationLogs.column.principal', '主体')}>
-              {detail.principalType || '-'} / {detail.principalId || '-'}
-            </Descriptions.Item>
-            <Descriptions.Item label={t('system.operationLogs.column.operator', '操作者')}>
-              {detail.operatorType || '-'} / {detail.operatorId || '-'}
-            </Descriptions.Item>
-            <Descriptions.Item label={t('system.operationLogs.column.operationDeptId', '操作部门')}>
-              {detail.operationDeptId ?? '-'}
-            </Descriptions.Item>
-            <Descriptions.Item label={t('system.operationLogs.column.createdAt', '操作时间')}>
-              {detail.createdAt}
-            </Descriptions.Item>
-            <Descriptions.Item label={t('system.operationLogs.column.context', '上下文')}>
-              <Typography.Paragraph copyable className="trueadmin-operation-log-context">
-                {JSON.stringify(detail.context ?? {}, null, 2)}
-              </Typography.Paragraph>
-            </Descriptions.Item>
-          </Descriptions>
-        ) : null}
-      </Drawer>
+      <OperationLogDetailDrawer
+        detail={detail.record}
+        loading={detail.loading}
+        open={detail.open}
+        t={t}
+        onClose={detail.close}
+      />
     </>
   );
 }

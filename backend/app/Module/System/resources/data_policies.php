@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 return [
     'strategies' => [
-        App\Module\System\Service\DataPermission\OrganizationDataPolicyStrategy::class,
+        App\Foundation\DataPermission\Organization\OrganizationDataPolicyStrategy::class,
     ],
     'resources' => [
         [

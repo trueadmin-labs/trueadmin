@@ -9,6 +9,9 @@ use TrueAdmin\Kernel\Pagination\PageResult;
 use App\Foundation\Repository\AbstractRepository;
 use App\Module\System\Model\ClientUser;
 
+/**
+ * @extends AbstractRepository<ClientUser>
+ */
 final class ClientUserRepository extends AbstractRepository
 {
     protected ?string $modelClass = ClientUser::class;

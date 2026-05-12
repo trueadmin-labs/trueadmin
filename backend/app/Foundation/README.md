@@ -8,6 +8,7 @@
 
 - `Http/Controller/HealthController.php`：模板健康检查入口。
 - `Repository/AbstractRepository.php`：模板 Repository 组合层和项目可覆盖查询钩子。
+- `DataPermission/Organization/*`：模板默认组织数据权限策略和数据来源接口。策略不依赖 System；System 只通过接口提供部门树数据。
 
 不要在这里重新复制已经进入 `trueadmin-kernel` 的能力，例如 Controller 基类、异常处理、权限中间件、ActorFactory、Model 基类、密码 helper、树 helper、Service helper、AfterCommit callbacks 或 kernel 语言包。
 

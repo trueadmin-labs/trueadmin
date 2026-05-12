@@ -198,12 +198,22 @@ final class MetadataMenuTest extends TestCase
 
     private function scanner(): InterfaceMetadataScanner
     {
-        return $this->container()->get(InterfaceMetadataScanner::class);
+        $scanner = $this->container()->get(InterfaceMetadataScanner::class);
+        if (! $scanner instanceof InterfaceMetadataScanner) {
+            throw new RuntimeException('Expected container service ' . InterfaceMetadataScanner::class . '.');
+        }
+
+        return $scanner;
     }
 
     private function sync(): MetadataSynchronizer
     {
-        return $this->container()->get(MetadataSynchronizer::class);
+        $sync = $this->container()->get(MetadataSynchronizer::class);
+        if (! $sync instanceof MetadataSynchronizer) {
+            throw new RuntimeException('Expected container service ' . MetadataSynchronizer::class . '.');
+        }
+
+        return $sync;
     }
 
     private function container(): \Psr\Container\ContainerInterface

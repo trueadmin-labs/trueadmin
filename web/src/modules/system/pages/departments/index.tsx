@@ -2,7 +2,7 @@ import { PlusOutlined } from '@ant-design/icons';
 import type { TreeSelectProps } from 'antd';
 import { App, Button, Form } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
-import { TrueAdminCrudPage } from '@/core/crud';
+import { TrueAdminCrudPage, useCrudRecordDetail } from '@/core/crud';
 import type { CrudTableAction } from '@/core/crud/types';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { departmentApi } from '../../services/department.api';
@@ -20,10 +20,12 @@ export default function AdminDepartmentsPage() {
   const { message } = App.useApp();
   const { t } = useI18n();
   const [form] = Form.useForm<DepartmentFormValues>();
-  const [open, setOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [editing, setEditing] = useState<DepartmentTreeNode>();
+  const editRecord = useCrudRecordDetail<DepartmentTreeNode>({ load: departmentApi.detail });
   const [departmentTree, setDepartmentTree] = useState<DepartmentTreeNode[]>([]);
+  const editing = editRecord.record;
+  const open = createOpen || editRecord.open;
 
   const statusText = useMemo<Record<DepartmentTreeNode['status'], string>>(
     () => ({
@@ -41,27 +43,36 @@ export default function AdminDepartmentsPage() {
     void loadDepartmentTree();
   }, []);
 
+  useEffect(() => {
+    if (!editRecord.open || !editing) {
+      return;
+    }
+
+    form.setFieldsValue({
+      code: editing.code,
+      name: editing.name,
+      parentId: editing.parentId,
+      sort: editing.sort,
+      status: editing.status,
+    });
+  }, [editRecord.open, editing, form]);
+
   const openCreate = () => {
-    setEditing(undefined);
+    editRecord.close();
+    setCreateOpen(true);
+    form.resetFields();
     form.setFieldsValue({ parentId: ROOT_PARENT_ID, sort: 0, status: 'enabled' });
-    setOpen(true);
   };
 
   const openEdit = (record: DepartmentTreeNode) => {
-    setEditing(record);
-    form.setFieldsValue({
-      code: record.code,
-      name: record.name,
-      parentId: record.parentId,
-      sort: record.sort,
-      status: record.status,
-    });
-    setOpen(true);
+    setCreateOpen(false);
+    form.resetFields();
+    void editRecord.openRecord(record.id, { initialRecord: record });
   };
 
   const closeForm = () => {
-    setOpen(false);
-    setEditing(undefined);
+    setCreateOpen(false);
+    editRecord.close();
     form.resetFields();
   };
 
@@ -154,6 +165,7 @@ export default function AdminDepartmentsPage() {
           <DepartmentFormModal
             editing={editing}
             form={form}
+            loading={editRecord.loading}
             open={open}
             parentTreeData={parentTreeData}
             statusText={statusText}

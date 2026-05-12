@@ -10,6 +10,9 @@ use App\Module\System\Model\AdminRoleDataPolicy;
 use Hyperf\DbConnection\Db;
 use TrueAdmin\Kernel\DataPermission\DataPolicyRule;
 
+/**
+ * @extends AbstractRepository<AdminRoleDataPolicy>
+ */
 final class AdminRoleDataPolicyRepository extends AbstractRepository
 {
     protected ?string $modelClass = AdminRoleDataPolicy::class;

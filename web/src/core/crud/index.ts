@@ -3,3 +3,4 @@ export { crudRequestOptions, toCrudRequestParams } from '@trueadmin/web-core/cru
 export * from './TrueAdminCrudPage';
 export * from './TrueAdminCrudTable';
 export * from './types';
+export * from './useCrudRecordDetail';

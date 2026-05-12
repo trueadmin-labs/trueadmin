@@ -16,6 +16,8 @@ export const loginLogApi = {
       .send(options?.force);
     return normalizePageResult(result);
   },
+  detail: (id: React.Key) =>
+    http.Get<AdminLoginLog>(`/admin/system-config/login-logs/${id}`).send(),
 };
 
 export const operationLogApi = {
@@ -28,4 +30,6 @@ export const operationLogApi = {
       .send(options?.force);
     return normalizePageResult(result);
   },
+  detail: (id: React.Key) =>
+    http.Get<AdminOperationLog>(`/admin/system-config/operation-logs/${id}`).send(),
 };

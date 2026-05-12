@@ -7,16 +7,21 @@ namespace App\Module\System\Repository\Notification;
 use App\Foundation\Repository\AbstractRepository;
 use App\Module\System\Model\AdminAnnouncementRead;
 
+/**
+ * @extends AbstractRepository<AdminAnnouncementRead>
+ */
 final class AdminAnnouncementReadRepository extends AbstractRepository
 {
     protected ?string $modelClass = AdminAnnouncementRead::class;
 
     public function findForReceiver(int $announcementId, int $adminId): ?AdminAnnouncementRead
     {
-        return AdminAnnouncementRead::query()
+        $read = AdminAnnouncementRead::query()
             ->where('announcement_id', $announcementId)
             ->where('admin_id', $adminId)
             ->first();
+
+        return $read instanceof AdminAnnouncementRead ? $read : null;
     }
 
     public function ensureForReceiver(int $announcementId, int $adminId): AdminAnnouncementRead

@@ -7,6 +7,7 @@ namespace App\Module\System\Service\Notification;
 use TrueAdmin\Kernel\Pagination\PageResult;
 use TrueAdmin\Kernel\Crud\CrudQuery;
 use TrueAdmin\Kernel\Service\AbstractService;
+use App\Module\System\Model\AdminAnnouncement;
 use App\Module\System\Model\AdminAnnouncementRead;
 use App\Module\System\Model\AdminNotificationDelivery;
 use App\Module\System\Repository\AdminUserRepository;
@@ -94,8 +95,9 @@ final class AdminMessageCenterService extends AbstractService
                 throw $this->notFound('admin_message', $id);
             }
             $this->markDeliveryRead($delivery);
+            $delivery->refresh();
 
-            return $this->deliveries->toMessageArray($delivery->refresh());
+            return $this->deliveries->toMessageArray($delivery);
         }
 
         if ($kind !== 'announcement') {
@@ -105,8 +107,9 @@ final class AdminMessageCenterService extends AbstractService
         $announcement = $this->visibleAnnouncement($id, $receiverId);
         $state = $this->announcementReads->ensureForReceiver($id, $receiverId);
         $this->markAnnouncementRead($state);
+        $state->refresh();
 
-        return $this->announcements->toMessageArray($announcement, $state->refresh());
+        return $this->announcements->toMessageArray($announcement, $state);
     }
 
     public function markRead(array $messages): void
@@ -280,7 +283,7 @@ final class AdminMessageCenterService extends AbstractService
     }
 
 
-    private function visibleAnnouncement(int $id, int $receiverId): object
+    private function visibleAnnouncement(int $id, int $receiverId): AdminAnnouncement
     {
         $announcement = $this->announcements->findVisibleForReceiver($id, $receiverId, $this->roleIdsForReceiver($receiverId));
         if ($announcement === null) {

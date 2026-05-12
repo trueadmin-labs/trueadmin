@@ -380,4 +380,5 @@ trueadmin-kernel/resources/lang/zh_CN/errors.php
 10. Controller 默认基类、OpenAPI Controller 和默认 ExceptionHandler 已抽到 kernel。
 11. Permission middleware runtime 已抽到 kernel，System 只保留后台权限事实服务。
 12. Service helper base 已抽到 kernel，模块业务 Service 只继承稳定 helper。
-13. ActorFactory、AfterCommit callbacks、Model 基类、Password、TreeHelper 和 kernel 语言包已抽到 kernel，Foundation 只剩模板 `HealthController` 和 `AbstractRepository`。
+13. ActorFactory、AfterCommit callbacks、Model 基类、Password、TreeHelper 和 kernel 语言包已抽到 kernel。
+14. Foundation 当前保留模板 `HealthController`、`AbstractRepository` 和模板默认组织数据权限策略。组织策略不依赖 System；System 只实现部门树数据来源接口。

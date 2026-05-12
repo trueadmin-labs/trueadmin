@@ -70,6 +70,7 @@ export default function AdminAnnouncementManagementPage() {
         editing={page.editing}
         form={page.form}
         levelText={page.levelText}
+        loading={page.editLoading}
         metadataOnlyEdit={page.metadataOnlyEdit}
         open={page.open}
         roleOptions={page.roleOptions}
@@ -83,11 +84,11 @@ export default function AdminAnnouncementManagementPage() {
       <AnnouncementDetailModal
         open={page.detailOpen}
         announcement={page.detail}
+        loading={page.detailLoading}
         statusText={page.statusText}
         levelText={page.levelText}
         targetTypeText={page.targetTypeText}
-        onClose={() => page.setDetailOpen(false)}
-        afterOpenChange={page.closeDetail}
+        onClose={page.closeDetail}
       />
     </>
   );

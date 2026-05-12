@@ -1753,7 +1753,7 @@
         },
         "/api/admin/system-config/login-logs": {
             "get": {
-                "operationId": "App_Module_System_Http_Admin_Controller_AdminLogController_loginLogs",
+                "operationId": "App_Module_System_Http_Admin_Controller_AdminLoginLogController_list",
                 "summary": "登录日志列表",
                 "description": "",
                 "tags": [
@@ -1765,11 +1765,40 @@
                     }
                 },
                 "x-trueadmin": {
-                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\AdminLogController@loginLogs",
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\AdminLoginLogController@list",
                     "permission": "system:login-log:list",
                     "permissionMode": "single",
                     "permissions": [
                         "system:login-log:list"
+                    ],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/system-config/login-logs/{id}": {
+            "get": {
+                "operationId": "App_Module_System_Http_Admin_Controller_AdminLoginLogController_detail",
+                "summary": "登录日志详情",
+                "description": "",
+                "tags": [
+                    "系统管理"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\AdminLoginLogController@detail",
+                    "permission": "system:login-log:detail",
+                    "permissionMode": "single",
+                    "permissions": [
+                        "system:login-log:detail"
                     ],
                     "public": false
                 },
@@ -1979,7 +2008,7 @@
         },
         "/api/admin/system-config/operation-logs": {
             "get": {
-                "operationId": "App_Module_System_Http_Admin_Controller_AdminLogController_operationLogs",
+                "operationId": "App_Module_System_Http_Admin_Controller_AdminOperationLogController_list",
                 "summary": "操作日志列表",
                 "description": "",
                 "tags": [
@@ -1991,11 +2020,40 @@
                     }
                 },
                 "x-trueadmin": {
-                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\AdminLogController@operationLogs",
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\AdminOperationLogController@list",
                     "permission": "system:operation-log:list",
                     "permissionMode": "single",
                     "permissions": [
                         "system:operation-log:list"
+                    ],
+                    "public": false
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/system-config/operation-logs/{id}": {
+            "get": {
+                "operationId": "App_Module_System_Http_Admin_Controller_AdminOperationLogController_detail",
+                "summary": "操作日志详情",
+                "description": "",
+                "tags": [
+                    "系统管理"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "x-trueadmin": {
+                    "action": "App\\Module\\System\\Http\\Admin\\Controller\\AdminOperationLogController@detail",
+                    "permission": "system:operation-log:detail",
+                    "permissionMode": "single",
+                    "permissions": [
+                        "system:operation-log:detail"
                     ],
                     "public": false
                 },

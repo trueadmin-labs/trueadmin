@@ -541,6 +541,15 @@ export const handlers = [
       pageSize,
     });
   }),
+  http.get('/api/admin/system-config/login-logs/:id', ({ params }) => {
+    const id = Number(params.id);
+    const log = loginLogs.find((item) => item.id === id);
+    if (!log) {
+      return fail('KERNEL.NOT_FOUND', '登录日志不存在');
+    }
+
+    return success(log);
+  }),
   http.get('/api/admin/system-config/operation-logs', ({ request }) => {
     const url = new URL(request.url);
     const page = Number(url.searchParams.get('page') || 1);
@@ -552,6 +561,15 @@ export const handlers = [
       page,
       pageSize,
     });
+  }),
+  http.get('/api/admin/system-config/operation-logs/:id', ({ params }) => {
+    const id = Number(params.id);
+    const log = operationLogs.find((item) => item.id === id);
+    if (!log) {
+      return fail('KERNEL.NOT_FOUND', '操作日志不存在');
+    }
+
+    return success(log);
   }),
   http.get('/api/admin/organization/departments/tree', () => success(departmentTree)),
   http.get('/api/admin/organization/users', ({ request }) => {
@@ -720,6 +738,14 @@ export const handlers = [
       pageSize,
     });
   }),
+  http.get('/api/admin/message-management/notifications/:id', ({ params }) => {
+    const batch = notificationBatches.find((item) => String(item.id) === String(params.id));
+    if (!batch) {
+      return fail('KERNEL.NOT_FOUND', '通知不存在');
+    }
+
+    return success(batch);
+  }),
   http.get('/api/admin/message-management/notifications/:id/deliveries', ({ params, request }) => {
     const url = new URL(request.url);
     const page = Number(url.searchParams.get('page') || 1);
@@ -818,6 +844,14 @@ export const handlers = [
       page,
       pageSize,
     });
+  }),
+  http.get('/api/admin/message-management/announcements/:id', ({ params }) => {
+    const announcement = announcements.find((item) => String(item.id) === String(params.id));
+    if (!announcement) {
+      return fail('KERNEL.NOT_FOUND', '公告不存在');
+    }
+
+    return success(announcement);
   }),
   http.post('/api/admin/message-management/announcements', async ({ request }) => {
     const body = (await request.json()) as {

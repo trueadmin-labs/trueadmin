@@ -2,6 +2,7 @@ import { errorCenter } from '@trueadmin/web-core/error';
 import { App, Form } from 'antd';
 import dayjs from 'dayjs';
 import { useEffect, useMemo, useState } from 'react';
+import { useCrudRecordDetail } from '@/core/crud';
 import type { CrudExtraQuerySchema, CrudFilterSchema, CrudService } from '@/core/crud/types';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import {
@@ -28,14 +29,19 @@ import {
 export function useAnnouncementManagementPage() {
   const { message } = App.useApp();
   const { t } = useI18n();
-  const [open, setOpen] = useState(false);
-  const [editing, setEditing] = useState<AdminAnnouncement>();
-  const [detail, setDetail] = useState<AdminAnnouncement>();
-  const [detailOpen, setDetailOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
   const [refreshSeed, setRefreshSeed] = useState(0);
   const [roleOptions, setRoleOptions] = useState<Array<{ label: string; value: number }>>([]);
   const [roleOptionsLoading, setRoleOptionsLoading] = useState(false);
   const [form] = Form.useForm<AnnouncementFormValues>();
+  const editRecord = useCrudRecordDetail<AdminAnnouncement>({
+    load: (id) => adminNotificationManagementApi.detailAnnouncement(Number(id)).send(),
+  });
+  const detailRecord = useCrudRecordDetail<AdminAnnouncement>({
+    load: (id) => adminNotificationManagementApi.detailAnnouncement(Number(id)).send(),
+  });
+  const editing = createOpen ? undefined : editRecord.record;
+  const open = createOpen || editRecord.open;
   const metadataOnlyEdit = editing
     ? editing.status === 'active' || editing.status === 'expired'
     : false;
@@ -154,39 +160,42 @@ export function useAnnouncementManagementPage() {
     [levelText, statusText, t, targetTypeText],
   );
 
+  useEffect(() => {
+    if (!editRecord.open || !editing) {
+      return;
+    }
+
+    form.setFieldsValue({
+      attachments: editing.attachments ?? [],
+      content: editing.content,
+      expireAt: editing.expireAt ? dayjs(editing.expireAt) : null,
+      level: editing.level,
+      pinned: editing.pinned ?? false,
+      scheduledAt: editing.scheduledAt ? dayjs(editing.scheduledAt) : null,
+      targetRoleIds: editing.targetRoleIds ?? [],
+      targetType: editing.targetType,
+      title: editing.title,
+    });
+  }, [editRecord.open, editing, form]);
+
   const openCreate = () => {
-    setEditing(undefined);
+    editRecord.close();
+    setCreateOpen(true);
     form.resetFields();
     form.setFieldsValue(getInitialAnnouncementValues());
-    setOpen(true);
   };
 
   const openEdit = (record: AdminAnnouncement) => {
-    setEditing(record);
-    form.setFieldsValue({
-      attachments: record.attachments ?? [],
-      content: record.content,
-      expireAt: record.expireAt ? dayjs(record.expireAt) : null,
-      level: record.level,
-      pinned: record.pinned ?? false,
-      scheduledAt: record.scheduledAt ? dayjs(record.scheduledAt) : null,
-      targetRoleIds: record.targetRoleIds ?? [],
-      targetType: record.targetType,
-      title: record.title,
-    });
-    setOpen(true);
+    setCreateOpen(false);
+    form.resetFields();
+    void editRecord.openRecord(record.id, { initialRecord: record });
   };
 
   const openDetail = (record: AdminAnnouncement) => {
-    setDetail(record);
-    setDetailOpen(true);
+    void detailRecord.openRecord(record.id, { initialRecord: record });
   };
 
-  const closeDetail = (nextOpen: boolean) => {
-    if (!nextOpen) {
-      setDetail(undefined);
-    }
-  };
+  const closeDetail = () => detailRecord.close();
 
   const submit = async (mode: AnnouncementSubmitMode = 'publish') => {
     const values = await form.validateFields();
@@ -209,15 +218,15 @@ export function useAnnouncementManagementPage() {
       );
     }
 
-    setOpen(false);
-    setEditing(undefined);
+    setCreateOpen(false);
+    editRecord.close();
     form.resetFields();
     setRefreshSeed((seed) => seed + 1);
   };
 
   const closeModal = () => {
-    setOpen(false);
-    setEditing(undefined);
+    setCreateOpen(false);
+    editRecord.close();
     form.resetFields();
   };
 
@@ -225,9 +234,11 @@ export function useAnnouncementManagementPage() {
     closeDetail,
     closeModal,
     columns,
-    detail,
-    detailOpen,
+    detail: detailRecord.record,
+    detailLoading: detailRecord.loading,
+    detailOpen: detailRecord.open,
     editing,
+    editLoading: editRecord.loading,
     extraQuery,
     filters,
     form,
@@ -240,7 +251,6 @@ export function useAnnouncementManagementPage() {
     roleOptions,
     roleOptionsLoading,
     service,
-    setDetailOpen,
     statusText,
     submit,
     t,

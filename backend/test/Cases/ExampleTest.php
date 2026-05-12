@@ -105,10 +105,19 @@ class ExampleTest extends TestCase
         $loginLogs = $this->get('/api/admin/system-config/login-logs', [], $headers);
         $this->assertSame('SUCCESS', $loginLogs['code']);
         $this->assertArrayHasKey('items', $loginLogs['data']);
+        $this->assertGreaterThanOrEqual(1, $loginLogs['data']['total']);
+
+        $loginLog = $this->get('/api/admin/system-config/login-logs/' . $loginLogs['data']['items'][0]['id'], [], $headers);
+        $this->assertSame('SUCCESS', $loginLog['code']);
+        $this->assertSame($loginLogs['data']['items'][0]['id'], $loginLog['data']['id']);
 
         $operationLogs = $this->get('/api/admin/system-config/operation-logs', [], $headers);
         $this->assertSame('SUCCESS', $operationLogs['code']);
         $this->assertGreaterThanOrEqual(1, $operationLogs['data']['total']);
+
+        $operationLog = $this->get('/api/admin/system-config/operation-logs/' . $operationLogs['data']['items'][0]['id'], [], $headers);
+        $this->assertSame('SUCCESS', $operationLog['code']);
+        $this->assertSame($operationLogs['data']['items'][0]['id'], $operationLog['data']['id']);
     }
 
     public function testAdminLoginFailureUsesStringErrorCode()
@@ -518,8 +527,14 @@ class ExampleTest extends TestCase
         $this->assertSame('system:login-log:list', \Hyperf\DbConnection\Db::table('admin_menus')
             ->where('code', 'system.loginLogs')
             ->value('permission'));
+        $this->assertSame('system:login-log:detail', \Hyperf\DbConnection\Db::table('admin_menus')
+            ->where('code', 'system.loginLogs.detail')
+            ->value('permission'));
         $this->assertSame('system:operation-log:list', \Hyperf\DbConnection\Db::table('admin_menus')
             ->where('code', 'system.operationLogs')
+            ->value('permission'));
+        $this->assertSame('system:operation-log:detail', \Hyperf\DbConnection\Db::table('admin_menus')
+            ->where('code', 'system.operationLogs.detail')
             ->value('permission'));
         $this->assertSame('system:user:create', \Hyperf\DbConnection\Db::table('admin_menus')
             ->where('code', 'system.users.create')
@@ -531,7 +546,9 @@ class ExampleTest extends TestCase
         $this->assertArrayHasKey('/api/admin/organization/client-users', $openapi['paths']);
         $this->assertArrayHasKey('/api/admin/profile', $openapi['paths']);
         $this->assertArrayHasKey('/api/admin/system-config/login-logs', $openapi['paths']);
+        $this->assertArrayHasKey('/api/admin/system-config/login-logs/{id}', $openapi['paths']);
         $this->assertArrayHasKey('/api/admin/system-config/operation-logs', $openapi['paths']);
+        $this->assertArrayHasKey('/api/admin/system-config/operation-logs/{id}', $openapi['paths']);
         foreach ($openapi['paths'] as $path => $operations) {
             foreach ($operations as $method => $operation) {
                 $this->assertNotSame('', $operation['summary'], sprintf('OpenAPI summary is empty for %s %s.', $method, $path));
@@ -544,7 +561,9 @@ class ExampleTest extends TestCase
             $openapi['paths']['/api/admin/profile']['get']['summary']
         );
         $this->assertSame('system:login-log:list', $openapi['paths']['/api/admin/system-config/login-logs']['get']['x-trueadmin']['permission']);
+        $this->assertSame('system:login-log:detail', $openapi['paths']['/api/admin/system-config/login-logs/{id}']['get']['x-trueadmin']['permission']);
         $this->assertSame('system:operation-log:list', $openapi['paths']['/api/admin/system-config/operation-logs']['get']['x-trueadmin']['permission']);
+        $this->assertSame('system:operation-log:detail', $openapi['paths']['/api/admin/system-config/operation-logs/{id}']['get']['x-trueadmin']['permission']);
         $this->assertSame('single', $openapi['paths']['/api/admin/organization/users']['get']['x-trueadmin']['permissionMode']);
         $this->assertSame(['system:user:list'], $openapi['paths']['/api/admin/organization/users']['get']['x-trueadmin']['permissions']);
 

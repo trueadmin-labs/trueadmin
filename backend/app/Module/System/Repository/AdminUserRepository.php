@@ -11,7 +11,11 @@ use App\Module\System\Model\AdminDepartment;
 use App\Module\System\Model\AdminUser;
 use Hyperf\Database\Model\Builder;
 use Hyperf\DbConnection\Db;
+use stdClass;
 
+/**
+ * @extends AbstractRepository<AdminUser>
+ */
 final class AdminUserRepository extends AbstractRepository
 {
     protected ?string $modelClass = AdminUser::class;
@@ -33,18 +37,22 @@ final class AdminUserRepository extends AbstractRepository
 
     public function findEnabledByUsername(string $username): ?AdminUser
     {
-        return AdminUser::query()
+        $user = AdminUser::query()
             ->where('username', $username)
             ->where('status', 'enabled')
             ->first();
+
+        return $user instanceof AdminUser ? $user : null;
     }
 
     public function findEnabledById(int $id): ?AdminUser
     {
-        return AdminUser::query()
+        $user = AdminUser::query()
             ->where('id', $id)
             ->where('status', 'enabled')
             ->first();
+
+        return $user instanceof AdminUser ? $user : null;
     }
 
     /**
@@ -194,7 +202,14 @@ final class AdminUserRepository extends AbstractRepository
     public function syncRoles(AdminUser $user, array $roleIds): void
     {
         $userId = (int) $user->getAttribute('id');
-        $this->syncPivot('admin_role_user', 'user_id', $userId, 'role_id', $roleIds);
+        Db::table('admin_role_user')->where('user_id', $userId)->delete();
+
+        foreach (array_values(array_unique($roleIds)) as $roleId) {
+            Db::table('admin_role_user')->insert([
+                'user_id' => $userId,
+                'role_id' => $roleId,
+            ]);
+        }
     }
 
     /**
@@ -202,7 +217,12 @@ final class AdminUserRepository extends AbstractRepository
      */
     public function roleIds(AdminUser $user): array
     {
-        return $this->pivotIds('admin_role_user', 'user_id', (int) $user->getAttribute('id'), 'role_id');
+        return Db::table('admin_role_user')
+            ->where('user_id', (int) $user->getAttribute('id'))
+            ->pluck('role_id')
+            ->map(static fn ($id): int => (int) $id)
+            ->values()
+            ->all();
     }
 
     /**
@@ -211,14 +231,15 @@ final class AdminUserRepository extends AbstractRepository
     public function syncDepartments(AdminUser $user, array $deptIds, ?int $primaryDeptId): void
     {
         $userId = (int) $user->getAttribute('id');
-        $this->syncPivot(
-            'admin_user_departments',
-            'user_id',
-            $userId,
-            'dept_id',
-            $deptIds,
-            static fn (int $deptId): array => ['is_primary' => $primaryDeptId !== null && $deptId === $primaryDeptId],
-        );
+        Db::table('admin_user_departments')->where('user_id', $userId)->delete();
+
+        foreach (array_values(array_unique($deptIds)) as $deptId) {
+            Db::table('admin_user_departments')->insert([
+                'user_id' => $userId,
+                'dept_id' => $deptId,
+                'is_primary' => $primaryDeptId !== null && $deptId === $primaryDeptId,
+            ]);
+        }
     }
 
     /**
@@ -226,7 +247,12 @@ final class AdminUserRepository extends AbstractRepository
      */
     public function departmentIds(AdminUser $user): array
     {
-        return $this->pivotIds('admin_user_departments', 'user_id', (int) $user->getAttribute('id'), 'dept_id');
+        return Db::table('admin_user_departments')
+            ->where('user_id', (int) $user->getAttribute('id'))
+            ->pluck('dept_id')
+            ->map(static fn ($id): int => (int) $id)
+            ->values()
+            ->all();
     }
 
     public function toArray(AdminUser $user): array
@@ -330,7 +356,7 @@ final class AdminUserRepository extends AbstractRepository
         return implode('/', $pathNames);
     }
 
-    private function primaryDepartment(AdminUser $user): ?object
+    private function primaryDepartment(AdminUser $user): ?stdClass
     {
         $primaryDeptId = $user->getAttribute('primary_dept_id');
         if ($primaryDeptId === null) {
@@ -341,7 +367,7 @@ final class AdminUserRepository extends AbstractRepository
             ->where('id', (int) $primaryDeptId)
             ->first(['id', 'name', 'path']);
 
-        return is_object($department) ? $department : null;
+        return $department instanceof stdClass ? $department : null;
     }
 
     public function passwordHash(AdminUser $user): string

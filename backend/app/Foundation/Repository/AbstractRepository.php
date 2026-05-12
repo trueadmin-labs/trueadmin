@@ -7,7 +7,6 @@ namespace App\Foundation\Repository;
 use TrueAdmin\Kernel\DataPermission\DataPolicyManager;
 use Hyperf\Context\ApplicationContext;
 use Hyperf\Database\Model\Builder;
-use Hyperf\DbConnection\Db;
 use Hyperf\DbConnection\Model\Model;
 use RuntimeException;
 use TrueAdmin\Kernel\Crud\CrudOperator;
@@ -17,8 +16,14 @@ use TrueAdmin\Kernel\Crud\CrudQueryApplierOptions;
 use TrueAdmin\Kernel\Crud\CrudSortRule;
 use TrueAdmin\Kernel\Pagination\PageResult;
 
+/**
+ * @template TModel of Model
+ */
 abstract class AbstractRepository
 {
+    /**
+     * @var null|class-string<TModel>
+     */
     protected ?string $modelClass = null;
 
     /**
@@ -56,6 +61,9 @@ abstract class AbstractRepository
      */
     protected array $defaultSort = ['id' => 'desc'];
 
+    /**
+     * @return Builder<TModel>
+     */
     protected function query(): Builder
     {
         $modelClass = $this->modelClass();
@@ -63,9 +71,12 @@ abstract class AbstractRepository
         return $modelClass::query();
     }
 
+    /**
+     * @return null|TModel
+     */
     protected function findModelById(int|string $id): ?Model
     {
-        return $this->query()->where('id', $id)->first();
+        return $this->firstModel($this->query()->where('id', $id));
     }
 
     protected function existsModelById(int|string $id): bool
@@ -73,22 +84,58 @@ abstract class AbstractRepository
         return $this->query()->where('id', $id)->exists();
     }
 
+    /**
+     * @param array<string, mixed> $data
+     * @return TModel
+     */
     protected function createModel(array $data): Model
     {
-        return $this->query()->create($data);
+        $model = $this->query()->create($data);
+        if (! $model instanceof Model) {
+            throw new RuntimeException('Expected model create result to be a ' . Model::class . ' instance.');
+        }
+
+        return $model;
     }
 
+    /**
+     * @param TModel $model
+     * @param array<string, mixed> $data
+     * @return TModel
+     */
     protected function updateModel(Model $model, array $data): Model
     {
         $model->fill($data);
         $model->save();
+        $model->refresh();
 
-        return $model->refresh();
+        return $model;
     }
 
+    /**
+     * @param TModel $model
+     */
     protected function deleteModel(Model $model): void
     {
         $model->delete();
+    }
+
+    /**
+     * @template TFound of Model
+     * @param Builder<TFound> $query
+     * @return null|TFound
+     */
+    protected function firstModel(Builder $query): ?Model
+    {
+        $model = $query->first();
+        if ($model === null) {
+            return null;
+        }
+        if (! $model instanceof Model) {
+            throw new RuntimeException('Expected query result to be a ' . Model::class . ' instance.');
+        }
+
+        return $model;
     }
 
     /**
@@ -100,35 +147,6 @@ abstract class AbstractRepository
         return $this->query()
             ->whereIn($field, array_values(array_unique($ids)))
             ->pluck($field)
-            ->map(static fn ($id): int => (int) $id)
-            ->values()
-            ->all();
-    }
-
-    /**
-     * @param list<int> $relatedIds
-     */
-    protected function syncPivot(string $table, string $ownerColumn, int $ownerId, string $relatedColumn, array $relatedIds, ?callable $extra = null): void
-    {
-        Db::table($table)->where($ownerColumn, $ownerId)->delete();
-
-        foreach (array_values(array_unique($relatedIds)) as $relatedId) {
-            $row = [$ownerColumn => $ownerId, $relatedColumn => $relatedId];
-            if ($extra !== null) {
-                $row = [...$row, ...$extra($relatedId)];
-            }
-            Db::table($table)->insert($row);
-        }
-    }
-
-    /**
-     * @return list<int>
-     */
-    protected function pivotIds(string $table, string $ownerColumn, int $ownerId, string $relatedColumn): array
-    {
-        return Db::table($table)
-            ->where($ownerColumn, $ownerId)
-            ->pluck($relatedColumn)
             ->map(static fn ($id): int => (int) $id)
             ->values()
             ->all();
@@ -190,7 +208,12 @@ abstract class AbstractRepository
 
     protected function dataPolicyManager(): DataPolicyManager
     {
-        return ApplicationContext::getContainer()->get(DataPolicyManager::class);
+        $manager = ApplicationContext::getContainer()->get(DataPolicyManager::class);
+        if (! $manager instanceof DataPolicyManager) {
+            throw new RuntimeException('Expected container service ' . DataPolicyManager::class . '.');
+        }
+
+        return $manager;
     }
 
     final protected function applyCrudQuery(Builder $query, CrudQuery $adminQuery): void
@@ -275,7 +298,12 @@ abstract class AbstractRepository
 
     protected function crudQueryApplier(): CrudQueryApplier
     {
-        return ApplicationContext::getContainer()->get(CrudQueryApplier::class);
+        $applier = ApplicationContext::getContainer()->get(CrudQueryApplier::class);
+        if (! $applier instanceof CrudQueryApplier) {
+            throw new RuntimeException('Expected container service ' . CrudQueryApplier::class . '.');
+        }
+
+        return $applier;
     }
 
     protected function crudQueryApplierOptions(): CrudQueryApplierOptions
@@ -357,10 +385,16 @@ abstract class AbstractRepository
         return $this->defaultSort;
     }
 
+    /**
+     * @return class-string<TModel>
+     */
     protected function modelClass(): string
     {
         if ($this->modelClass === null || $this->modelClass === '') {
             throw new RuntimeException(static::class . ' must define $modelClass before using model helpers.');
+        }
+        if (! is_subclass_of($this->modelClass, Model::class)) {
+            throw new RuntimeException(static::class . ' $modelClass must extend ' . Model::class . '.');
         }
 
         return $this->modelClass;

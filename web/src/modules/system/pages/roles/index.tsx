@@ -1,7 +1,7 @@
 import { PlusOutlined } from '@ant-design/icons';
 import { App, Button, Form } from 'antd';
-import { useMemo, useState } from 'react';
-import { TrueAdminCrudPage } from '@/core/crud';
+import { useEffect, useMemo, useState } from 'react';
+import { TrueAdminCrudPage, useCrudRecordDetail } from '@/core/crud';
 import type { CrudService, CrudTableAction } from '@/core/crud/types';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { roleApi } from '../../services/role.api';
@@ -25,13 +25,28 @@ export default function AdminRolesPage() {
   const { message } = App.useApp();
   const { t } = useI18n();
   const [form] = Form.useForm<RoleFormValues>();
-  const [open, setOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [editing, setEditing] = useState<AdminRole>();
+  const editRecord = useCrudRecordDetail<AdminRole>({ load: roleApi.detail });
   const roleAuthorization = useRoleAuthorization({
     t,
     onSuccess: (content) => message.success(content),
   });
+  const editing = editRecord.record;
+  const open = createOpen || editRecord.open;
+
+  useEffect(() => {
+    if (!editRecord.open || !editing) {
+      return;
+    }
+
+    form.setFieldsValue({
+      code: editing.code,
+      name: editing.name,
+      sort: editing.sort,
+      status: editing.status,
+    });
+  }, [editRecord.open, editing, form]);
 
   const statusText = useMemo<Record<AdminRole['status'], string>>(
     () => ({
@@ -42,9 +57,10 @@ export default function AdminRolesPage() {
   );
 
   const openCreate = () => {
-    setEditing(undefined);
+    editRecord.close();
+    setCreateOpen(true);
+    form.resetFields();
     form.setFieldsValue({ sort: 0, status: 'enabled' });
-    setOpen(true);
   };
 
   const openEdit = (record: AdminRole) => {
@@ -52,19 +68,14 @@ export default function AdminRolesPage() {
       return;
     }
 
-    setEditing(record);
-    form.setFieldsValue({
-      code: record.code,
-      name: record.name,
-      sort: record.sort,
-      status: record.status,
-    });
-    setOpen(true);
+    setCreateOpen(false);
+    form.resetFields();
+    void editRecord.openRecord(record.id, { initialRecord: record });
   };
 
   const closeForm = () => {
-    setOpen(false);
-    setEditing(undefined);
+    setCreateOpen(false);
+    editRecord.close();
     form.resetFields();
   };
 
@@ -151,6 +162,7 @@ export default function AdminRolesPage() {
           <RoleFormModal
             editing={editing}
             form={form}
+            loading={editRecord.loading}
             open={open}
             statusText={statusText}
             submitting={submitting}

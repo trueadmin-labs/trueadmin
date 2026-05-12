@@ -44,11 +44,17 @@ export const adminNotificationManagementApi = {
       '/admin/message-management/notifications',
       crudRequestOptions(params),
     ),
+  detailNotification: (id: number) =>
+    http.Get<AdminNotificationBatchListResult['items'][number]>(
+      `/admin/message-management/notifications/${String(id)}`,
+    ),
   listAnnouncements: (params?: AdminAnnouncementQuery | CrudListParams) =>
     http.Get<AdminAnnouncementListResult>(
       '/admin/message-management/announcements',
       crudRequestOptions(params),
     ),
+  detailAnnouncement: (id: number) =>
+    http.Get<AdminAnnouncement>(`/admin/message-management/announcements/${String(id)}`),
   createAnnouncement: (payload: AdminAnnouncementCreatePayload) =>
     http.Post<AdminAnnouncement>('/admin/message-management/announcements', payload),
   updateAnnouncement: (id: number, payload: AdminAnnouncementUpdatePayload) =>

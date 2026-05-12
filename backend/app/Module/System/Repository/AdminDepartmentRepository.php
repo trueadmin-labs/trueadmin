@@ -10,6 +10,9 @@ use TrueAdmin\Kernel\Support\TreeHelper;
 use App\Module\System\Model\AdminDepartment;
 use Hyperf\DbConnection\Db;
 
+/**
+ * @extends AbstractRepository<AdminDepartment>
+ */
 final class AdminDepartmentRepository extends AbstractRepository
 {
     protected ?string $modelClass = AdminDepartment::class;
@@ -52,7 +55,9 @@ final class AdminDepartmentRepository extends AbstractRepository
 
     public function findByCode(string $code): ?AdminDepartment
     {
-        return AdminDepartment::query()->where('code', $code)->first();
+        $department = AdminDepartment::query()->where('code', $code)->first();
+
+        return $department instanceof AdminDepartment ? $department : null;
     }
 
     public function create(array $data): AdminDepartment

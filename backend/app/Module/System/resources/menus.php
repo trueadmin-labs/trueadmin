@@ -422,6 +422,14 @@ return [
         'type' => 'menu',
     ],
     [
+        'code' => 'system.loginLogs.detail',
+        'title' => '登录日志详情',
+        'parent' => 'system.loginLogs',
+        'permission' => 'system:login-log:detail',
+        'sort' => 81,
+        'type' => 'button',
+    ],
+    [
         'code' => 'system.operationLogs',
         'title' => '操作日志',
         'path' => '/system-config/operation-logs',
@@ -430,5 +438,13 @@ return [
         'permission' => 'system:operation-log:list',
         'sort' => 90,
         'type' => 'menu',
+    ],
+    [
+        'code' => 'system.operationLogs.detail',
+        'title' => '操作日志详情',
+        'parent' => 'system.operationLogs',
+        'permission' => 'system:operation-log:detail',
+        'sort' => 91,
+        'type' => 'button',
     ],
 ];

@@ -11,6 +11,9 @@ use App\Module\System\Model\AdminNotificationDelivery;
 use Hyperf\Database\Model\Builder;
 use Hyperf\DbConnection\Db;
 
+/**
+ * @extends AbstractRepository<AdminNotificationDelivery>
+ */
 final class AdminNotificationDeliveryRepository extends AbstractRepository
 {
     protected ?string $modelClass = AdminNotificationDelivery::class;
@@ -102,18 +105,22 @@ final class AdminNotificationDeliveryRepository extends AbstractRepository
 
     public function findForReceiver(int $batchId, int $receiverId): ?AdminNotificationDelivery
     {
-        return AdminNotificationDelivery::query()
+        $delivery = AdminNotificationDelivery::query()
             ->where('batch_id', $batchId)
             ->where('receiver_id', $receiverId)
             ->first();
+
+        return $delivery instanceof AdminNotificationDelivery ? $delivery : null;
     }
 
     public function findMessageForReceiver(int $deliveryId, int $receiverId): ?AdminNotificationDelivery
     {
-        return AdminNotificationDelivery::query()
+        $delivery = AdminNotificationDelivery::query()
             ->where('id', $deliveryId)
             ->where('receiver_id', $receiverId)
             ->first();
+
+        return $delivery instanceof AdminNotificationDelivery ? $delivery : null;
     }
 
     public function create(array $data): AdminNotificationDelivery

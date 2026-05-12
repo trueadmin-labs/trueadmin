@@ -11,6 +11,9 @@ use TrueAdmin\Kernel\Support\TreeHelper;
 use App\Module\System\Model\AdminMenu;
 use Hyperf\DbConnection\Db;
 
+/**
+ * @extends AbstractRepository<AdminMenu>
+ */
 final class AdminMenuRepository extends AbstractRepository implements MetadataMenuRepositoryInterface
 {
     protected ?string $modelClass = AdminMenu::class;
@@ -58,7 +61,9 @@ final class AdminMenuRepository extends AbstractRepository implements MetadataMe
 
     public function findByCode(string $code): ?AdminMenu
     {
-        return AdminMenu::query()->where('code', $code)->first();
+        $menu = AdminMenu::query()->where('code', $code)->first();
+
+        return $menu instanceof AdminMenu ? $menu : null;
     }
 
     public function childCount(int $id): int
@@ -228,6 +233,9 @@ final class AdminMenuRepository extends AbstractRepository implements MetadataMe
     {
         $code = (string) $menu['code'];
         $exists = AdminMenu::query()->where('code', $code)->first();
+        if ($exists !== null && ! $exists instanceof AdminMenu) {
+            $exists = null;
+        }
         $type = (string) ($menu['type'] ?? 'menu');
 
         $defaults = [

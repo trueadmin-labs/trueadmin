@@ -288,6 +288,7 @@ export type CrudService<
     params: CrudListParams,
     options?: CrudListRequestOptions,
   ) => Promise<CrudPageResult<TRecord, TMeta>>;
+  detail?: (id: React.Key) => Promise<TRecord>;
   create?: (payload: TCreate) => Promise<TRecord>;
   update?: (id: React.Key, payload: TUpdate) => Promise<TRecord>;
   delete?: (id: React.Key) => Promise<unknown>;

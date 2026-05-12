@@ -1,6 +1,6 @@
 import { App } from 'antd';
 import { useMemo, useState } from 'react';
-import { TrueAdminCrudPage } from '@/core/crud';
+import { TrueAdminCrudPage, useCrudRecordDetail } from '@/core/crud';
 import type { CrudExtraQuerySchema, CrudFilterSchema, CrudService } from '@/core/crud/types';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import {
@@ -26,8 +26,9 @@ import { NotificationToolbar } from './NotificationToolbar';
 export default function AdminNotificationManagementPage() {
   const { message } = App.useApp();
   const { t } = useI18n();
-  const [detail, setDetail] = useState<AdminNotificationBatch>();
-  const [detailOpen, setDetailOpen] = useState(false);
+  const detailRecord = useCrudRecordDetail<AdminNotificationBatch>({
+    load: (id) => adminNotificationManagementApi.detailNotification(Number(id)).send(),
+  });
   const [deliveryBatch, setDeliveryBatch] = useState<AdminNotificationBatch>();
   const [deliveryOpen, setDeliveryOpen] = useState(false);
   const [refreshSeed, setRefreshSeed] = useState(0);
@@ -177,8 +178,7 @@ export default function AdminNotificationManagementPage() {
               record={record}
               t={t}
               onOpenDetail={(nextDetail) => {
-                setDetail(nextDetail);
-                setDetailOpen(true);
+                void detailRecord.openRecord(nextDetail.id, { initialRecord: nextDetail });
               }}
               onOpenDeliveries={(nextDeliveryBatch) => {
                 setDeliveryBatch(nextDeliveryBatch);
@@ -205,17 +205,13 @@ export default function AdminNotificationManagementPage() {
       />
 
       <NotificationDetailModal
-        open={detailOpen}
-        batch={detail}
+        open={detailRecord.open}
+        batch={detailRecord.record}
+        loading={detailRecord.loading}
         statusText={statusText}
         levelText={levelText}
         targetTypeText={targetTypeText}
-        onClose={() => setDetailOpen(false)}
-        afterOpenChange={(nextOpen) => {
-          if (!nextOpen) {
-            setDetail(undefined);
-          }
-        }}
+        onClose={detailRecord.close}
       />
       <DeliveryRecordsModal
         open={deliveryOpen}

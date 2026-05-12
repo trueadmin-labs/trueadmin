@@ -8,9 +8,13 @@ use TrueAdmin\Kernel\Crud\CrudQuery;
 use TrueAdmin\Kernel\Pagination\PageResult;
 use App\Foundation\Repository\AbstractRepository;
 use App\Module\System\Model\AdminAnnouncement;
+use App\Module\System\Model\AdminAnnouncementRead;
 use Hyperf\Database\Model\Builder;
 use Hyperf\DbConnection\Db;
 
+/**
+ * @extends AbstractRepository<AdminAnnouncement>
+ */
 final class AdminAnnouncementRepository extends AbstractRepository
 {
     protected ?string $modelClass = AdminAnnouncement::class;
@@ -85,9 +89,11 @@ final class AdminAnnouncementRepository extends AbstractRepository
 
     public function findVisibleForReceiver(int $id, int $adminId, array $roleIds): ?AdminAnnouncement
     {
-        /** @var null|AdminAnnouncement $announcement */
         $announcement = $this->visibleQuery(date('Y-m-d H:i:s'))->where('id', $id)->first();
-        if ($announcement === null || ! $this->isVisibleToReceiver($announcement, $adminId, $roleIds)) {
+        if (! $announcement instanceof AdminAnnouncement) {
+            return null;
+        }
+        if (! $this->isVisibleToReceiver($announcement, $adminId, $roleIds)) {
             return null;
         }
 
@@ -151,7 +157,7 @@ final class AdminAnnouncementRepository extends AbstractRepository
             ->all();
     }
 
-    public function toMessageArray(AdminAnnouncement $announcement, ?object $state = null): array
+    public function toMessageArray(AdminAnnouncement $announcement, ?AdminAnnouncementRead $state = null): array
     {
         return [
             'id' => (int) $announcement->getAttribute('id'),

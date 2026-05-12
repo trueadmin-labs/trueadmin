@@ -1,13 +1,17 @@
-import { Tag, Typography } from 'antd';
+import { EyeOutlined } from '@ant-design/icons';
+import { Button, Tag, Typography } from 'antd';
 import { useMemo } from 'react';
-import { TrueAdminCrudPage } from '@/core/crud/TrueAdminCrudPage';
+import { Permission } from '@/core/auth/Permission';
+import { TrueAdminCrudPage, useCrudRecordDetail } from '@/core/crud';
 import type { CrudColumns, CrudFilterSchema } from '@/core/crud/types';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { loginLogApi } from '../../services/log.api';
 import type { AdminLoginLog } from '../../types/log';
+import { LoginLogDetailDrawer } from './LoginLogDetailDrawer';
 
 export default function AdminLoginLogsPage() {
   const { t } = useI18n();
+  const detail = useCrudRecordDetail<AdminLoginLog>({ load: loginLogApi.detail });
   const statusText = useMemo<Record<string, string>>(
     () => ({
       failed: t('system.loginLogs.status.failed', '失败'),
@@ -79,24 +83,53 @@ export default function AdminLoginLogsPage() {
   );
 
   return (
-    <TrueAdminCrudPage<AdminLoginLog>
-      title={t('system.loginLogs.title', '登录日志')}
-      description={t('system.loginLogs.description', '查看后台账号登录成功、失败和访问来源。')}
-      resource="system.login-log"
-      rowKey="id"
-      columns={columns}
-      filters={filters}
-      service={loginLogApi}
-      quickSearch={{
-        placeholder: t('system.loginLogs.quickSearch.placeholder', '搜索用户名 / IP / User-Agent'),
-      }}
-      toolbarProps={{
-        quickSearchInputProps: { allowClear: true },
-        reloadButtonProps: { title: t('crud.action.reload', '刷新') },
-      }}
-      tableProps={{ size: 'middle' }}
-      paginationProps={{ showQuickJumper: true }}
-      tableScrollX={1180}
-    />
+    <>
+      <TrueAdminCrudPage<AdminLoginLog>
+        title={t('system.loginLogs.title', '登录日志')}
+        description={t('system.loginLogs.description', '查看后台账号登录成功、失败和访问来源。')}
+        resource="system.login-log"
+        rowKey="id"
+        columns={columns}
+        filters={filters}
+        service={loginLogApi}
+        quickSearch={{
+          placeholder: t(
+            'system.loginLogs.quickSearch.placeholder',
+            '搜索用户名 / IP / User-Agent',
+          ),
+        }}
+        rowActions={{
+          delete: false,
+          width: 108,
+          render: ({ record }) => (
+            <Permission code="system:login-log:detail">
+              <Button
+                icon={<EyeOutlined />}
+                size="small"
+                type="link"
+                onClick={() => void detail.openRecord(record.id, { initialRecord: record })}
+              >
+                {t('crud.action.detail', '详情')}
+              </Button>
+            </Permission>
+          ),
+        }}
+        toolbarProps={{
+          quickSearchInputProps: { allowClear: true },
+          reloadButtonProps: { title: t('crud.action.reload', '刷新') },
+        }}
+        tableProps={{ size: 'middle' }}
+        paginationProps={{ showQuickJumper: true }}
+        tableScrollX={1240}
+      />
+      <LoginLogDetailDrawer
+        detail={detail.record}
+        loading={detail.loading}
+        open={detail.open}
+        statusText={statusText}
+        t={t}
+        onClose={detail.close}
+      />
+    </>
   );
 }

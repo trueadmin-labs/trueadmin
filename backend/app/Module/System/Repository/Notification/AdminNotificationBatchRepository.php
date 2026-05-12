@@ -11,6 +11,9 @@ use App\Module\System\Model\AdminNotificationBatch;
 use Hyperf\Database\Model\Builder;
 use Hyperf\DbConnection\Db;
 
+/**
+ * @extends AbstractRepository<AdminNotificationBatch>
+ */
 final class AdminNotificationBatchRepository extends AbstractRepository
 {
     protected ?string $modelClass = AdminNotificationBatch::class;

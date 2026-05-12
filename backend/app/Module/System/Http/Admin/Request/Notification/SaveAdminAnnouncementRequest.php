@@ -7,6 +7,7 @@ namespace App\Module\System\Http\Admin\Request\Notification;
 use TrueAdmin\Kernel\Http\Request\FormRequest;
 use App\Module\System\Service\Notification\AttachmentSnapshotNormalizer;
 use Hyperf\Context\ApplicationContext;
+use RuntimeException;
 
 class SaveAdminAnnouncementRequest extends FormRequest
 {
@@ -74,6 +75,11 @@ class SaveAdminAnnouncementRequest extends FormRequest
 
     private function attachmentNormalizer(): AttachmentSnapshotNormalizer
     {
-        return ApplicationContext::getContainer()->get(AttachmentSnapshotNormalizer::class);
+        $normalizer = ApplicationContext::getContainer()->get(AttachmentSnapshotNormalizer::class);
+        if (! $normalizer instanceof AttachmentSnapshotNormalizer) {
+            throw new RuntimeException('Expected container service ' . AttachmentSnapshotNormalizer::class . '.');
+        }
+
+        return $normalizer;
     }
 }
