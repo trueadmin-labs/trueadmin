@@ -1,16 +1,15 @@
-import type { TableProps } from 'antd';
 import { App } from 'antd';
-import type { SorterResult } from 'antd/es/table/interface';
-import { useCallback, useMemo, useState } from 'react';
-import { errorCenter } from '@/core/error/errorCenter';
+import { useCallback, useState } from 'react';
 import { useI18n } from '@/core/i18n/I18nProvider';
-import { getSorterKey, getSorterResult, toCrudOrder } from './crudTableUtils';
 import { TrueAdminCrudTableContent } from './TrueAdminCrudTableContent';
 import type { CrudImportConfig, TrueAdminCrudTableProps } from './types';
+import { useCrudTableChangeHandler } from './useCrudTableChangeHandler';
 import { useCrudTableColumns } from './useCrudTableColumns';
 import { useCrudTableData } from './useCrudTableData';
+import { useCrudTableDeleteAction } from './useCrudTableDeleteAction';
 import { useCrudTableLayout } from './useCrudTableLayout';
 import { useCrudTableQueryState } from './useCrudTableQueryState';
+import { useCrudTableRenderContext } from './useCrudTableRenderContext';
 import { useCrudTableSelection } from './useCrudTableSelection';
 
 const DEFAULT_PAGE_SIZE = 20;
@@ -163,46 +162,26 @@ export function TrueAdminCrudTable<
     beginFilterPanelTransition(() => setFiltersExpanded((value) => !value));
   }, [beginFilterPanelTransition]);
 
-  const tableRenderContext = useMemo(
-    () => ({
-      action,
-      dataSource,
-      error,
-      loading,
-      query: queryState.query,
-      response,
-      selectedRowKeys,
-      selectedRows,
-      total,
-    }),
-    [
-      action,
-      dataSource,
-      error,
-      loading,
-      queryState.query,
-      response,
-      selectedRowKeys,
-      selectedRows,
-      total,
-    ],
-  );
+  const tableRenderContext = useCrudTableRenderContext<TRecord, TCreate, TUpdate, TMeta>({
+    action,
+    dataSource,
+    error,
+    loading,
+    query: queryState.query,
+    response,
+    selectedRowKeys,
+    selectedRows,
+    total,
+  });
 
-  const deleteRow = useCallback(
-    async (record: TRecord) => {
-      try {
-        await deleteRecord(getRecordKey(record));
-        if (!onDeleteSuccess) {
-          message.success(
-            locale?.deleteSuccessMessage ?? t('crud.action.deleteSuccess', '删除成功'),
-          );
-        }
-      } catch (error) {
-        errorCenter.emit(error);
-      }
-    },
-    [deleteRecord, getRecordKey, locale?.deleteSuccessMessage, message, onDeleteSuccess, t],
-  );
+  const deleteRow = useCrudTableDeleteAction<TRecord, TCreate, TUpdate, TMeta>({
+    deleteRecord,
+    getRecordKey,
+    locale,
+    notifySuccess: message.success,
+    onDeleteSuccess,
+    t,
+  });
 
   const mergedColumns = useCrudTableColumns<TRecord, TCreate, TUpdate, TMeta>({
     canDelete: Boolean(service.delete),
@@ -217,19 +196,10 @@ export function TrueAdminCrudTable<
     t,
   });
 
-  const handleTableChange: TableProps<TRecord>['onChange'] = (
-    pagination,
-    filters,
-    sorter,
-    extra,
-  ) => {
-    const sorterResult = getSorterResult(sorter as SorterResult<TRecord> | SorterResult<TRecord>[]);
-    queryState.changeSort(
-      sorterResult ? getSorterKey(sorterResult) : undefined,
-      toCrudOrder(sorterResult?.order),
-    );
-    tableProps?.onChange?.(pagination, filters, sorter, extra);
-  };
+  const handleTableChange = useCrudTableChangeHandler<TRecord, TCreate, TUpdate, TMeta>({
+    queryState,
+    tableProps,
+  });
 
   const resetQuery = useCallback(() => {
     queryState.resetFilters();
