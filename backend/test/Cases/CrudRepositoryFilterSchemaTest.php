@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace HyperfTest\Cases;
 
-use App\Foundation\Crud\CrudFilterCondition;
-use App\Foundation\Crud\CrudOperator;
-use App\Foundation\Crud\CrudSortRule;
-use App\Foundation\Http\Request\CrudQueryRequest;
+use TrueAdmin\Kernel\Crud\CrudFilterCondition;
+use TrueAdmin\Kernel\Crud\CrudOperator;
+use TrueAdmin\Kernel\Crud\CrudSortRule;
+use TrueAdmin\Kernel\Crud\CrudQueryRequest;
 use App\Foundation\Repository\AbstractRepository;
 use Hyperf\Context\ApplicationContext;
 use Hyperf\Testing\TestCase;

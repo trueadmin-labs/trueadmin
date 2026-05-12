@@ -11,7 +11,7 @@ declare(strict_types=1);
  */
 use App\Foundation\Http\Controller\HealthController;
 use App\Foundation\Http\Controller\OpenApiController;
-use App\Foundation\Http\Routing\AttributeRouteRegistrar;
+use TrueAdmin\Kernel\Http\Routing\AttributeRouteRegistrar;
 use Hyperf\Context\ApplicationContext;
 use Hyperf\HttpServer\Router\Router;
 

@@ -498,7 +498,7 @@ class ExampleTest extends TestCase
     public function testMetadataSyncAndOpenApiDocument()
     {
         $sync = \Hyperf\Context\ApplicationContext::getContainer()
-            ->get(\App\Foundation\Metadata\MetadataSynchronizer::class)
+            ->get(\TrueAdmin\Kernel\Metadata\MetadataSynchronizer::class)
             ->sync();
 
         $this->assertGreaterThanOrEqual(9, $sync['menus']);

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Foundation\Exception;
 
-use App\Foundation\Support\ApiResponse;
+use TrueAdmin\Kernel\Http\ApiResponse;
 use Hyperf\Contract\StdoutLoggerInterface;
 use Hyperf\ExceptionHandler\ExceptionHandler;
 use Hyperf\HttpMessage\Stream\SwooleStream;

@@ -172,9 +172,9 @@ Library
 当前 Foundation 已提供本地插件运行时发现能力：
 
 ```text
-backend/app/Foundation/Plugin/Plugin.php
-backend/app/Foundation/Plugin/PluginConfigRepository.php
-backend/app/Foundation/Plugin/PluginRepository.php
+trueadmin-kernel/src/Plugin/Plugin.php
+trueadmin-kernel/src/Plugin/PluginConfigRepository.php
+trueadmin-kernel/src/Plugin/PluginRepository.php
 backend/config/autoload/plugins.php
 ```
 

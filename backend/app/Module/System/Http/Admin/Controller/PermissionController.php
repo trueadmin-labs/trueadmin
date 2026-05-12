@@ -6,7 +6,7 @@ namespace App\Module\System\Http\Admin\Controller;
 
 use App\Foundation\Http\Controller\AdminController;
 use App\Foundation\Http\Middleware\PermissionMiddleware;
-use App\Foundation\Support\ApiResponse;
+use TrueAdmin\Kernel\Http\ApiResponse;
 use App\Foundation\Contract\AdminPermissionProviderInterface;
 use App\Foundation\DataPermission\DataPolicyRegistry;
 use App\Module\Auth\Http\Admin\Middleware\AdminAuthMiddleware;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Foundation\Http\Controller;
 
-use App\Foundation\Support\ApiResponse;
+use TrueAdmin\Kernel\Http\ApiResponse;
 
 final class HealthController extends Controller
 {

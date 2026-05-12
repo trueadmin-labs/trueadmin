@@ -11,7 +11,7 @@ declare(strict_types=1);
  */
 return [
     'http' => [
-        App\Foundation\I18n\Middleware\LocaleMiddleware::class,
+        TrueAdmin\Kernel\I18n\Middleware\LocaleMiddleware::class,
         Hyperf\Validation\Middleware\ValidationMiddleware::class,
     ],
 ];

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Module\System\Http\Admin\Request\Notification;
 
-use App\Foundation\Http\Request\CrudQueryRequest;
+use TrueAdmin\Kernel\Crud\CrudQueryRequest;
 
 class AdminNotificationQueryRequest extends CrudQueryRequest
 {

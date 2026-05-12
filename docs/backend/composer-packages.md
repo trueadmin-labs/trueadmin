@@ -29,18 +29,28 @@
 - 读取项目私有配置或供应商配置。
 - 只是当前模板的组织方式，还没有稳定扩展协议。
 
-## P0：已进入 kernel main，等待发版后切模板
+## P0：已进入 kernel，模板已切换
+
+当前 `trueadmin-kernel` 已推送：
+
+```text
+v0.1.1  CRUD / HTTP / Pagination 原语
+v0.1.2  Hyperf 后端运行时服务
+v0.1.3  路由命令补齐
+```
+
+模板后端已切到 `trueadmin/kernel ^0.1.3`。由于 Packagist 当前还未同步新 tag，`backend/composer.json` 临时保留 GitHub VCS repository，避免使用 `dev-main` 或本地 path repository。Packagist 同步 `v0.1.3` 后应删除该 VCS repository 配置。
 
 ### CRUD 协议值对象
 
 当前状态：
 
 - `trueadmin-kernel/src/Crud/*` 已新增。
-- 模板仍保留 `backend/app/Foundation/Crud/*` 作为临时重复定义。
+- 模板已删除 `backend/app/Foundation/Crud/*` 重复定义。
 
-处理：
+已处理：
 
-- 发布 `trueadmin/kernel v0.1.1` 后，模板后端改用 `TrueAdmin\Kernel\Crud`。
+- 模板后端改用 `TrueAdmin\Kernel\Crud`。
 - 删除 `backend/app/Foundation/Crud/*`。
 - `CrudQueryRequest` 和 `AbstractRepository` 同步切换 import。
 
@@ -52,10 +62,10 @@
 trueadmin-kernel/src/Pagination/PageResult.php
 ```
 
-模板临时保留：
+模板已删除：
 
 ```text
-backend/app/Foundation/Pagination/PageResult.php
+trueadmin-kernel/src/Pagination/PageResult.php
 ```
 
 理由：分页响应是 CRUD/API 协议的一部分，不依赖业务表。前端 `@trueadmin/web-core/http` 已经有 `PageResult` 类型，后端应有同名标准值对象。
@@ -68,7 +78,7 @@ backend/app/Foundation/Pagination/PageResult.php
 trueadmin-kernel/src/Http/ApiResponse.php
 ```
 
-模板临时保留：
+模板已删除：
 
 ```text
 backend/app/Foundation/Support/ApiResponse.php
@@ -84,7 +94,7 @@ backend/app/Foundation/Support/ApiResponse.php
 trueadmin-kernel/src/Http/Request/FormRequest.php
 ```
 
-模板临时保留：
+模板已删除：
 
 ```text
 backend/app/Foundation/Http/Request/FormRequest.php
@@ -100,7 +110,7 @@ backend/app/Foundation/Http/Request/FormRequest.php
 trueadmin-kernel/src/Crud/CrudQueryRequest.php
 ```
 
-模板临时保留：
+模板已删除：
 
 ```text
 backend/app/Foundation/Http/Request/CrudQueryRequest.php
@@ -110,97 +120,95 @@ backend/app/Foundation/Http/Request/CrudQueryRequest.php
 
 注意：字段白名单不在 Request 里做。Request 只校验协议形态；Repository/QueryApplier 负责按资源白名单拒绝未知字段。
 
-## P1：应抽为 kernel 运行时服务
+## P1：已进入 kernel，模板已切换
 
 ### Attribute 路由注册
 
-候选：
-
-```text
-backend/app/Foundation/Http/Routing/AttributeRouteRegistrar.php
-backend/app/Foundation/Http/Command/TrueAdminRoutesCommand.php
-```
-
-建议进入：
+当前状态：
 
 ```text
 trueadmin-kernel/src/Http/Routing/AttributeRouteRegistrar.php
 trueadmin-kernel/src/Http/Command/TrueAdminRoutesCommand.php
 ```
 
+模板已删除：
+
+```text
+backend/app/Foundation/Http/Routing/AttributeRouteRegistrar.php
+backend/app/Foundation/Http/Command/TrueAdminRoutesCommand.php
+```
+
 理由：它只依赖 Hyperf Router 和 kernel 里的路由 Attribute，不依赖业务模块。模板 `config/routes.php` 应只调用 kernel registrar。
 
 ### 接口元数据扫描与 OpenAPI 生成
 
-候选：
+当前状态：
 
 ```text
-backend/app/Foundation/Metadata/InterfaceMetadataScanner.php
-backend/app/Foundation/Metadata/OpenApiDocumentBuilder.php
-backend/app/Foundation/Metadata/Command/*
+trueadmin-kernel/src/Metadata/InterfaceMetadataScanner.php
+trueadmin-kernel/src/Metadata/OpenApiDocumentBuilder.php
+trueadmin-kernel/src/Metadata/MetadataSynchronizer.php
+trueadmin-kernel/src/Metadata/MetadataMenuRepositoryInterface.php
+trueadmin-kernel/src/Metadata/Command/*
 ```
 
-建议进入 kernel，但分两层：
-
-- 扫描器、规范化、OpenAPI 构建器、命令进入 kernel。
-- `MetadataMenuRepositoryInterface` 可以进入 kernel。
-- 具体菜单入库实现继续留在 `Module/System`。
+模板已删除同名 Foundation 类。具体菜单入库实现继续留在 `Module/System`。
 
 理由：扫描 Attribute、读取模块和插件 `resources/menus.php`、生成 OpenAPI 都是框架运行时能力。具体表结构和同步落库由宿主实现接口。
 
 ### 模块迁移和 Seeder 路径注册
 
-候选：
+当前状态：
 
 ```text
-backend/app/Foundation/Database/ModuleMigrationLocator.php
-backend/app/Foundation/Database/Listener/RegisterMigrationPathsListener.php
-backend/app/Foundation/Database/Listener/RegisterSeederPathsListener.php
-backend/app/Foundation/Database/Command/TrueAdminMigrationPathsCommand.php
-backend/app/Foundation/Database/Seeder/NamespacedSeed.php
+trueadmin-kernel/src/Database/ModuleMigrationLocator.php
+trueadmin-kernel/src/Database/Listener/RegisterMigrationPathsListener.php
+trueadmin-kernel/src/Database/Listener/RegisterSeederPathsListener.php
+trueadmin-kernel/src/Database/Command/TrueAdminMigrationPathsCommand.php
+trueadmin-kernel/src/Database/Seeder/NamespacedSeed.php
 ```
 
-建议进入 kernel。
+模板已删除同名 Foundation 类。
 
 理由：模块/插件迁移目录发现和注册是框架级运行时能力，不依赖业务表。宿主只需要提供插件仓库或配置。
 
 ### 插件后端 runtime 读取
 
-候选：
+当前状态：
 
 ```text
-backend/app/Foundation/Plugin/Plugin.php
-backend/app/Foundation/Plugin/PluginRepository.php
-backend/app/Foundation/Plugin/PluginConfigRepository.php
+trueadmin-kernel/src/Plugin/Plugin.php
+trueadmin-kernel/src/Plugin/PluginRepository.php
+trueadmin-kernel/src/Plugin/PluginConfigRepository.php
 ```
 
-建议进入 kernel。
+模板已删除同名 Foundation 类。
 
 理由：注意这里不是插件安装命令。安装/同步仍属于框架级 Node/npm CLI；但后端运行时读取端内 `config/autoload/plugins.php` 是 Hyperf 后端运行时能力，可以进 kernel。
 
 ### 模块翻译加载
 
-候选：
+当前状态：
 
 ```text
-backend/app/Foundation/I18n/ModuleTranslationLoader.php
-backend/app/Foundation/I18n/ModuleTranslationLoaderFactory.php
-backend/app/Foundation/I18n/Middleware/LocaleMiddleware.php
+trueadmin-kernel/src/I18n/ModuleTranslationLoader.php
+trueadmin-kernel/src/I18n/ModuleTranslationLoaderFactory.php
+trueadmin-kernel/src/I18n/Middleware/LocaleMiddleware.php
 ```
 
-建议进入 kernel。
+模板已删除同名 Foundation 类。
 
 理由：模块和插件语言包加载是框架级能力。具体语言文件仍留在模块、插件和宿主项目。
 
 ### SSE / Streamable
 
-候选：
+当前状态：
 
 ```text
-backend/app/Foundation/Stream/*
+trueadmin-kernel/src/Stream/*
 ```
 
-建议进入 kernel。
+模板已删除同名 Foundation 类。
 
 理由：`#[Streamable]` 已在 kernel，AOP 和 SSE responder 留在模板会割裂能力。它依赖 Hyperf/Swoole，但不依赖业务表，适合进入 kernel。
 
@@ -285,12 +293,13 @@ kernel 已有 `AbstractController`。模板里的 `Controller` 目前只增加 `
 - JWT 配置、数据库配置、Redis 配置、日志配置。
 - 插件安装/同步命令。该能力属于框架级 Node/npm CLI，不属于后端 Composer 命令。
 
-## 建议执行顺序
+## 当前执行状态
 
-1. 发布 `trueadmin/kernel v0.1.1`，模板改用 kernel CRUD 值对象，删除 `Foundation/Crud`。
-2. 抽 `PageResult`、`ApiResponse`、`FormRequest`、`CrudQueryRequest` 到 kernel。
-3. 抽 `AttributeRouteRegistrar` 和 routes 命令到 kernel。
-4. 抽插件 runtime、模块 migration/seeder locator、模块翻译 loader 到 kernel。
-5. 抽 Metadata scanner/OpenAPI builder，保留菜单入库接口由 `Module/System` 实现。
-6. 抽 SSE/Streamable runtime。
-7. 最后再拆 DataPolicy runtime 和 CRUD QueryApplier，避免一次性重构 Repository 继承链。
+1. 已发布 `trueadmin/kernel v0.1.1`、`v0.1.2`、`v0.1.3` Git tag。
+2. 模板已改用 kernel CRUD 值对象，已删除 `Foundation/Crud`。
+3. `PageResult`、`ApiResponse`、`FormRequest`、`CrudQueryRequest` 已抽到 kernel，模板已删除重复实现。
+4. `AttributeRouteRegistrar` 和 routes 命令已抽到 kernel，模板已删除重复实现。
+5. 插件 runtime、模块 migration/seeder locator、模块翻译 loader 已抽到 kernel，模板已删除重复实现。
+6. Metadata scanner/OpenAPI builder 已抽到 kernel，菜单入库接口由 `Module/System` 实现。
+7. SSE/Streamable runtime 已抽到 kernel，模板已删除重复实现。
+8. 后续再拆 DataPolicy runtime 和 CRUD QueryApplier，避免一次性重构 Repository 继承链。

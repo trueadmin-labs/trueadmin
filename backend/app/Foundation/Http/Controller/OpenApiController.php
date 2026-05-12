@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Foundation\Http\Controller;
 
-use App\Foundation\Metadata\OpenApiDocumentBuilder;
+use TrueAdmin\Kernel\Metadata\OpenApiDocumentBuilder;
 
 final class OpenApiController extends OpenController
 {

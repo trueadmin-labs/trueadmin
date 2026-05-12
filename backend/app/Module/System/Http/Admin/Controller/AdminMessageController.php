@@ -6,8 +6,8 @@ namespace App\Module\System\Http\Admin\Controller;
 
 use App\Foundation\Http\Controller\AdminController;
 use App\Foundation\Http\Middleware\PermissionMiddleware;
-use App\Foundation\Stream\StreamProgress;
-use App\Foundation\Support\ApiResponse;
+use TrueAdmin\Kernel\Stream\StreamProgress;
+use TrueAdmin\Kernel\Http\ApiResponse;
 use App\Module\Auth\Http\Admin\Middleware\AdminAuthMiddleware;
 use App\Module\System\Http\Admin\Request\Notification\AdminMessageActionRequest;
 use App\Module\System\Http\Admin\Request\Notification\AdminMessageReadAllRequest;

@@ -9,10 +9,10 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
-use App\Foundation\Database\Seeder\NamespacedSeed;
+use TrueAdmin\Kernel\Database\Seeder\NamespacedSeed;
 use App\Foundation\Contract\AdminPermissionProviderInterface;
 use App\Foundation\Contract\DataPolicyProviderInterface;
-use App\Foundation\Metadata\MetadataMenuRepositoryInterface;
+use TrueAdmin\Kernel\Metadata\MetadataMenuRepositoryInterface;
 use App\Module\System\Contract\AdminIdentityProviderInterface;
 use App\Module\System\Repository\AdminMenuRepository;
 use App\Module\System\Service\DataPermission\AdminRoleDataPolicyProvider;
@@ -25,7 +25,7 @@ use function Hyperf\Support\env;
 
 return [
     Seed::class => NamespacedSeed::class,
-    TranslatorLoaderInterface::class => App\Foundation\I18n\ModuleTranslationLoaderFactory::class,
+    TranslatorLoaderInterface::class => TrueAdmin\Kernel\I18n\ModuleTranslationLoaderFactory::class,
     AdminIdentityProviderInterface::class => env('APP_ENV') === 'testing'
         ? HyperfTest\Support\TestingAdminIdentityProvider::class
         : AdminIdentityService::class,

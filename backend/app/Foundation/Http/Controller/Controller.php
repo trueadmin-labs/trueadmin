@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Foundation\Http\Controller;
 
-use App\Foundation\Stream\SseStreamResponder;
+use TrueAdmin\Kernel\Stream\SseStreamResponder;
 use TrueAdmin\Kernel\Http\Controller\AbstractController;
 
 abstract class Controller extends AbstractController

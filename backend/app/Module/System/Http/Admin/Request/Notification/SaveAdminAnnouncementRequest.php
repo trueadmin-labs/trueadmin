@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Module\System\Http\Admin\Request\Notification;
 
-use App\Foundation\Http\Request\FormRequest;
+use TrueAdmin\Kernel\Http\Request\FormRequest;
 use App\Module\System\Service\Notification\AttachmentSnapshotNormalizer;
 use Hyperf\Context\ApplicationContext;
 

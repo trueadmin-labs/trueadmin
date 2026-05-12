@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Module\System\Service\Notification;
 
-use App\Foundation\Pagination\PageResult;
-use App\Foundation\Crud\CrudQuery;
+use TrueAdmin\Kernel\Pagination\PageResult;
+use TrueAdmin\Kernel\Crud\CrudQuery;
 use App\Foundation\Service\AbstractService;
 use App\Module\System\Model\AdminAnnouncementRead;
 use App\Module\System\Model\AdminNotificationDelivery;

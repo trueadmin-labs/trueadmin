@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Module\System\Service;
 
-use App\Foundation\Crud\CrudQuery;
+use TrueAdmin\Kernel\Crud\CrudQuery;
 use App\Foundation\Service\AbstractService;
 use App\Foundation\Tree\TreeHelper;
 use App\Module\System\Model\AdminDepartment;

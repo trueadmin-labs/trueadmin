@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Module\System\Repository\Notification;
 
-use App\Foundation\Crud\CrudQuery;
-use App\Foundation\Pagination\PageResult;
+use TrueAdmin\Kernel\Crud\CrudQuery;
+use TrueAdmin\Kernel\Pagination\PageResult;
 use App\Foundation\Repository\AbstractRepository;
 use App\Module\System\Model\AdminAnnouncement;
 use Hyperf\Database\Model\Builder;

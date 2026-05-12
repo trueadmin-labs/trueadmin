@@ -10,5 +10,5 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
 return [
-    App\Foundation\Stream\Aspect\StreamableAspect::class,
+    TrueAdmin\Kernel\Stream\Aspect\StreamableAspect::class,
 ];

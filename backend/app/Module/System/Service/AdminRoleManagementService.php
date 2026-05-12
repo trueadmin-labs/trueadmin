@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Module\System\Service;
 
-use App\Foundation\Pagination\PageResult;
-use App\Foundation\Crud\CrudQuery;
+use TrueAdmin\Kernel\Pagination\PageResult;
+use TrueAdmin\Kernel\Crud\CrudQuery;
 use App\Foundation\Service\AbstractService;
 use App\Foundation\DataPermission\DataPolicyRegistry;
 use App\Module\System\Model\AdminRole;

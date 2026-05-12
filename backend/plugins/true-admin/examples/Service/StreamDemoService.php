@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Plugin\TrueAdmin\Examples\Service;
 
-use App\Foundation\Stream\StreamProgress;
+use TrueAdmin\Kernel\Stream\StreamProgress;
 
 final class StreamDemoService
 {

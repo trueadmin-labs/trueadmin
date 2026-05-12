@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace HyperfTest\Cases;
 
-use App\Foundation\Metadata\InterfaceMetadataScanner;
-use App\Foundation\Metadata\MetadataSynchronizer;
+use TrueAdmin\Kernel\Metadata\InterfaceMetadataScanner;
+use TrueAdmin\Kernel\Metadata\MetadataSynchronizer;
 use App\Module\System\Service\AdminMenuManagementService;
 use Hyperf\Context\ApplicationContext;
 use Hyperf\DbConnection\Db;

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Foundation\Repository;
 
-use App\Foundation\Crud\CrudQuery;
-use App\Foundation\Crud\CrudOperator;
-use App\Foundation\Crud\CrudSortRule;
+use TrueAdmin\Kernel\Crud\CrudQuery;
+use TrueAdmin\Kernel\Crud\CrudOperator;
+use TrueAdmin\Kernel\Crud\CrudSortRule;
 use App\Foundation\DataPermission\DataPolicyManager;
-use App\Foundation\Pagination\PageResult;
+use TrueAdmin\Kernel\Pagination\PageResult;
 use Hyperf\Context\ApplicationContext;
 use Hyperf\Database\Model\Builder;
 use Hyperf\DbConnection\Db;

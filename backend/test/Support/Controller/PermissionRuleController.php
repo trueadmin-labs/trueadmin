@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace HyperfTest\Support\Controller;
 
-use App\Foundation\Support\ApiResponse;
+use TrueAdmin\Kernel\Http\ApiResponse;
 use App\Module\Auth\Http\Admin\Middleware\AdminAuthMiddleware;
 use App\Foundation\Http\Middleware\PermissionMiddleware;
 use TrueAdmin\Kernel\Http\Attribute\AdminController;

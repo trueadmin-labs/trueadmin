@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Foundation\DataPermission;
 
-use App\Foundation\Plugin\PluginRepository;
+use TrueAdmin\Kernel\Plugin\PluginRepository;
 use Hyperf\Contract\ConfigInterface;
 use Psr\Container\ContainerInterface;
 use RuntimeException;

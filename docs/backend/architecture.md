@@ -859,7 +859,7 @@ Module/System/Listener/Logstash/WriteOperationLogListener.php
 backend/app/Foundation/Service/AbstractService.php
 backend/app/Foundation/Repository/AbstractRepository.php
 backend/app/Foundation/Database/Model.php
-backend/app/Foundation/Pagination/PageResult.php
+trueadmin-kernel/src/Pagination/PageResult.php
 ```
 
 第一版能力：
@@ -1169,12 +1169,12 @@ AI 修改架构前必须更新项目记忆。
 
 TrueAdmin 默认提供请求绑定型流式响应能力，用于长耗时请求、批量操作、复杂流程和未来 AI 流式输出。第一版只做框架底层简单支持，不做后台任务、任务中心、断线续看或 WebSocket。
 
-核心设计是“普通执行方法 + 进度事件 + 注解声明可流式”：Service 方法本身仍然是普通 PHP 方法，不返回 SSE，不感知 HTTP 连接。需要暴露内部进度时，执行方法通过 `App\Foundation\Stream\StreamProgress` 抛出进度事件；Controller 方法通过 `#[Streamable]` 声明支持流式响应。普通请求仍返回原 JSON；客户端请求头包含 `Accept: text/event-stream`、`X-Stream-Response: 1` 或参数 `_stream=1` 时，框架 AOP 自动把 Controller 方法包裹成 SSE。
+核心设计是“普通执行方法 + 进度事件 + 注解声明可流式”：Service 方法本身仍然是普通 PHP 方法，不返回 SSE，不感知 HTTP 连接。需要暴露内部进度时，执行方法通过 `TrueAdmin\Kernel\Stream\StreamProgress` 抛出进度事件；Controller 方法通过 `#[Streamable]` 声明支持流式响应。普通请求仍返回原 JSON；客户端请求头包含 `Accept: text/event-stream`、`X-Stream-Response: 1` 或参数 `_stream=1` 时，框架 AOP 自动把 Controller 方法包裹成 SSE。
 
 示例：
 
 ```php
-use App\Foundation\Stream\StreamProgress;
+use TrueAdmin\Kernel\Stream\StreamProgress;
 
 final class DemoService
 {

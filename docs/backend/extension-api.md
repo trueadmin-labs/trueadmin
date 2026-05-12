@@ -120,7 +120,7 @@ assertSortable()
 
 ```php
 return [
-    App\Foundation\Metadata\OpenApiDocumentBuilder::class => App\Foundation\Metadata\ProjectOpenApiDocumentBuilder::class,
+    TrueAdmin\Kernel\Metadata\OpenApiDocumentBuilder::class => App\Foundation\OpenApi\ProjectOpenApiDocumentBuilder::class,
 ];
 ```
 

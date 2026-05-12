@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Module\System\Database\Seeders;
 
-use App\Foundation\Metadata\MetadataSynchronizer;
+use TrueAdmin\Kernel\Metadata\MetadataSynchronizer;
 use App\Foundation\DataPermission\DataPolicyRegistry;
 use App\Foundation\Support\Password;
 use Hyperf\Database\Seeders\Seeder;
