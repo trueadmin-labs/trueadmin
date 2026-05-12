@@ -15,10 +15,10 @@ import {
   TrueAdminCrudTablePagination,
   TrueAdminCrudTableSelectionStatus,
 } from './TrueAdminCrudTablePagination';
+import { TrueAdminCrudTableToolbarRow } from './TrueAdminCrudTableToolbarRow';
 import { TrueAdminCrudTableView } from './TrueAdminCrudTableView';
 import { TrueAdminImportModal } from './TrueAdminImportModal';
 import { TrueAdminTableFilterPanel } from './TrueAdminTableFilterPanel';
-import { TrueAdminTableToolbar } from './TrueAdminTableToolbar';
 import type { CrudImportConfig, TrueAdminCrudTableProps } from './types';
 import { useCrudTableColumns } from './useCrudTableColumns';
 import { useCrudTableData } from './useCrudTableData';
@@ -285,48 +285,32 @@ export function TrueAdminCrudTable<
   ) : null;
 
   const toolbarDom = (
-    <div
-      className={joinClassNames('trueadmin-crud-table-toolbar', classNames?.toolbar)}
-      style={styles?.toolbar}
-    >
-      <div
-        className={joinClassNames('trueadmin-crud-table-toolbar-left', classNames?.toolbarLeft)}
-        style={styles?.toolbarLeft}
-      >
-        {toolbarTitle}
-      </div>
-      <div
-        className={joinClassNames('trueadmin-crud-table-toolbar-right', classNames?.toolbarRight)}
-        style={styles?.toolbarRight}
-      >
-        <TrueAdminTableToolbar
-          activeFilterCount={queryState.activeFilterCount}
-          filtersExpanded={filtersExpanded}
-          hasFilters={hasFilters}
-          loading={loading}
-          extra={toolbarExtra}
-          importExport={importExport as never}
-          locale={locale}
-          renderContext={tableRenderContext as never}
-          selectedCount={selectedCount}
-          toolbarProps={toolbarProps as never}
-          t={t}
-          quickSearch={quickSearch}
-          quickSearchName={queryState.quickSearchName}
-          quickSearchResetSeed={queryResetSeed}
-          quickSearchValue={
-            queryState.quickSearchName ? queryState.values[queryState.quickSearchName] : undefined
-          }
-          onOpenImport={(config) =>
-            setImportModalConfig(config as CrudImportConfig<TRecord, TMeta, TCreate, TUpdate>)
-          }
-          onClearQuickSearch={queryState.clearQuickSearch}
-          onReload={reload}
-          onSubmitQuickSearch={queryState.submitQuickSearch}
-          onToggleFilters={toggleFiltersExpanded}
-        />
-      </div>
-    </div>
+    <TrueAdminCrudTableToolbarRow<TRecord, TCreate, TUpdate, TMeta>
+      activeFilterCount={queryState.activeFilterCount}
+      classNames={classNames}
+      filtersExpanded={filtersExpanded}
+      hasFilters={hasFilters}
+      importExport={importExport}
+      loading={loading}
+      locale={locale}
+      quickSearch={quickSearch}
+      quickSearchResetSeed={queryResetSeed}
+      quickSearchValue={
+        queryState.quickSearchName ? queryState.values[queryState.quickSearchName] : undefined
+      }
+      renderContext={tableRenderContext}
+      selectedCount={selectedCount}
+      styles={styles}
+      toolbarExtra={toolbarExtra}
+      toolbarProps={toolbarProps}
+      toolbarTitle={toolbarTitle}
+      t={t}
+      onOpenImport={setImportModalConfig}
+      onClearQuickSearch={queryState.clearQuickSearch}
+      onReload={reload}
+      onSubmitQuickSearch={queryState.submitQuickSearch}
+      onToggleFilters={toggleFiltersExpanded}
+    />
   );
 
   const selectedStatusDom = (

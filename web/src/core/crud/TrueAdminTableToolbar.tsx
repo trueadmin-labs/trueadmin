@@ -26,7 +26,6 @@ export type TrueAdminTableToolbarProps = {
   toolbarProps?: CrudToolbarProps;
   t: (key?: string, fallback?: string) => string;
   quickSearch?: CrudQuickSearchConfig;
-  quickSearchName?: string;
   quickSearchResetSeed?: number;
   quickSearchValue?: string;
   onOpenImport: (
