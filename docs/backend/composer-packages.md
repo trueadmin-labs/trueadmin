@@ -37,9 +37,10 @@
 v0.1.1  CRUD / HTTP / Pagination 原语
 v0.1.2  Hyperf 后端运行时服务
 v0.1.3  路由命令补齐
+v0.1.5  CRUD QueryApplier
 ```
 
-模板后端已切到 `trueadmin/kernel ^0.1.3`。由于 Packagist 当前还未同步新 tag，`backend/composer.json` 临时保留 GitHub VCS repository，避免使用 `dev-main` 或本地 path repository。Packagist 同步 `v0.1.3` 后应删除该 VCS repository 配置。
+模板后端已切到 `trueadmin/kernel ^0.1.5`。由于 Packagist 可能不会立即同步新 tag，`backend/composer.json` 临时保留 GitHub VCS repository，避免使用 `dev-main` 或本地 path repository。Packagist 同步 `v0.1.5` 后应删除该 VCS repository 配置。
 
 ### CRUD 协议值对象
 
@@ -65,7 +66,7 @@ trueadmin-kernel/src/Pagination/PageResult.php
 模板已删除：
 
 ```text
-trueadmin-kernel/src/Pagination/PageResult.php
+backend/app/Foundation/Pagination/PageResult.php
 ```
 
 理由：分页响应是 CRUD/API 协议的一部分，不依赖业务表。前端 `@trueadmin/web-core/http` 已经有 `PageResult` 类型，后端应有同名标准值对象。
@@ -212,32 +213,31 @@ trueadmin-kernel/src/Stream/*
 
 理由：`#[Streamable]` 已在 kernel，AOP 和 SSE responder 留在模板会割裂能力。它依赖 Hyperf/Swoole，但不依赖业务表，适合进入 kernel。
 
-## P2：先留模板，稳定后再抽
+## P2：小件进入 kernel，模板组合使用
 
 ### AbstractRepository
 
-候选：
+当前状态：
 
 ```text
 backend/app/Foundation/Repository/AbstractRepository.php
 ```
 
-当前不建议整体进入 kernel。
+不建议整体进入 kernel。
 
 原因：
 
 - 它混合了基础 Model helper、CRUD 查询应用、数据权限 helper、分页 helper、pivot helper。
 - 直接抽整个类会把宿主 Repository 继承链锁死，后续不好拆。
 
-建议先抽小件：
+已抽出小件：
 
 ```text
 trueadmin-kernel/src/Crud/CrudQueryApplier.php
-trueadmin-kernel/src/Crud/CrudFilterConfig.php
-trueadmin-kernel/src/Crud/CrudSortConfig.php
+trueadmin-kernel/src/Crud/CrudQueryApplierOptions.php
 ```
 
-模板 `AbstractRepository` 组合这些能力，而不是把所有 Repository 基类直接放进 kernel。
+模板 `AbstractRepository` 通过 `CrudQueryApplierOptions` 把关键词字段、过滤白名单、排序白名单、列映射和默认排序传给 kernel applier。模板仍保留 `applyParams()`、`applyFilterCondition()`、`applySortRule()`、`filterColumn()`、`sortColumn()` 等 protected 扩展点，项目可以覆盖模板方法，不需要改 composer 包源码。
 
 ### DataPolicyManager / DataPolicyRegistry
 
@@ -295,11 +295,12 @@ kernel 已有 `AbstractController`。模板里的 `Controller` 目前只增加 `
 
 ## 当前执行状态
 
-1. 已发布 `trueadmin/kernel v0.1.1`、`v0.1.2`、`v0.1.3` Git tag。
+1. 已发布 `trueadmin/kernel v0.1.1`、`v0.1.2`、`v0.1.3`、`v0.1.4`、`v0.1.5` Git tag。
 2. 模板已改用 kernel CRUD 值对象，已删除 `Foundation/Crud`。
 3. `PageResult`、`ApiResponse`、`FormRequest`、`CrudQueryRequest` 已抽到 kernel，模板已删除重复实现。
 4. `AttributeRouteRegistrar` 和 routes 命令已抽到 kernel，模板已删除重复实现。
 5. 插件 runtime、模块 migration/seeder locator、模块翻译 loader 已抽到 kernel，模板已删除重复实现。
 6. Metadata scanner/OpenAPI builder 已抽到 kernel，菜单入库接口由 `Module/System` 实现。
 7. SSE/Streamable runtime 已抽到 kernel，模板已删除重复实现。
-8. 后续再拆 DataPolicy runtime 和 CRUD QueryApplier，避免一次性重构 Repository 继承链。
+8. `CrudQueryApplier` 已抽到 kernel，模板 `AbstractRepository` 改为组合使用。
+9. 后续再拆 DataPolicy runtime，避免一次性重构 Repository 继承链。

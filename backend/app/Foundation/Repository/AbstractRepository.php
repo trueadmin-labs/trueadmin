@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace App\Foundation\Repository;
 
-use TrueAdmin\Kernel\Crud\CrudQuery;
-use TrueAdmin\Kernel\Crud\CrudOperator;
-use TrueAdmin\Kernel\Crud\CrudSortRule;
 use App\Foundation\DataPermission\DataPolicyManager;
-use TrueAdmin\Kernel\Pagination\PageResult;
 use Hyperf\Context\ApplicationContext;
 use Hyperf\Database\Model\Builder;
 use Hyperf\DbConnection\Db;
 use Hyperf\DbConnection\Model\Model;
 use RuntimeException;
-use TrueAdmin\Kernel\Constant\ErrorCode;
-use TrueAdmin\Kernel\Exception\BusinessException;
+use TrueAdmin\Kernel\Crud\CrudOperator;
+use TrueAdmin\Kernel\Crud\CrudQuery;
+use TrueAdmin\Kernel\Crud\CrudQueryApplier;
+use TrueAdmin\Kernel\Crud\CrudQueryApplierOptions;
+use TrueAdmin\Kernel\Crud\CrudSortRule;
+use TrueAdmin\Kernel\Pagination\PageResult;
 
 abstract class AbstractRepository
 {
@@ -155,7 +155,6 @@ abstract class AbstractRepository
         return $query->get()->map($mapper)->all();
     }
 
-
     /**
      * @param array<string, mixed>|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target
      */
@@ -218,88 +217,40 @@ abstract class AbstractRepository
 
     protected function applyKeyword(Builder $query, CrudQuery $adminQuery): void
     {
-        $fields = $this->keywordFields();
-        if ($adminQuery->keyword === '' || $fields === []) {
-            return;
-        }
-
-        $keyword = '%' . $adminQuery->keyword . '%';
-        $query->where(static function ($query) use ($fields, $keyword): void {
-            foreach ($fields as $index => $field) {
-                $method = $index === 0 ? 'where' : 'orWhere';
-                $query->{$method}($field, 'like', $keyword);
-            }
-        });
+        $this->crudQueryApplier()->applyKeyword($query, $adminQuery, $this->crudQueryApplierOptions());
     }
 
     protected function applyFilters(Builder $query, CrudQuery $adminQuery): void
     {
-        foreach ($adminQuery->filters as $condition) {
-            $field = $condition->field;
-            $operator = $condition->op;
-            $value = $condition->value;
-
-            if ($value === null || $value === '' || $value === 'all') {
-                if (! in_array($operator, [CrudOperator::IsNull, CrudOperator::NotNull], true)) {
-                    continue;
-                }
-            }
-
-            $this->assertFilterable($field, $operator);
-            $this->applyFilterCondition($query, $field, $operator, $value, $this->filterColumn($field));
-        }
+        $this->crudQueryApplier()->applyFilters(
+            $query,
+            $adminQuery,
+            $this->crudQueryApplierOptions(),
+            $this->applyFilterCondition(...),
+            $this->filterColumn(...),
+        );
     }
 
     protected function applySort(Builder $query, CrudQuery $adminQuery): void
     {
-        if ($adminQuery->sorts !== []) {
-            foreach ($adminQuery->sorts as $sort) {
-                $this->applySortRule($query, $sort, $this->assertSortable($sort));
-            }
-            return;
-        }
-
-        foreach ($this->defaultSort() as $field => $direction) {
-            $this->applyDefaultSortRule($query, (string) $field, $direction);
-        }
+        $this->crudQueryApplier()->applySort(
+            $query,
+            $adminQuery,
+            $this->crudQueryApplierOptions(),
+            $this->applySortRule(...),
+            $this->applyDefaultSortRule(...),
+            $this->assertSortable(...),
+        );
     }
 
     protected function applyFilterCondition(Builder $query, string $field, CrudOperator $operator, mixed $value, string $column): void
     {
-        if ($operator === CrudOperator::IsNull) {
-            $query->whereNull($column);
-            return;
-        }
-        if ($operator === CrudOperator::NotNull) {
-            $query->whereNotNull($column);
-            return;
-        }
-        if ($operator === CrudOperator::Like) {
-            $query->where($column, 'like', '%' . (string) $value . '%');
-            return;
-        }
-        if ($operator === CrudOperator::In) {
-            $values = is_array($value) ? $value : explode(',', (string) $value);
-            $values = array_values(array_filter($values, static fn (mixed $item): bool => $item !== '' && $item !== null));
-            if ($values !== []) {
-                $query->whereIn($column, $values);
-            }
-            return;
-        }
-        if ($operator === CrudOperator::Between) {
-            $values = is_array($value) ? array_values($value) : explode(',', (string) $value, 2);
-            if (count($values) >= 2 && $values[0] !== '' && $values[1] !== '') {
-                $query->whereBetween($column, [$values[0], $values[1]]);
-            }
-            return;
-        }
-
-        $query->where($column, $operator->sqlOperator(), $value);
+        $this->crudQueryApplier()->applyFilterCondition($query, $field, $operator, $value, $column);
     }
 
     protected function applySortRule(Builder $query, CrudSortRule $sort, string $column): void
     {
-        $query->orderBy($column, $sort->order->value);
+        $this->crudQueryApplier()->applySortRule($query, $sort, $column);
     }
 
     protected function applyDefaultSortRule(Builder $query, string $field, string $direction): void
@@ -312,52 +263,32 @@ abstract class AbstractRepository
 
     protected function assertFilterable(string $field, CrudOperator $operator): void
     {
-        $filterable = $this->filterable();
-        if (! array_key_exists($field, $filterable)) {
-            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, [
-                'field' => $field,
-                'reason' => 'unsupported_filter_field',
-            ]);
-        }
-
-        $allowed = $filterable[$field];
-        if ($allowed === false) {
-            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, [
-                'field' => $field,
-                'reason' => 'unsupported_filter_field',
-            ]);
-        }
-
-        if ($allowed === true) {
-            $allowed = $this->defaultFilterOps();
-        }
-        if ($allowed === '*') {
-            return;
-        }
-
-        if (is_string($allowed)) {
-            $allowed = [$allowed];
-        }
-
-        if (! in_array($operator->value, $allowed, true)) {
-            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, [
-                'field' => $field,
-                'operator' => $operator->value,
-                'reason' => 'unsupported_filter_operator',
-            ]);
-        }
+        $this->crudQueryApplier()->assertFilterable($field, $operator, $this->crudQueryApplierOptions());
     }
 
     protected function assertSortable(CrudSortRule $sort): string
     {
-        if (! in_array($sort->field, $this->sortable(), true)) {
-            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, [
-                'field' => $sort->field,
-                'reason' => 'unsupported_sort_field',
-            ]);
-        }
+        $this->crudQueryApplier()->assertSortable($sort, $this->crudQueryApplierOptions());
 
         return $this->sortColumn($sort->field);
+    }
+
+    protected function crudQueryApplier(): CrudQueryApplier
+    {
+        return ApplicationContext::getContainer()->get(CrudQueryApplier::class);
+    }
+
+    protected function crudQueryApplierOptions(): CrudQueryApplierOptions
+    {
+        return new CrudQueryApplierOptions(
+            keywordFields: $this->keywordFields(),
+            filterable: $this->filterable(),
+            defaultFilterOps: $this->defaultFilterOps(),
+            filterColumns: $this->filterColumns(),
+            sortable: $this->sortable(),
+            sortColumns: $this->sortColumns(),
+            defaultSort: $this->defaultSort(),
+        );
     }
 
     /**
@@ -386,7 +317,7 @@ abstract class AbstractRepository
 
     protected function filterColumn(string $field): string
     {
-        return $this->filterColumns()[$field] ?? $field;
+        return $this->crudQueryApplier()->filterColumn($field, $this->crudQueryApplierOptions());
     }
 
     /**
@@ -407,7 +338,7 @@ abstract class AbstractRepository
 
     protected function sortColumn(string $field): string
     {
-        return $this->sortColumns()[$field] ?? $field;
+        return $this->crudQueryApplier()->sortColumn($field, $this->crudQueryApplierOptions());
     }
 
     /**

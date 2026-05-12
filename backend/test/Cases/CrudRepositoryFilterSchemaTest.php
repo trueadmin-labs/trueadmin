@@ -88,6 +88,42 @@ final class CrudRepositoryFilterSchemaTest extends TestCase
         $repository->assertFilter('status', CrudOperator::Like);
     }
 
+    public function testRepositoryCrudApplierKeepsColumnResolverHooks(): void
+    {
+        $repository = new class () extends AbstractRepository {
+            protected array $filterable = [
+                'status' => true,
+            ];
+
+            protected array $sortable = [
+                'created_at',
+            ];
+
+            public function filterColumnFor(string $field): string
+            {
+                return $this->filterColumn($field);
+            }
+
+            public function sortColumnFor(CrudSortRule $sort): string
+            {
+                return $this->assertSortable($sort);
+            }
+
+            protected function filterColumn(string $field): string
+            {
+                return 'custom_filters.' . $field;
+            }
+
+            protected function sortColumn(string $field): string
+            {
+                return 'custom_sorts.' . $field;
+            }
+        };
+
+        $this->assertSame('custom_filters.status', $repository->filterColumnFor('status'));
+        $this->assertSame('custom_sorts.created_at', $repository->sortColumnFor(CrudSortRule::desc('created_at')));
+    }
+
     public function testCrudQueryRequestProtocolHooksCanBeCustomized(): void
     {
         $request = new class (ApplicationContext::getContainer()) extends CrudQueryRequest {

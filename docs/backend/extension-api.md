@@ -30,7 +30,7 @@ protected 模板方法
 标准链路：
 
 ```text
-CrudQueryRequest -> CrudQuery -> Repository::applyCrudQuery()
+CrudQueryRequest -> CrudQuery -> Repository::applyCrudQuery() -> CrudQueryApplier
 ```
 
 `CrudQueryRequest` 只负责协议形态：
@@ -48,7 +48,7 @@ sorts[n][nulls]
 params[key]
 ```
 
-字段是否允许查询，不在 Request 判断，由 Repository 或后续 `CrudQueryApplier` 按资源白名单判断。
+字段是否允许查询，不在 Request 判断，由 `trueadmin/kernel` 的 `CrudQueryApplier` 按资源白名单判断。模板 `AbstractRepository` 只负责把自身配置归一为 `CrudQueryApplierOptions`，并保留业务覆盖点。
 
 可覆盖的 Request 扩展点：
 
@@ -78,6 +78,15 @@ afterApplyCrudQuery
 ```
 
 `applyCrudQuery()` 保持 final，避免子类破坏标准顺序。业务参数扩展统一写在 `applyParams()`，例如左树右表的 `deptId/includeChildren`、快捷筛选、消息中心状态筛选等。
+
+默认关键词、过滤、排序逻辑来自：
+
+```text
+TrueAdmin\Kernel\Crud\CrudQueryApplier
+TrueAdmin\Kernel\Crud\CrudQueryApplierOptions
+```
+
+模板 Repository 不再复制默认 SQL 应用逻辑，只通过 options 和回调把项目覆盖点传给 applier。
 
 简单列表优先用属性声明：
 
@@ -226,4 +235,4 @@ AbstractRepository 整体继承链
 项目默认身份解析和权限落库实现
 ```
 
-当前建议是先把 `CrudQueryRequest`、`PageResult`、`ApiResponse`、FormRequest 和运行时服务逐步抽进 `trueadmin/kernel`；`AbstractRepository` 先拆出更小的 `CrudQueryApplier` 后再进入 Composer 包。
+当前 `CrudQueryRequest`、`PageResult`、`ApiResponse`、FormRequest、运行时服务和 `CrudQueryApplier` 已进入 `trueadmin/kernel`；`AbstractRepository` 整体仍留在模板，后续只继续抽 `DataPolicy` runtime 等不依赖业务事实的小件。
