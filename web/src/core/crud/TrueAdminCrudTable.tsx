@@ -1,16 +1,11 @@
 import type { TableProps } from 'antd';
-import { App, Card } from 'antd';
+import { App } from 'antd';
 import type { SorterResult } from 'antd/es/table/interface';
 import { useCallback, useMemo, useState } from 'react';
 import { errorCenter } from '@/core/error/errorCenter';
 import { useI18n } from '@/core/i18n/I18nProvider';
-import {
-  getSorterKey,
-  getSorterResult,
-  joinClassNames,
-  mergeCardBodyStyles,
-  toCrudOrder,
-} from './crudTableUtils';
+import { getSorterKey, getSorterResult, joinClassNames, toCrudOrder } from './crudTableUtils';
+import { buildCrudTableFrame } from './TrueAdminCrudTableFrame';
 import {
   TrueAdminCrudTablePagination,
   TrueAdminCrudTableSelectionStatus,
@@ -363,53 +358,22 @@ export function TrueAdminCrudTable<
       onChange={queryState.changePage}
     />
   );
-  const tableAreaDom = (
-    <Card
-      {...cardProps}
-      className={joinClassNames(
-        'trueadmin-crud-table-card',
-        classNames?.card,
-        cardProps?.className,
-      )}
-      style={{ ...styles?.card, ...cardProps?.style }}
-      styles={mergeCardBodyStyles(cardProps?.styles, { padding: 0 })}
-    >
-      {toolbarDom}
-      <div
-        ref={tableMainRef}
-        className={joinClassNames('trueadmin-crud-table-main', classNames?.tableMain)}
-        style={{ ...tableMainStyle, ...styles?.tableMain }}
-      >
-        {tableViewDom}
-      </div>
-      {paginationDom}
-    </Card>
-  );
-  const wrappedSearchDom = searchDom ? (
-    <div className={joinClassNames(classNames?.search)} style={styles?.search}>
-      {searchDom}
-    </div>
-  ) : null;
-  const domList = {
-    alert: selectedStatusDom,
-    extra: extraDom,
-    pagination: paginationDom,
-    search: wrappedSearchDom,
-    summary: summaryDom,
-    table: tableViewDom,
-    toolbar: toolbarDom,
-  };
-  const defaultDom = (
-    <div
-      className={joinClassNames('trueadmin-crud-shell', classNames?.shell, className)}
-      style={{ ...styles?.shell, ...style }}
-    >
-      {summaryDom}
-      {wrappedSearchDom}
-      {extraDom}
-      {tableAreaDom}
-    </div>
-  );
+  const { defaultDom, domList } = buildCrudTableFrame<TRecord, TCreate, TUpdate, TMeta>({
+    cardProps,
+    className,
+    classNames,
+    extraDom,
+    paginationDom,
+    searchDom,
+    selectedStatusDom,
+    style,
+    styles,
+    summaryDom,
+    tableMainRef,
+    tableMainStyle,
+    tableViewDom,
+    toolbarDom,
+  });
 
   const contentDom = tableRender
     ? tableRender(tableRenderContext, defaultDom, domList)
