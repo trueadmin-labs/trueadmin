@@ -128,7 +128,15 @@ final class ProfileController extends AdminController
 }
 ```
 
-不要用 `#[Permission(public: true)]` 表达“登录即可访问”。公开接口应放到 Open 入口；后台 Admin 入口的登录态接口以认证中间件作为边界。
+`#[Permission(public: true)]` 不再支持。公开接口应放到 Open 入口；后台 Admin 入口的登录态接口以认证中间件作为边界。
+
+`#[Permission]` 只是接口权限元数据，不会自己参与 HTTP 执行链。需要权限校验的后台路由必须让最终路由 middleware 同时包含 `AdminAuthMiddleware` 和 `PermissionMiddleware`，并且认证中间件在权限中间件之前。通常做法是在整个权限型 Controller 上声明：
+
+```php
+#[AdminController(path: '/api/admin/products', middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
+```
+
+如果某个 Controller 只有登录态接口，不挂 `PermissionMiddleware`，方法也不写 `#[Permission]`。
 
 Client/Open 同理使用对应端的 Controller 和方法注解：
 

@@ -149,7 +149,8 @@ public function saveAndAuthorize(): array
 - `allOf`：必须同时拥有全部原子权限点才能访问。
 - `code`、`anyOf`、`allOf` 三者只能使用一个；复杂业务授权交给 Policy 或 Service。
 - 同一个类或方法只允许声明一个 `#[Permission]`，不要通过重复注解表达多权限。
-- `#[Permission(public: true)]` 不作为后台登录态接口的标准写法；后台登录态接口不写 `#[Permission]`，公开接口应放到 Open 入口并由对应 Open Controller 表达。
+- `#[Permission(public: true)]` 不再支持；后台登录态接口不写 `#[Permission]`，公开接口应放到 Open 入口并由对应 Open Controller 表达。
+- `#[Permission]` 只声明权限规则；真正执行校验的是 `PermissionMiddleware`。权限型后台路由的最终 middleware 必须是 `AdminAuthMiddleware` 在前、`PermissionMiddleware` 在后。
 - `anyOf/allOf` 本身不会注册成数据库权限点，也不会生成 `A OR B` 这种组合权限。
 - `anyOf/allOf` 引用的每个权限码必须已经被菜单、按钮或单权限 `#[Permission('code')]` 定义为原子权限点，否则元数据扫描直接报错。
 
