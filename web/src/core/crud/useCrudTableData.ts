@@ -1,6 +1,6 @@
+import { errorCenter } from '@trueadmin/web-core/error';
 import type { Key } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { errorCenter } from '@/core/error/errorCenter';
 import type { CrudListParams, CrudPageResult, TrueAdminCrudTableProps } from './types';
 
 type UseCrudTableDataOptions<

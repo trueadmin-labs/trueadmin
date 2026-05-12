@@ -1,6 +1,6 @@
 import { SettingOutlined } from '@ant-design/icons';
+import { resolveTrans, type TranslateFunction } from '@trueadmin/web-core/i18n';
 import { Card, Empty, Menu, Space, Typography } from 'antd';
-import { resolveTrans, type TranslateFunction } from '@/core/i18n/trans';
 import { profilePreferenceManifests } from '@/core/profile';
 import type { AdminProfile } from '../../types/profile';
 

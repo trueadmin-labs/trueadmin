@@ -1,6 +1,6 @@
+import type { TranslateFunction } from '@trueadmin/web-core/i18n';
 import type { FormInstance, TreeSelectProps } from 'antd';
 import { Form, Input, InputNumber, Select, Space, TreeSelect } from 'antd';
-import type { TranslateFunction } from '@/core/i18n/trans';
 import { TrueAdminModal } from '@/core/modal';
 import type { DepartmentTreeNode } from '../../types/department';
 import { type DepartmentFormValues, ROOT_PARENT_ID } from './departmentPageModel';

@@ -29,9 +29,15 @@ importers:
       '@tanstack/react-query':
         specifier: latest
         version: 5.100.9(react@19.2.6)
+      '@trueadmin/web-antd':
+        specifier: ^0.1.0
+        version: 0.1.0
       '@trueadmin/web-core':
-        specifier: ^0.1.7
-        version: 0.1.7
+        specifier: ^0.1.8
+        version: 0.1.8
+      '@trueadmin/web-react':
+        specifier: ^0.1.0
+        version: 0.1.0
       alova:
         specifier: latest
         version: 3.5.1
@@ -1112,8 +1118,21 @@ packages:
       '@types/react-dom':
         optional: true
 
-  '@trueadmin/web-core@0.1.7':
-    resolution: {integrity: sha512-wsRMAIOpMPTxswqKjDcze3k2oyPeJdciEEpH06d5DrDgDz1q33NAAtNHwCPDR0BQI16IGn2XxPahAlnTqxrBNw==}
+  '@trueadmin/web-core@0.1.8':
+    resolution: {integrity: sha512-W/NEzEeeH+jWuTlKuqOCceYZ0qo18muXIk1o0VmgHDYQItewgVfCSd8Ke/uQe73VrKMiTMViOG5F1/iaOca7Mw==}
+
+  '@trueadmin/web-antd@0.1.0':
+    resolution: {integrity: sha512-/Pm8KVaBVmqll/b+KH/esS08B8ELxQ9L2RcB1cvs8KDCtacpj2DT+A3VLaUFH9mglx4OrEJx9PWYzH6TQg35Dw==}
+    peerDependencies:
+      '@ant-design/icons': '>=5'
+      antd: '>=5'
+      react: '>=18'
+      react-dom: '>=18'
+
+  '@trueadmin/web-react@0.1.0':
+    resolution: {integrity: sha512-xJmAUn5tHeg198D9/OM1OOxZn5ixt0f4sFq+MxMMo1v64JwSjcz4kB96FJ/Y5/kaWfAmvRKZ5zBur1NOFkOFvA==}
+    peerDependencies:
+      react: '>=18'
 
   '@tybys/wasm-util@0.10.2':
     resolution: {integrity: sha512-RoBvJ2X0wuKlWFIjrwffGw1IqZHKQqzIchKaadZZfnNpsAYp2mM0h36JtPCjNDAHGgYez/15uMBpfGwchhiMgg==}
@@ -3839,7 +3858,13 @@ snapshots:
       '@types/react': 19.2.14
       '@types/react-dom': 19.2.3(@types/react@19.2.14)
 
-  '@trueadmin/web-core@0.1.7': {}
+  '@trueadmin/web-core@0.1.8': {}
+
+  '@trueadmin/web-antd@0.1.0': {}
+
+  '@trueadmin/web-react@0.1.0':
+    dependencies:
+      '@trueadmin/web-core': 0.1.8
 
   '@tybys/wasm-util@0.10.2':
     dependencies:

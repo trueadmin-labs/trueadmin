@@ -4,6 +4,7 @@ import type {
   CrudFilterValue as ProtocolCrudFilterValue,
   CrudListParams as ProtocolCrudListParams,
 } from '@trueadmin/web-core/crud';
+import type { PageResult } from '@trueadmin/web-core/http';
 import type {
   ButtonProps,
   CardProps,
@@ -15,7 +16,6 @@ import type {
   TableProps,
 } from 'antd';
 import type { CSSProperties, ReactNode } from 'react';
-import type { PageResult } from '@/core/http/types';
 
 export type { CrudOperator, CrudOrder };
 

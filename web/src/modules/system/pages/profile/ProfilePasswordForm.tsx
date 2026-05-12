@@ -1,6 +1,6 @@
 import { LockOutlined } from '@ant-design/icons';
+import type { TranslateFunction } from '@trueadmin/web-core/i18n';
 import { Button, Card, Form, type FormInstance, Input } from 'antd';
-import type { TranslateFunction } from '@/core/i18n/trans';
 import type { PasswordFormValues } from './profilePageTypes';
 
 type ProfilePasswordFormProps = {

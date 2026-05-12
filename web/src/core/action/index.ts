@@ -1,2 +1,1 @@
-export * from './TrueAdminActionBar';
-export * from './TrueAdminConfirmAction';
+export * from '@trueadmin/web-antd/action';

@@ -1,6 +1,6 @@
+import type { TranslateFunction } from '@trueadmin/web-core/i18n';
 import type { TableProps } from 'antd';
 import type { CSSProperties, RefObject } from 'react';
-import type { TranslateFunction } from '@/core/i18n/trans';
 import { joinClassNames } from './crudTableUtils';
 import { buildCrudTableFrame } from './TrueAdminCrudTableFrame';
 import {

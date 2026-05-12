@@ -1,5 +1,5 @@
+import type { TranslateFunction } from '@trueadmin/web-core/i18n';
 import { useMemo } from 'react';
-import type { TranslateFunction } from '@/core/i18n/trans';
 import { getColumnSortKey } from './crudTableUtils';
 import { createCrudOperationColumns } from './TrueAdminCrudOperationColumn';
 import type {

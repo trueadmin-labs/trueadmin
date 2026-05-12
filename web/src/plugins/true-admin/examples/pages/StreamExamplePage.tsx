@@ -1,7 +1,7 @@
 import { ApiOutlined, ClearOutlined, PlayCircleOutlined, StopOutlined } from '@ant-design/icons';
+import { ApiError } from '@trueadmin/web-core/error';
 import { App, Button, Card, Col, Descriptions, Empty, Row, Space, Tag, Typography } from 'antd';
 import { useRef, useState } from 'react';
-import { ApiError } from '@/core/error/ApiError';
 import { http } from '@/core/http/client';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { TrueAdminPage } from '@/core/page/TrueAdminPage';

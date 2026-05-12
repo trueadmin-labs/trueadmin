@@ -1,7 +1,7 @@
+import { errorCenter } from '@trueadmin/web-core/error';
 import type { TreeSelectProps } from 'antd';
 import { TreeSelect } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
-import { errorCenter } from '@/core/error/errorCenter';
 import { departmentApi } from '../services/department.api';
 import type { DepartmentTreeNode } from '../types/department';
 

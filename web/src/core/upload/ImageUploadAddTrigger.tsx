@@ -1,9 +1,9 @@
 import { PlusOutlined } from '@ant-design/icons';
+import type { TranslateFunction } from '@trueadmin/web-core/i18n';
 import type { UploadProps } from 'antd';
 import { Upload } from 'antd';
 import type { UploadFile } from 'antd/es/upload/interface';
 import type { CSSProperties, ReactNode } from 'react';
-import type { TranslateFunction } from '@/core/i18n/trans';
 
 type ImageUploadAddTriggerProps = {
   accept: string;

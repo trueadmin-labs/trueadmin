@@ -1,6 +1,6 @@
+import { trans } from '@trueadmin/web-core/i18n';
 import { Descriptions, Tag } from 'antd';
 import { createElement, lazy } from 'react';
-import { trans } from '@/core/i18n/trans';
 import { defineModule } from '@/core/module/types';
 import {
   EXAMPLE_PROFILE_PREFERENCE_KEY,

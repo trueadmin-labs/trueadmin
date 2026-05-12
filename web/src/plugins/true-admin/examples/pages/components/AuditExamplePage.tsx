@@ -1,4 +1,4 @@
-import { TrueAdminActionBar } from '@core/action';
+import { TrueAdminActionBar } from '@trueadmin/web-antd/action';
 import { App, Space } from 'antd';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { TrueAdminPage } from '@/core/page/TrueAdminPage';

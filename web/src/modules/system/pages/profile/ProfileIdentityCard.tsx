@@ -1,7 +1,7 @@
 import { UserOutlined } from '@ant-design/icons';
+import type { TranslateFunction } from '@trueadmin/web-core/i18n';
 import { Avatar, Card, Tag, Typography } from 'antd';
 import type { CurrentAdminUser } from '@/core/auth/types';
-import type { TranslateFunction } from '@/core/i18n/trans';
 import type { AdminProfile } from '../../types/profile';
 
 type ProfileIdentityCardProps = {

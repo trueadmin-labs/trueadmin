@@ -1,4 +1,4 @@
-import { ApiError } from '@/core/error/ApiError';
+import { ApiError } from '@trueadmin/web-core/error';
 import { http } from '@/core/http/client';
 
 export type TrueAdminFileRecord = {

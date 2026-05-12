@@ -1,4 +1,4 @@
-import { crudRequestOptions } from '@/core/crud/request';
+import { crudRequestOptions } from '@trueadmin/web-core/crud';
 import type { CrudListParams } from '@/core/crud/types';
 import { http } from '@/core/http/client';
 import type {

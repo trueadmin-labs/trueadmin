@@ -1,6 +1,6 @@
 import { DeleteOutlined, EyeOutlined, SaveOutlined, SendOutlined } from '@ant-design/icons';
-import { TrueAdminActionBar, TrueAdminConfirmAction } from '@core/action';
 import { TrueAdminPermissionButton } from '@core/auth';
+import { TrueAdminActionBar, TrueAdminConfirmAction } from '@trueadmin/web-antd/action';
 import { App, Card, Space } from 'antd';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { TrueAdminImportExport } from '@/core/import-export';

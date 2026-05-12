@@ -1,6 +1,6 @@
 import { requestConfig } from '@config/index';
+import { stringifyRawSearchParams } from '@trueadmin/web-core/url';
 import { useLocaleStore } from '@/core/store/localeStore';
-import { stringifyRawSearchParams } from '@/core/url/searchParams';
 import type { StreamRequestBody, StreamRequestParams } from './types';
 
 export const appendStreamSearchParams = (url: string, params?: StreamRequestParams): string => {

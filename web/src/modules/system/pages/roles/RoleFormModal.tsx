@@ -1,6 +1,6 @@
+import type { TranslateFunction } from '@trueadmin/web-core/i18n';
 import type { FormInstance } from 'antd';
 import { Form, Input, InputNumber, Select, Space } from 'antd';
-import type { TranslateFunction } from '@/core/i18n/trans';
 import { TrueAdminModal } from '@/core/modal';
 import type { AdminRole } from '../../types/role';
 import type { RoleFormValues } from './roleAuthorization';

@@ -1,7 +1,7 @@
+import type { PageResult } from '@trueadmin/web-core/http';
+import type { TransText } from '@trueadmin/web-core/i18n';
 import type { Dayjs } from 'dayjs';
 import type { ReactNode } from 'react';
-import type { PageResult } from '@/core/http/types';
-import type { TransText } from '@/core/i18n/trans';
 import type { TrueAdminIconInput } from '@/core/icon/TrueAdminIcon';
 import type { TrueAdminAttachmentValue } from '@/core/upload';
 

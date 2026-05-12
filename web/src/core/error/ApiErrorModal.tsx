@@ -4,15 +4,19 @@ import {
   ExclamationCircleFilled,
   InfoCircleFilled,
 } from '@ant-design/icons';
+import type { ApiError } from '@trueadmin/web-core/error';
+import type {
+  ErrorRenderable,
+  ErrorRenderContext,
+  ErrorSeverity,
+} from '@trueadmin/web-react/error';
+import { resolveRenderableTrans } from '@trueadmin/web-react/i18n';
 import { Button, Collapse, Space, Typography } from 'antd';
 import { motion } from 'motion/react';
 import { useI18n } from '@/core/i18n/I18nProvider';
-import { resolveRenderableTrans } from '@/core/i18n/trans';
 import { TrueAdminModal } from '@/core/modal';
 import { useLayoutStore } from '@/core/store/layoutStore';
-import type { ApiError } from './ApiError';
 import { getErrorExplanation } from './errorRegistry';
-import type { ErrorRenderContext, ErrorSeverity } from './types';
 
 const toReasonText = (details: unknown): string | undefined => {
   if (typeof details !== 'object' || details === null) {
@@ -76,9 +80,9 @@ export function ApiErrorModal({ error, open, onClose, afterOpenChange }: ApiErro
   const title = resolveRenderableTrans(explanation?.title, context, t, defaultMessage);
   const severity = explanation?.severity || 'error';
   const description = resolveRenderableTrans(explanation?.description, context, t);
-  const suggestions =
-    explanation?.suggestions?.map((suggestion) => resolveRenderableTrans(suggestion, context, t)) ??
-    [];
+  const suggestions: React.ReactNode[] = (explanation?.suggestions ?? []).map(
+    (suggestion: ErrorRenderable) => resolveRenderableTrans(suggestion, context, t),
+  );
   const visibleSuggestions = suggestions.slice(0, 2);
   const meta = severityMeta[severity];
   const primaryMessage = hasExplanation ? description : error.message || defaultMessage;

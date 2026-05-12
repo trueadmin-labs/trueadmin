@@ -1,6 +1,6 @@
+import type { TranslateFunction } from '@trueadmin/web-core/i18n';
 import type { CrudQueryController } from '@/core/crud/types';
 import { TrueAdminQuickFilter } from '@/core/filter/TrueAdminQuickFilter';
-import type { TranslateFunction } from '@/core/i18n/trans';
 import type { AdminNotificationBatchStatus } from '@/core/notification';
 
 type NotificationToolbarProps = {

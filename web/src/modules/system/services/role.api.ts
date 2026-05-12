@@ -1,8 +1,8 @@
-import { crudRequestOptions } from '@/core/crud/request';
+import { crudRequestOptions } from '@trueadmin/web-core/crud';
+import { ApiError } from '@trueadmin/web-core/error';
+import type { ApiEnvelope, PageResult } from '@trueadmin/web-core/http';
 import type { CrudListParams } from '@/core/crud/types';
-import { ApiError } from '@/core/error/ApiError';
 import { http } from '@/core/http/client';
-import type { ApiEnvelope, PageResult } from '@/core/http/types';
 import type {
   AdminRole,
   AdminRoleDataPolicy,

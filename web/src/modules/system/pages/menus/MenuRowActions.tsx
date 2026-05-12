@@ -1,6 +1,6 @@
+import type { TranslateFunction } from '@trueadmin/web-core/i18n';
 import { Button, Popconfirm, Space } from 'antd';
 import type { CrudTableAction } from '@/core/crud/types';
-import type { TranslateFunction } from '@/core/i18n/trans';
 import type { AdminMenu, AdminMenuPayload } from '../../types/menu';
 
 type MenuRowActionsProps = {

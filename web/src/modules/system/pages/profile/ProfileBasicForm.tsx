@@ -1,6 +1,6 @@
 import { SaveOutlined } from '@ant-design/icons';
+import type { TranslateFunction } from '@trueadmin/web-core/i18n';
 import { Button, Card, Form, type FormInstance, Input } from 'antd';
-import type { TranslateFunction } from '@/core/i18n/trans';
 import type { ProfileFormValues } from './profilePageTypes';
 
 type ProfileBasicFormProps = {

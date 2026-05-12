@@ -1,6 +1,6 @@
+import type { TranslateFunction } from '@trueadmin/web-core/i18n';
 import { Button, Popconfirm } from 'antd';
 import { Permission } from '@/core/auth/Permission';
-import type { TranslateFunction } from '@/core/i18n/trans';
 import { toPermissionCode } from './crudTableUtils';
 import type {
   CrudColumns,

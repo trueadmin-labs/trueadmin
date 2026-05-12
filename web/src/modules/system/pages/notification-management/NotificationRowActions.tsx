@@ -1,8 +1,8 @@
 import { RedoOutlined } from '@ant-design/icons';
+import { TrueAdminConfirmAction } from '@trueadmin/web-antd/action';
+import type { TranslateFunction } from '@trueadmin/web-core/i18n';
 import { Button, Space } from 'antd';
-import { TrueAdminConfirmAction } from '@/core/action';
 import type { CrudTableAction } from '@/core/crud/types';
-import type { TranslateFunction } from '@/core/i18n/trans';
 import { type AdminNotificationBatch, adminNotificationManagementApi } from '@/core/notification';
 
 type NotificationRowActionsProps = {

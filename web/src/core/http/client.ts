@@ -1,9 +1,9 @@
 import { requestConfig } from '@config/index';
+import { ApiError } from '@trueadmin/web-core/error';
+import type { ApiEnvelope } from '@trueadmin/web-core/http';
 import { createAlova } from 'alova';
 import { handleAuthUnauthorized, isAuthUnauthorizedCode } from '@/core/auth/session';
-import { ApiError } from '@/core/error/ApiError';
 import { useLocaleStore } from '@/core/store/localeStore';
-import type { ApiEnvelope } from './types';
 
 const isSuccessCode = (code: string | number): boolean =>
   code === 0 || code === '0' || code === 'SUCCESS' || code === 'KERNEL.SUCCESS';

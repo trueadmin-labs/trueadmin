@@ -1,8 +1,8 @@
 import { CheckCircleOutlined, ReloadOutlined } from '@ant-design/icons';
+import { TrueAdminConfirmAction } from '@trueadmin/web-antd/action';
 import { App, Button, Divider, Space, Tabs, Typography } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { TrueAdminConfirmAction } from '@/core/action';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { getAdminMessageTypeConfig } from '../registry';
 import { useAdminNotificationStore } from '../store';

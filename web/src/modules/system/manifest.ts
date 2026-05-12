@@ -1,5 +1,5 @@
+import { trans } from '@trueadmin/web-core/i18n';
 import { createElement, lazy } from 'react';
-import { trans } from '@/core/i18n/trans';
 import { defineModule } from '@/core/module/types';
 import { SystemLayoutPreferencePanel } from './pages/profile/SystemLayoutPreferencePanel';
 import {

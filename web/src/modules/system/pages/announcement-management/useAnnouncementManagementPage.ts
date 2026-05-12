@@ -1,8 +1,8 @@
+import { errorCenter } from '@trueadmin/web-core/error';
 import { App, Form } from 'antd';
 import dayjs from 'dayjs';
 import { useEffect, useMemo, useState } from 'react';
 import type { CrudExtraQuerySchema, CrudFilterSchema, CrudService } from '@/core/crud/types';
-import { errorCenter } from '@/core/error/errorCenter';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import {
   type AdminAnnouncement,

@@ -1,6 +1,6 @@
+import type { TranslateFunction } from '@trueadmin/web-core/i18n';
 import type { TableProps } from 'antd';
 import { Button, Empty, Result, Table } from 'antd';
-import type { TranslateFunction } from '@/core/i18n/trans';
 import type {
   CrudColumns,
   CrudTableLocale,

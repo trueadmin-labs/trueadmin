@@ -1,4 +1,4 @@
-import type { ApiEnvelope } from '@/core/http/types';
+import type { ApiEnvelope } from '@trueadmin/web-core/http';
 
 export type StreamEventType = 'progress' | 'debug' | 'result' | 'completed' | 'error' | string;
 

@@ -1,5 +1,5 @@
-import { ApiError } from '@/core/error/ApiError';
-import type { ApiEnvelope } from '@/core/http/types';
+import { ApiError } from '@trueadmin/web-core/error';
+import type { ApiEnvelope } from '@trueadmin/web-core/http';
 import { buildStreamUrl, createStreamHeaders } from './requestUtils';
 import { StreamError } from './StreamError';
 import { SseDataParser } from './streamParser';

@@ -1,6 +1,6 @@
+import type { TranslateFunction } from '@trueadmin/web-core/i18n';
 import { Tag } from 'antd';
 import type { CrudColumns } from '@/core/crud/types';
-import type { TranslateFunction } from '@/core/i18n/trans';
 import type { AdminUser } from '../../types/admin-user';
 
 const roleColorMap: Record<string, string> = {

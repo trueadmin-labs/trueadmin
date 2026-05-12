@@ -1,7 +1,7 @@
+import { errorCenter } from '@trueadmin/web-core/error';
+import type { TranslateFunction } from '@trueadmin/web-core/i18n';
 import type { Key } from 'react';
 import { useCallback } from 'react';
-import { errorCenter } from '@/core/error/errorCenter';
-import type { TranslateFunction } from '@/core/i18n/trans';
 import type { CrudTableLocale, TrueAdminCrudTableProps } from './types';
 
 type UseCrudTableDeleteActionOptions<

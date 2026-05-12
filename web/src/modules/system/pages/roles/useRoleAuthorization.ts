@@ -1,7 +1,7 @@
+import type { TranslateFunction } from '@trueadmin/web-core/i18n';
 import { Form } from 'antd';
 import { type Key, useEffect, useMemo, useState } from 'react';
 import type { CrudTableAction } from '@/core/crud/types';
-import type { TranslateFunction } from '@/core/i18n/trans';
 import { departmentApi } from '../../services/department.api';
 import { menuApi } from '../../services/menu.api';
 import { roleApi } from '../../services/role.api';

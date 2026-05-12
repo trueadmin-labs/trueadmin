@@ -1,5 +1,5 @@
+import { errorCenter } from '@trueadmin/web-core/error';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { errorCenter } from '@/core/error/errorCenter';
 import type { TrueAdminRemoteSelectProps, TrueAdminRemoteSelectValue } from './remoteSelectTypes';
 import { toValueArray } from './remoteSelectUtils';
 

@@ -1,5 +1,5 @@
+import { isTransText, resolveTrans, type TranslateFunction, trans } from '@trueadmin/web-core/i18n';
 import type { ReactNode } from 'react';
-import { isTransText, resolveTrans, type TranslateFunction, trans } from '@/core/i18n/trans';
 import type { ModuleManifest } from '@/core/module/types';
 import type { AdminMessageLabel, AdminMessageSourceConfig, AdminMessageTypeConfig } from './types';
 

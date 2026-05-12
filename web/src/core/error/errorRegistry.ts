@@ -1,6 +1,6 @@
-import { trans } from '@/core/i18n/trans';
+import { trans } from '@trueadmin/web-core/i18n';
+import type { ErrorExplanation } from '@trueadmin/web-react/error';
 import { enabledManifests } from '@/core/module/registry';
-import type { ErrorExplanation } from './types';
 
 const builtinErrors: Record<string, ErrorExplanation> = {
   'KERNEL.AUTH.UNAUTHORIZED': {

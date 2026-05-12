@@ -1,6 +1,6 @@
+import type { TranslateFunction, TransText } from '@trueadmin/web-core/i18n';
+import type { ErrorRegistry } from '@trueadmin/web-react/error';
 import type { ComponentType, LazyExoticComponent, ReactNode } from 'react';
-import type { ErrorRegistry } from '@/core/error/types';
-import type { TranslateFunction, TransText } from '@/core/i18n/trans';
 import type { TrueAdminIconInput } from '@/core/icon/TrueAdminIcon';
 import type { AppMenu } from '@/core/menu/types';
 import type { AdminMessageSourceConfig, AdminMessageTypeConfig } from '@/core/notification/types';

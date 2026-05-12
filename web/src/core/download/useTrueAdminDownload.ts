@@ -1,11 +1,11 @@
-import { App } from 'antd';
-import { useCallback, useState } from 'react';
-import { useI18n } from '@/core/i18n/I18nProvider';
 import {
   downloadFile,
   type TrueAdminDownloadInput,
   type TrueAdminDownloadOptions,
-} from './downloadFile';
+} from '@trueadmin/web-core/download';
+import { App } from 'antd';
+import { useCallback, useState } from 'react';
+import { useI18n } from '@/core/i18n/I18nProvider';
 
 export type UseTrueAdminDownloadOptions = {
   successMessage?: string | false;

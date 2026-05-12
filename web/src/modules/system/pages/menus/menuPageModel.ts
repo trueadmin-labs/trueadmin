@@ -1,5 +1,5 @@
+import type { TranslateFunction } from '@trueadmin/web-core/i18n';
 import type { CrudFilterSchema } from '@/core/crud/types';
-import type { TranslateFunction } from '@/core/i18n/trans';
 import type { AdminMenu, AdminMenuSource, AdminMenuType } from '../../types/menu';
 
 export const menuTypeColor: Record<AdminMenuType, string> = {

@@ -1,6 +1,6 @@
+import { updateRawSearchParams } from '@trueadmin/web-core/url';
 import { useCallback, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
-import { updateRawSearchParams } from '@/core/url/searchParams';
 import {
   createParamsObject,
   DEFAULT_PAGE,

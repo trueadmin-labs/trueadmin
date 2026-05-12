@@ -1,8 +1,8 @@
+import { errorCenter } from '@trueadmin/web-core/error';
 import type { SelectProps } from 'antd';
 import { Select } from 'antd';
 import type { ReactNode } from 'react';
 import { useEffect, useMemo, useState } from 'react';
-import { errorCenter } from '@/core/error/errorCenter';
 import type { TrueAdminEnumOption } from './TrueAdminEnumTag';
 
 export type TrueAdminDictValue = string | number;

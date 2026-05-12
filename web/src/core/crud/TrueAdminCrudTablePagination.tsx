@@ -1,7 +1,7 @@
+import type { TranslateFunction } from '@trueadmin/web-core/i18n';
 import type { PaginationProps } from 'antd';
 import { Button, Pagination, Typography } from 'antd';
 import type { ReactNode } from 'react';
-import type { TranslateFunction } from '@/core/i18n/trans';
 import { joinClassNames } from './crudTableUtils';
 import type {
   CrudTableClassNames,

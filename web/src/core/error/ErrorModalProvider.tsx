@@ -1,10 +1,9 @@
+import { type ApiError, errorCenter } from '@trueadmin/web-core/error';
 import { App } from 'antd';
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 import { isAuthUnauthorizedCode } from '@/core/auth/session';
-import type { ApiError } from './ApiError';
 import { ApiErrorModal } from './ApiErrorModal';
-import { errorCenter } from './errorCenter';
 
 export function ErrorModalProvider({ children }: { children: ReactNode }) {
   const { message } = App.useApp();

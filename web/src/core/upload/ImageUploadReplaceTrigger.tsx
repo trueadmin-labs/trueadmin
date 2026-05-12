@@ -1,8 +1,8 @@
+import type { TranslateFunction } from '@trueadmin/web-core/i18n';
 import type { UploadProps } from 'antd';
 import { Button, Upload } from 'antd';
 import type { UploadFile } from 'antd/es/upload/interface';
 import type { ReactNode } from 'react';
-import type { TranslateFunction } from '@/core/i18n/trans';
 
 type ImageUploadReplaceTriggerProps = {
   accept: string;

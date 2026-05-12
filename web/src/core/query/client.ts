@@ -1,5 +1,5 @@
 import { QueryClient } from '@tanstack/react-query';
-import { errorCenter } from '@/core/error/errorCenter';
+import { errorCenter } from '@trueadmin/web-core/error';
 
 export const queryClient = new QueryClient({
   defaultOptions: {
