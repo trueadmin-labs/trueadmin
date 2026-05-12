@@ -25,7 +25,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@tanstack/react-query": "latest",
-    "@trueadmin/web-core": "^0.1.1",
+    "@trueadmin/web-core": "^0.1.5",
     "alova": "latest",
     "antd": "latest",
     "antd-style": "latest",
