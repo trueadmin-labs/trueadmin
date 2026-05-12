@@ -24,7 +24,7 @@ Module/Xxx/Http/Open
 
 ### `trueadmin/kernel`
 
-Composer 核心原语包。它只承载所有 TrueAdmin 项目都应共享的稳定底层契约。
+Composer 核心原语包。TrueAdmin 后端基于 Hyperf，因此 kernel 可以依赖 Hyperf；它只承载所有 TrueAdmin 项目都应共享的稳定底层契约和 Hyperf 运行时能力。
 
 允许：
 
@@ -33,13 +33,15 @@ Composer 核心原语包。它只承载所有 TrueAdmin 项目都应共享的稳
 - Actor / Context 值对象
 - 数据权限和操作日志的 Attribute、事件和值对象
 - CRUD 查询协议值对象，例如 `CrudQuery`、`CrudFilterCondition`、`CrudSortRule`
+- 分页、API envelope、FormRequest、CRUD Query Request 等稳定协议实现
+- Attribute 路由注册、模块迁移路径注册、插件后端 runtime、模块翻译加载、SSE/Streamable 等不依赖业务表的 Hyperf 运行时能力
 
 不允许：
 
 - 应用 Controller、Request、Service、Repository
 - 数据库表、迁移、Seeder、菜单、权限资源事实
 - Admin / Client / Open 某一端专属业务逻辑
-- 读取宿主配置、扫描宿主模块、连接宿主数据库
+- 依赖 `Module/System` 或其他宿主业务模块的具体实现
 
 ### `backend/app/Foundation`
 
@@ -52,6 +54,7 @@ Composer 核心原语包。它只承载所有 TrueAdmin 项目都应共享的稳
 - `AbstractService`
 - 分页返回结构、统一响应、项目级 Controller 基类
 - 项目默认的 CRUD Query 解析、校验和应用逻辑
+- 尚未稳定进入 kernel 的框架默认实现
 
 不允许：
 

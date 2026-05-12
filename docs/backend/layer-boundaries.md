@@ -71,9 +71,9 @@ backend/
 
 ## trueadmin-kernel 边界
 
-`trueadmin-kernel` 是 TrueAdmin 的 Composer 核心包。
+`trueadmin-kernel` 是 TrueAdmin 的 Composer 核心包。TrueAdmin 后端明确基于 Hyperf，因此 kernel 可以依赖 Hyperf 组件；它不需要做成框架无关的通用 PHP 包。
 
-它应该放真正稳定、跨项目复用、不依赖具体业务表和项目规则的框架原语。
+它应该放真正稳定、跨项目复用、不依赖具体业务表和项目规则的框架原语与 Hyperf 运行时能力。
 
 适合放入 kernel：
 
@@ -84,6 +84,14 @@ backend/
 基础 Model 抽象
 框架级监听器
 Actor / ActorContext 原语
+CRUD 查询协议值对象
+分页结果值对象
+FormRequest / CrudQueryRequest 基类
+Attribute 路由注册器
+模块迁移和 Seeder 路径注册
+插件后端运行时读取
+模块和插件翻译加载
+SSE / Streamable 运行时
 接口元数据 Attribute 契约
 数据权限 Attribute / Context / AOP 原语
 操作日志 Attribute / Event / AOP 原语
@@ -94,7 +102,7 @@ Actor / ActorContext 原语
 
 ```text
 项目自己的响应字段命名偏好
-项目自己的异常映射规则
+项目自己的异常映射规则，除非只是 TrueAdmin 默认实现
 项目自己的管理员身份解析
 项目自己的权限表结构
 项目自己的数据权限规则和落库实现
@@ -104,7 +112,7 @@ Actor / ActorContext 原语
 项目自己的后台业务生成器规则
 ```
 
-判断标准：如果一个能力放进 Composer 包后，使用者大概率需要 fork 或修改包源码才能适配项目，那它不应该先进 `trueadmin-kernel`。
+判断标准：如果一个能力放进 Composer 包后，使用者大概率需要 fork 或修改包源码才能适配项目，那它不应该先进 `trueadmin-kernel`。如果它只是依赖 Hyperf，但不依赖宿主业务事实，则可以进入 kernel。
 
 ## backend/app/Foundation 边界
 

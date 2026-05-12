@@ -10,8 +10,10 @@ TrueAdmin 后端是 Hyperf 企业后台脚手架，参考 MineAdmin 的高效率
 trueadmin-kernel
   src/
     Context/
+    Crud/
     DataPermission/
     Http/Attribute/
+    Pagination/
     OperationLog/
     Exception/
 
@@ -118,6 +120,7 @@ backend/plugins/*/*/Database/Seeders
 
 - [后端完整架构方案](architecture.md)
 - [层级边界规范](layer-boundaries.md)
+- [Composer 包抽取检查](composer-packages.md)
 - [模块目录规范](module-architecture.md)
 - [配置模式与注解模式](configuration-vs-attribute.md)
 - [接口元数据体系](interface-metadata.md)
