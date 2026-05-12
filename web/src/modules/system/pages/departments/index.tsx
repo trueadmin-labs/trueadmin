@@ -1,35 +1,20 @@
 import { PlusOutlined } from '@ant-design/icons';
 import type { TreeSelectProps } from 'antd';
-import { App, Button, Form, Input, InputNumber, Select, Space, Tag, TreeSelect } from 'antd';
+import { App, Button, Form } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { TrueAdminCrudPage } from '@/core/crud';
-import type { CrudColumns, CrudFilterSchema, CrudTableAction } from '@/core/crud/types';
+import type { CrudTableAction } from '@/core/crud/types';
 import { useI18n } from '@/core/i18n/I18nProvider';
-import { TrueAdminModal } from '@/core/modal';
 import { departmentApi } from '../../services/department.api';
 import type { DepartmentPayload, DepartmentTreeNode } from '../../types/department';
-
-type DepartmentFormValues = DepartmentPayload;
-
-const ROOT_PARENT_ID = 0;
-
-const toTreeSelectData = (
-  departments: DepartmentTreeNode[],
-  disabledId?: number,
-  ancestorDisabled = false,
-): TreeSelectProps['treeData'] =>
-  departments.map((department) => {
-    const disabled = ancestorDisabled || department.id === disabledId;
-    return {
-      title: department.name,
-      value: department.id,
-      key: department.id,
-      disabled,
-      children: department.children
-        ? toTreeSelectData(department.children, disabledId, disabled)
-        : undefined,
-    };
-  });
+import { DepartmentFormModal } from './DepartmentFormModal';
+import { createDepartmentColumns } from './DepartmentTableColumns';
+import {
+  createDepartmentFilters,
+  type DepartmentFormValues,
+  ROOT_PARENT_ID,
+  toDepartmentTreeSelectData,
+} from './departmentPageModel';
 
 export default function AdminDepartmentsPage() {
   const { message } = App.useApp();
@@ -80,46 +65,9 @@ export default function AdminDepartmentsPage() {
     form.resetFields();
   };
 
-  const columns = useMemo<CrudColumns<DepartmentTreeNode>>(
-    () => [
-      { title: 'ID', dataIndex: 'id', width: 88, sorter: true },
-      { title: t('system.departments.column.name', '部门名称'), dataIndex: 'name', width: 220 },
-      { title: t('system.departments.column.code', '部门编码'), dataIndex: 'code', width: 220 },
-      { title: t('system.departments.column.level', '层级'), dataIndex: 'level', width: 90 },
-      {
-        title: t('system.departments.column.sort', '排序'),
-        dataIndex: 'sort',
-        width: 90,
-        sorter: true,
-      },
-      {
-        title: t('system.departments.column.status', '状态'),
-        dataIndex: 'status',
-        width: 110,
-        render: (_, record) => (
-          <Tag color={record.status === 'enabled' ? 'success' : 'default'}>
-            {statusText[record.status]}
-          </Tag>
-        ),
-      },
-    ],
-    [statusText, t],
-  );
+  const columns = useMemo(() => createDepartmentColumns({ statusText, t }), [statusText, t]);
 
-  const filters = useMemo<CrudFilterSchema[]>(
-    () => [
-      {
-        label: t('system.departments.column.status', '状态'),
-        name: 'status',
-        type: 'select',
-        options: [
-          { label: statusText.enabled, value: 'enabled' },
-          { label: statusText.disabled, value: 'disabled' },
-        ],
-      },
-    ],
-    [statusText, t],
-  );
+  const filters = useMemo(() => createDepartmentFilters({ statusText, t }), [statusText, t]);
 
   const parentTreeData = useMemo<TreeSelectProps['treeData']>(
     () => [
@@ -127,7 +75,7 @@ export default function AdminDepartmentsPage() {
         title: t('system.common.rootNode', '根节点'),
         value: ROOT_PARENT_ID,
         key: ROOT_PARENT_ID,
-        children: toTreeSelectData(departmentTree, editing?.id),
+        children: toDepartmentTreeSelectData(departmentTree, editing?.id),
       },
     ],
     [departmentTree, editing?.id, t],
@@ -203,72 +151,17 @@ export default function AdminDepartmentsPage() {
       tableRender={({ action }, defaultDom) => (
         <>
           {defaultDom}
-          <TrueAdminModal
-            destroyOnHidden
-            confirmLoading={submitting}
+          <DepartmentFormModal
+            editing={editing}
+            form={form}
             open={open}
-            title={
-              editing
-                ? t('system.departments.modal.edit', '编辑部门')
-                : t('system.departments.modal.create', '新增部门')
-            }
-            width={560}
+            parentTreeData={parentTreeData}
+            statusText={statusText}
+            submitting={submitting}
+            t={t}
             onCancel={closeForm}
-            onOk={() => void submit(action)}
-          >
-            <Form<DepartmentFormValues>
-              form={form}
-              layout="vertical"
-              initialValues={{ parentId: ROOT_PARENT_ID, sort: 0, status: 'enabled' }}
-            >
-              <Form.Item label={t('system.departments.form.parentId', '上级部门')} name="parentId">
-                <TreeSelect
-                  treeData={parentTreeData}
-                  treeDefaultExpandAll
-                  showSearch
-                  treeNodeFilterProp="title"
-                />
-              </Form.Item>
-              <Form.Item
-                label={t('system.departments.form.name', '部门名称')}
-                name="name"
-                rules={[
-                  {
-                    required: true,
-                    message: t('system.departments.form.nameRequired', '请输入部门名称'),
-                  },
-                ]}
-              >
-                <Input maxLength={64} />
-              </Form.Item>
-              <Form.Item
-                label={t('system.departments.form.code', '部门编码')}
-                name="code"
-                rules={[
-                  {
-                    required: true,
-                    message: t('system.departments.form.codeRequired', '请输入部门编码'),
-                  },
-                ]}
-              >
-                <Input maxLength={64} />
-              </Form.Item>
-              <Space size={12} style={{ width: '100%' }} align="start">
-                <Form.Item label={t('system.departments.form.sort', '排序')} name="sort">
-                  <InputNumber style={{ width: 160 }} />
-                </Form.Item>
-                <Form.Item label={t('system.departments.form.status', '状态')} name="status">
-                  <Select
-                    style={{ width: 180 }}
-                    options={[
-                      { label: statusText.enabled, value: 'enabled' },
-                      { label: statusText.disabled, value: 'disabled' },
-                    ]}
-                  />
-                </Form.Item>
-              </Space>
-            </Form>
-          </TrueAdminModal>
+            onSubmit={() => void submit(action)}
+          />
         </>
       )}
     />
