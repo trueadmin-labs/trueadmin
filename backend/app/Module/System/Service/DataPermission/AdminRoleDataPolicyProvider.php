@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Module\System\Service\DataPermission;
 
-use App\Foundation\Contract\DataPolicyProviderInterface;
-use App\Foundation\DataPermission\DataPolicyRegistry;
+use TrueAdmin\Kernel\DataPermission\DataPolicyProviderInterface;
+use TrueAdmin\Kernel\DataPermission\DataPolicyRegistry;
 use App\Module\System\Repository\AdminRoleDataPolicyRepository;
 use App\Module\System\Repository\AdminRoleRepository;
 use TrueAdmin\Kernel\Context\Actor;

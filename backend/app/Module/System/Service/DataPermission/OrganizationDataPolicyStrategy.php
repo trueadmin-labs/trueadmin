@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Module\System\Service\DataPermission;
 
-use App\Foundation\DataPermission\DataPolicyStrategyInterface;
+use TrueAdmin\Kernel\DataPermission\DataPolicyStrategyInterface;
 use App\Module\System\Repository\AdminDepartmentRepository;
 use Hyperf\Database\Model\Builder as ModelBuilder;
 use Hyperf\Database\Query\Builder as QueryBuilder;

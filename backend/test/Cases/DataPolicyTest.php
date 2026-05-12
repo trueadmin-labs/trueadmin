@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace HyperfTest\Cases;
 
 use App\Foundation\Auth\ActorFactory;
-use App\Foundation\DataPermission\DataPolicyStrategyInterface;
-use App\Foundation\DataPermission\DataPolicyManager;
-use App\Foundation\DataPermission\DataPolicyRegistry;
+use TrueAdmin\Kernel\DataPermission\DataPolicyStrategyInterface;
+use TrueAdmin\Kernel\DataPermission\DataPolicyManager;
+use TrueAdmin\Kernel\DataPermission\DataPolicyRegistry;
 use TrueAdmin\Kernel\Plugin\PluginRepository;
 use TrueAdmin\Kernel\Crud\CrudQuery;
 use App\Module\System\Repository\Notification\AdminAnnouncementRepository;

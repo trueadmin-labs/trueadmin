@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace HyperfTest\Support;
 
-use App\Foundation\DataPermission\DataPolicyStrategyInterface;
+use TrueAdmin\Kernel\DataPermission\DataPolicyStrategyInterface;
 use Hyperf\Database\Model\Builder as ModelBuilder;
 use Hyperf\Database\Query\Builder as QueryBuilder;
 use TrueAdmin\Kernel\Context\Actor;

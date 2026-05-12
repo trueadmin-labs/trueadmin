@@ -7,7 +7,7 @@ namespace App\Module\System\Service;
 use TrueAdmin\Kernel\Pagination\PageResult;
 use TrueAdmin\Kernel\Crud\CrudQuery;
 use App\Foundation\Service\AbstractService;
-use App\Foundation\DataPermission\DataPolicyRegistry;
+use TrueAdmin\Kernel\DataPermission\DataPolicyRegistry;
 use App\Module\System\Model\AdminRole;
 use App\Module\System\Repository\AdminDepartmentRepository;
 use App\Module\System\Repository\AdminMenuRepository;

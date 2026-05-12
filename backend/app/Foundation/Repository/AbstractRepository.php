@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Foundation\Repository;
 
-use App\Foundation\DataPermission\DataPolicyManager;
+use TrueAdmin\Kernel\DataPermission\DataPolicyManager;
 use Hyperf\Context\ApplicationContext;
 use Hyperf\Database\Model\Builder;
 use Hyperf\DbConnection\Db;

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "52cdf3b7612d689585d81caf65c02d6d",
+    "content-hash": "3198eed95bed4b145e3533212e29dead",
     "packages": [
         {
             "name": "aliyuncs/oss-sdk-php",
@@ -6457,16 +6457,16 @@
         },
         {
             "name": "trueadmin/kernel",
-            "version": "v0.1.5",
+            "version": "v0.1.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/trueadmin-labs/trueadmin-kernel.git",
-                "reference": "16ffc9e900eedb3e39c85c8087318ea3ab87b227"
+                "reference": "3d9c8f7e1c1ab1c8fef3d9e8182a04a34daa346d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/trueadmin-labs/trueadmin-kernel/zipball/16ffc9e900eedb3e39c85c8087318ea3ab87b227",
-                "reference": "16ffc9e900eedb3e39c85c8087318ea3ab87b227",
+                "url": "https://api.github.com/repos/trueadmin-labs/trueadmin-kernel/zipball/3d9c8f7e1c1ab1c8fef3d9e8182a04a34daa346d",
+                "reference": "3d9c8f7e1c1ab1c8fef3d9e8182a04a34daa346d",
                 "shasum": ""
             },
             "require": {
@@ -6508,10 +6508,10 @@
             "description": "TrueAdmin reusable backend kernel package.",
             "homepage": "https://github.com/trueadmin-labs/trueadmin-kernel",
             "support": {
-                "source": "https://github.com/trueadmin-labs/trueadmin-kernel/tree/v0.1.5",
+                "source": "https://github.com/trueadmin-labs/trueadmin-kernel/tree/v0.1.6",
                 "issues": "https://github.com/trueadmin-labs/trueadmin-kernel/issues"
             },
-            "time": "2026-05-12T06:58:11+00:00"
+            "time": "2026-05-12T07:12:07+00:00"
         },
         {
             "name": "vlucas/phpdotenv",

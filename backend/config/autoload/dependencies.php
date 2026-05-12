@@ -11,7 +11,7 @@ declare(strict_types=1);
  */
 use TrueAdmin\Kernel\Database\Seeder\NamespacedSeed;
 use App\Foundation\Contract\AdminPermissionProviderInterface;
-use App\Foundation\Contract\DataPolicyProviderInterface;
+use TrueAdmin\Kernel\DataPermission\DataPolicyProviderInterface;
 use TrueAdmin\Kernel\Metadata\MetadataMenuRepositoryInterface;
 use App\Module\System\Contract\AdminIdentityProviderInterface;
 use App\Module\System\Repository\AdminMenuRepository;
