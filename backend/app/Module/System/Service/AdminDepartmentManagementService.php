@@ -6,7 +6,7 @@ namespace App\Module\System\Service;
 
 use TrueAdmin\Kernel\Crud\CrudQuery;
 use TrueAdmin\Kernel\Service\AbstractService;
-use App\Foundation\Tree\TreeHelper;
+use TrueAdmin\Kernel\Support\TreeHelper;
 use App\Module\System\Model\AdminDepartment;
 use App\Module\System\Repository\AdminDepartmentRepository;
 use TrueAdmin\Kernel\Constant\ErrorCode;

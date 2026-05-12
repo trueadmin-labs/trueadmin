@@ -7,7 +7,7 @@ namespace App\Module\System\Service;
 use TrueAdmin\Kernel\Pagination\PageResult;
 use TrueAdmin\Kernel\Crud\CrudQuery;
 use TrueAdmin\Kernel\Service\AbstractService;
-use App\Foundation\Support\Password;
+use TrueAdmin\Kernel\Support\Password;
 use App\Module\System\Model\ClientUser;
 use App\Module\System\Repository\ClientUserRepository;
 use TrueAdmin\Kernel\Constant\ErrorCode;

@@ -6,7 +6,7 @@ namespace App\Module\Auth\Http\Admin\Middleware;
 
 use TrueAdmin\Kernel\Constant\ErrorCode;
 use TrueAdmin\Kernel\Exception\BusinessException;
-use App\Foundation\Auth\ActorFactory;
+use TrueAdmin\Kernel\Context\ActorFactory;
 use App\Module\Auth\Service\PassportService;
 use Psr\Http\Message\ResponseInterface;
 use TrueAdmin\Kernel\Context\ActorContext;

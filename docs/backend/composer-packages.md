@@ -42,9 +42,10 @@ v0.1.6  DataPolicy runtime
 v0.1.7  HTTP controller defaults / exception handler
 v0.1.8  Permission middleware runtime
 v0.1.9  Service helper base
+v0.1.10 Remaining foundation primitives
 ```
 
-模板后端已切到 `trueadmin/kernel ^0.1.9`。由于 Packagist 可能不会立即同步新 tag，`backend/composer.json` 临时保留 GitHub VCS repository，避免使用 `dev-main` 或本地 path repository。Packagist 同步 `v0.1.9` 后应删除该 VCS repository 配置。
+模板后端已切到 `trueadmin/kernel ^0.1.10`。由于 Packagist 可能不会立即同步新 tag，`backend/composer.json` 临时保留 GitHub VCS repository，避免使用 `dev-main` 或本地 path repository。Packagist 同步 `v0.1.10` 后应删除该 VCS repository 配置。
 
 ### CRUD 协议值对象
 
@@ -330,6 +331,31 @@ backend/app/Foundation/Service/AbstractService.php
 
 理由：当前 `AbstractService` 只提供 `assertUnique()`、`assertExistingIds()`、`notFound()` 这类基于 kernel `BusinessException` / `ErrorCode` 的稳定 helper，不依赖业务表。业务 Service 本身仍留在模块，不进入 Composer 包。
 
+### Foundation 剩余原语
+
+当前状态：
+
+```text
+trueadmin-kernel/src/Context/ActorFactory.php
+trueadmin-kernel/src/Database/AfterCommitCallbacks.php
+trueadmin-kernel/src/Database/Listener/RunAfterCommitCallbacksListener.php
+trueadmin-kernel/src/Database/Model.php
+trueadmin-kernel/src/Support/Password.php
+trueadmin-kernel/src/Support/TreeHelper.php
+trueadmin-kernel/resources/lang/en/errors.php
+trueadmin-kernel/resources/lang/zh_CN/errors.php
+```
+
+模板已删除同名 Foundation 类和 Foundation 语言包。
+
+理由：
+
+- `ActorFactory` 只负责从 Hyperf context 读取当前 actor，不依赖后台用户表或 System 模块。
+- `AfterCommitCallbacks` 和 listener 是事务生命周期 helper，可被任何模块复用。
+- Model 基类只承载 Hyperf Model 通用行为，不包含业务表事实。
+- `Password` 和 `TreeHelper` 是稳定支持类，业务模块、System 模块和插件都可能复用。
+- `KERNEL.*` 通用错误文案属于 kernel，项目根级 `resources/lang` 只作为最终覆盖层。
+
 ## 不应进入 Composer 包
 
 以下内容保持在模板或模块：
@@ -342,7 +368,7 @@ backend/app/Foundation/Service/AbstractService.php
 
 ## 当前执行状态
 
-1. 已发布 `trueadmin/kernel v0.1.1`、`v0.1.2`、`v0.1.3`、`v0.1.4`、`v0.1.5`、`v0.1.6`、`v0.1.7`、`v0.1.8`、`v0.1.9` Git tag。
+1. 已发布 `trueadmin/kernel v0.1.1`、`v0.1.2`、`v0.1.3`、`v0.1.4`、`v0.1.5`、`v0.1.6`、`v0.1.7`、`v0.1.8`、`v0.1.9`、`v0.1.10` Git tag。
 2. 模板已改用 kernel CRUD 值对象，已删除 `Foundation/Crud`。
 3. `PageResult`、`ApiResponse`、`FormRequest`、`CrudQueryRequest` 已抽到 kernel，模板已删除重复实现。
 4. `AttributeRouteRegistrar` 和 routes 命令已抽到 kernel，模板已删除重复实现。
@@ -354,3 +380,4 @@ backend/app/Foundation/Service/AbstractService.php
 10. Controller 默认基类、OpenAPI Controller 和默认 ExceptionHandler 已抽到 kernel。
 11. Permission middleware runtime 已抽到 kernel，System 只保留后台权限事实服务。
 12. Service helper base 已抽到 kernel，模块业务 Service 只继承稳定 helper。
+13. ActorFactory、AfterCommit callbacks、Model 基类、Password、TreeHelper 和 kernel 语言包已抽到 kernel，Foundation 只剩模板 `HealthController` 和 `AbstractRepository`。

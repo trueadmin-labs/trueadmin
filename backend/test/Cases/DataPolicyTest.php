@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace HyperfTest\Cases;
 
-use App\Foundation\Auth\ActorFactory;
+use TrueAdmin\Kernel\Context\ActorFactory;
 use TrueAdmin\Kernel\DataPermission\DataPolicyStrategyInterface;
 use TrueAdmin\Kernel\DataPermission\DataPolicyManager;
 use TrueAdmin\Kernel\DataPermission\DataPolicyRegistry;

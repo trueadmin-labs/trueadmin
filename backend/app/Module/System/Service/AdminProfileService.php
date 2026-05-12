@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Module\System\Service;
 
-use App\Foundation\Support\Password;
+use TrueAdmin\Kernel\Support\Password;
 use App\Module\System\Model\AdminUser;
 use App\Module\System\Repository\AdminUserRepository;
 use TrueAdmin\Kernel\Constant\ErrorCode;

@@ -8,7 +8,7 @@ use App\Module\Auth\Constant\AuthErrorCode;
 use App\Module\Auth\Event\AdminLoginLogged;
 use TrueAdmin\Kernel\Constant\ErrorCode;
 use TrueAdmin\Kernel\Exception\BusinessException;
-use App\Foundation\Support\Password;
+use TrueAdmin\Kernel\Support\Password;
 use App\Module\Auth\Http\Admin\Vo\AuthUser;
 use App\Module\System\Contract\AdminIdentityProviderInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;

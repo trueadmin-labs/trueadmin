@@ -44,10 +44,10 @@ TrueAdmin 要成为一个面向 AI 协作开发的企业级后台管理脚手架
 - 第一阶段聚焦后台基础版。
 - 后续扩展消息、待办、流程审批。
 - 第一版预留传统后台 CRUD 代码生成能力。
-- 第一版直接抽 `trueadmin-kernel`，但不把所有通用代码都放进 Composer 包：错误码、业务异常、基础抽象等稳定原语进入 kernel，统一响应、异常处理、健康检查、OpenAPI 入口、CRUD 默认行为、密码策略等项目默认实现进入 `backend/app/Foundation`，外部技术适配进入 `backend/app/Infrastructure`，菜单权限、部门岗位、数据权限规则、操作日志入库等后台业务能力留在模块内。
+- 第一版直接抽 `trueadmin-kernel`，但不把所有通用代码都放进 Composer 包：错误码、业务异常、HTTP 默认基类、异常处理、权限中间件、CRUD 查询协议、分页响应、FormRequest、Service helper、Model 基类、密码策略、树 helper、AfterCommit callbacks、模块翻译和插件后端 runtime 等稳定原语进入 kernel；`backend/app/Foundation` 当前只保留模板健康检查和 `AbstractRepository` 组合层；外部技术适配进入 `backend/app/Infrastructure`，菜单权限、部门岗位、数据权限规则、操作日志入库等后台业务能力留在模块内。
 - API 错误码使用字符串契约，不使用数字号段。后端响应 `code` 是稳定机器码，例如 `SUCCESS`、`KERNEL.AUTH.UNAUTHORIZED`、`SYSTEM.AUTH.INVALID_CREDENTIALS`、`PLUGIN.ACME.CMS.BANNER_NOT_FOUND`；`message` 来自 Hyperf 官方 `hyperf/constants` 的 `#[Message]` 翻译 key，并通过 `hyperf/translation` 根据 `Accept-Language` 返回本地化文案。前端通常直接展示 `message`，同时根据 `code` 做特殊交互处理。
 - 错误码归属按层级维护：kernel 只保留 `SUCCESS` 和 `KERNEL.*` 通用错误码，业务模块在自己的 `Constant/*ErrorCode.php` 中声明 `enum XxxErrorCode: string implements ErrorCodeInterface` 并 `use ErrorCodeTrait`；插件使用 `PLUGIN.{VENDOR}.{PACKAGE}.{ERROR}`。错误码是运行时异常响应契约，第一版不做错误码收集、注册、同步和扫描命令，也不要求模块或插件维护 `error_codes.php`。业务抛错只传错误码 enum、HTTP 状态和可选 params，不兼容裸字符串错误码。错误文案继续使用 Hyperf 官方 `hyperf/constants` 的 `#[Message]` 和 `hyperf/translation`。
-- 后端多语言按资产归属维护：`app/Foundation/resources/lang` 放框架通用文案，模块放 `Module/Xxx/resources/lang`，插件运行时副本放 `backend/plugins/<vendor>/<name>/resources/lang`，由插件运行时目录约定自动加载，项目根级 `resources/lang` 只作为最终覆盖层。普通业务翻译直接使用 Hyperf 官方 `trans()` 或 `__()`，TrueAdmin 不额外封装全局 `t()` helper，只补充模块和插件语言包加载能力。
+- 后端多语言按资产归属维护：`trueadmin-kernel/resources/lang` 放 `KERNEL.*` 通用文案，模块放 `Module/Xxx/resources/lang`，插件运行时副本放 `backend/plugins/<vendor>/<name>/resources/lang`，由插件运行时目录约定自动加载，项目根级 `resources/lang` 只作为最终覆盖层。普通业务翻译直接使用 Hyperf 官方 `trans()` 或 `__()`，TrueAdmin 不额外封装全局 `t()` helper，只补充模块和插件语言包加载能力。
 
 ## 第一阶段范围
 
@@ -186,9 +186,9 @@ backend/app/Infrastructure
 backend/app/Module
 ```
 
-`trueadmin-kernel` 放框架层和基础原语，并以 `trueadmin/kernel` 作为 Composer 包雏形。`backend/app/Foundation` 放项目级可改基础行为，`backend/app/Infrastructure` 放项目级技术适配。业务代码必须归属到 `backend/app/Module` 下的具体模块，模块内部采用 MineAdmin 分层。
+`trueadmin-kernel` 放框架层和基础原语，并以 `trueadmin/kernel` 作为 Composer 包雏形。`backend/app/Foundation` 当前只保留模板健康检查和 Repository 组合层，`backend/app/Infrastructure` 放项目级技术适配。业务代码必须归属到 `backend/app/Module` 下的具体模块，模块内部采用 MineAdmin 分层。
 
-Command、Listener 和 Crontab 也按职责归属：框架级放 `Kernel`，项目级基础能力放 `Foundation` 的具体能力目录，技术适配类任务放 `Infrastructure`，业务级放模块内。第一版不保留 `backend/app/Command`、`backend/app/Listener`、`backend/app/Crontab` 这类全局默认落点。
+Command、Listener 和 Crontab 也按职责归属：框架级放 `Kernel`，技术适配类任务放 `Infrastructure`，业务级放模块内；只有确实不适合进入这些层的少量项目级默认能力才放 `Foundation`。第一版不保留 `backend/app/Command`、`backend/app/Listener`、`backend/app/Crontab` 这类全局默认落点。
 
 数据库迁移只扫描模块和插件目录。第一版不保留 `backend/database/migrations` 根级迁移目录；系统基础表归属 `Module/System`，包括 `admin_users` 和用户端基础账号表 `client_users`。会员、客户等业务资料后续按业务语义归属 `Member`、`Customer` 等对应业务模块；用户端认证入口归属 `Module/Auth/Http/Client`，不要新增泛化 `Module/User`。
 

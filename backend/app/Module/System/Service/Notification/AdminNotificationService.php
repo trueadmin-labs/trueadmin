@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Module\System\Service\Notification;
 
-use App\Foundation\Database\AfterCommitCallbacks;
+use TrueAdmin\Kernel\Database\AfterCommitCallbacks;
 use App\Module\System\Model\AdminNotificationBatch;
 use App\Module\System\Repository\Notification\AdminNotificationBatchRepository;
 use App\Module\System\Repository\Notification\AdminNotificationDeliveryRepository;

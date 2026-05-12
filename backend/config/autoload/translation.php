@@ -13,7 +13,6 @@ return [
         'en' => 'en',
     ],
     'paths' => [
-        BASE_PATH . '/app/Foundation/resources/lang',
         ...glob(BASE_PATH . '/app/Module/*/resources/lang') ?: [],
         BASE_PATH . '/resources/lang',
     ],

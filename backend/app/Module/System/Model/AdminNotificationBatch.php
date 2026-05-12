@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Module\System\Model;
 
-use App\Foundation\Database\Model;
+use TrueAdmin\Kernel\Database\Model;
 use Hyperf\Database\Model\Relations\HasMany;
 
 final class AdminNotificationBatch extends Model

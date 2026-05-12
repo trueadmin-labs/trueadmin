@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace HyperfTest\Support;
 
-use App\Foundation\Support\Password;
+use TrueAdmin\Kernel\Support\Password;
 use App\Module\Auth\Http\Admin\Vo\AuthUser;
 use App\Module\System\Contract\AdminIdentityProviderInterface;
 use App\Module\System\Dto\AdminCredential;

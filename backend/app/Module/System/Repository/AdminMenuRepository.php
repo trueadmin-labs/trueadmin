@@ -7,7 +7,7 @@ namespace App\Module\System\Repository;
 use TrueAdmin\Kernel\Crud\CrudQuery;
 use TrueAdmin\Kernel\Metadata\MetadataMenuRepositoryInterface;
 use App\Foundation\Repository\AbstractRepository;
-use App\Foundation\Tree\TreeHelper;
+use TrueAdmin\Kernel\Support\TreeHelper;
 use App\Module\System\Model\AdminMenu;
 use Hyperf\DbConnection\Db;
 

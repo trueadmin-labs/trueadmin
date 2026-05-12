@@ -79,7 +79,7 @@ packages/
 核心原则：
 
 - `trueadmin-kernel` 只放真正通用、稳定、可复用的框架基础能力。
-- `backend/app/Foundation` 放项目级可改基础行为，承接 kernel 的默认实现和项目定制。
+- `backend/app/Foundation` 只放项目仍需要直接拥有的可改默认行为；当前主要是健康检查端点和 Repository 组合层。
 - `backend/app/Infrastructure` 放项目级技术适配，例如缓存、锁、存储、队列、短信、邮件、支付。
 - `backend/app/Module` 是业务和系统能力主目录。
 - 每个模块内部采用 MineAdmin 分层。
@@ -202,7 +202,7 @@ Service 不应该长期保留 `requiredString()`、`status()` 这类纯输入校
 
 Service 负责业务编排。
 
-普通 CRUD Service 可以继承 `backend/app/Foundation` 提供的轻量 `AbstractService`。
+普通 CRUD Service 可以继承 `trueadmin-kernel/src/Service/AbstractService.php` 提供的轻量 helper base。
 
 复杂业务 Service 可以绕开 CRUD 基类，自行编排多个 Repository、事件、策略和外部服务。
 
@@ -316,7 +316,7 @@ try {
 
 Repository 负责数据访问。
 
-普通 Repository 可以继承 `backend/app/Foundation` 提供的轻量 `AbstractRepository`。
+普通 Repository 可以继承 `backend/app/Foundation/Repository/AbstractRepository.php` 提供的轻量组合层。
 
 `AbstractRepository` 是标准 CRUD 的底层工具层，不负责业务判断。第一版提供：
 
@@ -353,7 +353,7 @@ sorts[0][order]=desc
 
 Repository 不应该处理 HTTP 语义。
 
-树结构统一使用 `backend/app/Foundation/Tree/TreeHelper.php` 处理 `level`、`path`、祖先判断和数组树构建。部门、菜单、角色这类树形资源可以复用该 helper，但树结构不进入所有 CRUD 的默认流程。
+树结构统一使用 `trueadmin-kernel/src/Support/TreeHelper.php` 处理 `level`、`path`、祖先判断和数组树构建。部门、菜单、角色这类树形资源可以复用该 helper，但树结构不进入所有 CRUD 的默认流程。
 
 ### 5.4 Model 层
 
@@ -856,9 +856,9 @@ Module/System/Listener/Logstash/WriteOperationLogListener.php
 推荐目录：
 
 ```text
-backend/app/Foundation/Service/AbstractService.php
 backend/app/Foundation/Repository/AbstractRepository.php
-backend/app/Foundation/Database/Model.php
+trueadmin-kernel/src/Service/AbstractService.php
+trueadmin-kernel/src/Database/Model.php
 trueadmin-kernel/src/Pagination/PageResult.php
 ```
 

@@ -219,13 +219,13 @@ Module/System/Repository/AdminMenuRepository.php
 
 模块不要为了基类依赖 System。
 
-通用基类采用两层：kernel 放稳定原语，Foundation 放项目可改默认实现。业务模块默认依赖 Foundation：
+通用基类采用两层：kernel 放稳定原语，Foundation 只保留项目仍需要直接拥有的默认组合层。业务模块不要依赖 System，也不要把已进入 kernel 的基类重新放回 Foundation：
 
 ```text
-backend/app/Foundation/Service/AbstractService.php
 backend/app/Foundation/Repository/AbstractRepository.php
-backend/app/Foundation/Database/Model.php
-backend/app/Foundation/Tree/TreeHelper.php
+trueadmin-kernel/src/Service/AbstractService.php
+trueadmin-kernel/src/Database/Model.php
+trueadmin-kernel/src/Support/TreeHelper.php
 trueadmin-kernel/src/Context/Actor.php
 trueadmin-kernel/src/Context/ActorContext.php
 ```
