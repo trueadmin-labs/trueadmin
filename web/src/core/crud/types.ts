@@ -92,6 +92,8 @@ export type CrudExtraQueryTransformContext = {
 export type CrudExtraQuerySchema = {
   name: string;
   defaultValue?: string;
+  operator?: CrudOperator;
+  requestMode?: 'filter' | 'param';
   requestName?: string | false;
   transform?: (context: CrudExtraQueryTransformContext) => CrudQueryTransformResult;
 };

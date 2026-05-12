@@ -8,7 +8,11 @@ import { describe, expect, it } from 'vitest';
 import { useCrudTableQueryState } from './useCrudTableQueryState';
 
 const wrapper = ({ children }: PropsWithChildren) => (
-  <MemoryRouter initialEntries={['/users?_page=3&keyword=root&status=enabled&deptId=10']}>
+  <MemoryRouter
+    initialEntries={[
+      '/users?page=3&keyword=root&filters[0][field]=status&filters[0][op]=eq&filters[0][value]=enabled&params[deptId]=10',
+    ]}
+  >
     {children}
   </MemoryRouter>
 );

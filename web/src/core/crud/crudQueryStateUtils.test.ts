@@ -15,13 +15,18 @@ import type { CrudExtraQuerySchema, CrudFilterSchema } from './types';
 
 describe('crudQueryStateUtils', () => {
   it('creates trimmed value objects from selected search params', () => {
-    const params = new URLSearchParams({
-      empty: '   ',
-      keyword: ' admin ',
-      status: 'enabled',
-    });
+    const params = new URLSearchParams(
+      'keyword=admin&filters[0][field]=status&filters[0][op]=eq&filters[0][value]=enabled&params[deptId]=10',
+    );
 
-    expect(createParamsObject(params, ['keyword', 'status', 'empty', 'missing'])).toEqual({
+    expect(
+      createParamsObject(params, {
+        extraQuery: [{ name: 'deptId' }],
+        filters: [{ label: 'Status', name: 'status', options: [], type: 'select' }],
+        quickSearchName: 'keyword',
+      }),
+    ).toEqual({
+      deptId: '10',
       keyword: 'admin',
       status: 'enabled',
     });
@@ -54,7 +59,7 @@ describe('crudQueryStateUtils', () => {
   });
 
   it('updates url pagination and scalar values without keeping defaults', () => {
-    const params = new URLSearchParams('_page=3&_pageSize=50&keyword=admin&status=enabled');
+    const params = new URLSearchParams('page=3&pageSize=50&keyword=admin&status=enabled');
 
     setPage(params, DEFAULT_PAGE);
     setPageSize(params, 20, 20);
@@ -66,7 +71,7 @@ describe('crudQueryStateUtils', () => {
   });
 
   it('stores sort rules as ordered array query params', () => {
-    const params = new URLSearchParams('_page=2&sorts[9][field]=stale');
+    const params = new URLSearchParams('page=2&sorts[9][field]=stale');
 
     setSorts(params, [
       { field: 'created_at', order: 'desc' },
@@ -74,7 +79,7 @@ describe('crudQueryStateUtils', () => {
     ]);
 
     expect(params.toString()).toBe(
-      '_page=2&sorts%5B0%5D%5Bfield%5D=created_at&sorts%5B0%5D%5Border%5D=desc&sorts%5B1%5D%5Bfield%5D=id&sorts%5B1%5D%5Border%5D=asc',
+      'page=2&sorts%5B0%5D%5Bfield%5D=created_at&sorts%5B0%5D%5Border%5D=desc&sorts%5B1%5D%5Bfield%5D=id&sorts%5B1%5D%5Border%5D=asc',
     );
     expect(getSorts(params)).toEqual([
       { field: 'created_at', order: 'desc' },

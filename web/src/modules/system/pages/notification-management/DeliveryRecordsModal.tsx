@@ -33,7 +33,7 @@ export function DeliveryRecordsModal({
     () => [
       {
         name: 'status',
-        transform: ({ value }) => ({ filters: [{ field: 'status', op: 'eq', value }] }),
+        requestMode: 'filter',
       },
     ],
     [],

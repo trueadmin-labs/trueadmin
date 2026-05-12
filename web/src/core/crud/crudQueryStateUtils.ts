@@ -9,11 +9,14 @@ import type {
   CrudSortRule,
 } from './types';
 
-export const PAGE_PARAM = '_page';
-export const PAGE_SIZE_PARAM = '_pageSize';
+export const PAGE_PARAM = 'page';
+export const PAGE_SIZE_PARAM = 'pageSize';
 export const DEFAULT_PAGE = 1;
 export const DEFAULT_PAGE_SIZE = 20;
+const LEGACY_PAGE_PARAM = '_page';
+const LEGACY_PAGE_SIZE_PARAM = '_pageSize';
 const SORT_FIELD_PATTERN = /^sorts\[(\d+)]\[field]$/;
+const FILTER_FIELD_PATTERN = /^filters\[(\d+)]\[field]$/;
 export const EMPTY_FILTERS: CrudFilterSchema[] = [];
 export const EMPTY_EXTRA_QUERY: CrudExtraQuerySchema[] = [];
 
@@ -62,15 +65,93 @@ export const getQueryValueNames = ({
   return names;
 };
 
-export const createParamsObject = (searchParams: URLSearchParams, keys: Iterable<string>) => {
-  const keySet = new Set(keys);
-  const values: Record<string, string> = {};
-  keySet.forEach((key) => {
-    const value = normalizeValue(searchParams.get(key) ?? undefined);
-    if (value !== undefined) {
-      values[key] = value;
+export const readParamValue = (searchParams: URLSearchParams, key: string) => {
+  const arrayValues = searchParams.getAll(`params[${key}][]`).map((value) => value.trim());
+  if (arrayValues.length > 0) {
+    return arrayValues.filter(Boolean).join(',');
+  }
+
+  return normalizeValue(searchParams.get(`params[${key}]`) ?? undefined);
+};
+
+const readIndexedValue = (searchParams: URLSearchParams, prefix: string) => {
+  const arrayValues = searchParams.getAll(`${prefix}[value][]`).map((value) => value.trim());
+  if (arrayValues.length > 0) {
+    return arrayValues.filter(Boolean).join(',');
+  }
+
+  return normalizeValue(searchParams.get(`${prefix}[value]`) ?? undefined);
+};
+
+export const readFilterValue = (searchParams: URLSearchParams, field: string) => {
+  const indexedFields = new Map<number, string>();
+  searchParams.forEach((value, key) => {
+    const matched = FILTER_FIELD_PATTERN.exec(key);
+    if (matched) {
+      indexedFields.set(Number(matched[1]), value);
     }
   });
+
+  for (const [index, indexedField] of Array.from(indexedFields.entries()).sort(
+    ([left], [right]) => left - right,
+  )) {
+    if (indexedField === field) {
+      return readIndexedValue(searchParams, `filters[${index}]`);
+    }
+  }
+
+  return undefined;
+};
+
+export const createParamsObject = (
+  searchParams: URLSearchParams,
+  {
+    extraQuery = EMPTY_EXTRA_QUERY,
+    filters = EMPTY_FILTERS,
+    quickSearchName,
+  }: {
+    extraQuery?: CrudExtraQuerySchema[];
+    filters?: CrudFilterSchema[];
+    quickSearchName?: string;
+  },
+) => {
+  const values: Record<string, string> = {};
+
+  if (quickSearchName) {
+    const keyword = normalizeValue(searchParams.get('keyword') ?? undefined);
+    if (keyword !== undefined) {
+      values[quickSearchName] = keyword;
+    }
+  }
+
+  filters.forEach((filter) => {
+    const requestName = filter.requestName ?? filter.name;
+    if (requestName === false) {
+      return;
+    }
+    const value =
+      filter.requestMode === 'param'
+        ? readParamValue(searchParams, requestName)
+        : readFilterValue(searchParams, requestName);
+    if (value !== undefined) {
+      values[filter.name] = value;
+    }
+  });
+
+  extraQuery.forEach((item) => {
+    const requestName = item.requestName ?? item.name;
+    if (requestName === false) {
+      return;
+    }
+    const value =
+      item.requestMode === 'filter'
+        ? readFilterValue(searchParams, requestName)
+        : readParamValue(searchParams, requestName);
+    if (value !== undefined) {
+      values[item.name] = value;
+    }
+  });
+
   return values;
 };
 
@@ -83,6 +164,24 @@ export const removeQueryKeys = (params: URLSearchParams, keys: Iterable<string>)
 export const removeSortParams = (params: URLSearchParams) => {
   Array.from(params.keys())
     .filter((key) => key.startsWith('sorts['))
+    .forEach((key) => {
+      params.delete(key);
+    });
+};
+
+export const removeCrudParams = (params: URLSearchParams, legacyKeys: Iterable<string> = []) => {
+  params.delete(PAGE_PARAM);
+  params.delete(PAGE_SIZE_PARAM);
+  params.delete(LEGACY_PAGE_PARAM);
+  params.delete(LEGACY_PAGE_SIZE_PARAM);
+  params.delete('keyword');
+  Array.from(legacyKeys).forEach((key) => {
+    params.delete(key);
+  });
+  Array.from(params.keys())
+    .filter(
+      (key) => key.startsWith('filters[') || key.startsWith('sorts[') || key.startsWith('params['),
+    )
     .forEach((key) => {
       params.delete(key);
     });
@@ -280,8 +379,19 @@ export const getRequestParams = ({
       return;
     }
     if (item.requestName !== false) {
+      const requestName = item.requestName ?? item.name;
+      if (item.requestMode === 'filter') {
+        params.filters ??= [];
+        params.filters.push({
+          field: requestName,
+          op: item.operator ?? 'eq',
+          value,
+        });
+        return;
+      }
+
       params.params ??= {};
-      params.params[item.requestName ?? item.name] = value;
+      params.params[requestName] = value;
     }
   });
 

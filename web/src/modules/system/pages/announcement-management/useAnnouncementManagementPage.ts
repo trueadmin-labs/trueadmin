@@ -134,7 +134,7 @@ export function useAnnouncementManagementPage() {
     () => [
       {
         name: 'status',
-        transform: ({ value }) => ({ filters: [{ field: 'status', op: 'eq', value }] }),
+        requestMode: 'filter',
       },
     ],
     [],

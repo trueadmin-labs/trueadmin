@@ -28,10 +28,8 @@ export function createUserFilters({
       label: t('system.users.column.roles', '角色'),
       type: 'select',
       mode: 'multiple',
-      transform: ({ value }) => {
-        const roleCodes = value.split(',').filter(Boolean);
-        return roleCodes.length > 0 ? { params: { roleCodes } } : {};
-      },
+      requestMode: 'param',
+      requestName: 'roleCodes',
       options: [
         { label: roleText['super-admin'], value: 'super-admin' },
         { label: roleText.admin, value: 'admin' },
@@ -51,9 +49,7 @@ export function createUserFilters({
 export const createUserExtraQuery = (): CrudExtraQuerySchema[] => [
   {
     name: 'deptId',
-    requestName: false,
-    transform: ({ value }) =>
-      value === ALL_DEPARTMENTS_VALUE ? {} : { params: { deptId: value } },
+    requestName: 'deptId',
   },
   {
     defaultValue: '1',

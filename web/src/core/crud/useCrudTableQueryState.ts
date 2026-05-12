@@ -1,3 +1,4 @@
+import { serializeCrudParams } from '@trueadmin/web-core/crud';
 import { updateRawSearchParams } from '@trueadmin/web-core/url';
 import { useCallback, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
@@ -14,12 +15,7 @@ import {
   getSorts,
   PAGE_PARAM,
   PAGE_SIZE_PARAM,
-  removeQueryKeys,
-  removeSortParams,
-  setPage,
-  setPageSize,
-  setQueryValue,
-  setSorts,
+  removeCrudParams,
   toPositiveInteger,
 } from './crudQueryStateUtils';
 import type {
@@ -85,8 +81,13 @@ export function useCrudTableQueryState({
   const pageSize = toPositiveInteger(searchParams.get(PAGE_SIZE_PARAM), defaultPageSize);
   const sorts = useMemo(() => getSorts(searchParams), [searchParams]);
   const values = useMemo(
-    () => createParamsObject(searchParams, valueKeys),
-    [searchParams, valueKeys],
+    () =>
+      createParamsObject(searchParams, {
+        extraQuery: stableExtraQuery,
+        filters: stableFilters,
+        quickSearchName,
+      }),
+    [quickSearchName, searchParams, stableExtraQuery, stableFilters],
   );
   const activeFilterCount = useMemo(
     () => Array.from(filterNames).filter((name) => values[name] !== undefined).length,
@@ -109,51 +110,107 @@ export function useCrudTableQueryState({
     [navigate, queryMode, urlSearchParams],
   );
 
+  const writeCrudQuery = useCallback(
+    ({
+      nextPage = current,
+      nextPageSize = pageSize,
+      nextSorts = sorts,
+      nextValues = values,
+    }: {
+      nextPage?: number;
+      nextPageSize?: number;
+      nextSorts?: CrudSortRule[];
+      nextValues?: Record<string, string>;
+    }) => {
+      const requestParams = getRequestParams({
+        extraQuery: stableExtraQuery,
+        filters: stableFilters,
+        page: nextPage,
+        pageSize: nextPageSize,
+        quickSearchName,
+        sorts: nextSorts,
+        values: nextValues,
+      });
+      const serializedParams = serializeCrudParams(requestParams);
+
+      updateQuery((params) => {
+        removeCrudParams(params, valueKeys);
+        serializedParams.forEach((value, key) => {
+          params.append(key, value);
+        });
+      });
+    },
+    [
+      current,
+      pageSize,
+      quickSearchName,
+      sorts,
+      stableExtraQuery,
+      stableFilters,
+      updateQuery,
+      valueKeys,
+      values,
+    ],
+  );
+
   const submitQuickSearch = useCallback(
     (value: string) => {
       if (!quickSearchName) {
         return;
       }
-      updateQuery((params) => {
-        setQueryValue(params, quickSearchName, value);
-        setPage(params, DEFAULT_PAGE);
+      writeCrudQuery({
+        nextPage: DEFAULT_PAGE,
+        nextValues: {
+          ...values,
+          [quickSearchName]: value,
+        },
       });
     },
-    [quickSearchName, updateQuery],
+    [quickSearchName, values, writeCrudQuery],
   );
 
   const clearQuickSearch = useCallback(() => {
     if (!quickSearchName) {
       return;
     }
-    updateQuery((params) => {
-      params.delete(quickSearchName);
-      setPage(params, DEFAULT_PAGE);
-    });
-  }, [quickSearchName, updateQuery]);
+    const nextValues = { ...values };
+    delete nextValues[quickSearchName];
+    writeCrudQuery({ nextPage: DEFAULT_PAGE, nextValues });
+  }, [quickSearchName, values, writeCrudQuery]);
 
   const submitFilters = useCallback(
     (nextValues: Record<string, string | undefined>) => {
-      updateQuery((params) => {
-        filterNames.forEach((name) => {
-          setQueryValue(params, name, nextValues[name]);
-        });
-        setPage(params, DEFAULT_PAGE);
+      const mergedValues = { ...values };
+      filterNames.forEach((name) => {
+        const value = nextValues[name]?.trim();
+        if (value) {
+          mergedValues[name] = value;
+          return;
+        }
+        delete mergedValues[name];
+      });
+      writeCrudQuery({
+        nextPage: DEFAULT_PAGE,
+        nextValues: mergedValues,
       });
     },
-    [filterNames, updateQuery],
+    [filterNames, values, writeCrudQuery],
   );
 
   const resetFilters = useCallback(() => {
-    updateQuery((params) => {
-      removeQueryKeys(
-        params,
-        new Set([...filterNames, ...(quickSearchName ? [quickSearchName] : [])]),
-      );
-      removeSortParams(params);
-      setPage(params, DEFAULT_PAGE);
+    const nextValues = { ...values };
+    filterNames.forEach((name) => {
+      delete nextValues[name];
     });
-  }, [filterNames, quickSearchName, updateQuery]);
+    if (quickSearchName) {
+      delete nextValues[quickSearchName];
+    }
+    writeCrudQuery({
+      nextPage: DEFAULT_PAGE,
+      nextSorts: [],
+      nextValues,
+    });
+  }, [filterNames, quickSearchName, values, writeCrudQuery]);
 
   const hasQueryName = useCallback((name: string) => valueKeys.has(name), [valueKeys]);
 
@@ -162,41 +219,55 @@ export function useCrudTableQueryState({
       if (!valueKeys.has(name)) {
         return;
       }
-      updateQuery((params) => {
-        setQueryValue(params, name, value);
-        setPage(params, DEFAULT_PAGE);
-      });
+      const nextValues = { ...values };
+      const normalized = value?.trim();
+      if (normalized) {
+        nextValues[name] = normalized;
+      } else {
+        delete nextValues[name];
+      }
+      writeCrudQuery({ nextPage: DEFAULT_PAGE, nextValues });
     },
-    [updateQuery, valueKeys],
+    [valueKeys, values, writeCrudQuery],
   );
 
   const setQueryControllerValues = useCallback(
     (nextValues: Record<string, string | undefined>) => {
-      updateQuery((params) => {
-        Object.entries(nextValues).forEach(([name, value]) => {
-          if (valueKeys.has(name)) {
-            setQueryValue(params, name, value);
-          }
-        });
-        setPage(params, DEFAULT_PAGE);
+      const mergedValues = { ...values };
+      Object.entries(nextValues).forEach(([name, value]) => {
+        if (!valueKeys.has(name)) {
+          return;
+        }
+        const normalized = value?.trim();
+        if (normalized) {
+          mergedValues[name] = normalized;
+          return;
+        }
+        delete mergedValues[name];
+      });
+      writeCrudQuery({
+        nextPage: DEFAULT_PAGE,
+        nextValues: mergedValues,
       });
     },
-    [updateQuery, valueKeys],
+    [valueKeys, values, writeCrudQuery],
   );
 
   const resetQueryControllerValues = useCallback(
     (names?: string[]) => {
-      updateQuery((params) => {
-        const nextNames = names ?? Array.from(valueKeys);
-        nextNames.forEach((name) => {
-          if (valueKeys.has(name)) {
-            params.delete(name);
-          }
-        });
-        setPage(params, DEFAULT_PAGE);
+      const mergedValues = { ...values };
+      const nextNames = names ?? Array.from(valueKeys);
+      nextNames.forEach((name) => {
+        if (valueKeys.has(name)) {
+          delete mergedValues[name];
+        }
+      });
+      writeCrudQuery({
+        nextPage: DEFAULT_PAGE,
+        nextValues: mergedValues,
       });
     },
-    [updateQuery, valueKeys],
+    [valueKeys, values, writeCrudQuery],
   );
 
   const query = useMemo<CrudQueryController>(
@@ -218,21 +289,19 @@ export function useCrudTableQueryState({
 
   const changePage = useCallback(
     (nextPage?: number, nextPageSize?: number) => {
-      updateQuery((params) => {
-        setPage(params, nextPage ?? DEFAULT_PAGE);
-        setPageSize(params, nextPageSize ?? defaultPageSize, defaultPageSize);
+      writeCrudQuery({
+        nextPage: nextPage ?? DEFAULT_PAGE,
+        nextPageSize: nextPageSize ?? defaultPageSize,
       });
     },
-    [defaultPageSize, updateQuery],
+    [defaultPageSize, writeCrudQuery],
   );
 
   const changeSorts = useCallback(
     (nextSorts: CrudSortRule[]) => {
-      updateQuery((params) => {
-        setSorts(params, nextSorts);
-      });
+      writeCrudQuery({ nextSorts });
     },
-    [updateQuery],
+    [writeCrudQuery],
   );
 
   const requestParams = useMemo(
