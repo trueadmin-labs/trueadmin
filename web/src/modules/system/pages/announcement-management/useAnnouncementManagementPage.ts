@@ -147,13 +147,14 @@ export function useAnnouncementManagementPage() {
       Partial<AdminAnnouncement>,
       AdminAnnouncementListMeta
     >
-  >(
-    () => ({
+  >(() => {
+    void refreshSeed;
+
+    return {
       list: async (params, options) =>
         adminNotificationManagementApi.listAnnouncements(params).send(options?.force),
-    }),
-    [refreshSeed],
-  );
+    };
+  }, [refreshSeed]);
 
   const columns = useMemo(
     () => createAnnouncementColumns({ levelText, statusText, targetTypeText, t }),

@@ -147,8 +147,6 @@ Repository 可以使用：
 - `updateModel()`
 - `deleteModel()`
 - `existingModelIds()`
-- `syncPivot()`
-- `pivotIds()`
 
 Repository 不处理 HTTP 语义，不抛业务异常，不判断按钮权限。
 
@@ -203,7 +201,7 @@ AI 生成一个标准 CRUD 模块时，至少完成：
 - Service。
 - Save Request。
 - Admin Controller。
-- 权限码和菜单注解。
+- 权限码和 `resources/menus.php` 菜单资源。
 - 操作日志注解。
 - 测试或可执行验证说明。
 - 必要文档更新。

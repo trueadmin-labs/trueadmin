@@ -41,6 +41,8 @@ export function useScrollActiveTabIntoView(
   tabCount: number,
 ) {
   useEffect(() => {
+    void tabCount;
+
     const activeNode = scrollRef.current?.querySelector<HTMLElement>(
       `[data-tab-key="${window.CSS.escape(activeKey ?? '')}"]`,
     );

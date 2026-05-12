@@ -1,7 +1,7 @@
 import { errorCenter } from '@trueadmin/web-core/error';
 import type { TreeSelectProps } from 'antd';
 import { TreeSelect } from 'antd';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { departmentApi } from '../services/department.api';
 import type { DepartmentTreeNode } from '../types/department';
 
@@ -45,7 +45,7 @@ export function TrueAdminDepartmentSelect({
     }
   }, [departments]);
 
-  const loadDepartments = async () => {
+  const loadDepartments = useCallback(async () => {
     if (!fetchDepartments || loading || loaded) {
       return;
     }
@@ -60,13 +60,13 @@ export function TrueAdminDepartmentSelect({
     } finally {
       setLoading(false);
     }
-  };
+  }, [fetchDepartments, loaded, loading, onLoadError]);
 
   useEffect(() => {
     if (autoLoad) {
       void loadDepartments();
     }
-  }, [autoLoad]);
+  }, [autoLoad, loadDepartments]);
 
   const treeData = useMemo(() => toTreeData(innerDepartments), [innerDepartments]);
 

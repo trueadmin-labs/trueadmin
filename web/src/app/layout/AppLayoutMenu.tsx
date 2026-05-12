@@ -114,7 +114,7 @@ export function AppMenu({
   const selectedOpenKeysKey = selectedOpenKeys.join('\0');
 
   useEffect(() => {
-    setOpenKeys(selectedOpenKeys);
+    setOpenKeys(selectedOpenKeysKey ? selectedOpenKeysKey.split('\0') : []);
   }, [selectedOpenKeysKey]);
 
   const handleOpenChange: MenuProps['onOpenChange'] = (keys) => {

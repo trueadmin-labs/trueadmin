@@ -1,8 +1,11 @@
-import { BellOutlined } from '@ant-design/icons';
+import { trans } from '@trueadmin/web-core/i18n';
 import { Descriptions, Tag } from 'antd';
 import { createElement, lazy } from 'react';
-import { trans } from '@/core/i18n/trans';
 import { defineModule } from '@/core/module/types';
+import {
+  EXAMPLE_PROFILE_PREFERENCE_KEY,
+  ExampleProfilePreferencePanel,
+} from './pages/ExampleProfilePreferencePanel';
 
 export default defineModule({
   id: 'true-admin.examples',
@@ -28,9 +31,34 @@ export default defineModule({
       meta: { title: 'examples.crud.title', auth: true },
     },
     {
-      path: '/examples/components',
-      component: lazy(() => import('./pages/ComponentsExamplePage')),
-      meta: { title: 'examples.components.title', auth: true },
+      path: '/examples/form-controls',
+      component: lazy(() => import('./pages/components/FormControlsExamplePage')),
+      meta: { title: 'examples.formControls.title', auth: true },
+    },
+    {
+      path: '/examples/attachments',
+      component: lazy(() => import('./pages/components/AttachmentExamplePage')),
+      meta: { title: 'examples.attachment.title', auth: true },
+    },
+    {
+      path: '/examples/display',
+      component: lazy(() => import('./pages/components/DisplayExamplePage')),
+      meta: { title: 'examples.display.title', auth: true },
+    },
+    {
+      path: '/examples/markdown',
+      component: lazy(() => import('./pages/components/MarkdownExamplePage')),
+      meta: { title: 'examples.markdown.title', auth: true },
+    },
+    {
+      path: '/examples/actions',
+      component: lazy(() => import('./pages/components/ActionExamplePage')),
+      meta: { title: 'examples.actions.title', auth: true },
+    },
+    {
+      path: '/examples/audit',
+      component: lazy(() => import('./pages/components/AuditExamplePage')),
+      meta: { title: 'examples.audit.title', auth: true },
     },
     {
       path: '/examples/selector',
@@ -71,158 +99,12 @@ export default defineModule({
       meta: { title: 'examples.multilevel.title', auth: true },
     },
   ],
-  menus: [
-    {
-      code: 'true-admin.examples',
-      title: 'Demo',
-      i18n: 'menu.examples',
-      path: '/examples',
-      icon: 'app',
-      type: 'directory',
-      status: 'enabled',
-      sort: 9000,
-      devOnly: true,
-      children: [
-        {
-          code: 'true-admin.examples.permission',
-          title: 'Permission Demo',
-          i18n: 'menu.examples.permission',
-          path: '/examples/permission',
-          icon: 'lock',
-          type: 'menu',
-          status: 'enabled',
-          sort: 10,
-        },
-        {
-          code: 'true-admin.examples.loading',
-          title: 'Loading Demo',
-          i18n: 'menu.examples.loading',
-          path: '/examples/loading',
-          icon: 'sync',
-          type: 'menu',
-          status: 'enabled',
-          sort: 20,
-        },
-        {
-          code: 'true-admin.examples.pageContainer',
-          title: 'Page Container',
-          i18n: 'menu.examples.pageContainer',
-          path: '/examples/page-container',
-          icon: 'app',
-          type: 'menu',
-          status: 'enabled',
-          sort: 30,
-        },
-        {
-          code: 'true-admin.examples.crud',
-          title: 'CRUD Demo',
-          i18n: 'menu.examples.crud',
-          path: '/examples/crud',
-          icon: 'table',
-          type: 'menu',
-          status: 'enabled',
-          sort: 40,
-        },
-        {
-          code: 'true-admin.examples.components',
-          title: 'Components Demo',
-          i18n: 'menu.examples.components',
-          path: '/examples/components',
-          icon: 'app',
-          type: 'menu',
-          status: 'enabled',
-          sort: 43,
-        },
-        {
-          code: 'true-admin.examples.selector',
-          title: 'Selector Demo',
-          i18n: 'menu.examples.selector',
-          path: '/examples/selector',
-          icon: 'app',
-          type: 'menu',
-          status: 'enabled',
-          sort: 45,
-        },
-        {
-          code: 'true-admin.examples.stream',
-          title: 'Stream Demo',
-          i18n: 'menu.examples.stream',
-          path: '/examples/stream',
-          icon: 'sync',
-          type: 'menu',
-          status: 'enabled',
-          sort: 47,
-        },
-        {
-          code: 'true-admin.examples.notification',
-          title: 'Notification Demo',
-          i18n: 'menu.examples.notification',
-          path: '/examples/notification',
-          icon: 'bell',
-          type: 'menu',
-          status: 'enabled',
-          sort: 48,
-        },
-        {
-          code: 'true-admin.examples.complexForm',
-          title: 'Complex Form',
-          i18n: 'menu.examples.complexForm',
-          path: '/examples/complex-form',
-          icon: 'app',
-          type: 'menu',
-          status: 'enabled',
-          sort: 50,
-        },
-        {
-          code: 'true-admin.examples.complexDetail',
-          title: 'Complex Detail',
-          i18n: 'menu.examples.complexDetail',
-          path: '/examples/complex-detail',
-          icon: 'app',
-          type: 'menu',
-          status: 'enabled',
-          sort: 60,
-        },
-        {
-          code: 'true-admin.examples.multilevel',
-          title: 'Multi-level Menu',
-          i18n: 'menu.examples.multilevel',
-          path: '/examples/multilevel',
-          icon: 'app',
-          type: 'directory',
-          status: 'enabled',
-          sort: 70,
-          children: [
-            {
-              code: 'true-admin.examples.multilevel.second',
-              title: 'Second Level',
-              i18n: 'menu.examples.multilevel.second',
-              path: '/examples/multilevel/second',
-              icon: 'app',
-              type: 'directory',
-              status: 'enabled',
-              sort: 10,
-              children: [
-                {
-                  code: 'true-admin.examples.multilevel.second.third',
-                  title: 'Third Level',
-                  i18n: 'menu.examples.multilevel.third',
-                  path: '/examples/multilevel/second/third',
-                  icon: 'app',
-                  type: 'menu',
-                  status: 'enabled',
-                  sort: 10,
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-  ],
   locales: {
     'zh-CN': () => import('./locales/zh-CN'),
     'en-US': () => import('./locales/en-US'),
+  },
+  icons: {
+    'true-admin.examples.logo': '/mock/icons/true-admin-examples.svg',
   },
   notification: {
     sources: {
@@ -234,19 +116,37 @@ export default defineModule({
       example_task: {
         label: trans('examples.notification.type.task', '示例任务'),
         color: 'cyan',
-        icon: createElement(BellOutlined),
-        payloadRender: ({ payload }) => (
+        icon: 'BellOutlined',
+        payloadRender: ({ payload }) =>
           createElement(
             Descriptions,
             { bordered: true, column: 1, size: 'small' },
-            Object.entries(payload).map(([key, value]) => createElement(
-              Descriptions.Item,
-              { key, label: key },
-              key === 'status' ? createElement(Tag, { color: 'processing' }, String(value)) : String(value),
-            )),
-          )
-        ),
+            Object.entries(payload).map(([key, value]) =>
+              createElement(
+                Descriptions.Item,
+                { key, label: key },
+                key === 'status'
+                  ? createElement(Tag, { color: 'processing' }, String(value))
+                  : String(value),
+              ),
+            ),
+          ),
       },
     },
+  },
+  profile: {
+    preferences: [
+      {
+        key: EXAMPLE_PROFILE_PREFERENCE_KEY,
+        title: trans('examples.profilePreference.title', '开发示例偏好'),
+        description: trans(
+          'examples.profilePreference.description',
+          '演示插件如何向个人中心注册自己的配置面板。',
+        ),
+        sort: 9000,
+        render: ({ value, saving, save }) =>
+          createElement(ExampleProfilePreferencePanel, { value, saving, onSave: save }),
+      },
+    ],
   },
 });

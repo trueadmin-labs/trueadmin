@@ -9,6 +9,8 @@ export function useTabMoveAnimation(
   const rectsRef = useRef(new Map<string, { pinned: boolean; rect: DOMRect }>());
 
   useLayoutEffect(() => {
+    void layoutKey;
+
     const scroll = scrollRef.current;
     if (!scroll) {
       return;

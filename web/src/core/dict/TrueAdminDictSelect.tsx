@@ -2,7 +2,7 @@ import { errorCenter } from '@trueadmin/web-core/error';
 import type { SelectProps } from 'antd';
 import { Select } from 'antd';
 import type { ReactNode } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { TrueAdminEnumOption } from './TrueAdminEnumTag';
 
 export type TrueAdminDictValue = string | number;
@@ -51,7 +51,7 @@ export function TrueAdminDictSelect<TValue extends TrueAdminDictValue = TrueAdmi
     }
   }, [hasRemoteOptions, options]);
 
-  const loadOptions = async () => {
+  const loadOptions = useCallback(async () => {
     if (!fetchOptions || loading || loaded) {
       return;
     }
@@ -66,13 +66,13 @@ export function TrueAdminDictSelect<TValue extends TrueAdminDictValue = TrueAdmi
     } finally {
       setLoading(false);
     }
-  };
+  }, [fetchOptions, loaded, loading, onLoadError]);
 
   useEffect(() => {
     if (autoLoad) {
       void loadOptions();
     }
-  }, [autoLoad]);
+  }, [autoLoad, loadOptions]);
 
   const selectOptions = useMemo(
     () =>

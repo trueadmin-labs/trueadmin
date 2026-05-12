@@ -23,8 +23,13 @@ export const useCrudTableLayout = ({ dataSourceLength }: { dataSourceLength: num
   const tableMainStyle = {
     '--trueadmin-crud-table-empty-height': `${tableEmptyHeight}px`,
   } as CSSProperties;
+  const tableMeasurementKey = [tableMainSize.height, tableMainSize.width, dataSourceLength].join(
+    ':',
+  );
 
   useLayoutEffect(() => {
+    void tableMeasurementKey;
+
     const tableMainNode = tableMainRef.current;
     if (!tableMainNode) {
       return;
@@ -54,7 +59,7 @@ export const useCrudTableLayout = ({ dataSourceLength }: { dataSourceLength: num
     setTableEmptyChromeHeight((currentChromeHeight) =>
       currentChromeHeight === nextChromeHeight ? currentChromeHeight : nextChromeHeight,
     );
-  }, [tableMainRef, tableMainSize.height, tableMainSize.width, dataSourceLength]);
+  }, [tableMainRef, tableMeasurementKey]);
 
   const finishFilterPanelTransition = useCallback(() => {
     if (filterPanelTransitionTimerRef.current) {

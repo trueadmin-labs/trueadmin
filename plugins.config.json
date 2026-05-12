@@ -5,7 +5,7 @@
       "backendPath": "backend/plugins/true-admin/examples",
       "webPath": "web/src/plugins/true-admin/examples",
       "version": "0.1.0",
-      "enabled": true,
+      "enabled": false,
       "defaults": {}
     }
   },

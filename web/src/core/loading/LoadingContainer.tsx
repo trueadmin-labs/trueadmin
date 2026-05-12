@@ -105,7 +105,7 @@ export function LoadingContainer({
     return () => {
       resizeObserver.disconnect();
     };
-  }, [isLoadingVisible, keepChildren]);
+  }, [isLoadingVisible]);
 
   const reservedHeight = isLoadingVisible
     ? (confirmedHeight ?? measuredHeight ?? loadingHeightPixels)

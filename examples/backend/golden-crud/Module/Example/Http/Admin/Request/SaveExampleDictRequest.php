@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Module\Example\Http\Admin\Request;
 
-use App\Foundation\Http\Request\FormRequest;
+use TrueAdmin\Kernel\Http\Request\FormRequest;
 
 final class SaveExampleDictRequest extends FormRequest
 {

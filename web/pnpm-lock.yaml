@@ -12,7 +12,7 @@ importers:
         specifier: ^2.6.7
         version: 2.6.7(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@ant-design/icons':
-        specifier: latest
+        specifier: 6.2.2
         version: 6.2.2(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@ant-design/pro-components':
         specifier: 3.1.12-0
@@ -27,37 +27,37 @@ importers:
         specifier: ^3.2.2
         version: 3.2.2(react@19.2.6)
       '@tanstack/react-query':
-        specifier: latest
+        specifier: 5.100.9
         version: 5.100.9(react@19.2.6)
       '@trueadmin/web-antd':
         specifier: ^0.1.1
-        version: 0.1.1
+        version: 0.1.1(@ant-design/icons@6.2.2(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(antd@6.3.7(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@trueadmin/web-core':
         specifier: ^0.1.9
         version: 0.1.9
       '@trueadmin/web-react':
         specifier: ^0.1.0
-        version: 0.1.0
+        version: 0.1.0(react@19.2.6)
       alova:
-        specifier: latest
+        specifier: 3.5.1
         version: 3.5.1
       antd:
-        specifier: latest
+        specifier: 6.3.7
         version: 6.3.7(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       antd-style:
-        specifier: latest
+        specifier: 4.1.0
         version: 4.1.0(@types/react@19.2.14)(antd@6.3.7(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       dayjs:
-        specifier: latest
+        specifier: 1.11.20
         version: 1.11.20
       motion:
-        specifier: latest
+        specifier: 12.38.0
         version: 12.38.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       react:
-        specifier: latest
+        specifier: 19.2.6
         version: 19.2.6
       react-dom:
-        specifier: latest
+        specifier: 19.2.6
         version: 19.2.6(react@19.2.6)
       react-error-boundary:
         specifier: ^6.1.1
@@ -66,56 +66,56 @@ importers:
         specifier: ^10.1.0
         version: 10.1.0(@types/react@19.2.14)(react@19.2.6)
       react-router:
-        specifier: latest
+        specifier: 7.15.0
         version: 7.15.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       remark-gfm:
         specifier: ^4.0.1
         version: 4.0.1
       zustand:
-        specifier: latest
+        specifier: 5.0.13
         version: 5.0.13(@types/react@19.2.14)(react@19.2.6)(use-sync-external-store@1.6.0(react@19.2.6))
     devDependencies:
       '@biomejs/biome':
-        specifier: latest
+        specifier: 2.4.14
         version: 2.4.14
       '@tailwindcss/vite':
-        specifier: latest
+        specifier: 4.2.4
         version: 4.2.4(vite@8.0.11(@types/node@25.6.0)(jiti@2.7.0))
       '@testing-library/jest-dom':
-        specifier: latest
+        specifier: 6.9.1
         version: 6.9.1
       '@testing-library/react':
-        specifier: latest
+        specifier: 16.3.2
         version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@types/node':
-        specifier: latest
+        specifier: 25.6.0
         version: 25.6.0
       '@types/react':
-        specifier: latest
+        specifier: 19.2.14
         version: 19.2.14
       '@types/react-dom':
-        specifier: latest
+        specifier: 19.2.3
         version: 19.2.3(@types/react@19.2.14)
       '@vitejs/plugin-react':
-        specifier: latest
+        specifier: 6.0.1
         version: 6.0.1(vite@8.0.11(@types/node@25.6.0)(jiti@2.7.0))
       jsdom:
-        specifier: latest
+        specifier: 29.1.1
         version: 29.1.1
       msw:
-        specifier: latest
+        specifier: 2.14.3
         version: 2.14.3(@types/node@25.6.0)(typescript@6.0.3)
       tailwindcss:
-        specifier: latest
+        specifier: 4.2.4
         version: 4.2.4
       typescript:
-        specifier: latest
+        specifier: 6.0.3
         version: 6.0.3
       vite:
-        specifier: latest
+        specifier: 8.0.11
         version: 8.0.11(@types/node@25.6.0)(jiti@2.7.0)
       vitest:
-        specifier: latest
+        specifier: 4.1.5
         version: 4.1.5(@types/node@25.6.0)(jsdom@29.1.1)(msw@2.14.3(@types/node@25.6.0)(typescript@6.0.3))(vite@8.0.11(@types/node@25.6.0)(jiti@2.7.0))
 
 packages:
@@ -1118,9 +1118,6 @@ packages:
       '@types/react-dom':
         optional: true
 
-  '@trueadmin/web-core@0.1.9':
-    resolution: {integrity: sha512-enYPbvVQiNdC5UmWmB8IQbhziBbMqP8WI3NbvO5ED44da/hOt7qqFPHNCVoUalI8ZbgmDfupbvFeZ3kxUUSkXw==}
-
   '@trueadmin/web-antd@0.1.1':
     resolution: {integrity: sha512-mXH1YKp9UQEtcrVMe0r+uKHPoWz7kP5TP3gHFTioY10bxb1p5WRcJJJU9lNj3QlwO8vAj/sC+jKWac10RUn2kA==}
     peerDependencies:
@@ -1128,6 +1125,9 @@ packages:
       antd: '>=5'
       react: '>=18'
       react-dom: '>=18'
+
+  '@trueadmin/web-core@0.1.9':
+    resolution: {integrity: sha512-enYPbvVQiNdC5UmWmB8IQbhziBbMqP8WI3NbvO5ED44da/hOt7qqFPHNCVoUalI8ZbgmDfupbvFeZ3kxUUSkXw==}
 
   '@trueadmin/web-react@0.1.0':
     resolution: {integrity: sha512-wzN2FlUwelEUPD8cUz65hVd3LgLj8V74K6YesKFye3drfSw4od7sRdWfckdgZ7duGcdUz3av2cNvjXM7BZJZlg==}
@@ -3858,13 +3858,19 @@ snapshots:
       '@types/react': 19.2.14
       '@types/react-dom': 19.2.3(@types/react@19.2.14)
 
+  '@trueadmin/web-antd@0.1.1(@ant-design/icons@6.2.2(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(antd@6.3.7(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)':
+    dependencies:
+      '@ant-design/icons': 6.2.2(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      antd: 6.3.7(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      react: 19.2.6
+      react-dom: 19.2.6(react@19.2.6)
+
   '@trueadmin/web-core@0.1.9': {}
 
-  '@trueadmin/web-antd@0.1.1': {}
-
-  '@trueadmin/web-react@0.1.0':
+  '@trueadmin/web-react@0.1.0(react@19.2.6)':
     dependencies:
       '@trueadmin/web-core': 0.1.9
+      react: 19.2.6
 
   '@tybys/wasm-util@0.10.2':
     dependencies:

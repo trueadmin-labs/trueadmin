@@ -14,18 +14,6 @@ export default defineModule({
       },
     },
   ],
-  menus: [
-    {
-      code: 'workbench',
-      title: 'Workbench',
-      i18n: 'menu.workbench',
-      path: '/workbench',
-      icon: 'DashboardOutlined',
-      type: 'menu',
-      status: 'enabled',
-      sort: -100,
-    },
-  ],
   locales: {
     'zh-CN': () => import('./locales/zh-CN'),
     'en-US': () => import('./locales/en-US'),

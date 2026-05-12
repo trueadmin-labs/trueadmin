@@ -1,6 +1,6 @@
 import type { TranslateFunction } from '@trueadmin/web-core/i18n';
 import { Form } from 'antd';
-import { type Key, useEffect, useMemo, useState } from 'react';
+import { type Key, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CrudTableAction } from '@/core/crud/types';
 import { departmentApi } from '../../services/department.api';
 import { menuApi } from '../../services/menu.api';
@@ -37,13 +37,29 @@ export function useRoleAuthorization({ t, onSuccess }: UseRoleAuthorizationOptio
   const [expandedMenuIds, setExpandedMenuIds] = useState<Key[]>([]);
   const [strictMenuCheck, setStrictMenuCheck] = useState(true);
   const dataPolicyScopes = Form.useWatch('policies', dataPolicyForm);
+  const dataPolicyMetadataRef = useRef(dataPolicyMetadata);
+  const menuTreeRef = useRef(menuTree);
+  const departmentTreeRef = useRef(departmentTree);
 
-  const loadDataPolicyMetadata = async () => {
+  useEffect(() => {
+    dataPolicyMetadataRef.current = dataPolicyMetadata;
+  }, [dataPolicyMetadata]);
+
+  useEffect(() => {
+    menuTreeRef.current = menuTree;
+  }, [menuTree]);
+
+  useEffect(() => {
+    departmentTreeRef.current = departmentTree;
+  }, [departmentTree]);
+
+  const loadDataPolicyMetadata = useCallback(async () => {
     const metadata = await roleApi.dataPolicyMetadata();
+    dataPolicyMetadataRef.current = metadata;
     setDataPolicyMetadata(metadata);
 
     return metadata;
-  };
+  }, []);
 
   const openAuthorize = (record: AdminRole) => {
     if (isBuiltinRole(record)) {
@@ -80,11 +96,16 @@ export function useRoleAuthorization({ t, onSuccess }: UseRoleAuthorizationOptio
 
     const loadAuthorizeData = async () => {
       try {
+        const currentMetadata = dataPolicyMetadataRef.current;
+        const currentMenuTree = menuTreeRef.current;
+        const currentDepartmentTree = departmentTreeRef.current;
         const [detail, metadata, menus, departments] = await Promise.all([
           roleApi.detail(pendingAuthorizeRole.id),
-          dataPolicyMetadata ? Promise.resolve(dataPolicyMetadata) : loadDataPolicyMetadata(),
-          menuTree.length > 0 ? Promise.resolve(menuTree) : menuApi.tree(),
-          departmentTree.length > 0 ? Promise.resolve(departmentTree) : departmentApi.tree(),
+          currentMetadata ? Promise.resolve(currentMetadata) : loadDataPolicyMetadata(),
+          currentMenuTree.length > 0 ? Promise.resolve(currentMenuTree) : menuApi.tree(),
+          currentDepartmentTree.length > 0
+            ? Promise.resolve(currentDepartmentTree)
+            : departmentApi.tree(),
         ]);
 
         if (cancelled) {
@@ -109,7 +130,7 @@ export function useRoleAuthorization({ t, onSuccess }: UseRoleAuthorizationOptio
     return () => {
       cancelled = true;
     };
-  }, [authorizeOpen, pendingAuthorizeRole]);
+  }, [authorizeOpen, dataPolicyForm.setFieldsValue, loadDataPolicyMetadata, pendingAuthorizeRole]);
 
   const departmentTreeData = useMemo(() => toDepartmentTreeData(departmentTree), [departmentTree]);
   const menuGroupKeysMap = useMemo(

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Module\Example\Repository;
 
-use App\Foundation\Pagination\PageResult;
-use App\Foundation\Query\AdminQuery;
 use App\Foundation\Repository\AbstractRepository;
 use App\Module\Example\Model\ExampleDict;
+use TrueAdmin\Kernel\Crud\CrudQuery;
+use TrueAdmin\Kernel\Pagination\PageResult;
 
 final class ExampleDictRepository extends AbstractRepository
 {
@@ -16,18 +16,18 @@ final class ExampleDictRepository extends AbstractRepository
     protected array $keywordFields = ['code', 'name', 'remark'];
 
     protected array $filterable = [
-        'id' => ['=', 'in'],
-        'code' => ['=', 'like'],
-        'name' => ['=', 'like'],
-        'status' => ['=', 'in'],
-        'created_at' => ['between', '>=', '<='],
+        'id' => ['eq', 'in'],
+        'code' => ['eq', 'like'],
+        'name' => ['eq', 'like'],
+        'status' => ['eq', 'in'],
+        'createdAt' => ['between', 'gte', 'lte'],
     ];
 
-    protected array $sortable = ['id', 'sort', 'created_at', 'updated_at'];
+    protected array $sortable = ['id', 'sort', 'createdAt', 'updatedAt'];
 
     protected array $defaultSort = ['sort' => 'asc', 'id' => 'desc'];
 
-    public function paginate(AdminQuery $adminQuery): PageResult
+    public function paginate(CrudQuery $adminQuery): PageResult
     {
         return $this->pageQuery(
             ExampleDict::query(),

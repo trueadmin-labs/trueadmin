@@ -1,6 +1,6 @@
 import type { Plugin } from 'vite';
 
-const success = (data: unknown) => ({ code: 'KERNEL.SUCCESS', message: 'success', data });
+const success = (data: unknown) => ({ code: 'SUCCESS', message: 'success', data });
 
 const fail = (code: string, message: string, data?: unknown) => ({ code, message, data });
 

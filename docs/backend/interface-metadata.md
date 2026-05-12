@@ -119,7 +119,7 @@ final class ProductController extends AdminController
 规则：
 
 - `code` 必须全局唯一。
-- 后台接口默认应声明权限，除非明确 `public: true`。
+- 后台接口默认应声明权限；只需要登录即可访问的接口不写 `#[Permission]`，只挂 `AdminAuthMiddleware`。
 - 权限注解用于接口权限校验、OpenAPI 和权限规则元数据；原子权限点必须先在 `resources/menus.php` 中声明。
 - 运行时角色授权以数据库为准。
 
@@ -149,6 +149,7 @@ public function saveAndAuthorize(): array
 - `allOf`：必须同时拥有全部原子权限点才能访问。
 - `code`、`anyOf`、`allOf` 三者只能使用一个；复杂业务授权交给 Policy 或 Service。
 - 同一个类或方法只允许声明一个 `#[Permission]`，不要通过重复注解表达多权限。
+- `#[Permission(public: true)]` 不作为后台登录态接口的标准写法；后台登录态接口不写 `#[Permission]`，公开接口应放到 Open 入口并由对应 Open Controller 表达。
 - `anyOf/allOf` 本身不会注册成数据库权限点，也不会生成 `A OR B` 这种组合权限。
 - `anyOf/allOf` 引用的每个权限码必须已经被菜单、按钮或单权限 `#[Permission('code')]` 定义为原子权限点，否则元数据扫描直接报错。
 

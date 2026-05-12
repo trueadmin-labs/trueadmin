@@ -1,6 +1,6 @@
 import { ReloadOutlined } from '@ant-design/icons';
 import type { TableProps } from 'antd';
-import { Button, List, Space, Table, Tag, Typography } from 'antd';
+import { Button, Space, Table, Tag, Typography } from 'antd';
 import { useState } from 'react';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { TrueAdminPageSection } from '@/core/page/TrueAdminPageSection';
@@ -92,20 +92,23 @@ export default function PageContainerExamplePage() {
       rightTitle={t('examples.pageContainer.right.title', '内容区')}
       leftWidth={260}
       left={
-        <List
-          size="small"
-          dataSource={[
+        <ul className="trueadmin-example-list is-compact">
+          {[
             t('examples.pageContainer.left.item.basic', '基础信息'),
             t('examples.pageContainer.left.item.permission', '权限策略'),
             t('examples.pageContainer.left.item.audit', '审计记录'),
             t('examples.pageContainer.left.item.setting', '扩展配置'),
-          ]}
-          renderItem={(item, index) => (
-            <List.Item className={index === 0 ? 'is-active' : undefined}>
+          ].map((item, index) => (
+            <li
+              key={item}
+              className={['trueadmin-example-list-item', index === 0 ? 'is-active' : '']
+                .filter(Boolean)
+                .join(' ')}
+            >
               <Text>{item}</Text>
-            </List.Item>
-          )}
-        />
+            </li>
+          ))}
+        </ul>
       }
       right={
         <Space orientation="vertical" size={16} style={{ width: '100%' }}>

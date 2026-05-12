@@ -47,6 +47,11 @@ export function TrueAdminMessageDetailModal({
   }, [message]);
 
   useEffect(() => {
+    if (messageKey === undefined) {
+      setOptimisticReadAt(undefined);
+      return;
+    }
+
     setOptimisticReadAt(undefined);
   }, [messageKey]);
 

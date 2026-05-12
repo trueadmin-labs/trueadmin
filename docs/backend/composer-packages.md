@@ -43,9 +43,10 @@ v0.1.7  HTTP controller defaults / exception handler
 v0.1.8  Permission middleware runtime
 v0.1.9  Service helper base
 v0.1.10 Remaining foundation primitives
+v0.1.11 Repository typing and CRUD boundary cleanup
 ```
 
-模板后端已切到 `trueadmin/kernel ^0.1.10`。由于 Packagist 可能不会立即同步新 tag，`backend/composer.json` 临时保留 GitHub VCS repository，避免使用 `dev-main` 或本地 path repository。Packagist 同步 `v0.1.10` 后应删除该 VCS repository 配置。
+模板后端已切到 `trueadmin/kernel ^0.1.11`，并直接使用 Packagist 解析，不再保留临时 GitHub VCS repository。模板应用不能依赖本地 path repository 或临时 VCS repository，否则开源用户初始化项目时会得到不可复现的依赖解析结果。
 
 ### CRUD 协议值对象
 

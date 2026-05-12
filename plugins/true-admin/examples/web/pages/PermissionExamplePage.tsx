@@ -1,9 +1,8 @@
 import { LockOutlined, WarningOutlined } from '@ant-design/icons';
+import { ApiError, errorCenter } from '@trueadmin/web-core/error';
 import { Alert, Button, Card, Space, Typography } from 'antd';
 import { Link } from 'react-router';
 import { Permission } from '@/core/auth/Permission';
-import { ApiError } from '@/core/error/ApiError';
-import { errorCenter } from '@/core/error/errorCenter';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { TrueAdminPage } from '@/core/page/TrueAdminPage';
 
@@ -27,7 +26,11 @@ export default function PermissionExamplePage() {
   };
 
   return (
-    <TrueAdminPage title={t('examples.permission.title', '权限展示示例')}>
+    <TrueAdminPage
+      title={t('examples.permission.title', '权限展示示例')}
+      contentAlign="center"
+      contentWidth={920}
+    >
       <Space orientation="vertical" size={16} className="trueadmin-example-stack">
         <Alert
           showIcon

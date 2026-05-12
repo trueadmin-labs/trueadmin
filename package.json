@@ -17,6 +17,6 @@
     "check": "npm run doctor && npm run plugin:validate && npm run web:check && npm run backend:analyse && npm run backend:test"
   },
   "devDependencies": {
-    "@trueadmin/cli": "^0.1.0"
+    "@trueadmin/cli": "^0.1.11"
   }
 }

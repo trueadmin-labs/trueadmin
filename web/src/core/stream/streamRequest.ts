@@ -10,8 +10,7 @@ import type {
   StreamRequestResult,
 } from './types';
 
-const isSuccessCode = (code: string | number): boolean =>
-  code === 0 || code === '0' || code === 'SUCCESS' || code === 'KERNEL.SUCCESS';
+const isSuccessCode = (code: unknown): boolean => code === 'SUCCESS';
 
 const isEnvelope = <TData = unknown>(value: unknown): value is ApiEnvelope<TData> =>
   typeof value === 'object' && value !== null && 'code' in value && 'message' in value;

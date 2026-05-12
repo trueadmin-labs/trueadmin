@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Plugin\TrueAdmin\Examples\Http\Admin\Controller;
 
-use TrueAdmin\Kernel\Http\Controller\AdminController;
-use TrueAdmin\Kernel\Http\ApiResponse;
+use App\Module\Auth\Http\Admin\Middleware\AdminAuthMiddleware;
 use App\Module\System\Service\Notification\AdminNotificationService;
 use App\Module\System\Service\Notification\AdminNotificationTemplateRegistry;
+use TrueAdmin\Kernel\Http\ApiResponse;
 use TrueAdmin\Kernel\Http\Attribute\AdminController as AdminRouteController;
 use TrueAdmin\Kernel\Http\Attribute\AdminPost;
-use TrueAdmin\Kernel\Http\Attribute\Permission;
+use TrueAdmin\Kernel\Http\Controller\AdminController;
 
-#[AdminRouteController(path: '/api/admin/examples/notification-demo')]
+#[AdminRouteController(path: '/api/admin/examples/notification-demo', middleware: [AdminAuthMiddleware::class])]
 final class NotificationDemoController extends AdminController
 {
     public function __construct(
@@ -22,7 +22,6 @@ final class NotificationDemoController extends AdminController
     }
 
     #[AdminPost('direct')]
-    #[Permission(public: true)]
     public function direct(): array
     {
         return ApiResponse::success($this->notifications->send([
@@ -50,7 +49,6 @@ final class NotificationDemoController extends AdminController
     }
 
     #[AdminPost('template')]
-    #[Permission(public: true)]
     public function template(): array
     {
         $this->templates->register('examples.task.assigned', [

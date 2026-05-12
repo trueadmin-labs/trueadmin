@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Module\Example\Service;
 
-use App\Foundation\Pagination\PageResult;
-use App\Foundation\Query\AdminQuery;
-use App\Foundation\Service\AbstractService;
 use App\Module\Example\Model\ExampleDict;
 use App\Module\Example\Repository\ExampleDictRepository;
+use TrueAdmin\Kernel\Crud\CrudQuery;
+use TrueAdmin\Kernel\Pagination\PageResult;
+use TrueAdmin\Kernel\Service\AbstractService;
 
 final class ExampleDictManagementService extends AbstractService
 {
@@ -16,7 +16,7 @@ final class ExampleDictManagementService extends AbstractService
     {
     }
 
-    public function paginate(AdminQuery $query): PageResult
+    public function paginate(CrudQuery $query): PageResult
     {
         return $this->dicts->paginate($query);
     }

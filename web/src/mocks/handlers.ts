@@ -9,8 +9,7 @@ import type {
 } from '@/core/notification';
 import type { TrueAdminAttachmentValue } from '@/core/upload';
 
-const success = <T>(data: T) =>
-  HttpResponse.json({ code: 'KERNEL.SUCCESS', message: 'success', data });
+const success = <T>(data: T) => HttpResponse.json({ code: 'SUCCESS', message: 'success', data });
 
 const fail = (code: string, message: string, data?: unknown) =>
   HttpResponse.json({ code, message, data }, { status: 400 });

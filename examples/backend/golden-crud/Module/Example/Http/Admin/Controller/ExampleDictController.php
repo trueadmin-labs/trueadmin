@@ -4,23 +4,21 @@ declare(strict_types=1);
 
 namespace App\Module\Example\Http\Admin\Controller;
 
-use App\Foundation\Http\Controller\AdminController;
-use App\Foundation\Http\Middleware\PermissionMiddleware;
-use App\Foundation\Http\Request\AdminQueryRequest;
-use App\Foundation\Support\ApiResponse;
 use App\Module\Auth\Http\Admin\Middleware\AdminAuthMiddleware;
 use App\Module\Example\Http\Admin\Request\SaveExampleDictRequest;
 use App\Module\Example\Service\ExampleDictManagementService;
+use TrueAdmin\Kernel\Crud\CrudQueryRequest;
+use TrueAdmin\Kernel\Http\ApiResponse;
 use TrueAdmin\Kernel\Http\Attribute\AdminController as AdminRouteController;
 use TrueAdmin\Kernel\Http\Attribute\AdminDelete;
 use TrueAdmin\Kernel\Http\Attribute\AdminGet;
 use TrueAdmin\Kernel\Http\Attribute\AdminPost;
 use TrueAdmin\Kernel\Http\Attribute\AdminPut;
-use TrueAdmin\Kernel\Http\Attribute\Menu;
 use TrueAdmin\Kernel\Http\Attribute\Permission;
+use TrueAdmin\Kernel\Http\Controller\AdminController;
+use TrueAdmin\Kernel\Http\Middleware\PermissionMiddleware;
 use TrueAdmin\Kernel\OperationLog\Attribute\OperationLog;
 
-#[Menu(code: 'example.dicts', title: '示例字典', path: '/example/dicts', parent: 'system', permission: 'example:dict:list', component: './example/dicts', sort: 900)]
 #[AdminRouteController(path: '/api/admin/example/dicts', middleware: [AdminAuthMiddleware::class, PermissionMiddleware::class])]
 final class ExampleDictController extends AdminController
 {
@@ -30,9 +28,9 @@ final class ExampleDictController extends AdminController
 
     #[AdminGet('')]
     #[Permission('example:dict:list', title: '示例字典列表', group: '示例模块')]
-    public function list(AdminQueryRequest $request): array
+    public function list(CrudQueryRequest $request): array
     {
-        return ApiResponse::success($this->dicts->paginate($request->adminQuery()));
+        return ApiResponse::success($this->dicts->paginate($request->crudQuery())->toArray());
     }
 
     #[AdminGet('{id}')]

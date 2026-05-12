@@ -5,8 +5,7 @@ import { createAlova } from 'alova';
 import { handleAuthUnauthorized, isAuthUnauthorizedCode } from '@/core/auth/session';
 import { useLocaleStore } from '@/core/store/localeStore';
 
-const isSuccessCode = (code: string | number): boolean =>
-  code === 0 || code === '0' || code === 'SUCCESS' || code === 'KERNEL.SUCCESS';
+const isSuccessCode = (code: unknown): boolean => code === 'SUCCESS';
 
 export const http = createAlova({
   baseURL: requestConfig.baseURL,

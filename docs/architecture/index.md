@@ -53,7 +53,7 @@ web/
 
 菜单、权限、按钮、接口元数据以后端为事实来源。前端 manifest 只负责 `path -> component`、模块 locales、图标和前端扩展能力。后端 menu-tree 下发菜单，前端按 path 匹配 React Router 页面；权限点由后端注册和校验，前端只消费当前用户 permissions 控制按钮展示。
 
-菜单管理的定位是“后台资源树管理”，不是动态路由配置器。内部页面由模块代码定义：后端模块或插件 `resources/menus.php` 负责声明菜单和按钮权限，Controller `#[Permission]` 只负责接口权限校验，前端 `manifest.ts` 负责注册对应 React Router 页面。后台菜单管理只允许调整资源树的展示关系和运行时状态，例如名称、图标、排序、层级和启停；代码定义资源的 `type`、`path`、`permission` 等关键字段由代码掌权。菜单图标支持 registered icon name 和 image url：registered icon name 来自前端图标注册表，默认包含完整 Ant Design Icons，模块/插件可通过 `manifest.icons` 扩展 React 图标或图片图标；image url 用于上传图片图标。需要跳转外部系统时使用自定义 `link` 资源，支持新标签页、当前窗口和系统内 iframe 承载。
+菜单管理的定位是“后台资源树管理”，不是动态路由配置器。内部页面由模块代码定义：后端模块或插件 `resources/menus.php` 负责声明菜单和按钮权限，Controller `#[Permission]` 只负责接口权限校验；只需要后台登录态的接口不写 `#[Permission]`，只挂 `AdminAuthMiddleware`。前端 `manifest.ts` 负责注册对应 React Router 页面。后台菜单管理只允许调整资源树的展示关系和运行时状态，例如名称、图标、排序、层级和启停；代码定义资源的 `type`、`path`、`permission` 等关键字段由代码掌权。菜单图标支持 registered icon name 和 image url：registered icon name 来自前端图标注册表，默认包含完整 Ant Design Icons，模块/插件可通过 `manifest.icons` 扩展 React 图标或图片图标；image url 用于上传图片图标。需要跳转外部系统时使用自定义 `link` 资源，支持新标签页、当前窗口和系统内 iframe 承载。
 
 数据权限同样采用模块/插件自注册：后端模块和插件通过 `resources/data_policies.php` 声明数据资源和策略类，框架自动汇总到角色授权元数据。Foundation 提供模板默认 `organization` 组织策略，System 只提供部门树和当前操作部门数据来源；ERP/CRM/WMS 等业务模块可以注册客户、仓库、项目、门店等领域策略，Repository 显式调用 `applyDataPolicy()` 和 `assertDataPolicyAllows()` 落地查询约束。
 

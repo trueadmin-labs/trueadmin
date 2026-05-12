@@ -11,7 +11,6 @@ const requiredLocales = ['zh-CN', 'en-US'];
 const failures = [];
 const manifestIds = new Map();
 const routePaths = new Map();
-const menuCodes = new Map();
 
 const manifestFiles = [
   ...findManifestFiles(path.join(webRoot, 'src/modules')),
@@ -53,7 +52,7 @@ function validateManifest(file) {
 
   const requiredKeys = new Set();
   validateRoutes(file, manifest, requiredKeys);
-  validateMenus(file, manifest, requiredKeys);
+  validateNoFrontendMenus(file, manifest);
   collectTransKeys(manifest, requiredKeys);
   validateLocales(file, manifest, requiredKeys);
 }
@@ -129,46 +128,12 @@ function validateRoutes(file, manifest, requiredKeys) {
   }
 }
 
-function validateMenus(file, manifest, requiredKeys) {
-  const menus = getArrayProperty(manifest, 'menus');
-  if (!menus) {
-    return;
-  }
-
-  for (const menu of objectElements(menus)) {
-    validateMenuNode(file, menu, requiredKeys);
-  }
-}
-
-function validateMenuNode(file, menu, requiredKeys) {
+function validateNoFrontendMenus(file, manifest) {
   const relative = relativePath(file);
-  const code = getStringProperty(menu, 'code');
-  const i18n = getStringProperty(menu, 'i18n');
-  const menuPath = getStringProperty(menu, 'path');
-
-  if (!code) {
-    failures.push(`${relative}: menu code is required.`);
-  } else {
-    recordUnique(menuCodes, code, relative, 'menu code');
-  }
-
-  if (!i18n) {
-    failures.push(`${relative}: menu [${code || 'unknown'}] i18n is required.`);
-  } else {
-    requiredKeys.add(i18n);
-  }
-
-  if (menuPath && !menuPath.startsWith('/')) {
-    failures.push(`${relative}: menu [${code || 'unknown'}] path [${menuPath}] must start with /.`);
-  }
-
-  const children = getArrayProperty(menu, 'children');
-  if (!children) {
-    return;
-  }
-
-  for (const child of objectElements(children)) {
-    validateMenuNode(file, child, requiredKeys);
+  if (getProperty(manifest, 'menus')) {
+    failures.push(
+      `${relative}: frontend menus are not allowed. Declare menus in backend resources/menus.php.`,
+    );
   }
 }
 

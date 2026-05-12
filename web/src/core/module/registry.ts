@@ -28,4 +28,3 @@ enabledManifests.forEach((manifest) => {
 });
 
 export const frontendRoutes = enabledManifests.flatMap((manifest) => manifest.routes ?? []);
-export const frontendMenus = enabledManifests.flatMap((manifest) => manifest.menus ?? []);

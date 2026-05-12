@@ -43,7 +43,6 @@ describe('validate-modules script', () => {
       `export default defineModule({
         id: 'system',
         routes: [{ path: '/system/users', meta: { title: 'system.users.title' } }],
-        menus: [{ code: 'system.users', i18n: 'system.users.title', path: '/system/users' }],
         locales: {
           'zh-CN': () => import('./locales/zh-CN'),
           'en-US': () => import('./locales/en-US'),
@@ -103,6 +102,7 @@ describe('validate-modules script', () => {
 
     expect(result.status).toBe(1);
     expect(output).toContain('duplicate route path [/dashboard]');
+    expect(output).toContain('frontend menus are not allowed');
     expect(output).toContain('locale [zh-CN] is missing key [workbench.dashboard]');
   });
 });

@@ -89,11 +89,5 @@
             "Composer\\Config::disableProcessTimeout",
             "php ./bin/hyperf.php start"
         ]
-    },
-    "repositories": {
-        "trueadmin-kernel": {
-            "type": "vcs",
-            "url": "git@github.com:trueadmin-labs/trueadmin-kernel.git"
-        }
     }
 }

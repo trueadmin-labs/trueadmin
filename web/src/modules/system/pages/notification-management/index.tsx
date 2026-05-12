@@ -124,13 +124,14 @@ export default function AdminNotificationManagementPage() {
       Partial<AdminNotificationBatch>,
       AdminNotificationBatchListMeta
     >
-  >(
-    () => ({
+  >(() => {
+    void refreshSeed;
+
+    return {
       list: async (params, options) =>
         adminNotificationManagementApi.listNotifications(params).send(options?.force),
-    }),
-    [refreshSeed],
-  );
+    };
+  }, [refreshSeed]);
 
   const columns = useMemo(
     () => createNotificationColumns({ levelText, statusText, targetTypeText, t }),

@@ -1,9 +1,9 @@
+import { TrueAdminPageModal } from '@core/modal';
+import { TrueAdminDetailPage } from '@core/page';
 import { Button, Card, Col, Descriptions, Divider, Row, Space, Table, Tag, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useMemo, useState } from 'react';
 import { useI18n } from '@/core/i18n/I18nProvider';
-import { TrueAdminPageModal } from '@/core/modal/TrueAdminPageModal';
-import { TrueAdminFormPage } from '@/core/page/TrueAdminFormPage';
 import { TrueAdminAttachmentUpload, type TrueAdminAttachmentValue } from '@/core/upload';
 
 type SalesDetailItem = {
@@ -370,7 +370,7 @@ export default function ComplexDetailExamplePage() {
 
   return (
     <>
-      <TrueAdminFormPage
+      <TrueAdminDetailPage
         showHeader
         title={t('examples.complexDetail.title', '复杂详情示例')}
         description={t(
@@ -380,7 +380,7 @@ export default function ComplexDetailExamplePage() {
         extra={actions}
       >
         <SalesOrderDetailBody />
-      </TrueAdminFormPage>
+      </TrueAdminDetailPage>
       <TrueAdminPageModal
         title={t('examples.complexDetail.modal.title', '销售订单详情')}
         open={modalOpen}

@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Plugin\TrueAdmin\Examples\Http\Admin\Controller;
 
-use App\Foundation\Http\Controller\AdminController;
-use App\Foundation\Support\ApiResponse;
+use App\Module\Auth\Http\Admin\Middleware\AdminAuthMiddleware;
 use Plugin\TrueAdmin\Examples\Service\StreamDemoService;
+use TrueAdmin\Kernel\Http\ApiResponse;
 use TrueAdmin\Kernel\Http\Attribute\AdminController as AdminRouteController;
 use TrueAdmin\Kernel\Http\Attribute\AdminGet;
-use TrueAdmin\Kernel\Http\Attribute\Permission;
 use TrueAdmin\Kernel\Http\Attribute\Streamable;
+use TrueAdmin\Kernel\Http\Controller\AdminController;
 
-#[AdminRouteController(path: '/api/admin/examples/stream-demo')]
+#[AdminRouteController(path: '/api/admin/examples/stream-demo', middleware: [AdminAuthMiddleware::class])]
 final class StreamDemoController extends AdminController
 {
     public function __construct(private readonly StreamDemoService $demoService)
@@ -20,7 +20,6 @@ final class StreamDemoController extends AdminController
     }
 
     #[AdminGet('progress')]
-    #[Permission(public: true)]
     #[Streamable(completedMessage: '流式演示完成')]
     public function progress(): array
     {

@@ -1,6 +1,6 @@
 import { PlusOutlined } from '@ant-design/icons';
 import { App, Button, Dropdown, Form } from 'antd';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { TrueAdminCrudPage, useCrudRecordDetail } from '@/core/crud';
 import type { CrudTableAction } from '@/core/crud/types';
 import { useI18n } from '@/core/i18n/I18nProvider';
@@ -70,13 +70,13 @@ export default function AdminMenusPage() {
     [t],
   );
 
-  const loadMenuTree = async () => {
+  const loadMenuTree = useCallback(async () => {
     setMenuTree(await menuApi.tree());
-  };
+  }, []);
 
   useEffect(() => {
     void loadMenuTree();
-  }, []);
+  }, [loadMenuTree]);
 
   useEffect(() => {
     if (!editRecord.open || !editing) {

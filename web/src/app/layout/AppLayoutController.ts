@@ -3,7 +3,6 @@ import { useLocation } from 'react-router';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { getRouteLayoutMeta } from '@/core/layout/routeLayoutMeta';
 import { useMenuTreeQuery } from '@/core/menu/hooks';
-import { mergeFrontendMenus } from '@/core/menu/mergeFrontendMenus';
 import { useLayoutStore } from '@/core/store/layoutStore';
 import { useRouteTabs } from '@/core/tabs/useRouteTabs';
 import { findMenuMatch, getSideOpenKeys, resolveActiveRoot, toRuntimeMenus } from './AppLayoutMenu';
@@ -17,8 +16,7 @@ export function useAppLayoutController() {
   const showTabs = useLayoutStore((state) => state.showTabs);
   const layoutMode = useLayoutStore((state) => state.layoutMode);
   const { data: menus, isLoading, error } = useMenuTreeQuery();
-  const mergedMenus = useMemo(() => mergeFrontendMenus(menus), [menus]);
-  const runtimeMenus = useMemo(() => toRuntimeMenus(mergedMenus, t), [mergedMenus, t]);
+  const runtimeMenus = useMemo(() => toRuntimeMenus(menus ?? [], t), [menus, t]);
   const menuMatch = useMemo(
     () => findMenuMatch(runtimeMenus, location.pathname),
     [runtimeMenus, location.pathname],

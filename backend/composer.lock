@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "041dc0a7032fdd1ca3ab782dfa8d3a20",
+    "content-hash": "fe98e4908eff3a481ab6b7cc22a1e402",
     "packages": [
         {
             "name": "aliyuncs/oss-sdk-php",
@@ -6493,23 +6493,15 @@
                     "TrueAdmin\\Kernel\\": "src/"
                 }
             },
-            "scripts": {
-                "lint": [
-                    "find src -name '*.php' -print0 | xargs -0 -n1 php -l"
-                ],
-                "check": [
-                    "composer validate --strict",
-                    "@lint"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
             "description": "TrueAdmin reusable backend kernel package.",
             "homepage": "https://github.com/trueadmin-labs/trueadmin-kernel",
             "support": {
-                "source": "https://github.com/trueadmin-labs/trueadmin-kernel/tree/v0.1.11",
-                "issues": "https://github.com/trueadmin-labs/trueadmin-kernel/issues"
+                "issues": "https://github.com/trueadmin-labs/trueadmin-kernel/issues",
+                "source": "https://github.com/trueadmin-labs/trueadmin-kernel/tree/v0.1.11"
             },
             "time": "2026-05-12T11:17:40+00:00"
         },

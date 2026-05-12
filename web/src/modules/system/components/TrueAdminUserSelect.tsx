@@ -23,8 +23,12 @@ export type TrueAdminUserSelectProps<
   'fetchByValues' | 'fetchOptions' | 'getLabel' | 'getValue' | 'optionRender' | 'picker'
 > & {
   picker?: Partial<TrueAdminRemoteTableSelectProps<AdminUser, TValue, TMultiple>['picker']>;
+  fetchByValues?: TrueAdminRemoteTableSelectProps<AdminUser, TValue, TMultiple>['fetchByValues'];
   fetchDepartments?: () => Promise<DepartmentTreeNode[]>;
+  fetchOptions?: TrueAdminRemoteTableSelectProps<AdminUser, TValue, TMultiple>['fetchOptions'];
+  getLabel?: TrueAdminRemoteTableSelectProps<AdminUser, TValue, TMultiple>['getLabel'];
   getValue?: (user: AdminUser) => TValue;
+  optionRender?: TrueAdminRemoteTableSelectProps<AdminUser, TValue, TMultiple>['optionRender'];
   showDepartmentAside?: boolean;
 };
 
@@ -47,8 +51,12 @@ export function TrueAdminUserSelect<
   TValue extends TrueAdminRemoteSelectValue = number,
   TMultiple extends boolean = false,
 >({
+  fetchByValues,
   fetchDepartments = departmentApi.tree,
+  fetchOptions,
+  getLabel,
   getValue = defaultGetUserValue,
+  optionRender,
   picker,
   showDepartmentAside = true,
   ...selectProps
@@ -132,7 +140,7 @@ export function TrueAdminUserSelect<
     [t],
   );
 
-  const fetchUsers = useCallback(
+  const defaultFetchUsers = useCallback(
     async ({ keyword, page, pageSize }: { keyword: string; page?: number; pageSize?: number }) => {
       const result = await adminUserApi.list({ keyword, page, pageSize });
       return result.items ?? [];
@@ -140,7 +148,7 @@ export function TrueAdminUserSelect<
     [],
   );
 
-  const fetchUsersByValues = useCallback(
+  const defaultFetchUsersByValues = useCallback(
     async (values: TValue[]) => {
       const result = await adminUserApi.list({ page: 1, pageSize: Math.max(values.length, 20) });
       const valueSet = new Set(values.map(String));
@@ -148,21 +156,26 @@ export function TrueAdminUserSelect<
     },
     [getValue],
   );
+  const defaultGetLabel = useCallback((user: AdminUser) => user.nickname || user.username, []);
+  const defaultOptionRender = useCallback(
+    (user: AdminUser) => (
+      <Space size={8}>
+        <span>{user.nickname || user.username}</span>
+        <Typography.Text type="secondary">{user.username}</Typography.Text>
+      </Space>
+    ),
+    [],
+  );
 
   return (
     <TrueAdminRemoteTableSelect<AdminUser, TValue, TMultiple>
       placeholder={t('system.users.select.placeholder', '搜索用户')}
       {...selectProps}
-      fetchByValues={fetchUsersByValues}
-      fetchOptions={fetchUsers}
-      getLabel={(user) => user.nickname || user.username}
+      fetchByValues={fetchByValues ?? defaultFetchUsersByValues}
+      fetchOptions={fetchOptions ?? defaultFetchUsers}
+      getLabel={getLabel ?? defaultGetLabel}
       getValue={getValue}
-      optionRender={(user) => (
-        <Space size={8}>
-          <span>{user.nickname || user.username}</span>
-          <Typography.Text type="secondary">{user.username}</Typography.Text>
-        </Space>
-      )}
+      optionRender={optionRender ?? defaultOptionRender}
       picker={{
         title: t('system.users.select.modalTitle', '选择用户'),
         rowKey: (record) => getValue(record) as Key,

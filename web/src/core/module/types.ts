@@ -2,7 +2,6 @@ import type { TranslateFunction, TransText } from '@trueadmin/web-core/i18n';
 import type { ErrorRegistry } from '@trueadmin/web-react/error';
 import type { ComponentType, LazyExoticComponent, ReactNode } from 'react';
 import type { TrueAdminIconInput } from '@/core/icon/TrueAdminIcon';
-import type { AppMenu } from '@/core/menu/types';
 import type { AdminMessageSourceConfig, AdminMessageTypeConfig } from '@/core/notification/types';
 
 export type RouteComponent = LazyExoticComponent<ComponentType> | ComponentType;
@@ -34,12 +33,6 @@ export type FrontendRoute = {
     layout?: RouteLayoutMeta;
     tab?: RouteTabMeta;
   };
-};
-
-export type FrontendMenu = Omit<AppMenu, 'children'> & {
-  parentPath?: string;
-  devOnly?: boolean;
-  children?: FrontendMenu[];
 };
 
 export type LocaleLoader = () => Promise<
@@ -88,7 +81,6 @@ export type ModuleProfileManifest = {
 export type ModuleManifest = {
   id: string;
   routes?: FrontendRoute[];
-  menus?: FrontendMenu[];
   locales?: Record<string, LocaleLoader>;
   icons?: IconLoader;
   errors?: ErrorRegistry;

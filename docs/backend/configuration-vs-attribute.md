@@ -115,6 +115,21 @@ final class ProductController extends AdminController
 }
 ```
 
+只需要后台登录态、不需要角色权限码的接口只挂认证中间件，不写 `#[Permission]`：
+
+```php
+#[AdminController(path: '/api/admin/profile', middleware: [AdminAuthMiddleware::class])]
+final class ProfileController extends AdminController
+{
+    #[AdminGet('')]
+    public function detail(): array
+    {
+    }
+}
+```
+
+不要用 `#[Permission(public: true)]` 表达“登录即可访问”。公开接口应放到 Open 入口；后台 Admin 入口的登录态接口以认证中间件作为边界。
+
 Client/Open 同理使用对应端的 Controller 和方法注解：
 
 ```php

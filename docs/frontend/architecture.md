@@ -309,33 +309,24 @@ const showModal = (nextPayload: Payload) => {
 
 接口级无权限继续走全局错误弹窗。当前用户打开组件后接口返回 `403` 或 `KERNEL.AUTH.FORBIDDEN`，说明后端权限兜底触发、权限状态变化或前端权限判断不完整，应由错误弹窗解释原因和建议，不要静默替换成页面 403。
 
-## 前端固定路由和菜单
+## 前端固定路由
 
-模块可以通过 `manifest.routes` 注册前端固定路由，通过 `manifest.menus` 注册前端菜单。前端菜单会与后端菜单树合并，适合开发示例、前端工具页、调试页和不由后端业务菜单控制的固定入口。
+模块可以通过 `manifest.routes` 注册前端固定路由。菜单不允许在前端 manifest 中声明，必须由后端模块或插件的 `resources/menus.php` 提供，再通过后端菜单同步进入菜单事实文件。
 
-合并规则：
+原因是菜单承载权限码、父子关系、排序和启用状态，属于后台管理端权限模型的一部分。前端只负责注册页面路由和渲染后端返回的菜单树，避免同一个入口在前后端出现两份事实来源。
 
-- `parentPath` 命中后端或前端菜单节点时，菜单会追加到该节点的 `children`。
-- 没有 `parentPath` 或未命中时，菜单追加到根级底部。
-- 同级菜单按 `sort` 升序排列；未设置 `sort` 时默认为 `0`。
-- `devOnly: true` 的菜单仅在 dev/test 模式显示，但路由仍可注册，方便直接访问调试页。
+开发期校验会拒绝 `manifest.menus`。如果模块需要菜单入口：
 
-示例：
+- 后端模块：写入 `backend/app/Module/<ModuleName>/resources/menus.php`。
+- 插件源包：写入 `plugins/<vendor>/<name>/backend/php/resources/menus.php`。
+- 插件安装后 runtime：由框架插件同步命令写入 `backend/plugins/<vendor>/<name>/resources/menus.php`。
+
+前端 manifest 示例：
 
 ```ts
 export default defineModule({
   id: 'true-admin.examples',
   routes: [{ path: '/examples/permission', component: PermissionExamplePage }],
-  menus: [
-    {
-      code: 'true-admin.examples.permission',
-      title: 'Permission Demo',
-      path: '/examples/permission',
-      parentPath: '/examples',
-      sort: 10,
-      devOnly: true,
-    },
-  ],
 });
 ```
 

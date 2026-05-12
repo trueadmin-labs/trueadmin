@@ -1,19 +1,9 @@
 import { ReloadOutlined } from '@ant-design/icons';
-import {
-  Button,
-  Card,
-  Descriptions,
-  Drawer,
-  Form,
-  Input,
-  Modal,
-  Space,
-  Switch,
-  Typography,
-} from 'antd';
+import { Button, Card, Descriptions, Drawer, Form, Input, Space, Switch, Typography } from 'antd';
 import { useEffect, useState } from 'react';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { LoadingContainer } from '@/core/loading/LoadingContainer';
+import { TrueAdminModal } from '@/core/modal';
 import { TrueAdminPage } from '@/core/page/TrueAdminPage';
 
 const { Paragraph, Text } = Typography;
@@ -206,7 +196,11 @@ export default function LoadingExamplePage() {
   const effectiveLoading = disableLoading ? false : detailLoading || refreshing;
 
   return (
-    <TrueAdminPage title={t('examples.loading.title', '加载态示例')}>
+    <TrueAdminPage
+      title={t('examples.loading.title', '加载态示例')}
+      contentAlign="center"
+      contentWidth={920}
+    >
       <Space orientation="vertical" size={16} className="trueadmin-example-stack">
         <Card title={t('examples.loading.strategy.title', '容器级加载策略')} size="small">
           <Paragraph>
@@ -298,7 +292,7 @@ export default function LoadingExamplePage() {
         </Card>
       </Space>
 
-      <Modal
+      <TrueAdminModal
         title={t('examples.loading.modal.detailTitle', '弹窗详情')}
         open={modalOpen}
         onCancel={() => setModalOpen(false)}
@@ -329,7 +323,7 @@ export default function LoadingExamplePage() {
             ) : null}
           </div>
         </LoadingContainer>
-      </Modal>
+      </TrueAdminModal>
 
       <Drawer
         title={t('examples.loading.drawer.detailTitle', '详情抽屉')}

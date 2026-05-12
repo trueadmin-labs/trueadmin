@@ -4,6 +4,14 @@ declare(strict_types=1);
 
 return [
     [
+        'code' => 'workbench',
+        'title' => '工作台',
+        'path' => '/workbench',
+        'icon' => 'DashboardOutlined',
+        'sort' => -100,
+        'type' => 'menu',
+    ],
+    [
         'code' => 'organization',
         'title' => '组织权限',
         'path' => '/organization',

@@ -1,7 +1,7 @@
 import { PlusOutlined } from '@ant-design/icons';
 import type { TreeSelectProps } from 'antd';
 import { App, Button, Form } from 'antd';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { TrueAdminCrudPage, useCrudRecordDetail } from '@/core/crud';
 import type { CrudTableAction } from '@/core/crud/types';
 import { useI18n } from '@/core/i18n/I18nProvider';
@@ -35,13 +35,13 @@ export default function AdminDepartmentsPage() {
     [t],
   );
 
-  const loadDepartmentTree = async () => {
+  const loadDepartmentTree = useCallback(async () => {
     setDepartmentTree(await departmentApi.tree());
-  };
+  }, []);
 
   useEffect(() => {
     void loadDepartmentTree();
-  }, []);
+  }, [loadDepartmentTree]);
 
   useEffect(() => {
     if (!editRecord.open || !editing) {
