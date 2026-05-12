@@ -1,39 +1,28 @@
-import { DeleteOutlined, EyeOutlined, PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined } from '@ant-design/icons';
 import type { UploadProps } from 'antd';
-import { Button, Empty, Image, message, Tooltip, Upload } from 'antd';
+import { Button, Empty, Image, message, Upload } from 'antd';
 import type { RcFile, UploadFile } from 'antd/es/upload/interface';
-import type { CSSProperties, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { useMemo, useState } from 'react';
 import { useI18n } from '@/core/i18n/I18nProvider';
+import {
+  DEFAULT_IMAGE_ACCEPT,
+  getImagePreviewSizeStyle,
+  normalizeImageUploadResult,
+  type TrueAdminImageId,
+  type TrueAdminImagePreviewSize,
+  type TrueAdminImageUploadResult,
+  type TrueAdminImageValue,
+  toImageValueArray,
+} from './imageUploadUtils';
+import { TrueAdminImageUploadItem } from './TrueAdminImageUploadItem';
 
-export type TrueAdminImageId = string | number;
-
-export type TrueAdminImageValue = {
-  id: TrueAdminImageId;
-  name: string;
-  url: string;
-  size?: number;
-  mimeType?: string;
-};
-
-export type TrueAdminImageUploadResult = Partial<TrueAdminImageValue> & {
-  id?: TrueAdminImageId;
-  name?: string;
-  originalName?: string;
-  originName?: string;
-  origin_name?: string;
-  url?: string;
-  size?: number;
-  mimeType?: string;
-  type?: string;
-};
-
-export type TrueAdminImagePreviewSize =
-  | number
-  | {
-      width?: number | string;
-      height?: number | string;
-    };
+export type {
+  TrueAdminImageId,
+  TrueAdminImagePreviewSize,
+  TrueAdminImageUploadResult,
+  TrueAdminImageValue,
+} from './imageUploadUtils';
 
 export type TrueAdminImageUploadProps = Omit<
   UploadProps,
@@ -64,52 +53,6 @@ export type TrueAdminImageUploadProps = Omit<
   accept?: string;
 };
 
-const DEFAULT_ACCEPT = 'image/png,image/jpeg,image/webp,image/gif';
-
-function toArray(value: TrueAdminImageUploadProps['value']): TrueAdminImageValue[] {
-  if (!value) {
-    return [];
-  }
-
-  return Array.isArray(value) ? value : [value];
-}
-
-function normalizeUploadResult(
-  result: TrueAdminImageUploadResult | undefined,
-  file: File,
-): TrueAdminImageValue {
-  const raw = result ?? {};
-  const name = raw.name ?? raw.originalName ?? raw.originName ?? raw.origin_name ?? file.name;
-
-  return {
-    id: raw.id ?? `${Date.now()}-${file.name}`,
-    name,
-    url: raw.url ?? URL.createObjectURL(file),
-    size: raw.size ?? file.size,
-    mimeType: raw.mimeType ?? raw.type ?? file.type,
-  };
-}
-
-function getSizeStyle(previewSize?: TrueAdminImagePreviewSize): CSSProperties | undefined {
-  if (previewSize === undefined) {
-    return undefined;
-  }
-
-  if (typeof previewSize === 'number') {
-    return {
-      '--trueadmin-image-upload-width': `${previewSize}px`,
-      '--trueadmin-image-upload-height': `${previewSize}px`,
-    } as CSSProperties;
-  }
-
-  return {
-    '--trueadmin-image-upload-width':
-      typeof previewSize.width === 'number' ? `${previewSize.width}px` : previewSize.width,
-    '--trueadmin-image-upload-height':
-      typeof previewSize.height === 'number' ? `${previewSize.height}px` : previewSize.height,
-  } as CSSProperties;
-}
-
 export function TrueAdminImageUpload({
   value,
   onChange,
@@ -123,12 +66,12 @@ export function TrueAdminImageUpload({
   emptyText,
   addText,
   replaceText,
-  accept = DEFAULT_ACCEPT,
+  accept = DEFAULT_IMAGE_ACCEPT,
   ...uploadProps
 }: TrueAdminImageUploadProps) {
   const { t } = useI18n();
   const [uploading, setUploading] = useState(false);
-  const files = useMemo(() => toArray(value), [value]);
+  const files = useMemo(() => toImageValueArray(value), [value]);
   const [preview, setPreview] = useState<TrueAdminImageValue>();
 
   const uploadFileList = useMemo<UploadFile[]>(
@@ -146,7 +89,7 @@ export function TrueAdminImageUpload({
 
   const limit = multiple ? maxCount : 1;
   const canUpload = !readonly && !disabled && (!limit || files.length < limit);
-  const sizeStyle = getSizeStyle(previewSize);
+  const sizeStyle = getImagePreviewSizeStyle(previewSize);
 
   const emitChange = (nextFiles: TrueAdminImageValue[]) => {
     const nextValue = multiple ? nextFiles : (nextFiles[0] ?? null);
@@ -166,7 +109,7 @@ export function TrueAdminImageUpload({
 
     setUploading(true);
     try {
-      const nextFile = normalizeUploadResult(upload ? await upload(file) : undefined, file);
+      const nextFile = normalizeImageUploadResult(upload ? await upload(file) : undefined, file);
       const nextFiles = multiple ? [...files, nextFile] : [nextFile];
       emitChange(limit ? nextFiles.slice(0, limit) : nextFiles);
     } catch (error) {
@@ -210,30 +153,15 @@ export function TrueAdminImageUpload({
     <div className="trueadmin-image-upload">
       <div className="trueadmin-image-upload-list">
         {files.map((file) => (
-          <div key={file.id} className="trueadmin-image-upload-item" style={sizeStyle}>
-            <img src={file.url} alt={file.name} />
-            <div className="trueadmin-image-upload-mask">
-              <Tooltip title={t('upload.image.preview', '预览')}>
-                <Button
-                  type="text"
-                  size="small"
-                  icon={<EyeOutlined />}
-                  onClick={() => setPreview(file)}
-                />
-              </Tooltip>
-              {!readonly ? (
-                <Tooltip title={t('upload.image.remove', '移除')}>
-                  <Button
-                    danger
-                    type="text"
-                    size="small"
-                    icon={<DeleteOutlined />}
-                    onClick={() => handleRemove(file.id)}
-                  />
-                </Tooltip>
-              ) : null}
-            </div>
-          </div>
+          <TrueAdminImageUploadItem
+            key={file.id}
+            file={file}
+            readonly={readonly}
+            sizeStyle={sizeStyle}
+            t={t}
+            onPreview={setPreview}
+            onRemove={handleRemove}
+          />
         ))}
         {canUpload ? uploader : null}
       </div>
