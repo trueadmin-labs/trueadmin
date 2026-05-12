@@ -16,7 +16,7 @@ import {
   useScrollActiveTabIntoView,
   useTabsWheelScroll,
 } from './AppTabsBarEffects';
-import { useTabActions } from './AppTabsBarItems';
+import { useTabActions } from './AppTabsBarMenu';
 import { type ClosingTabState, isSamePath, type PendingDropAnimation } from './AppTabsBarUtils';
 import { useTabsStore } from './tabsStore';
 import type { AppTab } from './types';

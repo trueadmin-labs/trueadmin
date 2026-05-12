@@ -1,11 +1,8 @@
 import { DndContext } from '@dnd-kit/core';
 import { useAppTabsBarController } from './AppTabsBarController';
-import {
-  restrictToHorizontalAxis,
-  SortableTabGroup,
-  sameGroupCollisionDetection,
-  TabsMoreButton,
-} from './AppTabsBarItems';
+import { restrictToHorizontalAxis, sameGroupCollisionDetection } from './AppTabsBarDnd';
+import { SortableTabGroup } from './AppTabsBarItems';
+import { TabsMoreButton } from './AppTabsBarMenu';
 
 export function AppTabsBar({ activeKey }: { activeKey?: string }) {
   const tabsBar = useAppTabsBarController(activeKey);
