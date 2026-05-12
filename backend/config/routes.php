@@ -10,7 +10,7 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
 use App\Foundation\Http\Controller\HealthController;
-use App\Foundation\Http\Controller\OpenApiController;
+use TrueAdmin\Kernel\Http\Controller\OpenApiController;
 use TrueAdmin\Kernel\Http\Routing\AttributeRouteRegistrar;
 use Hyperf\Context\ApplicationContext;
 use Hyperf\HttpServer\Router\Router;

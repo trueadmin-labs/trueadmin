@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Module\Auth\Http\Admin\Controller;
 
-use App\Foundation\Http\Controller\AdminController;
+use TrueAdmin\Kernel\Http\Controller\AdminController;
 use TrueAdmin\Kernel\Http\ApiResponse;
 use App\Module\Auth\Http\Admin\Middleware\AdminAuthMiddleware;
 use App\Module\Auth\Service\PassportService;

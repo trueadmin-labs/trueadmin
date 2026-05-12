@@ -156,6 +156,13 @@ OpenApiDocumentBuilder
   components()
   operation()
 
+TrueAdminExceptionHandler
+  businessExceptionResponse()
+  validationExceptionResponse()
+  serverErrorResponse()
+  logUnexpected()
+  json()
+
 PluginRepository / PluginConfigRepository
   installedPlugins()
   stringList()
@@ -236,4 +243,4 @@ AbstractRepository 整体继承链
 项目默认身份解析和权限落库实现
 ```
 
-当前 `CrudQueryRequest`、`PageResult`、`ApiResponse`、FormRequest、运行时服务、`CrudQueryApplier` 和 `DataPolicy` runtime 已进入 `trueadmin/kernel`；`AbstractRepository` 整体仍留在模板，后续只继续抽不依赖业务事实的小件。
+当前 `CrudQueryRequest`、`PageResult`、`ApiResponse`、FormRequest、运行时服务、`CrudQueryApplier`、`DataPolicy` runtime、Controller 默认基类和默认 ExceptionHandler 已进入 `trueadmin/kernel`；`AbstractRepository` 整体仍留在模板，后续只继续抽不依赖业务事实的小件。
