@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Module\System\Service;
 
-use App\Foundation\Query\AdminQuery;
+use App\Foundation\Crud\CrudQuery;
 use App\Foundation\Service\AbstractService;
 use App\Module\System\Model\AdminMenu;
 use App\Module\System\Repository\AdminMenuRepository;
@@ -29,12 +29,12 @@ final class AdminMenuManagementService extends AbstractService
     {
     }
 
-    public function list(AdminQuery $query): array
+    public function list(CrudQuery $query): array
     {
         return $this->menus->all($query);
     }
 
-    public function tree(AdminQuery $query): array
+    public function tree(CrudQuery $query): array
     {
         return $this->menus->managementTree($query);
     }

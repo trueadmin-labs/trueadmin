@@ -6,7 +6,7 @@ namespace App\Module\System\Http\Admin\Controller;
 
 use App\Foundation\Http\Controller\AdminController;
 use App\Foundation\Http\Middleware\PermissionMiddleware;
-use App\Foundation\Http\Request\AdminQueryRequest;
+use App\Foundation\Http\Request\CrudQueryRequest;
 use App\Foundation\Support\ApiResponse;
 use App\Module\Auth\Http\Admin\Middleware\AdminAuthMiddleware;
 use App\Module\System\Service\AdminLogService;
@@ -23,15 +23,15 @@ final class AdminLogController extends AdminController
 
     #[AdminGet('login-logs')]
     #[Permission('system:login-log:list', title: '登录日志列表', group: '系统管理')]
-    public function loginLogs(AdminQueryRequest $request): array
+    public function loginLogs(CrudQueryRequest $request): array
     {
-        return ApiResponse::success($this->logs->loginLogs($request->adminQuery())->toArray());
+        return ApiResponse::success($this->logs->loginLogs($request->crudQuery())->toArray());
     }
 
     #[AdminGet('operation-logs')]
     #[Permission('system:operation-log:list', title: '操作日志列表', group: '系统管理')]
-    public function operationLogs(AdminQueryRequest $request): array
+    public function operationLogs(CrudQueryRequest $request): array
     {
-        return ApiResponse::success($this->logs->operationLogs($request->adminQuery())->toArray());
+        return ApiResponse::success($this->logs->operationLogs($request->crudQuery())->toArray());
     }
 }

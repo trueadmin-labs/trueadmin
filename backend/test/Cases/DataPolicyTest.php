@@ -9,7 +9,7 @@ use App\Foundation\DataPermission\DataPolicyStrategyInterface;
 use App\Foundation\DataPermission\DataPolicyManager;
 use App\Foundation\DataPermission\DataPolicyRegistry;
 use App\Foundation\Plugin\PluginRepository;
-use App\Foundation\Query\AdminQuery;
+use App\Foundation\Crud\CrudQuery;
 use App\Module\System\Repository\Notification\AdminAnnouncementRepository;
 use App\Module\System\Repository\Notification\AdminNotificationBatchRepository;
 use App\Module\System\Repository\AdminUserRepository;
@@ -198,7 +198,7 @@ final class DataPolicyTest extends TestCase
 
         ActorContext::set(ActorFactory::fromAdmin(801005, 'dp-announcement', 'DP Announcement', ['dp-announcement'], [$roleId], [], $deptA, [$deptA]));
 
-        $result = $this->container()->get(AdminAnnouncementRepository::class)->paginate(new AdminQuery(page: 1, pageSize: 50, keyword: $suffix));
+        $result = $this->container()->get(AdminAnnouncementRepository::class)->paginate(new CrudQuery(page: 1, pageSize: 50, keyword: $suffix));
         $ids = array_column($result->items, 'id');
 
         $this->assertContains($visibleId, $ids);
@@ -217,7 +217,7 @@ final class DataPolicyTest extends TestCase
 
         ActorContext::set(ActorFactory::fromAdmin($actorId, 'dp-notification', 'DP Notification', ['dp-notification'], [$roleId], [], $deptId, [$deptId]));
 
-        $result = $this->container()->get(AdminNotificationBatchRepository::class)->paginate(new AdminQuery(page: 1, pageSize: 50, keyword: $suffix));
+        $result = $this->container()->get(AdminNotificationBatchRepository::class)->paginate(new CrudQuery(page: 1, pageSize: 50, keyword: $suffix));
         $ids = array_column($result->items, 'id');
 
         $this->assertContains($visibleId, $ids);
@@ -303,7 +303,7 @@ final class DataPolicyTest extends TestCase
         $this->createPolicy($roleId, $scope, $config);
         ActorContext::set(ActorFactory::fromAdmin($actorId, 'dp-actor', 'DP Actor', ['dp-role'], [$roleId], [], $operationDeptId, [$operationDeptId]));
 
-        $result = $this->container()->get(AdminUserRepository::class)->paginate(new AdminQuery(page: 1, pageSize: 50, keyword: $suffix));
+        $result = $this->container()->get(AdminUserRepository::class)->paginate(new CrudQuery(page: 1, pageSize: 50, keyword: $suffix));
         $ids = array_column($result->items, 'id');
 
         foreach ($expectedIds as $expectedId) {

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Module\System\Repository;
 
-use App\Foundation\Query\AdminQuery;
+use App\Foundation\Crud\CrudQuery;
 use App\Foundation\Repository\AbstractRepository;
 use App\Foundation\Tree\TreeHelper;
 use App\Module\System\Model\AdminDepartment;
@@ -17,12 +17,12 @@ final class AdminDepartmentRepository extends AbstractRepository
     protected array $keywordFields = ['code', 'name'];
 
     protected array $filterable = [
-        'id' => ['=', 'in'],
-        'parent_id' => ['=', 'in'],
-        'code' => ['=', 'like'],
-        'name' => ['=', 'like'],
-        'level' => ['=', 'in', '>=', '<='],
-        'status' => ['=', 'in'],
+        'id' => ['eq', 'in'],
+        'parent_id' => ['eq', 'in'],
+        'code' => ['eq', 'like'],
+        'name' => ['eq', 'like'],
+        'level' => ['eq', 'in', 'gte', 'lte'],
+        'status' => ['eq', 'in'],
     ];
 
     protected array $sortable = ['id', 'level', 'sort', 'created_at', 'updated_at'];
@@ -33,7 +33,7 @@ final class AdminDepartmentRepository extends AbstractRepository
     {
     }
 
-    public function all(AdminQuery $adminQuery): array
+    public function all(CrudQuery $adminQuery): array
     {
         return $this->listQuery(
             AdminDepartment::query(),
@@ -147,7 +147,7 @@ final class AdminDepartmentRepository extends AbstractRepository
         ];
     }
 
-    public function tree(AdminQuery $adminQuery): array
+    public function tree(CrudQuery $adminQuery): array
     {
         return $this->tree->build($this->all($adminQuery));
     }

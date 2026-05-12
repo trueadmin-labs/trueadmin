@@ -136,7 +136,7 @@ export function useMessagesPage() {
         name: 'createdAt',
         transform: ({ value }) => {
           const [startAt, endAt] = splitRange(value);
-          return { endAt, startAt };
+          return { params: { endAt, startAt } };
         },
         type: 'dateRange',
       },

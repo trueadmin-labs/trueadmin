@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Module\System\Repository;
 
+use App\Foundation\Crud\CrudQuery;
 use App\Foundation\Pagination\PageResult;
-use App\Foundation\Query\AdminQuery;
 use App\Foundation\Repository\AbstractRepository;
 use App\Module\System\Model\AdminLoginLog;
 
@@ -16,13 +16,13 @@ final class AdminLoginLogRepository extends AbstractRepository
     protected array $keywordFields = ['username', 'ip', 'user_agent', 'reason'];
 
     protected array $filterable = [
-        'id' => ['=', 'in'],
-        'admin_user_id' => ['=', 'in'],
-        'username' => ['=', 'like'],
-        'ip' => ['=', 'like'],
-        'status' => ['=', 'in'],
-        'reason' => ['=', 'like'],
-        'created_at' => ['between', '>=', '<='],
+        'id' => ['eq', 'in'],
+        'admin_user_id' => ['eq', 'in'],
+        'username' => ['eq', 'like'],
+        'ip' => ['eq', 'like'],
+        'status' => ['eq', 'in'],
+        'reason' => ['eq', 'like'],
+        'created_at' => ['between', 'gte', 'lte'],
     ];
 
     protected array $sortable = ['id', 'created_at'];
@@ -37,7 +37,7 @@ final class AdminLoginLogRepository extends AbstractRepository
         return AdminLoginLog::query()->create($payload);
     }
 
-    public function paginate(AdminQuery $adminQuery): PageResult
+    public function paginate(CrudQuery $adminQuery): PageResult
     {
         return $this->pageQuery(
             AdminLoginLog::query(),

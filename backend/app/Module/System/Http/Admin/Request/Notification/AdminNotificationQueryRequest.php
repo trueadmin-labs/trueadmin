@@ -4,22 +4,22 @@ declare(strict_types=1);
 
 namespace App\Module\System\Http\Admin\Request\Notification;
 
-use App\Foundation\Http\Request\AdminQueryRequest;
+use App\Foundation\Http\Request\CrudQueryRequest;
 
-class AdminNotificationQueryRequest extends AdminQueryRequest
+class AdminNotificationQueryRequest extends CrudQueryRequest
 {
     public function rules(): array
     {
         return [
             ...parent::rules(),
-            'kind' => ['sometimes', 'string', 'in:all,notification,announcement'],
-            'status' => ['sometimes', 'string', 'max:32'],
-            'level' => ['sometimes', 'string', 'max:32'],
-            'type' => ['sometimes', 'string', 'max:64'],
-            'source' => ['sometimes', 'string', 'max:64'],
-            'targetType' => ['sometimes', 'string', 'max:32'],
-            'startAt' => ['sometimes', 'string', 'max:32'],
-            'endAt' => ['sometimes', 'string', 'max:32'],
+            'params.kind' => ['sometimes', 'string', 'in:all,notification,announcement'],
+            'params.status' => ['sometimes', 'string', 'max:32'],
+            'params.level' => ['sometimes', 'string', 'max:32'],
+            'params.type' => ['sometimes', 'string', 'max:64'],
+            'params.source' => ['sometimes', 'string', 'max:64'],
+            'params.targetType' => ['sometimes', 'string', 'max:32'],
+            'params.startAt' => ['sometimes', 'string', 'max:32'],
+            'params.endAt' => ['sometimes', 'string', 'max:32'],
         ];
     }
 }

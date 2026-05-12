@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Module\System\Service;
 
 use App\Foundation\Pagination\PageResult;
-use App\Foundation\Query\AdminQuery;
+use App\Foundation\Crud\CrudQuery;
 use App\Foundation\Service\AbstractService;
 use App\Foundation\Database\AfterCommitCallbacks;
 use App\Foundation\Support\Password;
@@ -32,7 +32,7 @@ final class AdminUserManagementService extends AbstractService
     ) {
     }
 
-    public function paginate(AdminQuery $query): PageResult
+    public function paginate(CrudQuery $query): PageResult
     {
         return $this->users->paginate($query);
     }

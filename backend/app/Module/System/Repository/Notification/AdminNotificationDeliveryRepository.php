@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Module\System\Repository\Notification;
 
+use App\Foundation\Crud\CrudQuery;
 use App\Foundation\Pagination\PageResult;
-use App\Foundation\Query\AdminQuery;
 use App\Foundation\Repository\AbstractRepository;
 use App\Module\System\Model\AdminNotificationDelivery;
 use Hyperf\Database\Model\Builder;
@@ -15,23 +15,46 @@ final class AdminNotificationDeliveryRepository extends AbstractRepository
 {
     protected ?string $modelClass = AdminNotificationDelivery::class;
 
-    protected array $keywordFields = ['receiver_name', 'title', 'content', 'error_message'];
+    protected array $keywordFields = [
+        'admin_notification_deliveries.receiver_name',
+        'admin_notification_deliveries.title',
+        'admin_notification_deliveries.content',
+        'admin_notification_deliveries.error_message',
+    ];
 
     protected array $filterable = [
-        'id' => ['=', 'in'],
-        'batch_id' => ['=', 'in'],
-        'receiver_id' => ['=', 'in'],
-        'status' => ['=', 'in'],
-        'read_at' => ['between', '>=', '<='],
-        'archived_at' => ['between', '>=', '<='],
-        'created_at' => ['between', '>=', '<='],
+        'id' => ['eq', 'in'],
+        'batch_id' => ['eq', 'in'],
+        'receiver_id' => ['eq', 'in'],
+        'status' => ['eq', 'in'],
+        'read_at' => ['between', 'gte', 'lte'],
+        'archived_at' => ['between', 'gte', 'lte'],
+        'created_at' => ['between', 'gte', 'lte'],
+    ];
+
+    protected array $filterColumns = [
+        'id' => 'admin_notification_deliveries.id',
+        'batch_id' => 'admin_notification_deliveries.batch_id',
+        'receiver_id' => 'admin_notification_deliveries.receiver_id',
+        'status' => 'admin_notification_deliveries.status',
+        'read_at' => 'admin_notification_deliveries.read_at',
+        'archived_at' => 'admin_notification_deliveries.archived_at',
+        'created_at' => 'admin_notification_deliveries.created_at',
     ];
 
     protected array $sortable = ['id', 'created_at', 'updated_at', 'read_at', 'sent_at'];
 
+    protected array $sortColumns = [
+        'id' => 'admin_notification_deliveries.id',
+        'created_at' => 'admin_notification_deliveries.created_at',
+        'updated_at' => 'admin_notification_deliveries.updated_at',
+        'read_at' => 'admin_notification_deliveries.read_at',
+        'sent_at' => 'admin_notification_deliveries.sent_at',
+    ];
+
     protected array $defaultSort = ['id' => 'desc'];
 
-    public function paginateByBatch(int $batchId, AdminQuery $adminQuery): PageResult
+    public function paginateByBatch(int $batchId, CrudQuery $adminQuery): PageResult
     {
         return $this->pageQuery(
             AdminNotificationDelivery::query()->where('batch_id', $batchId),
@@ -40,14 +63,14 @@ final class AdminNotificationDeliveryRepository extends AbstractRepository
         );
     }
 
-    public function paginateForReceiver(int $receiverId, AdminQuery $adminQuery): PageResult
+    public function paginateForReceiver(int $receiverId, CrudQuery $adminQuery): PageResult
     {
         $items = $this->listForReceiver($receiverId, $adminQuery);
 
         return new PageResult($items, count($items), $adminQuery->page, $adminQuery->pageSize);
     }
 
-    public function listForReceiver(int $receiverId, AdminQuery $adminQuery): array
+    public function listForReceiver(int $receiverId, CrudQuery $adminQuery): array
     {
         $now = date('Y-m-d H:i:s');
         $query = AdminNotificationDelivery::query()
@@ -168,21 +191,19 @@ final class AdminNotificationDeliveryRepository extends AbstractRepository
         ];
     }
 
-    private function messageSearchQuery(AdminQuery $adminQuery): AdminQuery
+    private function messageSearchQuery(CrudQuery $adminQuery): CrudQuery
     {
-        return new AdminQuery(
+        return new CrudQuery(
             page: $adminQuery->page,
             pageSize: $adminQuery->pageSize,
             keyword: '',
             filters: [],
-            operators: [],
+            sorts: $adminQuery->sorts,
             params: [],
-            sort: $adminQuery->sort,
-            order: $adminQuery->order,
         );
     }
 
-    private function applyMessageFilters(Builder $query, AdminQuery $adminQuery): void
+    private function applyMessageFilters(Builder $query, CrudQuery $adminQuery): void
     {
         $status = (string) $adminQuery->param('status', 'all');
         if ($status === 'unread') {

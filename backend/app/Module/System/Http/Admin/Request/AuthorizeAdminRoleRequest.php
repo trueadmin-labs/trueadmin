@@ -15,7 +15,7 @@ final class AuthorizeAdminRoleRequest extends FormRequest
             'menuIds.*' => ['integer', 'min:1'],
             'dataPolicies' => ['sometimes', 'array'],
             'dataPolicies.*.resource' => ['required_with:dataPolicies', 'string', 'max:128'],
-            'dataPolicies.*.action' => ['prohibited'],
+            'dataPolicies.*.action' => ['missing'],
             'dataPolicies.*.strategy' => ['required_with:dataPolicies', 'string', 'max:64'],
             'dataPolicies.*.effect' => ['sometimes', 'string', 'in:allow'],
             'dataPolicies.*.scope' => ['required_with:dataPolicies', 'string', 'in:all,self,department,department_and_children,custom_departments,custom_departments_and_children'],

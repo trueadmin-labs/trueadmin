@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Module\System\Repository;
 
+use App\Foundation\Crud\CrudQuery;
 use App\Foundation\Pagination\PageResult;
-use App\Foundation\Query\AdminQuery;
 use App\Foundation\Repository\AbstractRepository;
 use App\Module\System\Model\AdminRole;
 use Hyperf\DbConnection\Db;
@@ -19,17 +19,17 @@ final class AdminRoleRepository extends AbstractRepository
     protected array $keywordFields = ['code', 'name'];
 
     protected array $filterable = [
-        'id' => ['=', 'in'],
-        'code' => ['=', 'like'],
-        'name' => ['=', 'like'],
-        'status' => ['=', 'in'],
+        'id' => ['eq', 'in'],
+        'code' => ['eq', 'like'],
+        'name' => ['eq', 'like'],
+        'status' => ['eq', 'in'],
     ];
 
     protected array $sortable = ['id', 'sort', 'created_at', 'updated_at'];
 
     protected array $defaultSort = ['sort' => 'asc', 'id' => 'asc'];
 
-    public function paginate(AdminQuery $adminQuery): PageResult
+    public function paginate(CrudQuery $adminQuery): PageResult
     {
         return $this->pageQuery(
             AdminRole::query(),
@@ -38,7 +38,7 @@ final class AdminRoleRepository extends AbstractRepository
         );
     }
 
-    public function all(AdminQuery $adminQuery): array
+    public function all(CrudQuery $adminQuery): array
     {
         return $this->listQuery(
             AdminRole::query(),

@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Module\System\Repository;
 
-use App\Foundation\Query\AdminQuery;
+use App\Foundation\Crud\CrudQuery;
 use App\Foundation\Pagination\PageResult;
 use App\Foundation\Repository\AbstractRepository;
 use App\Module\System\Model\AdminDepartment;
 use App\Module\System\Model\AdminUser;
+use Hyperf\Database\Model\Builder;
 use Hyperf\DbConnection\Db;
 
 final class AdminUserRepository extends AbstractRepository
@@ -18,12 +19,12 @@ final class AdminUserRepository extends AbstractRepository
     protected array $keywordFields = ['username', 'nickname'];
 
     protected array $filterable = [
-        'id' => ['=', 'in'],
-        'username' => ['=', 'like'],
-        'nickname' => ['=', 'like'],
-        'status' => ['=', 'in'],
-        'primary_dept_id' => ['=', 'in'],
-        'created_at' => ['between', '>=', '<='],
+        'id' => ['eq', 'in'],
+        'username' => ['eq', 'like'],
+        'nickname' => ['eq', 'like'],
+        'status' => ['eq', 'in'],
+        'primary_dept_id' => ['eq', 'in'],
+        'created_at' => ['between', 'gte', 'lte'],
     ];
 
     protected array $sortable = ['id', 'username', 'status', 'created_at', 'updated_at'];
@@ -82,7 +83,7 @@ final class AdminUserRepository extends AbstractRepository
             ->all();
     }
 
-    public function paginate(AdminQuery $adminQuery): PageResult
+    public function paginate(CrudQuery $adminQuery): PageResult
     {
         $query = AdminUser::query();
         $this->applyDataPolicy($query, 'admin_user', [
@@ -97,15 +98,7 @@ final class AdminUserRepository extends AbstractRepository
         );
     }
 
-    protected function handleSearch(mixed $query, AdminQuery $adminQuery): void
-    {
-        $this->applyKeyword($query, $adminQuery);
-        $this->applyFilters($query, $adminQuery);
-        $this->applyParams($query, $adminQuery);
-        $this->applySort($query, $adminQuery);
-    }
-
-    private function applyParams(mixed $query, AdminQuery $adminQuery): void
+    protected function applyParams(Builder $query, CrudQuery $adminQuery): void
     {
         $deptId = (int) $adminQuery->param('deptId', 0);
         if ($deptId > 0) {

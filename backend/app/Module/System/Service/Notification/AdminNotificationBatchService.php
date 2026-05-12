@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Module\System\Service\Notification;
 
 use App\Foundation\Pagination\PageResult;
-use App\Foundation\Query\AdminQuery;
+use App\Foundation\Crud\CrudQuery;
 use App\Foundation\Service\AbstractService;
 use App\Module\System\Repository\Notification\AdminNotificationBatchRepository;
 use App\Module\System\Repository\Notification\AdminNotificationDeliveryRepository;
@@ -19,7 +19,7 @@ final class AdminNotificationBatchService extends AbstractService
     ) {
     }
 
-    public function paginate(AdminQuery $query): PageResult
+    public function paginate(CrudQuery $query): PageResult
     {
         return $this->batches->paginate($query);
     }
@@ -39,7 +39,7 @@ final class AdminNotificationBatchService extends AbstractService
         return $this->batches->toArray($batch);
     }
 
-    public function paginateDeliveries(int $id, AdminQuery $query): PageResult
+    public function paginateDeliveries(int $id, CrudQuery $query): PageResult
     {
         $batch = $this->batches->findByIdWithDataPolicy($id);
         if ($batch === null) {

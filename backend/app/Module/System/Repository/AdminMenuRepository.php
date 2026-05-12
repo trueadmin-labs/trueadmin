@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Module\System\Repository;
 
+use App\Foundation\Crud\CrudQuery;
 use App\Foundation\Metadata\MetadataMenuRepositoryInterface;
-use App\Foundation\Query\AdminQuery;
 use App\Foundation\Repository\AbstractRepository;
 use App\Foundation\Tree\TreeHelper;
 use App\Module\System\Model\AdminMenu;
@@ -18,17 +18,17 @@ final class AdminMenuRepository extends AbstractRepository implements MetadataMe
     protected array $keywordFields = ['code', 'name', 'path', 'url', 'permission'];
 
     protected array $filterable = [
-        'id' => ['=', 'in'],
-        'parent_id' => ['=', 'in'],
-        'code' => ['=', 'like'],
-        'type' => ['=', 'in'],
-        'name' => ['=', 'like'],
-        'path' => ['=', 'like'],
-        'url' => ['=', 'like'],
-        'open_mode' => ['=', 'in'],
-        'permission' => ['=', 'like'],
-        'source' => ['=', 'in'],
-        'status' => ['=', 'in'],
+        'id' => ['eq', 'in'],
+        'parent_id' => ['eq', 'in'],
+        'code' => ['eq', 'like'],
+        'type' => ['eq', 'in'],
+        'name' => ['eq', 'like'],
+        'path' => ['eq', 'like'],
+        'url' => ['eq', 'like'],
+        'open_mode' => ['eq', 'in'],
+        'permission' => ['eq', 'like'],
+        'source' => ['eq', 'in'],
+        'status' => ['eq', 'in'],
     ];
 
     protected array $sortable = ['id', 'sort', 'created_at', 'updated_at'];
@@ -39,7 +39,7 @@ final class AdminMenuRepository extends AbstractRepository implements MetadataMe
     {
     }
 
-    public function all(AdminQuery $adminQuery): array
+    public function all(CrudQuery $adminQuery): array
     {
         return $this->listQuery(
             AdminMenu::query(),
@@ -204,7 +204,7 @@ final class AdminMenuRepository extends AbstractRepository implements MetadataMe
         return $this->tree($this->allEnabled());
     }
 
-    public function managementTree(AdminQuery $adminQuery): array
+    public function managementTree(CrudQuery $adminQuery): array
     {
         return $this->tree($this->all($adminQuery));
     }

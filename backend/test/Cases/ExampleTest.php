@@ -315,19 +315,18 @@ class ExampleTest extends TestCase
         $this->assertGreaterThanOrEqual(1, $users['data']['total']);
 
         $filteredUsers = $this->get('/api/admin/organization/users', [
-            'filter' => [
-                'created_at' => ['2000-01-01', '2999-12-31'],
-                'status' => 'enabled',
-            ],
-            'op' => [
-                'created_at' => 'between',
-                'status' => '=',
+            'filters' => [
+                ['field' => 'created_at', 'op' => 'between', 'value' => ['2000-01-01', '2999-12-31']],
+                ['field' => 'status', 'op' => 'eq', 'value' => 'enabled'],
             ],
             'page' => 1,
             'pageSize' => 5,
-            'roleCodes' => ['test-role-' . $suffix],
-            'sort' => 'id',
-            'order' => 'desc',
+            'params' => [
+                'roleCodes' => ['test-role-' . $suffix],
+            ],
+            'sorts' => [
+                ['field' => 'id', 'order' => 'desc'],
+            ],
         ], $headers);
         $this->assertSame('SUCCESS', $filteredUsers['code']);
         $this->assertContains($user['data']['id'], array_column($filteredUsers['data']['items'], 'id'));
@@ -337,9 +336,11 @@ class ExampleTest extends TestCase
         }
 
         $departmentUsers = $this->get('/api/admin/organization/users', [
-            'deptId' => $deptAId,
-            'includeChildren' => '1',
             'keyword' => 'test-user-' . $suffix,
+            'params' => [
+                'deptId' => $deptAId,
+                'includeChildren' => '1',
+            ],
         ], $headers);
         $this->assertSame('SUCCESS', $departmentUsers['code']);
         $this->assertContains($user['data']['id'], array_column($departmentUsers['data']['items'], 'id'));

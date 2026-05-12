@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace HyperfTest\Support;
 
 use App\Foundation\DataPermission\DataPolicyStrategyInterface;
+use Hyperf\Database\Model\Builder as ModelBuilder;
+use Hyperf\Database\Query\Builder as QueryBuilder;
 use TrueAdmin\Kernel\Context\Actor;
 use TrueAdmin\Kernel\DataPermission\DataPolicyRule;
 use TrueAdmin\Kernel\DataPermission\DataPolicyTarget;
@@ -32,7 +34,7 @@ final class TestingDataPolicyStrategy implements DataPolicyStrategyInterface
         ];
     }
 
-    public function apply(mixed $query, Actor $actor, DataPolicyRule $rule, DataPolicyTarget $target): void
+    public function apply(ModelBuilder|QueryBuilder $query, Actor $actor, DataPolicyRule $rule, DataPolicyTarget $target): void
     {
     }
 

@@ -13,7 +13,7 @@ declare(strict_types=1);
 namespace App\Module\System\Service;
 
 use App\Foundation\Pagination\PageResult;
-use App\Foundation\Query\AdminQuery;
+use App\Foundation\Crud\CrudQuery;
 use App\Foundation\Service\AbstractService;
 use App\Module\System\Dto\FileUploadContext;
 use App\Module\System\Model\File;
@@ -46,7 +46,7 @@ final class FileService extends AbstractService
         $this->mimeTypes = new FinfoMimeTypeDetector(bufferSampleSize: 8192);
     }
 
-    public function paginate(AdminQuery $query, Actor $actor, ?string $origin = null): PageResult
+    public function paginate(CrudQuery $query, Actor $actor, ?string $origin = null): PageResult
     {
         return $this->files->paginate($query, $actor, fn (File $file): array => $this->toArray($file, $origin));
     }

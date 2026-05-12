@@ -4,13 +4,18 @@ declare(strict_types=1);
 
 namespace App\Foundation\Repository;
 
-use App\Foundation\Pagination\PageResult;
-use App\Foundation\Query\AdminQuery;
+use App\Foundation\Crud\CrudQuery;
+use App\Foundation\Crud\CrudOperator;
+use App\Foundation\Crud\CrudSortRule;
 use App\Foundation\DataPermission\DataPolicyManager;
+use App\Foundation\Pagination\PageResult;
 use Hyperf\Context\ApplicationContext;
+use Hyperf\Database\Model\Builder;
 use Hyperf\DbConnection\Db;
 use Hyperf\DbConnection\Model\Model;
 use RuntimeException;
+use TrueAdmin\Kernel\Constant\ErrorCode;
+use TrueAdmin\Kernel\Exception\BusinessException;
 
 abstract class AbstractRepository
 {
@@ -22,9 +27,19 @@ abstract class AbstractRepository
     protected array $keywordFields = [];
 
     /**
-     * @var array<string, bool|list<string>>
+     * @var array<string, bool|string|list<string>>
      */
     protected array $filterable = [];
+
+    /**
+     * @var list<string>|'*'
+     */
+    protected array|string $defaultFilterOps = ['eq', 'in'];
+
+    /**
+     * @var array<string, string>
+     */
+    protected array $filterColumns = [];
 
     /**
      * @var list<string>
@@ -34,9 +49,14 @@ abstract class AbstractRepository
     /**
      * @var array<string, string>
      */
+    protected array $sortColumns = [];
+
+    /**
+     * @var array<string, string>
+     */
     protected array $defaultSort = ['id' => 'desc'];
 
-    protected function query(): mixed
+    protected function query(): Builder
     {
         $modelClass = $this->modelClass();
 
@@ -114,9 +134,9 @@ abstract class AbstractRepository
             ->all();
     }
 
-    protected function pageQuery(mixed $query, AdminQuery $adminQuery, callable $mapper): PageResult
+    protected function pageQuery(Builder $query, CrudQuery $adminQuery, callable $mapper): PageResult
     {
-        $this->handleSearch($query, $adminQuery);
+        $this->applyCrudQuery($query, $adminQuery);
 
         $total = (int) (clone $query)->count();
         $items = $query
@@ -128,9 +148,9 @@ abstract class AbstractRepository
         return new PageResult($items, $total, $adminQuery->page, $adminQuery->pageSize);
     }
 
-    protected function listQuery(mixed $query, AdminQuery $adminQuery, callable $mapper): array
+    protected function listQuery(Builder $query, CrudQuery $adminQuery, callable $mapper): array
     {
-        $this->handleSearch($query, $adminQuery);
+        $this->applyCrudQuery($query, $adminQuery);
 
         return $query->get()->map($mapper)->all();
     }
@@ -139,7 +159,7 @@ abstract class AbstractRepository
     /**
      * @param array<string, mixed>|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target
      */
-    protected function applyDataPolicy(mixed $query, string $resource, array|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target = []): void
+    protected function applyDataPolicy(Builder $query, string $resource, array|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target = []): void
     {
         $this->dataPolicyManager()->apply($query, $resource, $target);
     }
@@ -147,7 +167,7 @@ abstract class AbstractRepository
     /**
      * @param array<string, mixed>|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target
      */
-    protected function dataPolicyAllows(mixed $query, string $resource, array|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target = []): bool
+    protected function dataPolicyAllows(Builder $query, string $resource, array|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target = []): bool
     {
         return $this->dataPolicyManager()->allows($query, $resource, $target);
     }
@@ -155,7 +175,7 @@ abstract class AbstractRepository
     /**
      * @param array<string, mixed>|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target
      */
-    protected function assertDataPolicyAllows(mixed $query, string $resource, array|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target = []): void
+    protected function assertDataPolicyAllows(Builder $query, string $resource, array|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target = []): void
     {
         $this->dataPolicyManager()->assertAllows($query, $resource, $target);
     }
@@ -164,7 +184,7 @@ abstract class AbstractRepository
      * @param list<int|string> $ids
      * @param array<string, mixed>|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target
      */
-    protected function assertDataPolicyAllowsAll(mixed $query, string $resource, array $ids, string $idColumn = 'id', array|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target = []): void
+    protected function assertDataPolicyAllowsAll(Builder $query, string $resource, array $ids, string $idColumn = 'id', array|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target = []): void
     {
         $this->dataPolicyManager()->assertAllowsAll($query, $resource, $ids, $idColumn, $target);
     }
@@ -174,21 +194,26 @@ abstract class AbstractRepository
         return ApplicationContext::getContainer()->get(DataPolicyManager::class);
     }
 
-    protected function handleSearch(mixed $query, AdminQuery $adminQuery): void
+    final protected function applyCrudQuery(Builder $query, CrudQuery $adminQuery): void
     {
         $this->applyKeyword($query, $adminQuery);
         $this->applyFilters($query, $adminQuery);
+        $this->applyParams($query, $adminQuery);
         $this->applySort($query, $adminQuery);
     }
 
-    protected function applyKeyword(mixed $query, AdminQuery $adminQuery): void
+    protected function applyParams(Builder $query, CrudQuery $adminQuery): void
     {
-        if ($adminQuery->keyword === '' || $this->keywordFields === []) {
+    }
+
+    protected function applyKeyword(Builder $query, CrudQuery $adminQuery): void
+    {
+        $fields = $this->keywordFields;
+        if ($adminQuery->keyword === '' || $fields === []) {
             return;
         }
 
         $keyword = '%' . $adminQuery->keyword . '%';
-        $fields = $this->keywordFields;
         $query->where(static function ($query) use ($fields, $keyword): void {
             foreach ($fields as $index => $field) {
                 $method = $index === 0 ? 'where' : 'orWhere';
@@ -197,69 +222,119 @@ abstract class AbstractRepository
         });
     }
 
-    protected function applyFilters(mixed $query, AdminQuery $adminQuery): void
+    protected function applyFilters(Builder $query, CrudQuery $adminQuery): void
     {
-        foreach ($adminQuery->filters as $field => $value) {
-            if (! is_string($field)) {
-                continue;
-            }
+        foreach ($adminQuery->filters as $condition) {
+            $field = $condition->field;
+            $operator = $condition->op;
+            $value = $condition->value;
+
             if ($value === null || $value === '' || $value === 'all') {
-                continue;
+                if (! in_array($operator, [CrudOperator::IsNull, CrudOperator::NotNull], true)) {
+                    continue;
+                }
             }
 
-            if (! $this->isFilterable($field, $adminQuery->operator($field))) {
-                continue;
-            }
+            $this->assertFilterable($field, $operator);
+            $column = $this->filterColumns[$field] ?? $field;
 
-            $operator = $adminQuery->operator($field);
-            if ($operator === 'like') {
-                $query->where($field, 'like', '%' . (string) $value . '%');
+            if ($operator === CrudOperator::IsNull) {
+                $query->whereNull($column);
                 continue;
             }
-            if ($operator === 'in') {
+            if ($operator === CrudOperator::NotNull) {
+                $query->whereNotNull($column);
+                continue;
+            }
+            if ($operator === CrudOperator::Like) {
+                $query->where($column, 'like', '%' . (string) $value . '%');
+                continue;
+            }
+            if ($operator === CrudOperator::In) {
                 $values = is_array($value) ? $value : explode(',', (string) $value);
                 $values = array_values(array_filter($values, static fn (mixed $item): bool => $item !== '' && $item !== null));
                 if ($values !== []) {
-                    $query->whereIn($field, $values);
+                    $query->whereIn($column, $values);
                 }
                 continue;
             }
-            if ($operator === 'between') {
+            if ($operator === CrudOperator::Between) {
                 $values = is_array($value) ? array_values($value) : explode(',', (string) $value, 2);
                 if (count($values) >= 2 && $values[0] !== '' && $values[1] !== '') {
-                    $query->whereBetween($field, [$values[0], $values[1]]);
+                    $query->whereBetween($column, [$values[0], $values[1]]);
                 }
                 continue;
             }
 
-            $query->where($field, $operator, $value);
+            $query->where($column, $operator->sqlOperator(), $value);
         }
     }
 
-    protected function applySort(mixed $query, AdminQuery $adminQuery): void
+    protected function applySort(Builder $query, CrudQuery $adminQuery): void
     {
-        if ($adminQuery->sort !== '' && in_array($adminQuery->sort, $this->sortable, true)) {
-            $query->orderBy($adminQuery->sort, $adminQuery->order === 'desc' ? 'desc' : 'asc');
+        if ($adminQuery->sorts !== []) {
+            foreach ($adminQuery->sorts as $sort) {
+                $column = $this->assertSortable($sort);
+                $query->orderBy($column, $sort->order->value);
+            }
             return;
         }
 
         foreach ($this->defaultSort as $field => $direction) {
-            $query->orderBy($field, strtolower($direction) === 'desc' ? 'desc' : 'asc');
+            $query->orderBy(
+                $this->sortColumns[$field] ?? $field,
+                strtolower($direction) === 'desc' ? 'desc' : 'asc',
+            );
         }
     }
 
-    private function isFilterable(string $field, string $operator): bool
+    private function assertFilterable(string $field, CrudOperator $operator): void
     {
         if (! array_key_exists($field, $this->filterable)) {
-            return false;
+            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, [
+                'field' => $field,
+                'reason' => 'unsupported_filter_field',
+            ]);
         }
 
         $allowed = $this->filterable[$field];
-        if ($allowed === true) {
-            return true;
+        if ($allowed === false) {
+            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, [
+                'field' => $field,
+                'reason' => 'unsupported_filter_field',
+            ]);
         }
 
-        return in_array($operator, $allowed, true);
+        if ($allowed === true) {
+            $allowed = $this->defaultFilterOps;
+        }
+        if ($allowed === '*') {
+            return;
+        }
+
+        if (is_string($allowed)) {
+            $allowed = [$allowed];
+        }
+
+        if (! in_array($operator->value, $allowed, true)) {
+            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, [
+                'field' => $field,
+                'operator' => $operator->value,
+                'reason' => 'unsupported_filter_operator',
+            ]);
+        }
+    }
+
+    private function assertSortable(CrudSortRule $sort): string
+    {
+        if (! in_array($sort->field, $this->sortable, true)) {
+            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, [
+                'field' => $sort->field,
+                'reason' => 'unsupported_sort_field',
+            ]);
+        }
+
+        return $this->sortColumns[$sort->field] ?? $sort->field;
     }
 
     private function modelClass(): string

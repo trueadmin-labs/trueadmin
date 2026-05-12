@@ -26,7 +26,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@tanstack/react-query": "latest",
     "@trueadmin/web-antd": "^0.1.0",
-    "@trueadmin/web-core": "^0.1.8",
+    "@trueadmin/web-core": "^0.1.9",
     "@trueadmin/web-react": "^0.1.0",
     "alova": "latest",
     "antd": "latest",

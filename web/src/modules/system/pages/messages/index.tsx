@@ -27,7 +27,12 @@ export default function AdminMessagesPage() {
         filters={page.filters}
         extraQuery={page.extraQuery}
         defaultFiltersExpanded={false}
-        transformParams={(params) => ({ kind: 'all', status: 'all', ...params }) as CrudListParams}
+        transformParams={(params) =>
+          ({
+            ...params,
+            params: { kind: 'all', status: 'all', ...params.params },
+          }) as CrudListParams
+        }
         rowActions={{
           render: ({ record }) => (
             <Button

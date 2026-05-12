@@ -94,7 +94,10 @@ export function TrueAdminUserSelect<
         adminUserApi.list(
           {
             ...params,
-            ...(department === ALL_DEPARTMENTS_VALUE ? {} : { deptId: department }),
+            params: {
+              ...params.params,
+              ...(department === ALL_DEPARTMENTS_VALUE ? {} : { deptId: department }),
+            },
           },
           options,
         ),

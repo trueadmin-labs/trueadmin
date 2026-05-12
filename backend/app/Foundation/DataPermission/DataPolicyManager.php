@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Foundation\DataPermission;
 
 use App\Foundation\Contract\DataPolicyProviderInterface;
+use Hyperf\Database\Model\Builder as ModelBuilder;
+use Hyperf\Database\Query\Builder as QueryBuilder;
 use TrueAdmin\Kernel\Context\Actor;
 use TrueAdmin\Kernel\Context\ActorContext;
 use TrueAdmin\Kernel\Constant\ErrorCode;
@@ -26,7 +28,7 @@ final class DataPolicyManager
     /**
      * @param array<string, mixed>|DataPolicyTarget $target
      */
-    public function apply(mixed $query, string $resource, array|DataPolicyTarget $target = []): void
+    public function apply(ModelBuilder|QueryBuilder $query, string $resource, array|DataPolicyTarget $target = []): void
     {
         $this->registry->assertRegisteredResource($resource);
 
@@ -59,7 +61,7 @@ final class DataPolicyManager
     /**
      * @param array<string, mixed>|DataPolicyTarget $target
      */
-    public function allows(mixed $query, string $resource, array|DataPolicyTarget $target = []): bool
+    public function allows(ModelBuilder|QueryBuilder $query, string $resource, array|DataPolicyTarget $target = []): bool
     {
         $this->apply($query, $resource, $target);
 
@@ -69,7 +71,7 @@ final class DataPolicyManager
     /**
      * @param array<string, mixed>|DataPolicyTarget $target
      */
-    public function assertAllows(mixed $query, string $resource, array|DataPolicyTarget $target = []): void
+    public function assertAllows(ModelBuilder|QueryBuilder $query, string $resource, array|DataPolicyTarget $target = []): void
     {
         if ($this->allows($query, $resource, $target)) {
             return;
@@ -85,7 +87,7 @@ final class DataPolicyManager
      * @param list<int|string> $ids
      * @param array<string, mixed>|DataPolicyTarget $target
      */
-    public function assertAllowsAll(mixed $query, string $resource, array $ids, string $idColumn = 'id', array|DataPolicyTarget $target = []): void
+    public function assertAllowsAll(ModelBuilder|QueryBuilder $query, string $resource, array $ids, string $idColumn = 'id', array|DataPolicyTarget $target = []): void
     {
         $ids = array_values(array_unique(array_filter($ids, static fn (int|string $id): bool => (string) $id !== '')));
         if ($ids === []) {

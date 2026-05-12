@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Module\System\Service\Notification;
 
 use App\Foundation\Pagination\PageResult;
-use App\Foundation\Query\AdminQuery;
+use App\Foundation\Crud\CrudQuery;
 use App\Foundation\Service\AbstractService;
 use App\Module\System\Model\AdminAnnouncementRead;
 use App\Module\System\Model\AdminNotificationDelivery;
@@ -30,7 +30,7 @@ final class AdminMessageCenterService extends AbstractService
     ) {
     }
 
-    public function paginate(AdminQuery $query): PageResult
+    public function paginate(CrudQuery $query): PageResult
     {
         $receiverId = $this->receiverId();
         $messages = [];
@@ -71,7 +71,7 @@ final class AdminMessageCenterService extends AbstractService
         $receiverId = $this->receiverId();
         $notification = $this->deliveries->unreadCount($receiverId);
         $announcementUnread = 0;
-        foreach ($this->announcements->visibleForReceiver($receiverId, $this->roleIds(), new AdminQuery(page: 1, pageSize: 1000)) as $announcement) {
+        foreach ($this->announcements->visibleForReceiver($receiverId, $this->roleIds(), new CrudQuery(page: 1, pageSize: 1000)) as $announcement) {
             $state = $this->announcementReads->findForReceiver((int) $announcement->getAttribute('id'), $receiverId);
             if (($state === null || $state->getAttribute('read_at') === null) && ($state === null || $state->getAttribute('archived_at') === null)) {
                 ++$announcementUnread;
@@ -137,7 +137,7 @@ final class AdminMessageCenterService extends AbstractService
 
     public function readAll(string $kind): void
     {
-        $messages = $this->paginate(new AdminQuery(page: 1, pageSize: 1000, params: ['kind' => $kind, 'status' => 'unread']));
+        $messages = $this->paginate(new CrudQuery(page: 1, pageSize: 1000, params: ['kind' => $kind, 'status' => 'unread']));
         $this->markRead(array_map(static fn (array $message): array => [
             'kind' => (string) $message['kind'],
             'id' => (int) $message['id'],
@@ -250,36 +250,32 @@ final class AdminMessageCenterService extends AbstractService
         return true;
     }
 
-    private function candidateQuery(AdminQuery $query): AdminQuery
+    private function candidateQuery(CrudQuery $query): CrudQuery
     {
         $candidateSize = max($query->page * $query->pageSize, $query->pageSize);
 
-        return new AdminQuery(
+        return new CrudQuery(
             page: 1,
             pageSize: $candidateSize,
             keyword: $query->keyword,
             filters: $query->filters,
-            operators: $query->operators,
+            sorts: $query->sorts,
             params: $query->params,
-            sort: $query->sort,
-            order: $query->order,
         );
     }
 
-    private function withoutKind(AdminQuery $query): AdminQuery
+    private function withoutKind(CrudQuery $query): CrudQuery
     {
         $params = $query->params;
         unset($params['kind']);
 
-        return new AdminQuery(
+        return new CrudQuery(
             page: $query->page,
             pageSize: $query->pageSize,
             keyword: $query->keyword,
             filters: $query->filters,
-            operators: $query->operators,
+            sorts: $query->sorts,
             params: $params,
-            sort: $query->sort,
-            order: $query->order,
         );
     }
 

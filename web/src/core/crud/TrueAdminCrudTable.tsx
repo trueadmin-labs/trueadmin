@@ -188,11 +188,10 @@ export function TrueAdminCrudTable<
     columns,
     locale,
     onDelete: deleteRow,
-    order: queryState.order,
     renderContext: tableRenderContext,
     resource,
     rowActions,
-    sort: queryState.sort,
+    sorts: queryState.sorts,
     t,
   });
 

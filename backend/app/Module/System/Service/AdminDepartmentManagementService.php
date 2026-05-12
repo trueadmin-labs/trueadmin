@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Module\System\Service;
 
-use App\Foundation\Query\AdminQuery;
+use App\Foundation\Crud\CrudQuery;
 use App\Foundation\Service\AbstractService;
 use App\Foundation\Tree\TreeHelper;
 use App\Module\System\Model\AdminDepartment;
@@ -20,7 +20,7 @@ final class AdminDepartmentManagementService extends AbstractService
     ) {
     }
 
-    public function tree(AdminQuery $query): array
+    public function tree(CrudQuery $query): array
     {
         return $this->departments->tree($query);
     }

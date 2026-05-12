@@ -1,7 +1,7 @@
 import type { TableProps } from 'antd';
 import type { SorterResult } from 'antd/es/table/interface';
 import { useCallback } from 'react';
-import { getSorterKey, getSorterResult, toCrudOrder } from './crudTableUtils';
+import { getSortRules } from './crudTableUtils';
 import type { TrueAdminCrudTableProps } from './types';
 import type { CrudTableQueryState } from './useCrudTableQueryState';
 
@@ -11,7 +11,7 @@ type UseCrudTableChangeHandlerOptions<
   TUpdate,
   TMeta,
 > = {
-  queryState: Pick<CrudTableQueryState, 'changeSort'>;
+  queryState: Pick<CrudTableQueryState, 'changeSorts'>;
   tableProps?: TrueAdminCrudTableProps<TRecord, TCreate, TUpdate, TMeta>['tableProps'];
 };
 
@@ -23,12 +23,8 @@ export function useCrudTableChangeHandler<
 >({ queryState, tableProps }: UseCrudTableChangeHandlerOptions<TRecord, TCreate, TUpdate, TMeta>) {
   return useCallback<NonNullable<TableProps<TRecord>['onChange']>>(
     (pagination, filters, sorter, extra) => {
-      const sorterResult = getSorterResult(
-        sorter as SorterResult<TRecord> | SorterResult<TRecord>[],
-      );
-      queryState.changeSort(
-        sorterResult ? getSorterKey(sorterResult) : undefined,
-        toCrudOrder(sorterResult?.order),
+      queryState.changeSorts(
+        getSortRules(sorter as SorterResult<TRecord> | SorterResult<TRecord>[]),
       );
       tableProps?.onChange?.(pagination, filters, sorter, extra);
     },

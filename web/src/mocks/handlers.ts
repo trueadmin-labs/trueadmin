@@ -15,6 +15,19 @@ const success = <T>(data: T) =>
 const fail = (code: string, message: string, data?: unknown) =>
   HttpResponse.json({ code, message, data }, { status: 400 });
 
+const getCrudParam = (url: URL, field: string, fallback = '') =>
+  url.searchParams.get(`params[${field}]`) ?? fallback;
+
+const getCrudFilter = (url: URL, field: string, fallback = '') => {
+  for (let index = 0; index < 20; index += 1) {
+    if (url.searchParams.get(`filters[${index}][field]`) === field) {
+      return url.searchParams.get(`filters[${index}][value]`) ?? fallback;
+    }
+  }
+
+  return fallback;
+};
+
 const users = [
   {
     id: 1,
@@ -553,14 +566,14 @@ export const handlers = [
     const url = new URL(request.url);
     const page = Number(url.searchParams.get('page') || 1);
     const pageSize = Number(url.searchParams.get('pageSize') || 5);
-    const kind = url.searchParams.get('kind') || 'all';
-    const status = url.searchParams.get('status') || 'all';
+    const kind = getCrudParam(url, 'kind', 'all');
+    const status = getCrudParam(url, 'status', 'all');
     const keyword = url.searchParams.get('keyword')?.trim().toLowerCase();
-    const level = url.searchParams.get('level') || '';
-    const type = url.searchParams.get('type') || '';
-    const source = url.searchParams.get('source') || '';
-    const startAt = url.searchParams.get('startAt') || '';
-    const endAt = url.searchParams.get('endAt') || '';
+    const level = getCrudParam(url, 'level');
+    const type = getCrudParam(url, 'type');
+    const source = getCrudParam(url, 'source');
+    const startAt = getCrudParam(url, 'startAt');
+    const endAt = getCrudParam(url, 'endAt');
     const items = withMessageState().filter((message) => {
       if (kind !== 'all' && message.kind !== kind) {
         return false;
@@ -660,10 +673,10 @@ export const handlers = [
     const page = Number(url.searchParams.get('page') || 1);
     const pageSize = Number(url.searchParams.get('pageSize') || 20);
     const keyword = url.searchParams.get('keyword')?.trim().toLowerCase();
-    const status = url.searchParams.get('status') || '';
-    const level = url.searchParams.get('level') || '';
-    const type = url.searchParams.get('type') || '';
-    const source = url.searchParams.get('source') || '';
+    const status = getCrudFilter(url, 'status');
+    const level = getCrudFilter(url, 'level') || getCrudParam(url, 'level');
+    const type = getCrudFilter(url, 'type') || getCrudParam(url, 'type');
+    const source = getCrudFilter(url, 'source') || getCrudParam(url, 'source');
     const items = notificationBatches.filter((batch) => {
       if (status && batch.status !== status) {
         return false;
@@ -711,7 +724,7 @@ export const handlers = [
     const url = new URL(request.url);
     const page = Number(url.searchParams.get('page') || 1);
     const pageSize = Number(url.searchParams.get('pageSize') || 20);
-    const status = url.searchParams.get('status') || '';
+    const status = getCrudFilter(url, 'status') || getCrudParam(url, 'status');
     const keyword = url.searchParams.get('keyword')?.trim().toLowerCase();
     const items = notificationDeliveries.filter((delivery) => {
       if (String(delivery.batchId) !== String(params.id)) {
@@ -759,10 +772,10 @@ export const handlers = [
     const page = Number(url.searchParams.get('page') || 1);
     const pageSize = Number(url.searchParams.get('pageSize') || 20);
     const keyword = url.searchParams.get('keyword')?.trim().toLowerCase();
-    const status = url.searchParams.get('status') || '';
-    const level = url.searchParams.get('level') || '';
-    const type = url.searchParams.get('type') || '';
-    const source = url.searchParams.get('source') || '';
+    const status = getCrudFilter(url, 'status');
+    const level = getCrudFilter(url, 'level') || getCrudParam(url, 'level');
+    const type = getCrudFilter(url, 'type') || getCrudParam(url, 'type');
+    const source = getCrudFilter(url, 'source') || getCrudParam(url, 'source');
     const items = announcements.filter((announcement) => {
       if (status && announcement.status !== status) {
         return false;

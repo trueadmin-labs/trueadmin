@@ -29,7 +29,7 @@ final class AdminMessageController extends AdminController
     #[Permission('system:message:list', title: '消息中心列表', group: '系统管理')]
     public function list(AdminNotificationQueryRequest $request): array
     {
-        return ApiResponse::success($this->messages->paginate($request->adminQuery())->toArray());
+        return ApiResponse::success($this->messages->paginate($request->crudQuery())->toArray());
     }
 
     #[AdminGet('unread-count')]

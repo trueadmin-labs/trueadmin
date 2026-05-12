@@ -27,7 +27,7 @@ final class AdminNotificationController extends AdminController
     #[Permission('system:notification:list', title: '通知列表', group: '系统管理')]
     public function list(AdminNotificationQueryRequest $request): array
     {
-        $page = $this->notifications->paginate($request->adminQuery())->toArray();
+        $page = $this->notifications->paginate($request->crudQuery())->toArray();
 
         return ApiResponse::success([...$page, 'meta' => $this->notifications->listMeta()]);
     }
@@ -51,7 +51,7 @@ final class AdminNotificationController extends AdminController
     #[Permission('system:notification:delivery:list', title: '通知投递记录', group: '系统管理')]
     public function deliveries(int $id, AdminNotificationQueryRequest $request): array
     {
-        return ApiResponse::success($this->notifications->paginateDeliveries($id, $request->adminQuery())->toArray());
+        return ApiResponse::success($this->notifications->paginateDeliveries($id, $request->crudQuery())->toArray());
     }
 
 }

@@ -2,10 +2,11 @@ import { describe, expect, it } from 'vitest';
 import {
   getColumnSortKey,
   getSorterKey,
-  getSorterResult,
+  getSorterResults,
+  getSortRules,
   joinClassNames,
   mergeCardBodyStyles,
-  toCrudOrder,
+  toCrudSortOrder,
   toPermissionCode,
 } from './crudTableUtils';
 import type { CrudColumns } from './types';
@@ -24,16 +25,25 @@ describe('crudTableUtils', () => {
     expect(toPermissionCode('system.user', 'delete')).toBe('system:user:delete');
     expect(getColumnSortKey(columns[0])).toBe('displayName');
     expect(getColumnSortKey(columns[1])).toBe('tenant.name');
-    expect(toCrudOrder('ascend')).toBe('asc');
-    expect(toCrudOrder('descend')).toBe('desc');
-    expect(toCrudOrder(undefined)).toBeUndefined();
+    expect(toCrudSortOrder('ascend')).toBe('asc');
+    expect(toCrudSortOrder('descend')).toBe('desc');
+    expect(toCrudSortOrder(undefined)).toBeUndefined();
   });
 
   it('normalizes sorter payloads', () => {
-    expect(getSorterResult([{ columnKey: 'createdAt', order: 'descend' }])?.columnKey).toBe(
+    expect(getSorterResults([{ columnKey: 'createdAt', order: 'descend' }])[0]?.columnKey).toBe(
       'createdAt',
     );
     expect(getSorterKey({ field: ['user', 'name'], order: 'ascend' })).toBe('user.name');
+    expect(
+      getSortRules([
+        { columnKey: 'createdAt', order: 'descend' },
+        { field: ['user', 'name'], order: 'ascend' },
+      ]),
+    ).toEqual([
+      { field: 'createdAt', order: 'desc' },
+      { field: 'user.name', order: 'asc' },
+    ]);
   });
 
   it('merges card body styles while preserving user overrides', () => {

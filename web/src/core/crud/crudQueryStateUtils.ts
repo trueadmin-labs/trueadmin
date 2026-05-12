@@ -4,15 +4,16 @@ import type {
   CrudFilterValue,
   CrudListParams,
   CrudOperator,
-  CrudOrder,
+  CrudQueryTransformResult,
+  CrudSortOrder,
+  CrudSortRule,
 } from './types';
 
 export const PAGE_PARAM = '_page';
 export const PAGE_SIZE_PARAM = '_pageSize';
-export const SORT_PARAM = '_sort';
-export const ORDER_PARAM = '_order';
 export const DEFAULT_PAGE = 1;
 export const DEFAULT_PAGE_SIZE = 20;
+const SORT_FIELD_PATTERN = /^sorts\[(\d+)]\[field]$/;
 export const EMPTY_FILTERS: CrudFilterSchema[] = [];
 export const EMPTY_EXTRA_QUERY: CrudExtraQuerySchema[] = [];
 
@@ -21,7 +22,7 @@ export const toPositiveInteger = (value: string | null, fallback: number) => {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 };
 
-export const toOrder = (value: string | null): CrudOrder | undefined => {
+export const toSortOrder = (value: string | null): CrudSortOrder | undefined => {
   if (value === 'asc' || value === 'desc') {
     return value;
   }
@@ -42,6 +43,25 @@ export const getFilterNames = (filters: CrudFilterSchema[] = []) =>
 export const getExtraQueryNames = (extraQuery: CrudExtraQuerySchema[] = []) =>
   new Set(extraQuery.map((item) => item.name));
 
+export const getQueryValueNames = ({
+  extraQuery = EMPTY_EXTRA_QUERY,
+  filters = EMPTY_FILTERS,
+  quickSearchName,
+}: {
+  extraQuery?: CrudExtraQuerySchema[];
+  filters?: CrudFilterSchema[];
+  quickSearchName?: string;
+}) => {
+  const names = getFilterNames(filters);
+  if (quickSearchName) {
+    names.add(quickSearchName);
+  }
+  getExtraQueryNames(extraQuery).forEach((name) => {
+    names.add(name);
+  });
+  return names;
+};
+
 export const createParamsObject = (searchParams: URLSearchParams, keys: Iterable<string>) => {
   const keySet = new Set(keys);
   const values: Record<string, string> = {};
@@ -58,6 +78,14 @@ export const removeQueryKeys = (params: URLSearchParams, keys: Iterable<string>)
   Array.from(keys).forEach((key) => {
     params.delete(key);
   });
+};
+
+export const removeSortParams = (params: URLSearchParams) => {
+  Array.from(params.keys())
+    .filter((key) => key.startsWith('sorts['))
+    .forEach((key) => {
+      params.delete(key);
+    });
 };
 
 export const setQueryValue = (params: URLSearchParams, key: string, value: string | undefined) => {
@@ -90,25 +118,27 @@ const splitListValue = (value: string) => value.split(',').filter(Boolean);
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
-const mergeRequestParams = (params: CrudListParams, nextParams: Record<string, unknown>) => {
+const mergeRequestParams = (params: CrudListParams, nextParams: CrudQueryTransformResult) => {
   Object.entries(nextParams).forEach(([key, value]) => {
-    if (key === 'filter' && isRecord(value)) {
-      params.filter = {
-        ...(isRecord(params.filter) ? params.filter : {}),
-        ...value,
-      } as CrudListParams['filter'];
+    if (key === 'filters' && Array.isArray(value)) {
+      params.filters = [...(params.filters ?? []), ...value] as CrudListParams['filters'];
       return;
     }
 
-    if (key === 'op' && isRecord(value)) {
-      params.op = {
-        ...(isRecord(params.op) ? params.op : {}),
-        ...value,
-      } as CrudListParams['op'];
+    if (key === 'sorts' && Array.isArray(value)) {
+      params.sorts = [...(params.sorts ?? []), ...value] as CrudListParams['sorts'];
       return;
     }
 
-    params[key] = value;
+    if (key === 'params' && isRecord(value)) {
+      params.params = {
+        ...(isRecord(params.params) ? params.params : {}),
+        ...value,
+      } as CrudListParams['params'];
+      return;
+    }
+
+    throw new Error(`Unsupported CRUD transform result key "${key}".`);
   });
 };
 
@@ -129,7 +159,7 @@ const defaultFilterOperator = (filter: CrudFilterSchema): CrudOperator => {
     return 'between';
   }
 
-  return '=';
+  return 'eq';
 };
 
 const defaultFilterValue = (filter: CrudFilterSchema, value: string): CrudFilterValue => {
@@ -160,33 +190,59 @@ const setStandardFilterParam = (
   }
 
   if (filter.requestMode === 'param') {
-    params[requestName] = requestValue;
+    params.params ??= {};
+    params.params[requestName] = requestValue;
     return;
   }
 
-  params.filter ??= {};
-  params.op ??= {};
-  params.filter[requestName] = requestValue;
-  params.op[requestName] = defaultFilterOperator(filter);
+  params.filters ??= [];
+  params.filters.push({
+    field: requestName,
+    op: defaultFilterOperator(filter),
+    value: requestValue,
+  });
+};
+
+export const getSorts = (searchParams: URLSearchParams): CrudSortRule[] => {
+  const indexedFields = new Map<number, string>();
+  searchParams.forEach((value, key) => {
+    const matched = SORT_FIELD_PATTERN.exec(key);
+    if (matched) {
+      indexedFields.set(Number(matched[1]), value);
+    }
+  });
+
+  return Array.from(indexedFields.entries())
+    .sort(([left], [right]) => left - right)
+    .flatMap(([index, field]) => {
+      const order = toSortOrder(searchParams.get(`sorts[${index}][order]`));
+      return field && order ? [{ field, order }] : [];
+    });
+};
+
+export const setSorts = (params: URLSearchParams, sorts: CrudSortRule[]) => {
+  removeSortParams(params);
+  sorts.forEach((sort, index) => {
+    params.set(`sorts[${index}][field]`, sort.field);
+    params.set(`sorts[${index}][order]`, sort.order);
+  });
 };
 
 export const getRequestParams = ({
   filters,
   extraQuery,
-  order,
   page,
   pageSize,
-  sort,
+  sorts,
   values,
   quickSearchName,
 }: {
   filters: CrudFilterSchema[];
   extraQuery: CrudExtraQuerySchema[];
-  order?: CrudOrder;
   page: number;
   pageSize: number;
   quickSearchName?: string;
-  sort?: string;
+  sorts: CrudSortRule[];
   values: Record<string, string>;
 }) => {
   const params: CrudListParams = {
@@ -195,12 +251,11 @@ export const getRequestParams = ({
   };
 
   if (quickSearchName && values[quickSearchName] !== undefined) {
-    params[quickSearchName] = values[quickSearchName];
+    params.keyword = values[quickSearchName];
   }
 
-  if (sort && order) {
-    params.sort = sort;
-    params.order = order;
+  if (sorts.length > 0) {
+    params.sorts = sorts;
   }
 
   filters.forEach((filter) => {
@@ -217,7 +272,6 @@ export const getRequestParams = ({
 
   extraQuery.forEach((item) => {
     const value = values[item.name] ?? item.defaultValue;
-    delete params[item.name];
     if (value === undefined) {
       return;
     }
@@ -226,7 +280,8 @@ export const getRequestParams = ({
       return;
     }
     if (item.requestName !== false) {
-      params[item.requestName ?? item.name] = value;
+      params.params ??= {};
+      params.params[item.requestName ?? item.name] = value;
     }
   });
 

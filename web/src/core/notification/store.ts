@@ -95,7 +95,12 @@ export const useAdminNotificationStore = create<NotificationStoreState>((set, ge
 
   refreshLatestMessages: async (query) => {
     const result = await adminMessageApi
-      .list({ kind: 'all', page: 1, pageSize: 5, status: 'all', ...query })
+      .list({
+        ...query,
+        page: 1,
+        pageSize: 5,
+        params: { kind: 'all', status: 'all', ...query?.params },
+      })
       .send();
     set({ latestMessages: result.items ?? [] });
   },

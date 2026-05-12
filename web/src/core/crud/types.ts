@@ -1,6 +1,7 @@
 import type {
   CrudOperator,
-  CrudOrder,
+  CrudSortOrder,
+  CrudSortRule,
   CrudFilterValue as ProtocolCrudFilterValue,
   CrudListParams as ProtocolCrudListParams,
 } from '@trueadmin/web-core/crud';
@@ -17,7 +18,7 @@ import type {
 } from 'antd';
 import type { CSSProperties, ReactNode } from 'react';
 
-export type { CrudOperator, CrudOrder };
+export type { CrudOperator, CrudSortOrder, CrudSortRule };
 
 export type CrudListParams = ProtocolCrudListParams;
 
@@ -34,6 +35,10 @@ export type CrudFilterTransformContext = {
   values: Record<string, string>;
 };
 
+export type CrudQueryTransformResult = Partial<
+  Pick<CrudListParams, 'filters' | 'sorts' | 'params'>
+>;
+
 export type CrudFilterBase = {
   name: string;
   label: ReactNode;
@@ -41,7 +46,7 @@ export type CrudFilterBase = {
   operator?: CrudOperator;
   requestMode?: 'filter' | 'param';
   requestName?: string | false;
-  transform?: (context: CrudFilterTransformContext) => Record<string, unknown>;
+  transform?: (context: CrudFilterTransformContext) => CrudQueryTransformResult;
 };
 
 export type CrudInputFilter = CrudFilterBase & {
@@ -88,14 +93,15 @@ export type CrudExtraQuerySchema = {
   name: string;
   defaultValue?: string;
   requestName?: string | false;
-  transform?: (context: CrudExtraQueryTransformContext) => Record<string, unknown>;
+  transform?: (context: CrudExtraQueryTransformContext) => CrudQueryTransformResult;
 };
 
 export type CrudQueryController = {
   values: Record<string, string>;
+  hasName: (name: string) => boolean;
   setValue: (name: string, value?: string) => void;
   setValues: (values: Record<string, string | undefined>) => void;
-  resetValues: (names: string[]) => void;
+  resetValues: (names?: string[]) => void;
 };
 
 export type CrudTableClassNames = {

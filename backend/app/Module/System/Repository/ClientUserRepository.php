@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Module\System\Repository;
 
+use App\Foundation\Crud\CrudQuery;
 use App\Foundation\Pagination\PageResult;
-use App\Foundation\Query\AdminQuery;
 use App\Foundation\Repository\AbstractRepository;
 use App\Module\System\Model\ClientUser;
 
@@ -16,22 +16,22 @@ final class ClientUserRepository extends AbstractRepository
     protected array $keywordFields = ['username', 'phone', 'email', 'nickname'];
 
     protected array $filterable = [
-        'id' => ['=', 'in'],
-        'username' => ['=', 'like'],
-        'phone' => ['=', 'like'],
-        'email' => ['=', 'like'],
-        'nickname' => ['=', 'like'],
-        'status' => ['=', 'in'],
-        'register_channel' => ['=', 'in'],
-        'created_at' => ['between', '>=', '<='],
-        'last_login_at' => ['between', '>=', '<='],
+        'id' => ['eq', 'in'],
+        'username' => ['eq', 'like'],
+        'phone' => ['eq', 'like'],
+        'email' => ['eq', 'like'],
+        'nickname' => ['eq', 'like'],
+        'status' => ['eq', 'in'],
+        'register_channel' => ['eq', 'in'],
+        'created_at' => ['between', 'gte', 'lte'],
+        'last_login_at' => ['between', 'gte', 'lte'],
     ];
 
     protected array $sortable = ['id', 'username', 'phone', 'email', 'status', 'created_at', 'updated_at', 'last_login_at'];
 
     protected array $defaultSort = ['id' => 'desc'];
 
-    public function paginate(AdminQuery $adminQuery): PageResult
+    public function paginate(CrudQuery $adminQuery): PageResult
     {
         return $this->pageQuery(
             ClientUser::query(),

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Module\System\Repository\Notification;
 
+use App\Foundation\Crud\CrudQuery;
 use App\Foundation\Pagination\PageResult;
-use App\Foundation\Query\AdminQuery;
 use App\Foundation\Repository\AbstractRepository;
 use App\Module\System\Model\AdminAnnouncement;
 use Hyperf\Database\Model\Builder;
@@ -18,21 +18,21 @@ final class AdminAnnouncementRepository extends AbstractRepository
     protected array $keywordFields = ['title', 'content', 'operator_name'];
 
     protected array $filterable = [
-        'id' => ['=', 'in'],
-        'level' => ['=', 'in'],
-        'type' => ['=', 'in'],
-        'source' => ['=', 'in'],
-        'status' => ['=', 'in'],
-        'scope' => ['=', 'in'],
-        'created_at' => ['between', '>=', '<='],
-        'publish_at' => ['between', '>=', '<='],
+        'id' => ['eq', 'in'],
+        'level' => ['eq', 'in'],
+        'type' => ['eq', 'in'],
+        'source' => ['eq', 'in'],
+        'status' => ['eq', 'in'],
+        'scope' => ['eq', 'in'],
+        'created_at' => ['between', 'gte', 'lte'],
+        'publish_at' => ['between', 'gte', 'lte'],
     ];
 
     protected array $sortable = ['id', 'created_at', 'updated_at', 'publish_at', 'expire_at'];
 
     protected array $defaultSort = ['pinned' => 'desc', 'id' => 'desc'];
 
-    public function paginate(AdminQuery $adminQuery): PageResult
+    public function paginate(CrudQuery $adminQuery): PageResult
     {
         $query = AdminAnnouncement::query();
         $this->applyManagementDataPolicy($query);
@@ -47,7 +47,7 @@ final class AdminAnnouncementRepository extends AbstractRepository
     /**
      * @return list<AdminAnnouncement>
      */
-    public function visibleForReceiver(int $adminId, array $roleIds, AdminQuery $adminQuery): array
+    public function visibleForReceiver(int $adminId, array $roleIds, CrudQuery $adminQuery): array
     {
         $now = date('Y-m-d H:i:s');
         $query = $this->visibleQuery($now);
@@ -206,15 +206,7 @@ final class AdminAnnouncementRepository extends AbstractRepository
         ];
     }
 
-    protected function handleSearch(mixed $query, AdminQuery $adminQuery): void
-    {
-        $this->applyKeyword($query, $adminQuery);
-        $this->applyFilters($query, $adminQuery);
-        $this->applyParams($query, $adminQuery);
-        $this->applySort($query, $adminQuery);
-    }
-
-    private function applyManagementDataPolicy(mixed $query): void
+    private function applyManagementDataPolicy(Builder $query): void
     {
         $this->applyDataPolicy($query, 'admin_announcement', [
             'deptColumn' => 'operator_dept_id',
@@ -222,7 +214,7 @@ final class AdminAnnouncementRepository extends AbstractRepository
         ]);
     }
 
-    private function assertManagementDataPolicy(mixed $query): void
+    private function assertManagementDataPolicy(Builder $query): void
     {
         $this->assertDataPolicyAllows($query, 'admin_announcement', [
             'deptColumn' => 'operator_dept_id',
@@ -230,7 +222,7 @@ final class AdminAnnouncementRepository extends AbstractRepository
         ]);
     }
 
-    private function applyParams(Builder $query, AdminQuery $adminQuery): void
+    protected function applyParams(Builder $query, CrudQuery $adminQuery): void
     {
         foreach (['level', 'type', 'source', 'status'] as $field) {
             if ($adminQuery->hasParam($field)) {
@@ -249,7 +241,7 @@ final class AdminAnnouncementRepository extends AbstractRepository
         }
     }
 
-    private function applyMessageFilters(Builder $query, AdminQuery $adminQuery): void
+    private function applyMessageFilters(Builder $query, CrudQuery $adminQuery): void
     {
         foreach (['level', 'type', 'source'] as $field) {
             if ($adminQuery->hasParam($field)) {
@@ -287,17 +279,15 @@ final class AdminAnnouncementRepository extends AbstractRepository
         return false;
     }
 
-    private function messageSearchQuery(AdminQuery $adminQuery): AdminQuery
+    private function messageSearchQuery(CrudQuery $adminQuery): CrudQuery
     {
-        return new AdminQuery(
+        return new CrudQuery(
             page: $adminQuery->page,
             pageSize: $adminQuery->pageSize,
             keyword: $adminQuery->keyword,
             filters: [],
-            operators: [],
+            sorts: $adminQuery->sorts,
             params: [],
-            sort: $adminQuery->sort,
-            order: $adminQuery->order,
         );
     }
 

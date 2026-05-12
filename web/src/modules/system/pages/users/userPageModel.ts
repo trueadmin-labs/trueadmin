@@ -30,7 +30,7 @@ export function createUserFilters({
       mode: 'multiple',
       transform: ({ value }) => {
         const roleCodes = value.split(',').filter(Boolean);
-        return roleCodes.length > 0 ? { roleCodes } : {};
+        return roleCodes.length > 0 ? { params: { roleCodes } } : {};
       },
       options: [
         { label: roleText['super-admin'], value: 'super-admin' },
@@ -52,7 +52,8 @@ export const createUserExtraQuery = (): CrudExtraQuerySchema[] => [
   {
     name: 'deptId',
     requestName: false,
-    transform: ({ value }) => (value === ALL_DEPARTMENTS_VALUE ? {} : { deptId: value }),
+    transform: ({ value }) =>
+      value === ALL_DEPARTMENTS_VALUE ? {} : { params: { deptId: value } },
   },
   {
     defaultValue: '1',

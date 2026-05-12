@@ -1,3 +1,4 @@
+import type { CrudListParams } from '@trueadmin/web-core/crud';
 import type { PageResult } from '@trueadmin/web-core/http';
 import type { TransText } from '@trueadmin/web-core/i18n';
 import type { Dayjs } from 'dayjs';
@@ -28,17 +29,18 @@ export type AdminMessageItem = {
   createdAt: string;
 };
 
-export type AdminMessageQuery = {
-  page?: number;
-  pageSize?: number;
+export type AdminMessageQueryParams = {
   kind?: AdminMessageKind | 'all';
   status?: AdminMessageReadStatus;
   level?: AdminMessageLevel;
   type?: string;
   source?: string;
-  keyword?: string;
   startAt?: string;
   endAt?: string;
+};
+
+export type AdminMessageQuery = CrudListParams & {
+  params?: AdminMessageQueryParams;
 };
 
 export type AdminMessageUnreadCount = {
@@ -199,14 +201,15 @@ export type AdminNotificationDelivery = {
   updatedAt: string;
 };
 
-export type AdminNotificationBatchQuery = {
-  page?: number;
-  pageSize?: number;
-  keyword?: string;
+export type AdminNotificationBatchQueryParams = {
   level?: AdminMessageLevel;
   type?: string;
   source?: string;
   status?: AdminNotificationBatchStatus;
+};
+
+export type AdminNotificationBatchQuery = CrudListParams & {
+  params?: AdminNotificationBatchQueryParams;
 };
 
 export type AdminAnnouncementListMeta = {
@@ -215,15 +218,16 @@ export type AdminAnnouncementListMeta = {
 
 export type AdminAnnouncementListResult = PageResult<AdminAnnouncement, AdminAnnouncementListMeta>;
 
-export type AdminAnnouncementQuery = Omit<AdminNotificationBatchQuery, 'status'> & {
-  status?: AdminAnnouncementStatus;
+export type AdminAnnouncementQuery = CrudListParams & {
+  params?: Omit<AdminNotificationBatchQueryParams, 'status'> & {
+    status?: AdminAnnouncementStatus;
+  };
 };
 
-export type AdminNotificationDeliveryQuery = {
-  page?: number;
-  pageSize?: number;
-  status?: AdminNotificationDeliveryStatus;
-  keyword?: string;
+export type AdminNotificationDeliveryQuery = CrudListParams & {
+  params?: {
+    status?: AdminNotificationDeliveryStatus;
+  };
 };
 
 export type AdminNotificationBatchCreatePayload = {

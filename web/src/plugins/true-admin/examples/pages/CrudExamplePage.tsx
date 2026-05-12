@@ -88,7 +88,11 @@ const createRecords = (t: (key?: string, fallback?: string) => string): CrudExam
 };
 
 const splitParam = (value: unknown) =>
-  typeof value === 'string' && value.length > 0 ? value.split(',').filter(Boolean) : [];
+  Array.isArray(value)
+    ? value.map(String).filter(Boolean)
+    : typeof value === 'string' && value.length > 0
+      ? value.split(',').filter(Boolean)
+      : [];
 
 const getStatusStats = (records: CrudExampleRecord[]): CrudExampleMeta['statusStats'] => ({
   all: records.length,
@@ -125,26 +129,26 @@ const summaryCardStyles = {
   body: { display: 'flex', height: '100%', justifyContent: 'center', padding: 12 },
 };
 
-const formatLifecycleParams = (params: CrudListParams) => {
-  const entries = Object.entries(params).filter(([, value]) => value !== undefined);
-  if (entries.length === 0) {
-    return '-';
-  }
+const formatLifecycleParams = (params: CrudListParams) =>
+  JSON.stringify(params, (_key, value) => (value === undefined ? undefined : value));
 
-  return entries
-    .map(([key, value]) => `${key}=${Array.isArray(value) ? value.join(',') : String(value)}`)
-    .join(' / ');
-};
+const getFilterValue = (params: CrudListParams, field: string) =>
+  params.filters?.find((filter) => filter.field === field)?.value;
+
+const getParamValue = (params: CrudListParams, field: string) => params.params?.[field];
 
 const filterRecords = (records: CrudExampleRecord[], params: CrudListParams) =>
   records.filter((record) => {
     const keyword = typeof params.keyword === 'string' ? params.keyword.trim() : '';
-    const owner = typeof params.owner === 'string' ? params.owner.trim() : '';
-    const statusScope = typeof params.statusScope === 'string' ? params.statusScope : 'all';
-    const categoryScope = typeof params.categoryScope === 'string' ? params.categoryScope : 'all';
-    const statuses = splitParam(params.status);
-    const categories = splitParam(params.category);
-    const [createdAtStart, createdAtEnd] = splitParam(params.createdAt);
+    const ownerValue = getFilterValue(params, 'owner');
+    const statusScopeValue = getParamValue(params, 'statusScope');
+    const categoryScopeValue = getParamValue(params, 'categoryScope');
+    const owner = typeof ownerValue === 'string' ? ownerValue.trim() : '';
+    const statusScope = typeof statusScopeValue === 'string' ? statusScopeValue : 'all';
+    const categoryScope = typeof categoryScopeValue === 'string' ? categoryScopeValue : 'all';
+    const statuses = splitParam(getFilterValue(params, 'status'));
+    const categories = splitParam(getFilterValue(params, 'category'));
+    const [createdAtStart, createdAtEnd] = splitParam(getFilterValue(params, 'createdAt'));
     const matchKeyword = keyword
       ? record.name.includes(keyword) || record.owner.includes(keyword)
       : true;
@@ -169,12 +173,13 @@ const filterRecords = (records: CrudExampleRecord[], params: CrudListParams) =>
   });
 
 const sortRecords = (records: CrudExampleRecord[], params: CrudListParams) => {
-  if (params.sort !== 'visits' || !params.order) {
+  const visitsSort = params.sorts?.find((sort) => sort.field === 'visits');
+  if (!visitsSort) {
     return records;
   }
 
   return [...records].sort((left, right) =>
-    params.order === 'asc' ? left.visits - right.visits : right.visits - left.visits,
+    visitsSort.order === 'asc' ? left.visits - right.visits : right.visits - left.visits,
   );
 };
 
@@ -428,7 +433,10 @@ export default function CrudExamplePage() {
 
   const handleTransformParams = useCallback(
     (params: CrudListParams, context: CrudRequestLifecycleContext) => {
-      const nextParams = { ...params, lifecycleDemo: 'enabled' };
+      const nextParams = {
+        ...params,
+        params: { ...params.params, lifecycleDemo: 'enabled' },
+      };
       appendLifecycleLog('transformParams', formatLifecycleParams(nextParams), {
         context,
         nextParams,

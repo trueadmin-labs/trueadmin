@@ -6,7 +6,7 @@ namespace App\Module\System\Http\Admin\Controller;
 
 use App\Foundation\Http\Controller\AdminController;
 use App\Foundation\Http\Middleware\PermissionMiddleware;
-use App\Foundation\Http\Request\AdminQueryRequest;
+use App\Foundation\Http\Request\CrudQueryRequest;
 use App\Foundation\Support\ApiResponse;
 use App\Module\Auth\Http\Admin\Middleware\AdminAuthMiddleware;
 use App\Module\System\Http\Admin\Request\CreateClientUserRequest;
@@ -29,9 +29,9 @@ final class ClientUserController extends AdminController
 
     #[AdminGet('')]
     #[Permission('system:client-user:list', title: '用户端账号列表', group: '系统管理')]
-    public function list(AdminQueryRequest $request): array
+    public function list(CrudQueryRequest $request): array
     {
-        return ApiResponse::success($this->users->paginate($request->adminQuery())->toArray());
+        return ApiResponse::success($this->users->paginate($request->crudQuery())->toArray());
     }
 
     #[AdminGet('{id}')]

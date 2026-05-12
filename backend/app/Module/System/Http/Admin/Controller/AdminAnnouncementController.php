@@ -30,7 +30,7 @@ final class AdminAnnouncementController extends AdminController
     #[Permission('system:announcement:list', title: '公告列表', group: '系统管理')]
     public function list(AdminNotificationQueryRequest $request): array
     {
-        $page = $this->announcements->paginate($request->adminQuery())->toArray();
+        $page = $this->announcements->paginate($request->crudQuery())->toArray();
 
         return ApiResponse::success([...$page, 'meta' => $this->announcements->listMeta()]);
     }

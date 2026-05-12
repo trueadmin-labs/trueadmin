@@ -6,7 +6,7 @@ namespace App\Module\System\Http\Admin\Controller;
 
 use App\Foundation\Http\Controller\AdminController;
 use App\Foundation\Http\Middleware\PermissionMiddleware;
-use App\Foundation\Http\Request\AdminQueryRequest;
+use App\Foundation\Http\Request\CrudQueryRequest;
 use App\Foundation\Support\ApiResponse;
 use App\Module\Auth\Http\Admin\Middleware\AdminAuthMiddleware;
 use App\Module\System\Http\Admin\Request\SaveAdminMenuRequest;
@@ -28,16 +28,16 @@ final class AdminMenuController extends AdminController
 
     #[AdminGet('')]
     #[Permission('system:menu:list', title: '菜单列表', group: '系统管理')]
-    public function list(AdminQueryRequest $request): array
+    public function list(CrudQueryRequest $request): array
     {
-        return ApiResponse::success($this->menus->list($request->adminQuery()));
+        return ApiResponse::success($this->menus->list($request->crudQuery()));
     }
 
     #[AdminGet('tree')]
     #[Permission('system:menu:list', title: '菜单树', group: '系统管理')]
-    public function tree(AdminQueryRequest $request): array
+    public function tree(CrudQueryRequest $request): array
     {
-        return ApiResponse::success($this->menus->tree($request->adminQuery()));
+        return ApiResponse::success($this->menus->tree($request->crudQuery()));
     }
 
     #[AdminGet('{id}')]

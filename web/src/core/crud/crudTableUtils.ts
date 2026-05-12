@@ -1,7 +1,7 @@
 import type { CardProps, CardSemanticStyles, CardStylesType } from 'antd/es/card/Card';
 import type { SorterResult, SortOrder } from 'antd/es/table/interface';
 import type { CSSProperties } from 'react';
-import type { CrudColumns, CrudOrder } from './types';
+import type { CrudColumns, CrudSortOrder, CrudSortRule } from './types';
 
 export const joinClassNames = (...classNames: Array<string | undefined | false>) =>
   classNames.filter(Boolean).join(' ');
@@ -43,7 +43,7 @@ export const getColumnSortKey = <TRecord extends Record<string, unknown>>(
   return undefined;
 };
 
-export const toCrudOrder = (order: SortOrder | undefined): CrudOrder | undefined => {
+export const toCrudSortOrder = (order: SortOrder | undefined): CrudSortOrder | undefined => {
   if (order === 'ascend') {
     return 'asc';
   }
@@ -53,9 +53,9 @@ export const toCrudOrder = (order: SortOrder | undefined): CrudOrder | undefined
   return undefined;
 };
 
-export const getSorterResult = <TRecord extends Record<string, unknown>>(
+export const getSorterResults = <TRecord extends Record<string, unknown>>(
   sorter: SorterResult<TRecord> | SorterResult<TRecord>[],
-) => (Array.isArray(sorter) ? sorter[0] : sorter);
+) => (Array.isArray(sorter) ? sorter : [sorter]).filter((item) => item.order);
 
 export const getSorterKey = <TRecord extends Record<string, unknown>>(
   sorter: SorterResult<TRecord>,
@@ -71,3 +71,12 @@ export const getSorterKey = <TRecord extends Record<string, unknown>>(
   }
   return undefined;
 };
+
+export const getSortRules = <TRecord extends Record<string, unknown>>(
+  sorter: SorterResult<TRecord> | SorterResult<TRecord>[],
+): CrudSortRule[] =>
+  getSorterResults(sorter).flatMap((item) => {
+    const field = getSorterKey(item);
+    const order = toCrudSortOrder(item.order);
+    return field && order ? [{ field, order }] : [];
+  });

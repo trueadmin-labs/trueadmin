@@ -14,7 +14,7 @@ namespace App\Module\System\Http\Admin\Controller;
 
 use App\Foundation\Http\Controller\AdminController;
 use App\Foundation\Http\Middleware\PermissionMiddleware;
-use App\Foundation\Http\Request\AdminQueryRequest;
+use App\Foundation\Http\Request\CrudQueryRequest;
 use App\Foundation\Support\ApiResponse;
 use App\Module\Auth\Http\Admin\Middleware\AdminAuthMiddleware;
 use App\Module\System\Dto\FileUploadContext;
@@ -43,11 +43,11 @@ final class AdminFileController extends AdminController
 
     #[AdminGet('')]
     #[Permission('system:file:list', title: '文件列表', group: '系统管理')]
-    public function list(AdminQueryRequest $request): array
+    public function list(CrudQueryRequest $request): array
     {
         $actor = ActorContext::requirePrincipal();
 
-        return ApiResponse::success($this->files->paginate($request->adminQuery(), $actor, $this->origin())->toArray());
+        return ApiResponse::success($this->files->paginate($request->crudQuery(), $actor, $this->origin())->toArray());
     }
 
     #[AdminPost('upload')]

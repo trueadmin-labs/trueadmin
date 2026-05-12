@@ -6,6 +6,8 @@ namespace App\Module\System\Service\DataPermission;
 
 use App\Foundation\DataPermission\DataPolicyStrategyInterface;
 use App\Module\System\Repository\AdminDepartmentRepository;
+use Hyperf\Database\Model\Builder as ModelBuilder;
+use Hyperf\Database\Query\Builder as QueryBuilder;
 use TrueAdmin\Kernel\Context\Actor;
 use TrueAdmin\Kernel\DataPermission\DataPolicyRule;
 use TrueAdmin\Kernel\DataPermission\DataPolicyTarget;
@@ -42,7 +44,7 @@ final class OrganizationDataPolicyStrategy implements DataPolicyStrategyInterfac
         ];
     }
 
-    public function apply(mixed $query, Actor $actor, DataPolicyRule $rule, DataPolicyTarget $target): void
+    public function apply(ModelBuilder|QueryBuilder $query, Actor $actor, DataPolicyRule $rule, DataPolicyTarget $target): void
     {
         if ($rule->scope === 'all') {
             return;

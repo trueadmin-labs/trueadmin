@@ -12,10 +12,11 @@ declare(strict_types=1);
 
 namespace App\Module\System\Repository;
 
+use App\Foundation\Crud\CrudQuery;
 use App\Foundation\Pagination\PageResult;
-use App\Foundation\Query\AdminQuery;
 use App\Foundation\Repository\AbstractRepository;
 use App\Module\System\Model\File;
+use Hyperf\Database\Model\Builder;
 use TrueAdmin\Kernel\Context\Actor;
 
 final class FileRepository extends AbstractRepository
@@ -39,7 +40,7 @@ final class FileRepository extends AbstractRepository
 
     protected array $defaultSort = ['id' => 'desc'];
 
-    public function paginate(AdminQuery $adminQuery, Actor $actor, callable $mapper): PageResult
+    public function paginate(CrudQuery $adminQuery, Actor $actor, callable $mapper): PageResult
     {
         $query = $this->query();
         $this->applyDataScope($query, $actor);
@@ -71,7 +72,7 @@ final class FileRepository extends AbstractRepository
         return $file;
     }
 
-    private function applyDataScope(mixed $query, Actor $actor): void
+    private function applyDataScope(Builder $query, Actor $actor): void
     {
         if ($actor->type !== 'admin') {
             $query->where('scope', $actor->type)->where('owner_id', (string) $actor->id);

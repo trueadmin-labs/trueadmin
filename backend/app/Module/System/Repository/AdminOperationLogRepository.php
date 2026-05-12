@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Module\System\Repository;
 
+use App\Foundation\Crud\CrudQuery;
 use App\Foundation\Pagination\PageResult;
-use App\Foundation\Query\AdminQuery;
 use App\Foundation\Repository\AbstractRepository;
 use App\Module\System\Model\AdminOperationLog;
 
@@ -16,16 +16,16 @@ final class AdminOperationLogRepository extends AbstractRepository
     protected array $keywordFields = ['module', 'action', 'remark', 'principal_id', 'operator_id'];
 
     protected array $filterable = [
-        'id' => ['=', 'in'],
-        'module' => ['=', 'like', 'in'],
-        'action' => ['=', 'like', 'in'],
-        'remark' => ['=', 'like'],
-        'principal_type' => ['=', 'in'],
-        'principal_id' => ['=', 'like'],
-        'operator_type' => ['=', 'in'],
-        'operator_id' => ['=', 'like'],
-        'operation_dept_id' => ['=', 'in'],
-        'created_at' => ['between', '>=', '<='],
+        'id' => ['eq', 'in'],
+        'module' => ['eq', 'like', 'in'],
+        'action' => ['eq', 'like', 'in'],
+        'remark' => ['eq', 'like'],
+        'principal_type' => ['eq', 'in'],
+        'principal_id' => ['eq', 'like'],
+        'operator_type' => ['eq', 'in'],
+        'operator_id' => ['eq', 'like'],
+        'operation_dept_id' => ['eq', 'in'],
+        'created_at' => ['between', 'gte', 'lte'],
     ];
 
     protected array $sortable = ['id', 'created_at'];
@@ -40,7 +40,7 @@ final class AdminOperationLogRepository extends AbstractRepository
         return AdminOperationLog::query()->create($payload);
     }
 
-    public function paginate(AdminQuery $adminQuery): PageResult
+    public function paginate(CrudQuery $adminQuery): PageResult
     {
         return $this->pageQuery(
             AdminOperationLog::query(),

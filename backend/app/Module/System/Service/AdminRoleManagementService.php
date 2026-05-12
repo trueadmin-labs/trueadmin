@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Module\System\Service;
 
 use App\Foundation\Pagination\PageResult;
-use App\Foundation\Query\AdminQuery;
+use App\Foundation\Crud\CrudQuery;
 use App\Foundation\Service\AbstractService;
 use App\Foundation\DataPermission\DataPolicyRegistry;
 use App\Module\System\Model\AdminRole;
@@ -28,7 +28,7 @@ final class AdminRoleManagementService extends AbstractService
     ) {
     }
 
-    public function paginate(AdminQuery $query): PageResult
+    public function paginate(CrudQuery $query): PageResult
     {
         return $this->roles->paginate($query);
     }

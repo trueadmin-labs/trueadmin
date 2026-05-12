@@ -4,7 +4,7 @@ import { getColumnSortKey } from './crudTableUtils';
 import { createCrudOperationColumns } from './TrueAdminCrudOperationColumn';
 import type {
   CrudColumns,
-  CrudOrder,
+  CrudSortRule,
   CrudTableLocale,
   CrudTableRenderContext,
   TrueAdminCrudTableProps,
@@ -20,11 +20,10 @@ type UseCrudTableColumnsOptions<
   columns: CrudColumns<TRecord>;
   locale?: CrudTableLocale;
   onDelete: (record: TRecord) => void | Promise<void>;
-  order?: CrudOrder;
   renderContext: CrudTableRenderContext<TRecord, TMeta, TCreate, TUpdate>;
   resource: string;
   rowActions?: TrueAdminCrudTableProps<TRecord, TCreate, TUpdate, TMeta>['rowActions'];
-  sort?: string;
+  sorts: CrudSortRule[];
   t: TranslateFunction;
 };
 
@@ -38,11 +37,10 @@ export function useCrudTableColumns<
   columns,
   locale,
   onDelete,
-  order,
   renderContext,
   resource,
   rowActions,
-  sort,
+  sorts,
   t,
 }: UseCrudTableColumnsOptions<TRecord, TCreate, TUpdate, TMeta>) {
   const operationColumn = useMemo<CrudColumns<TRecord>>(
@@ -66,10 +64,11 @@ export function useCrudTableColumns<
       if (!sortKey || !column.sorter) {
         return column;
       }
+      const sort = sorts.find((item) => item.field === sortKey);
       return {
         ...column,
-        sortOrder: sort === sortKey && order ? (order === 'asc' ? 'ascend' : 'descend') : undefined,
+        sortOrder: sort ? (sort.order === 'asc' ? 'ascend' : 'descend') : undefined,
       };
     });
-  }, [columns, operationColumn, order, sort]);
+  }, [columns, operationColumn, sorts]);
 }
