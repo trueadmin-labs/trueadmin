@@ -4,16 +4,8 @@ import type { SorterResult } from 'antd/es/table/interface';
 import { useCallback, useMemo, useState } from 'react';
 import { errorCenter } from '@/core/error/errorCenter';
 import { useI18n } from '@/core/i18n/I18nProvider';
-import { getSorterKey, getSorterResult, joinClassNames, toCrudOrder } from './crudTableUtils';
-import { buildCrudTableFrame } from './TrueAdminCrudTableFrame';
-import {
-  TrueAdminCrudTablePagination,
-  TrueAdminCrudTableSelectionStatus,
-} from './TrueAdminCrudTablePagination';
-import { TrueAdminCrudTableToolbarRow } from './TrueAdminCrudTableToolbarRow';
-import { TrueAdminCrudTableView } from './TrueAdminCrudTableView';
-import { TrueAdminImportModal } from './TrueAdminImportModal';
-import { TrueAdminTableFilterPanel } from './TrueAdminTableFilterPanel';
+import { getSorterKey, getSorterResult, toCrudOrder } from './crudTableUtils';
+import { TrueAdminCrudTableContent } from './TrueAdminCrudTableContent';
 import type { CrudImportConfig, TrueAdminCrudTableProps } from './types';
 import { useCrudTableColumns } from './useCrudTableColumns';
 import { useCrudTableData } from './useCrudTableData';
@@ -128,7 +120,6 @@ export function TrueAdminCrudTable<
     defaultPageSize: DEFAULT_PAGE_SIZE,
     queryMode,
   });
-  const hasFilters = filters.length > 0;
   const {
     clearSelected,
     getRecordKey,
@@ -226,9 +217,6 @@ export function TrueAdminCrudTable<
     t,
   });
 
-  const toolbarTitle = toolbarRender?.(tableRenderContext) ?? null;
-  const toolbarExtra = toolbarExtraRender?.(tableRenderContext) ?? null;
-
   const handleTableChange: TableProps<TRecord>['onChange'] = (
     pagination,
     filters,
@@ -248,147 +236,58 @@ export function TrueAdminCrudTable<
     setQueryResetSeed((seed) => seed + 1);
   }, [queryState]);
 
-  const searchDom = hasFilters ? (
-    <TrueAdminTableFilterPanel
-      expanded={filtersExpanded}
-      filters={filters}
-      values={queryState.values}
-      onReset={resetQuery}
-      onSubmit={queryState.submitFilters}
-      locale={locale}
-      panelProps={filterPanelProps}
-      onTransitionEnd={finishFilterPanelTransition}
-    />
-  ) : null;
-
-  const summaryDom = summaryRender ? (
-    <div
-      className={joinClassNames('trueadmin-crud-table-summary', classNames?.summary)}
-      style={styles?.summary}
-    >
-      {summaryRender(tableRenderContext)}
-    </div>
-  ) : null;
-
-  const extraDom = tableExtraRender ? (
-    <div
-      className={joinClassNames('trueadmin-crud-table-extra', classNames?.extra)}
-      style={styles?.extra}
-    >
-      {tableExtraRender(tableRenderContext)}
-    </div>
-  ) : null;
-
-  const toolbarDom = (
-    <TrueAdminCrudTableToolbarRow<TRecord, TCreate, TUpdate, TMeta>
-      activeFilterCount={queryState.activeFilterCount}
+  return (
+    <TrueAdminCrudTableContent<TRecord, TCreate, TUpdate, TMeta>
+      cardProps={cardProps}
+      className={className}
       classNames={classNames}
-      filtersExpanded={filtersExpanded}
-      hasFilters={hasFilters}
-      importExport={importExport}
-      loading={loading}
-      locale={locale}
-      quickSearch={quickSearch}
-      quickSearchResetSeed={queryResetSeed}
-      quickSearchValue={
-        queryState.quickSearchName ? queryState.values[queryState.quickSearchName] : undefined
-      }
-      renderContext={tableRenderContext}
-      selectedCount={selectedCount}
-      styles={styles}
-      toolbarExtra={toolbarExtra}
-      toolbarProps={toolbarProps}
-      toolbarTitle={toolbarTitle}
-      t={t}
-      onOpenImport={setImportModalConfig}
-      onClearQuickSearch={queryState.clearQuickSearch}
-      onReload={reload}
-      onSubmitQuickSearch={queryState.submitQuickSearch}
-      onToggleFilters={toggleFiltersExpanded}
-    />
-  );
-
-  const selectedStatusDom = (
-    <TrueAdminCrudTableSelectionStatus
-      classNames={classNames}
-      clearSelected={clearSelected}
-      locale={locale}
-      open={hasSelectedStatus}
-      renderContext={tableRenderContext}
-      selectedCount={selectedCount}
-      styles={styles}
-      t={t}
-      tableAlertOptionRender={tableAlertOptionRender}
-      tableAlertRender={tableAlertRender}
-    />
-  );
-
-  const tableDom = (
-    <TrueAdminCrudTableView<TRecord, TCreate, TUpdate, TMeta>
       columns={mergedColumns}
       dataSource={dataSource}
       emptyRender={emptyRender}
       error={error}
       errorRender={errorRender}
+      filterPanelProps={filterPanelProps}
+      filters={filters}
+      filtersExpanded={filtersExpanded}
+      importExport={importExport}
+      importModalConfig={importModalConfig}
       loading={loading}
       locale={locale}
       mergedRowSelection={mergedRowSelection}
-      renderContext={tableRenderContext}
-      reload={reload}
-      rowKey={rowKey}
-      tableBodyScrollY={tableBodyScrollY}
-      tableProps={tableProps}
-      tableScrollX={tableScrollX}
-      t={t}
-      onChange={handleTableChange}
-    />
-  );
-  const tableViewDom = tableViewRender ? tableViewRender(tableRenderContext, tableDom) : tableDom;
-  const paginationDom = (
-    <TrueAdminCrudTablePagination
-      classNames={classNames}
-      current={queryState.current}
-      locale={locale}
-      pageSize={queryState.pageSize}
       paginationProps={paginationProps}
-      selectedStatus={selectedStatusDom}
+      queryResetSeed={queryResetSeed}
+      queryState={queryState}
+      quickSearch={quickSearch}
+      renderContext={tableRenderContext}
+      rowKey={rowKey}
+      selectedCount={selectedCount}
+      selectedStatusOpen={hasSelectedStatus}
+      style={style}
       styles={styles}
+      summaryRender={summaryRender}
+      tableAlertOptionRender={tableAlertOptionRender}
+      tableAlertRender={tableAlertRender}
+      tableBodyScrollY={tableBodyScrollY}
+      tableExtraRender={tableExtraRender}
+      tableMainRef={tableMainRef}
+      tableMainStyle={tableMainStyle}
+      tableProps={tableProps}
+      tableRender={tableRender}
+      tableScrollX={tableScrollX}
+      tableViewRender={tableViewRender}
+      toolbarExtraRender={toolbarExtraRender}
+      toolbarProps={toolbarProps}
+      toolbarRender={toolbarRender}
       t={t}
       total={total}
-      onChange={queryState.changePage}
+      onChangeTable={handleTableChange}
+      onClearSelected={clearSelected}
+      onCloseImport={() => setImportModalConfig(undefined)}
+      onFinishFilterPanelTransition={finishFilterPanelTransition}
+      onOpenImport={setImportModalConfig}
+      onReload={reload}
+      onResetQuery={resetQuery}
+      onToggleFilters={toggleFiltersExpanded}
     />
-  );
-  const { defaultDom, domList } = buildCrudTableFrame<TRecord, TCreate, TUpdate, TMeta>({
-    cardProps,
-    className,
-    classNames,
-    extraDom,
-    paginationDom,
-    searchDom,
-    selectedStatusDom,
-    style,
-    styles,
-    summaryDom,
-    tableMainRef,
-    tableMainStyle,
-    tableViewDom,
-    toolbarDom,
-  });
-
-  const contentDom = tableRender
-    ? tableRender(tableRenderContext, defaultDom, domList)
-    : defaultDom;
-
-  return (
-    <>
-      {contentDom}
-      <TrueAdminImportModal
-        config={importModalConfig as never}
-        context={tableRenderContext as never}
-        open={Boolean(importModalConfig)}
-        t={t}
-        onClose={() => setImportModalConfig(undefined)}
-      />
-    </>
   );
 }
