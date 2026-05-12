@@ -1,30 +1,18 @@
 import { PlusOutlined } from '@ant-design/icons';
 import { App, Button, Form } from 'antd';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { TrueAdminCrudPage } from '@/core/crud';
 import type { CrudService, CrudTableAction } from '@/core/crud/types';
 import { useI18n } from '@/core/i18n/I18nProvider';
-import { departmentApi } from '../../services/department.api';
-import { menuApi } from '../../services/menu.api';
 import { roleApi } from '../../services/role.api';
-import type { DepartmentTreeNode } from '../../types/department';
-import type { AdminMenu } from '../../types/menu';
-import type { AdminRole, AdminRolePayload, DataPolicyMetadata } from '../../types/role';
+import type { AdminRole, AdminRolePayload } from '../../types/role';
 import { RoleAuthorizeModal } from './RoleAuthorizeModal';
 import { RoleFormModal } from './RoleFormModal';
 import { RoleRowActions } from './RoleRowActions';
 import { createRoleColumns } from './RoleTableColumns';
-import {
-  type DataPolicyFormValues,
-  getMenuTreeKeys,
-  isBuiltinRole,
-  type RoleFormValues,
-  toDataPolicies,
-  toDataPolicyFormValues,
-  toDepartmentTreeData,
-  uniqueKeys,
-} from './roleAuthorization';
+import { isBuiltinRole, type RoleFormValues } from './roleAuthorization';
 import { createRoleFilters } from './rolePageModel';
+import { useRoleAuthorization } from './useRoleAuthorization';
 
 const roleService: CrudService<AdminRole, AdminRolePayload, AdminRolePayload> = {
   list: roleApi.list,
@@ -37,22 +25,13 @@ export default function AdminRolesPage() {
   const { message } = App.useApp();
   const { t } = useI18n();
   const [form] = Form.useForm<RoleFormValues>();
-  const [dataPolicyForm] = Form.useForm<DataPolicyFormValues>();
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [editing, setEditing] = useState<AdminRole>();
-  const [menuTree, setMenuTree] = useState<AdminMenu[]>([]);
-  const [departmentTree, setDepartmentTree] = useState<DepartmentTreeNode[]>([]);
-  const [dataPolicyMetadata, setDataPolicyMetadata] = useState<DataPolicyMetadata>();
-  const [authorizeOpen, setAuthorizeOpen] = useState(false);
-  const [authorizeLoading, setAuthorizeLoading] = useState(false);
-  const [authorizing, setAuthorizing] = useState(false);
-  const [authorizeRole, setAuthorizeRole] = useState<AdminRole>();
-  const [pendingAuthorizeRole, setPendingAuthorizeRole] = useState<AdminRole>();
-  const [checkedMenuIds, setCheckedMenuIds] = useState<React.Key[]>([]);
-  const [expandedMenuIds, setExpandedMenuIds] = useState<React.Key[]>([]);
-  const [strictMenuCheck, setStrictMenuCheck] = useState(true);
-  const dataPolicyScopes = Form.useWatch('policies', dataPolicyForm);
+  const roleAuthorization = useRoleAuthorization({
+    t,
+    onSuccess: (content) => message.success(content),
+  });
 
   const statusText = useMemo<Record<AdminRole['status'], string>>(
     () => ({
@@ -61,13 +40,6 @@ export default function AdminRolesPage() {
     }),
     [t],
   );
-
-  const loadDataPolicyMetadata = async () => {
-    const metadata = await roleApi.dataPolicyMetadata();
-    setDataPolicyMetadata(metadata);
-
-    return metadata;
-  };
 
   const openCreate = () => {
     setEditing(undefined);
@@ -96,89 +68,9 @@ export default function AdminRolesPage() {
     form.resetFields();
   };
 
-  const openAuthorize = (record: AdminRole) => {
-    if (isBuiltinRole(record)) {
-      return;
-    }
-
-    setPendingAuthorizeRole(record);
-    setAuthorizeRole(undefined);
-    setCheckedMenuIds([]);
-    setExpandedMenuIds([]);
-    setStrictMenuCheck(true);
-    dataPolicyForm.resetFields();
-    setAuthorizeOpen(true);
-  };
-
-  const closeAuthorize = () => {
-    setAuthorizeOpen(false);
-    setAuthorizeLoading(false);
-    setPendingAuthorizeRole(undefined);
-    setAuthorizeRole(undefined);
-    setCheckedMenuIds([]);
-    setExpandedMenuIds([]);
-    setStrictMenuCheck(true);
-    dataPolicyForm.resetFields();
-  };
-
-  useEffect(() => {
-    if (!authorizeOpen || !pendingAuthorizeRole) {
-      return;
-    }
-
-    let cancelled = false;
-    setAuthorizeLoading(true);
-
-    const loadAuthorizeData = async () => {
-      try {
-        const [detail, metadata, menus, departments] = await Promise.all([
-          roleApi.detail(pendingAuthorizeRole.id),
-          dataPolicyMetadata ? Promise.resolve(dataPolicyMetadata) : loadDataPolicyMetadata(),
-          menuTree.length > 0 ? Promise.resolve(menuTree) : menuApi.tree(),
-          departmentTree.length > 0 ? Promise.resolve(departmentTree) : departmentApi.tree(),
-        ]);
-
-        if (cancelled) {
-          return;
-        }
-
-        setMenuTree(menus);
-        setDepartmentTree(departments);
-        setAuthorizeRole(detail);
-        setCheckedMenuIds(detail.menuIds ?? []);
-        setExpandedMenuIds(getMenuTreeKeys(menus));
-        dataPolicyForm.setFieldsValue(toDataPolicyFormValues(metadata, detail));
-      } finally {
-        if (!cancelled) {
-          setAuthorizeLoading(false);
-        }
-      }
-    };
-
-    void loadAuthorizeData();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [authorizeOpen, pendingAuthorizeRole]);
-
   const columns = useMemo(() => createRoleColumns({ statusText, t }), [statusText, t]);
 
   const filters = useMemo(() => createRoleFilters({ statusText, t }), [statusText, t]);
-
-  const departmentTreeData = useMemo(() => toDepartmentTreeData(departmentTree), [departmentTree]);
-  const menuGroupKeysMap = useMemo(
-    () => new Map(menuTree.map((menu) => [menu.id, getMenuTreeKeys([menu])])),
-    [menuTree],
-  );
-
-  const toggleMenuGroupRoot = (menu: AdminMenu, checked: boolean) => {
-    setCheckedMenuIds((current) => {
-      const withoutRoot = current.filter((key) => key !== menu.id);
-
-      return checked ? uniqueKeys([...withoutRoot, menu.id]) : withoutRoot;
-    });
-  };
 
   const submit = async (action: CrudTableAction<AdminRole, AdminRolePayload, AdminRolePayload>) => {
     if (isBuiltinRole(editing)) {
@@ -198,32 +90,6 @@ export default function AdminRolesPage() {
       closeForm();
     } finally {
       setSubmitting(false);
-    }
-  };
-
-  const submitAuthorize = async (
-    action: CrudTableAction<AdminRole, AdminRolePayload, AdminRolePayload>,
-  ) => {
-    if (!authorizeRole) {
-      return;
-    }
-    if (isBuiltinRole(authorizeRole)) {
-      return;
-    }
-
-    setAuthorizing(true);
-    try {
-      const metadata = dataPolicyMetadata ?? (await loadDataPolicyMetadata());
-      const dataPolicyValues = await dataPolicyForm.validateFields();
-      await roleApi.authorize(authorizeRole.id, {
-        menuIds: checkedMenuIds.map(Number),
-        dataPolicies: toDataPolicies(metadata, dataPolicyValues),
-      });
-      message.success(t('system.roles.success.authorize', '角色授权已保存'));
-      action.reload();
-      closeAuthorize();
-    } finally {
-      setAuthorizing(false);
     }
   };
 
@@ -256,7 +122,7 @@ export default function AdminRolesPage() {
             record={record}
             t={t}
             onEdit={openEdit}
-            onAuthorize={openAuthorize}
+            onAuthorize={roleAuthorization.openAuthorize}
           />
         ),
       }}
@@ -293,27 +159,9 @@ export default function AdminRolesPage() {
             onSubmit={() => void submit(action)}
           />
           <RoleAuthorizeModal
-            authorizing={authorizing}
-            authorizeLoading={authorizeLoading}
-            authorizeRole={authorizeRole}
-            checkedMenuIds={checkedMenuIds}
-            dataPolicyForm={dataPolicyForm}
-            dataPolicyMetadata={dataPolicyMetadata}
-            dataPolicyScopes={dataPolicyScopes}
-            departmentTreeData={departmentTreeData}
-            expandedMenuIds={expandedMenuIds}
-            menuGroupKeysMap={menuGroupKeysMap}
-            menuTree={menuTree}
-            open={authorizeOpen}
-            pendingAuthorizeRole={pendingAuthorizeRole}
-            setCheckedMenuIds={setCheckedMenuIds}
-            setExpandedMenuIds={setExpandedMenuIds}
-            setStrictMenuCheck={setStrictMenuCheck}
-            strictMenuCheck={strictMenuCheck}
+            {...roleAuthorization.modalProps}
             t={t}
-            onCancel={closeAuthorize}
-            onOk={() => void submitAuthorize(action)}
-            onToggleMenuGroupRoot={toggleMenuGroupRoot}
+            onOk={() => void roleAuthorization.submitAuthorize(action)}
           />
         </>
       )}
