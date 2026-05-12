@@ -1,14 +1,14 @@
 import { TableOutlined } from '@ant-design/icons';
+import {
+  TrueAdminRemoteSelect,
+  type TrueAdminRemoteSelectProps,
+  type TrueAdminRemoteSelectValue,
+} from '@trueadmin/web-antd/remote-select';
 import type { ButtonProps } from 'antd';
 import { Button, Space, Tooltip } from 'antd';
 import type { Key, ReactNode } from 'react';
 import { useCallback, useMemo, useState } from 'react';
 import { useI18n } from '@/core/i18n/I18nProvider';
-import {
-  TrueAdminRemoteSelect,
-  type TrueAdminRemoteSelectProps,
-  type TrueAdminRemoteSelectValue,
-} from './TrueAdminRemoteSelect';
 import { TrueAdminTablePicker, type TrueAdminTablePickerProps } from './TrueAdminTablePicker';
 
 export type TrueAdminRemoteTableSelectProps<

@@ -1,9 +1,6 @@
 import { ApartmentOutlined } from '@ant-design/icons';
+import { TrueAdminTreeFilter, type TrueAdminTreeFilterItem } from '@trueadmin/web-antd/filter';
 import type { TranslateFunction } from '@trueadmin/web-core/i18n';
-import {
-  TrueAdminTreeFilter,
-  type TrueAdminTreeFilterItem,
-} from '@/core/filter/TrueAdminTreeFilter';
 import type { DepartmentTreeNode } from '../../types/department';
 import { ALL_DEPARTMENTS_VALUE } from './userPageModel';
 

@@ -1,6 +1,6 @@
+import { TrueAdminQuickFilter } from '@trueadmin/web-antd/filter';
 import type { TranslateFunction } from '@trueadmin/web-core/i18n';
 import type { CrudQueryController } from '@/core/crud/types';
-import { TrueAdminQuickFilter } from '@/core/filter/TrueAdminQuickFilter';
 import type { AdminNotificationBatchStatus } from '@/core/notification';
 
 type NotificationToolbarProps = {

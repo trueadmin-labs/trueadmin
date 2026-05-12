@@ -8,6 +8,7 @@ import {
   PlusOutlined,
 } from '@ant-design/icons';
 import { StatisticCard } from '@ant-design/pro-components';
+import { TrueAdminQuickFilter, TrueAdminTreeFilter } from '@trueadmin/web-antd/filter';
 import { App, Button, Col, Dropdown, Form, Input, Row, Select, Space, Tag, Tooltip } from 'antd';
 import type { Key } from 'react';
 import { useCallback, useMemo, useRef, useState } from 'react';
@@ -23,8 +24,6 @@ import type {
   CrudService,
 } from '@/core/crud/types';
 import { downloadFile } from '@/core/download';
-import { TrueAdminQuickFilter } from '@/core/filter/TrueAdminQuickFilter';
-import { TrueAdminTreeFilter } from '@/core/filter/TrueAdminTreeFilter';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { TrueAdminModal } from '@/core/modal';
 

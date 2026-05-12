@@ -1,8 +1,8 @@
+import { TrueAdminQuickFilter } from '@trueadmin/web-antd/filter';
 import { Button, Statistic, Tag } from 'antd';
 import { useMemo } from 'react';
 import { TrueAdminCrudTable } from '@/core/crud';
 import type { CrudColumns, CrudExtraQuerySchema, CrudService } from '@/core/crud/types';
-import { TrueAdminQuickFilter } from '@/core/filter/TrueAdminQuickFilter';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { TrueAdminModal } from '@/core/modal';
 import {

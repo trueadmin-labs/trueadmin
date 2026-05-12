@@ -10,6 +10,18 @@ TrueAdmin 后端采用 `kernel + app/Foundation + app/Infrastructure + app/Modul
 
 不要因为出现用户端接口就创建通用 `Module/User`。第一版内置的 `client_users` 是系统基础账号资源，归属 `Module/System`；用户端登录、刷新 Token、获取当前身份这类认证流程归属 `Module/Auth`；用户端会员、客户、订单、内容等业务能力，应按真实业务语义归属 `Module/Member`、`Module/Customer`、`Module/Order` 或其他更贴切的模块。
 
+## 调用端边界
+
+`Admin`、`Client`、`Open` 是入口边界，不是模块边界。
+
+- `Http/Admin`：后台管理端入口，面向当前 `web` 管理端和未来 Admin 定位的 `uniapp`。这里可以依赖后台 JWT、RBAC、菜单权限、数据权限和操作日志。
+- `Http/Client`：用户端入口，面向未来会员端、客户侧、小程序用户端等应用。这里不能复用 Admin 菜单权限假设。
+- `Http/Open`：开放平台入口，面向第三方系统。这里不能复用 Admin / Client 登录态，应使用开放平台认证和签名策略。
+
+端内独有代码只放在对应 `Http/<End>` 目录及其 Request、Middleware、Vo、Controller 中。端间复用的业务规则放在模块根级 `Service`、`Repository`、`Model`、`Event`、`Listener`、`Library` 或 `Schema` 中；如果某个 Service 只服务单一端且包含大量端内语义，可以放入 `Service/Admin`、`Service/Client` 或 `Service/Open` 子目录，但不要反向让通用 Service 读取 HTTP Request 或端内身份细节。
+
+后端可进入 `trueadmin/kernel` 的内容必须是跨端稳定原语，例如 CRUD 查询值对象、Actor、Attribute、错误码、数据权限原语。依赖数据库表、菜单、权限资源、Controller 或业务流程的实现留在模板 `Foundation`、模块或插件内。完整包边界见 [TrueAdmin 包与端边界](../package-boundaries.md)。
+
 ## 目录基准
 
 ```text

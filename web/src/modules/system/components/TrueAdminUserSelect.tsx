@@ -1,18 +1,15 @@
 import { ApartmentOutlined, TeamOutlined } from '@ant-design/icons';
+import { TrueAdminTreeFilter, type TrueAdminTreeFilterItem } from '@trueadmin/web-antd/filter';
+import type { TrueAdminRemoteSelectValue } from '@trueadmin/web-antd/remote-select';
 import { Space, Tag, Typography } from 'antd';
 import type { Key } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { CrudColumns, CrudService } from '@/core/crud/types';
-import {
-  TrueAdminTreeFilter,
-  type TrueAdminTreeFilterItem,
-} from '@/core/filter/TrueAdminTreeFilter';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import {
-  type TrueAdminRemoteSelectValue,
   TrueAdminRemoteTableSelect,
   type TrueAdminRemoteTableSelectProps,
-} from '@/core/selector';
+} from '@/core/selector/TrueAdminRemoteTableSelect';
 import { adminUserApi } from '../services/admin-user.api';
 import { departmentApi } from '../services/department.api';
 import type { AdminUser } from '../types/admin-user';

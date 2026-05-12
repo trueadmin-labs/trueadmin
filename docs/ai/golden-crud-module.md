@@ -172,7 +172,7 @@ Module/Xxx/Database/Migrations/YYYY_MM_DD_HHMMSS_create_xxx_table.php
 
 ## 标准查询协议
 
-后台列表统一使用 `AdminQueryRequest -> AdminQuery -> AbstractRepository::handleSearch()`。
+后台列表统一使用 `CrudQueryRequest -> CrudQuery -> AbstractRepository::applyCrudQuery()`。
 
 请求参数：
 
@@ -180,16 +180,18 @@ Module/Xxx/Database/Migrations/YYYY_MM_DD_HHMMSS_create_xxx_table.php
 page=1
 pageSize=20
 keyword=abc
-filter[status]=enabled
-op[status]=%3D
-filter[id][]=1
-filter[id][]=2
-op[id]=in
-sort=created_at
-order=desc
+filters[0][field]=status
+filters[0][op]=eq
+filters[0][value]=enabled
+filters[1][field]=id
+filters[1][op]=in
+filters[1][value][]=1
+filters[1][value][]=2
+sorts[0][field]=created_at
+sorts[0][order]=desc
 ```
 
-筛选字段和排序字段使用 Repository 白名单中的后端字段名；数组值使用 `filter[field][]=...`；前端统一使用 `@trueadmin/web-core/crud` 序列化。响应分页字段保持 camelCase，例如 `pageSize`。
+筛选字段和排序字段使用 Repository 白名单中的后端字段名；数组值放在 `filters[n][value][]`；前端统一使用 `@trueadmin/web-core/crud` 序列化。响应分页字段保持 camelCase，例如 `pageSize`。
 
 ## 生成清单
 

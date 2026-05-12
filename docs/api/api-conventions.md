@@ -113,12 +113,12 @@ Authorization: Bearer <token>
 
 ```http
 GET /api/admin/organization/users?page=1&pageSize=20&keyword=admin
-GET /api/admin/organization/users?filter[status]=enabled&op[status]=%3D
-GET /api/admin/organization/users?filter[id][]=1&filter[id][]=2&op[id]=in
-GET /api/admin/organization/users?sort=created_at&order=desc
+GET /api/admin/organization/users?filters[0][field]=status&filters[0][op]=eq&filters[0][value]=enabled
+GET /api/admin/organization/users?filters[0][field]=id&filters[0][op]=in&filters[0][value][]=1&filters[0][value][]=2
+GET /api/admin/organization/users?sorts[0][field]=created_at&sorts[0][order]=desc&sorts[1][field]=id&sorts[1][order]=asc
 ```
 
-`filter[field]` 和 `op[field]` 是标准写法，数组使用 `filter[field][]=...`。后端仍兼容旧的 JSON 字符串格式，但前端和文档只生成 bracket query。后端只会应用 Repository 白名单中允许的字段和操作符。常用操作符包括 `=`、`<>`、`>`、`>=`、`<`、`<=`、`like`、`in`、`between`。
+`filters[n][field/op/value]`、`sorts[n][field/order]` 和 `params[key]` 是标准写法。后端不兼容旧 `filter[field]`、`op[field]`、`sort/order` 和平铺业务参数；未知顶层参数会直接校验失败。后端只会应用 Repository 白名单中允许的字段和操作符。常用操作符包括 `eq`、`ne`、`gt`、`gte`、`lt`、`lte`、`like`、`in`、`between`、`is_null`、`not_null`。
 
 ## HTTP 方法
 

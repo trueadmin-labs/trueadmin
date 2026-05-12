@@ -1,8 +1,8 @@
 import { CheckOutlined, InboxOutlined, RollbackOutlined } from '@ant-design/icons';
+import { TrueAdminQuickFilter } from '@trueadmin/web-antd/filter';
 import type { TranslateFunction } from '@trueadmin/web-core/i18n';
 import { Button, Space } from 'antd';
 import type { CrudQueryController, CrudTableAction } from '@/core/crud/types';
-import { TrueAdminQuickFilter } from '@/core/filter/TrueAdminQuickFilter';
 import {
   type AdminMessageItem,
   type AdminMessageReadStatus,

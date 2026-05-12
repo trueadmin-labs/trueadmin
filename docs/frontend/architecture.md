@@ -8,6 +8,14 @@ TrueAdmin Web 管理端采用自研模块化前端底座，复用 Ant Design v6 
 
 技术边界：React Router 负责路由；Ant Design / ProComponents 负责后台组件和布局；TanStack Query 负责服务端状态；alova 负责 HTTP 请求和响应解包；Zustand 负责前端 UI 状态；MSW 只用于最小开发 Mock；Tailwind 只做布局工具；antd-style 用于消费 Ant Design token 的框架样式。
 
+## 端定位
+
+当前 `web` 是 Admin 管理端，不是用户端。未来 `uniapp` 第一阶段也定位为 Admin 管理端，用于移动后台管理场景；如果后续出现会员端、客户侧、小程序用户端等应用，应按 Client 端重新规划目录、接口、身份和权限，不复用 Admin 端菜单和 RBAC 假设。
+
+Admin 端可共享的是后台管理体验和通用组件，例如 CRUD、菜单、权限按钮、后台消息、工作区和管理端选择器。Client 端可共享的是协议包、请求规范、错误结构、基础 UI 原语和领域 service，不应直接复用 Admin Layout、Admin 菜单、Admin 权限码和 Admin 消息中心。
+
+完整包边界见 [TrueAdmin 包与端边界](../package-boundaries.md)，组件 API 规范见 [前端组件 API 规范](component-api.md)。
+
 ## 目录结构
 
 ```text
@@ -100,6 +108,8 @@ import { TrueAdminUserSelect } from '@/modules/system/components/TrueAdminUserSe
 `core` 只放无领域归属的框架通用能力。用户选择器、部门选择器、客户选择器、商品选择器等带明确业务领域的组件，应保留在所属模块或插件中，并通过公开出口给其他模块使用。第一阶段不要求在 `manifest.ts` 中声明模块依赖；依赖关系由静态 import 和 TypeScript 编译直接约束。
 
 页面容器、CRUD 和页面型弹窗属于框架稳定 API，应通过 `@core/page`、`@core/crud`、`@core/modal` 公开出口导入。容器选择、标题/操作区、滚动区和版权显示规范见 [页面容器分层规范](./page-container.md)。
+
+`core` 不是 npm 包的本地兼容层。已经进入 `@trueadmin/web-core` 或 `@trueadmin/web-antd` 的能力，模板代码应直接从包导入；只有依赖 Admin 端事实、模板状态或业务领域的组合能力才保留在 `core`、`modules` 或 `plugins` 中。
 
 ## 配置体系
 

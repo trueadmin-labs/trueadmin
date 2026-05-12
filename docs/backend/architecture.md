@@ -324,9 +324,9 @@ Repository 负责数据访问。
 - `createModel()`、`updateModel()`、`deleteModel()`。
 - `existingModelIds()`。
 - `syncPivot()`、`pivotIds()`。
-- `pageQuery()`、`listQuery()`、`handleSearch()`。
+- `pageQuery()`、`listQuery()`、`applyCrudQuery()`。
 
-后台管理列表统一使用 `AdminQueryRequest -> AdminQuery -> AbstractRepository::handleSearch()` 这一条链路，避免每个列表接口各自解析分页、关键字、筛选和排序。
+后台管理列表统一使用 `CrudQueryRequest -> CrudQuery -> AbstractRepository::applyCrudQuery()` 这一条链路，避免每个列表接口各自解析分页、关键字、筛选和排序。
 
 标准查询参数：
 
@@ -334,18 +334,20 @@ Repository 负责数据访问。
 page=1
 pageSize=20
 keyword=admin
-filter[status]=enabled
-op[status]=%3D
-filter[id][]=1
-filter[id][]=2
-op[id]=in
-sort=created_at
-order=desc
+filters[0][field]=status
+filters[0][op]=eq
+filters[0][value]=enabled
+filters[1][field]=id
+filters[1][op]=in
+filters[1][value][]=1
+filters[1][value][]=2
+sorts[0][field]=created_at
+sorts[0][order]=desc
 ```
 
-分页响应统一输出 `pageSize`，请求参数和 JSON 字段都使用 camelCase，数据库字段仍使用 snake_case。`filter[field]`、`op[field]`、`sort` 只允许命中 Repository 声明的白名单字段，禁止把前端参数直接映射成任意 SQL 字段。后端兼容旧的 JSON 字符串 `filter/op`，但前端统一使用 `@trueadmin/web-core/crud` 的序列化结果。
+分页响应统一输出 `pageSize`，请求参数和 JSON 字段都使用 camelCase，数据库字段仍使用 snake_case。`filters[n][field]`、`filters[n][op]`、`sorts[n][field]` 只允许命中 Repository 声明的白名单字段，禁止把前端参数直接映射成任意 SQL 字段。后端不兼容旧 CRUD 查询协议；前端统一使用 `@trueadmin/web-core/crud` 的序列化结果。
 
-搜索条件优先通过 `handleSearch()` 扩展。简单场景只需要配置 `$keywordFields`、`$filterable`、`$sortable`、`$defaultSort`；复杂场景可以在具体 Repository 覆盖 `handleSearch()`，但仍应保留字段白名单和业务语义清晰的查询封装。
+搜索条件优先通过 `applyParams()` 扩展业务参数。简单场景只需要配置 `$keywordFields`、`$filterable`、`$sortable`、`$defaultSort`；复杂场景仍应保留字段白名单和业务语义清晰的查询封装。
 
 Repository 不应该处理 HTTP 语义。
 
@@ -687,7 +689,7 @@ return [
 
 ```php
 #[DataScope(resource: 'outbound_order')]
-public function paginate(AdminQuery $query): PageResult
+public function paginate(CrudQuery $query): PageResult
 {
     return $this->orders->paginate($query);
 }
@@ -867,7 +869,8 @@ findById
 create
 updateById
 deleteById
-handleSearch
+applyCrudQuery
+applyParams
 handleItems
 ```
 
@@ -883,7 +886,7 @@ handleItems
 批量审批
 ```
 
-第一版不提供空壳 `AbstractCrudController`。Controller 显式声明路由、权限、Request 和 Service 调用；通用能力收敛在 `AdminQueryRequest`、`AdminQuery`、`PageResult`、`AbstractRepository`、`AbstractService`。复杂业务允许不走标准 CRUD 模板。
+第一版不提供空壳 `AbstractCrudController`。Controller 显式声明路由、权限、Request 和 Service 调用；通用能力收敛在 `CrudQueryRequest`、`CrudQuery`、`PageResult`、`AbstractRepository`、`AbstractService`。复杂业务允许不走标准 CRUD 模板。
 
 ## 13. 事件、监听器、队列、定时任务
 

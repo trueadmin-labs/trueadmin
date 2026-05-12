@@ -1,18 +1,12 @@
 import { ApartmentOutlined, TeamOutlined } from '@ant-design/icons';
+import { TrueAdminTreeFilter, type TrueAdminTreeFilterItem } from '@trueadmin/web-antd/filter';
+import { TrueAdminRemoteSelect } from '@trueadmin/web-antd/remote-select';
 import { App, Button, Card, Space, Tag, Typography } from 'antd';
 import { useMemo, useState } from 'react';
 import type { CrudColumns, CrudService } from '@/core/crud/types';
-import {
-  TrueAdminTreeFilter,
-  type TrueAdminTreeFilterItem,
-} from '@/core/filter/TrueAdminTreeFilter';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { TrueAdminPage } from '@/core/page/TrueAdminPage';
-import {
-  TrueAdminRemoteSelect,
-  TrueAdminRemoteTableSelect,
-  TrueAdminTablePicker,
-} from '@/core/selector';
+import { TrueAdminRemoteTableSelect, TrueAdminTablePicker } from '@/core/selector';
 
 const wait = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
 

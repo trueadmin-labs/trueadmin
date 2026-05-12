@@ -6,11 +6,12 @@
 
 1. [前端总体架构](architecture.md)
 2. [页面容器规范](page-container.md)
-3. [CRUD 搜索与筛选规范](crud-search-filter.md)
-4. [总体架构](../architecture/index.md)
-5. [技术栈说明](../overview/tech-stack.md)
-6. [API 规范](../api/index.md)
-7. [AI 开发指南](../ai/ai-development-guide.md)
+3. [前端组件 API 规范](component-api.md)
+4. [CRUD 搜索与筛选规范](crud-search-filter.md)
+5. [总体架构](../architecture/index.md)
+6. [技术栈说明](../overview/tech-stack.md)
+7. [API 规范](../api/index.md)
+8. [AI 开发指南](../ai/ai-development-guide.md)
 
 ## 核心结论
 
@@ -18,6 +19,7 @@
 - 技术栈使用 Vite、React、TypeScript、React Router、Ant Design v6、ProComponents 3、TanStack Query、alova、Zustand、MSW、Tailwind v4、antd-style、Biome、Vitest。
 - Ant Design Pro v6 作为布局、主题、交互和产品体验参考，不把官方示例页面放入主干。
 - MineAdmin 作为模块化、插件化、菜单、权限、CRUD 工作流和后台工作区体验参考。
+- 当前 `web` 是 Admin 管理端。未来 `uniapp` 第一阶段也定位为 Admin 管理端；用户端或客户侧应用需要按 Client 端边界另行规划。
 - 前端模块和插件都通过 `manifest.ts` 暴露前端能力，菜单、权限、按钮、OpenAPI 元数据以后端为事实来源。
 - 第一版落地范围是“框架 + System/admin-users 黄金 CRUD 闭环”。
 

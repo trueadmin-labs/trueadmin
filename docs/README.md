@@ -8,11 +8,12 @@
 
 1. [项目概览](overview/index.md)
 2. [总体架构](architecture/index.md)
-3. [后端架构](backend/index.md)
-4. [前端架构](frontend/index.md)
-5. [API 规范](api/index.md)
-6. [本地开发](development/local-development.md)
-7. [AI 开发指南](ai/ai-development-guide.md)
+3. [包与端边界](package-boundaries.md)
+4. [后端架构](backend/index.md)
+5. [前端架构](frontend/index.md)
+6. [API 规范](api/index.md)
+7. [本地开发](development/local-development.md)
+8. [AI 开发指南](ai/ai-development-guide.md)
 
 AI 编码代理应先阅读根目录的 [AGENTS.md](../AGENTS.md)，再根据任务进入对应专题文档。
 
@@ -20,6 +21,7 @@ AI 编码代理应先阅读根目录的 [AGENTS.md](../AGENTS.md)，再根据任
 
 - [overview](overview/index.md)：项目定位、技术栈、模块范围和演化路径。
 - [architecture](architecture/index.md)：Monorepo 总体架构、分层原则和前后端协作方式。
+- [package-boundaries](package-boundaries.md)：npm/composer 包、Admin/Client/Open 端边界和抽包判断规则。
 - [Admin 站内消息通知方案](architecture/admin-notification.md)：后台管理员消息、公告、铃铛入口、消息中心、实时同步和管理后台设计。
 - [backend](backend/index.md)：Hyperf 后端、模块化目录、注解、迁移、接口元数据、插件系统和层级边界。
 - [frontend](frontend/index.md)：Web 管理端技术栈、模块系统、插件系统、CRUD、布局、主题、权限、国际化和质量规范。

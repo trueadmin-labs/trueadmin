@@ -30,11 +30,11 @@ importers:
         specifier: latest
         version: 5.100.9(react@19.2.6)
       '@trueadmin/web-antd':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.1.1
+        version: 0.1.1
       '@trueadmin/web-core':
-        specifier: ^0.1.8
-        version: 0.1.8
+        specifier: ^0.1.9
+        version: 0.1.9
       '@trueadmin/web-react':
         specifier: ^0.1.0
         version: 0.1.0
@@ -1118,11 +1118,11 @@ packages:
       '@types/react-dom':
         optional: true
 
-  '@trueadmin/web-core@0.1.8':
-    resolution: {integrity: sha512-W/NEzEeeH+jWuTlKuqOCceYZ0qo18muXIk1o0VmgHDYQItewgVfCSd8Ke/uQe73VrKMiTMViOG5F1/iaOca7Mw==}
+  '@trueadmin/web-core@0.1.9':
+    resolution: {integrity: sha512-enYPbvVQiNdC5UmWmB8IQbhziBbMqP8WI3NbvO5ED44da/hOt7qqFPHNCVoUalI8ZbgmDfupbvFeZ3kxUUSkXw==}
 
-  '@trueadmin/web-antd@0.1.0':
-    resolution: {integrity: sha512-/Pm8KVaBVmqll/b+KH/esS08B8ELxQ9L2RcB1cvs8KDCtacpj2DT+A3VLaUFH9mglx4OrEJx9PWYzH6TQg35Dw==}
+  '@trueadmin/web-antd@0.1.1':
+    resolution: {integrity: sha512-mXH1YKp9UQEtcrVMe0r+uKHPoWz7kP5TP3gHFTioY10bxb1p5WRcJJJU9lNj3QlwO8vAj/sC+jKWac10RUn2kA==}
     peerDependencies:
       '@ant-design/icons': '>=5'
       antd: '>=5'
@@ -1130,7 +1130,7 @@ packages:
       react-dom: '>=18'
 
   '@trueadmin/web-react@0.1.0':
-    resolution: {integrity: sha512-xJmAUn5tHeg198D9/OM1OOxZn5ixt0f4sFq+MxMMo1v64JwSjcz4kB96FJ/Y5/kaWfAmvRKZ5zBur1NOFkOFvA==}
+    resolution: {integrity: sha512-wzN2FlUwelEUPD8cUz65hVd3LgLj8V74K6YesKFye3drfSw4od7sRdWfckdgZ7duGcdUz3av2cNvjXM7BZJZlg==}
     peerDependencies:
       react: '>=18'
 
@@ -3858,13 +3858,13 @@ snapshots:
       '@types/react': 19.2.14
       '@types/react-dom': 19.2.3(@types/react@19.2.14)
 
-  '@trueadmin/web-core@0.1.8': {}
+  '@trueadmin/web-core@0.1.9': {}
 
-  '@trueadmin/web-antd@0.1.0': {}
+  '@trueadmin/web-antd@0.1.1': {}
 
   '@trueadmin/web-react@0.1.0':
     dependencies:
-      '@trueadmin/web-core': 0.1.8
+      '@trueadmin/web-core': 0.1.9
 
   '@tybys/wasm-util@0.10.2':
     dependencies:

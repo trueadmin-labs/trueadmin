@@ -1,6 +1,6 @@
+import { TrueAdminQuickFilter } from '@trueadmin/web-antd/filter';
 import type { TranslateFunction } from '@trueadmin/web-core/i18n';
 import type { CrudPageResult, CrudQueryController } from '@/core/crud/types';
-import { TrueAdminQuickFilter } from '@/core/filter/TrueAdminQuickFilter';
 import type { AdminAnnouncementListMeta, AdminAnnouncementStatus } from '@/core/notification';
 
 type AnnouncementStatusFilterProps = {

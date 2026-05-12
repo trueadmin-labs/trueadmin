@@ -8,13 +8,13 @@ TrueAdmin 标准 CRUD 由 `TrueAdminCrudTable` 统一管理列表查询状态、
 
 - `_page`：当前页
 - `_pageSize`：每页条数
-- `_sort`：排序字段
-- `_order`：`asc` 或 `desc`
+- `sorts[n][field]`：第 n 个排序字段
+- `sorts[n][order]`：第 n 个排序方向，`asc` 或 `desc`
 
 示例：
 
 ```text
-?keyword=chen&status=enabled,pending&createdAt=2026-01-01,2026-01-31&_page=2&_pageSize=20&_sort=createdAt&_order=desc
+?keyword=chen&status=enabled,pending&createdAt=2026-01-01,2026-01-31&_page=2&_pageSize=20&sorts[0][field]=createdAt&sorts[0][order]=desc
 ```
 
 数组类值统一用逗号拼接。空数组不写入 URL。筛选值约定不包含逗号；如果未来出现自由文本数组这类值可能包含逗号的场景，应为该字段增加自定义序列化或 `transform`。
@@ -70,7 +70,7 @@ TrueAdmin 标准 CRUD 由 `TrueAdminCrudTable` 统一管理列表查询状态、
 
 ## 接口请求参数
 
-`TrueAdminCrudTable` 会把浏览器 URL 状态转换成后端标准查询协议。前端 service 通过 `crudRequestOptions` / `@trueadmin/web-core/crud` 序列化为 bracket query，后端通过 `AdminQueryRequest` 读取。
+`TrueAdminCrudTable` 会把浏览器 URL 状态转换成后端标准查询协议。前端 service 通过 `crudRequestOptions` / `@trueadmin/web-core/crud` 序列化为 bracket query，后端通过 `CrudQueryRequest` 读取。
 
 标准请求对象：
 
@@ -79,35 +79,31 @@ TrueAdmin 标准 CRUD 由 `TrueAdminCrudTable` 统一管理列表查询状态、
   page: 1,
   pageSize: 20,
   keyword: 'chen',
-  filter: {
-    status: ['enabled', 'pending'],
-    createdAt: ['2026-01-01', '2026-01-31'],
-  },
-  op: {
-    status: 'in',
-    createdAt: 'between',
-  },
-  sort: 'createdAt',
-  order: 'desc',
+  filters: [
+    { field: 'status', op: 'in', value: ['enabled', 'pending'] },
+    { field: 'createdAt', op: 'between', value: ['2026-01-01', '2026-01-31'] },
+  ],
+  sorts: [{ field: 'createdAt', order: 'desc' }],
+  params: {},
 }
 ```
 
 序列化后的接口查询：
 
 ```text
-page=1&pageSize=20&keyword=chen&filter[status][]=enabled&filter[status][]=pending&op[status]=in&filter[createdAt][]=2026-01-01&filter[createdAt][]=2026-01-31&op[createdAt]=between&sort=createdAt&order=desc
+page=1&pageSize=20&keyword=chen&filters[0][field]=status&filters[0][op]=in&filters[0][value][]=enabled&filters[0][value][]=pending&filters[1][field]=createdAt&filters[1][op]=between&filters[1][value][]=2026-01-01&filters[1][value][]=2026-01-31&sorts[0][field]=createdAt&sorts[0][order]=desc
 ```
 
 默认映射规则：
 
-- `input`：`filter[field]=value`，默认 `op[field]` 为 `like`
-- 单选 `select`：`filter[field]=value`，默认 `op[field]` 为 `=`
-- 多选 `select`：`filter[field][]=...`，默认 `op[field]` 为 `in`
-- `dateRange`：`filter[field][]=start&filter[field][]=end`，默认 `op[field]` 为 `between`
+- `input`：追加 `{ field, op: 'like', value }`
+- 单选 `select`：追加 `{ field, op: 'eq', value }`
+- 多选 `select`：追加 `{ field, op: 'in', value: [...] }`
+- `dateRange`：追加 `{ field, op: 'between', value: [start, end] }`
 
-字段级 `operator` 可以覆盖默认操作符。字段级 `requestMode: 'param'` 可以把筛选值作为普通顶层参数传递。字段级 `requestName` 可以把前端字段名映射到后端字段名；设置 `requestName: false` 时，该字段不会自动进入请求参数。
+字段级 `operator` 可以覆盖默认操作符。字段级 `requestMode: 'param'` 可以把筛选值写入 `params`。字段级 `requestName` 可以把前端字段名映射到后端字段名；设置 `requestName: false` 时，该字段不会自动进入请求参数。
 
-字段级 `transform` 可以完全接管该筛选项的请求参数，并额外添加或覆盖 `filter` / `op` / 顶层参数：
+字段级 `transform` 可以完全接管该筛选项的请求参数，并额外添加 `filters` / `sorts` / `params`：
 
 ```tsx
 {
@@ -117,8 +113,7 @@ page=1&pageSize=20&keyword=chen&filter[status][]=enabled&filter[status][]=pendin
   transform: ({ value }) => {
     const [start, end] = value.split(',');
     return {
-      filter: { created_at: [start, end] },
-      op: { created_at: 'between' },
+      filters: [{ field: 'created_at', op: 'between', value: [start, end] }],
     };
   },
 }
@@ -130,8 +125,7 @@ page=1&pageSize=20&keyword=chen&filter[status][]=enabled&filter[status][]=pendin
 {
   page: 1,
   pageSize: 20,
-  sort: 'createdAt',
-  order: 'desc',
+  sorts: [{ field: 'createdAt', order: 'desc' }],
 }
 ```
 
@@ -271,6 +265,38 @@ toolbarRender={({ action }) => (
 `summaryRender` 是页面标题下方、高级筛选上方的独立插槽。CRUD 核心只提供插槽位置，不内置卡片或图表样式；业务页面应自行决定使用 `Card`、`StatisticCard`、图表或提示组件。`meta` 只是列表响应扩展的默认便利能力，不是统计区的数据来源限制；复杂统计可以在 `summaryRender` 内通过业务 service、React Query 或其他数据层独立请求。
 
 状态类快速筛选优先使用 `TrueAdminQuickFilter`，默认放在 `toolbarRender` 左侧业务区，与批量操作同区展示。它基于 AntD `Segmented`，数量通过角标展示；数量为 0 时不展示，超过 99 时展示 `99+`。
+
+## 外部查询控件
+
+左树右表、左上角状态筛选、统计卡片点击筛选等外部控件，都应通过 render context 暴露的 `query` 操作 URL 状态：
+
+```tsx
+toolbarRender={({ query, response }) => (
+  <TrueAdminQuickFilter
+    value={query.values.status ?? 'all'}
+    items={statusItems(response?.meta?.statusStats)}
+    onChange={(status) => {
+      query.setValue('status', status === 'all' ? undefined : status);
+    }}
+  />
+)}
+```
+
+`query` 提供：
+
+- `values`：当前 URL 中已提交的查询状态。
+- `hasName(name)`：判断字段是否属于当前 CRUD 查询状态。
+- `setValue(name, value)`：设置单个查询字段，并重置页码。
+- `setValues(values)`：批量设置查询字段，并重置页码。
+- `resetValues(names?)`：清理指定字段；不传时清理当前 CRUD 声明过的查询字段。
+
+外部控件不要直接调用 `service.list`。查询状态必须先回写 URL，再由 `TrueAdminCrudTable` 统一转换成后端 `filters[n]`、`sorts[n]` 和 `params[key]`，这样刷新、复制链接、标签页恢复和自动 reload 行为才一致。
+
+## 远程筛选与选择器
+
+普通远程下拉优先使用 `@trueadmin/web-antd/remote-select` 的 `TrueAdminRemoteSelect`。它只负责远程搜索、选中值回显和 AntD Select 渲染；数据来源、值字段、展示字段和错误处理由调用方提供。
+
+领域选择器应保留在所属模块或插件，例如用户选择器留在 `modules/system`，并通过公开出口提供给其他模块。领域选择器可以包装 `TrueAdminRemoteSelect`，但必须继续透传关键 API，例如 `fetchOptions`、`fetchByValues`、`getValue`、`getLabel`、`optionRender`、`onLoadOptionsError` 和 `notFoundContentRender`，避免开发者为了换接口或换展示而修改框架包源码。
 
 ## 后续优化记录
 
