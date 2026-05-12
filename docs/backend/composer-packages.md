@@ -40,9 +40,10 @@ v0.1.3  路由命令补齐
 v0.1.5  CRUD QueryApplier
 v0.1.6  DataPolicy runtime
 v0.1.7  HTTP controller defaults / exception handler
+v0.1.8  Permission middleware runtime
 ```
 
-模板后端已切到 `trueadmin/kernel ^0.1.7`。由于 Packagist 可能不会立即同步新 tag，`backend/composer.json` 临时保留 GitHub VCS repository，避免使用 `dev-main` 或本地 path repository。Packagist 同步 `v0.1.7` 后应删除该 VCS repository 配置。
+模板后端已切到 `trueadmin/kernel ^0.1.8`。由于 Packagist 可能不会立即同步新 tag，`backend/composer.json` 临时保留 GitHub VCS repository，避免使用 `dev-main` 或本地 path repository。Packagist 同步 `v0.1.8` 后应删除该 VCS repository 配置。
 
 ### CRUD 协议值对象
 
@@ -294,6 +295,24 @@ trueadmin-kernel/src/Http/Controller/OpenApiController.php
 
 理由：`stream()` helper、Admin/Client/Open 语义基类和 OpenAPI 输出都不依赖业务表，属于框架 HTTP 默认能力。模块业务 Controller 仍留在各自模块。
 
+### PermissionMiddleware
+
+当前状态：
+
+```text
+trueadmin-kernel/src/Http/PermissionProviderInterface.php
+trueadmin-kernel/src/Http/Middleware/PermissionMiddleware.php
+```
+
+模板已删除：
+
+```text
+backend/app/Foundation/Contract/AdminPermissionProviderInterface.php
+backend/app/Foundation/Http/Middleware/PermissionMiddleware.php
+```
+
+理由：`#[Permission]` 已在 kernel，路由权限解析、single/anyOf/allOf 校验和 forbidden 响应属于框架 HTTP 运行时。kernel 契约只保留 `PermissionProviderInterface::can()`；后台菜单树、权限点列表、角色权限聚合继续留在 `Module/System`。
+
 ## 不应进入 Composer 包
 
 以下内容保持在模板或模块：
@@ -306,7 +325,7 @@ trueadmin-kernel/src/Http/Controller/OpenApiController.php
 
 ## 当前执行状态
 
-1. 已发布 `trueadmin/kernel v0.1.1`、`v0.1.2`、`v0.1.3`、`v0.1.4`、`v0.1.5`、`v0.1.6`、`v0.1.7` Git tag。
+1. 已发布 `trueadmin/kernel v0.1.1`、`v0.1.2`、`v0.1.3`、`v0.1.4`、`v0.1.5`、`v0.1.6`、`v0.1.7`、`v0.1.8` Git tag。
 2. 模板已改用 kernel CRUD 值对象，已删除 `Foundation/Crud`。
 3. `PageResult`、`ApiResponse`、`FormRequest`、`CrudQueryRequest` 已抽到 kernel，模板已删除重复实现。
 4. `AttributeRouteRegistrar` 和 routes 命令已抽到 kernel，模板已删除重复实现。
@@ -316,3 +335,4 @@ trueadmin-kernel/src/Http/Controller/OpenApiController.php
 8. `CrudQueryApplier` 已抽到 kernel，模板 `AbstractRepository` 改为组合使用。
 9. DataPolicy runtime 已抽到 kernel，System 只保留后台角色 provider 和组织策略。
 10. Controller 默认基类、OpenAPI Controller 和默认 ExceptionHandler 已抽到 kernel。
+11. Permission middleware runtime 已抽到 kernel，System 只保留后台权限事实服务。

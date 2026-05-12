@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Module\System\Http\Admin\Controller;
 
 use TrueAdmin\Kernel\Http\Controller\AdminController;
-use App\Foundation\Http\Middleware\PermissionMiddleware;
+use TrueAdmin\Kernel\Http\Middleware\PermissionMiddleware;
 use TrueAdmin\Kernel\Stream\StreamProgress;
 use TrueAdmin\Kernel\Http\ApiResponse;
 use App\Module\Auth\Http\Admin\Middleware\AdminAuthMiddleware;

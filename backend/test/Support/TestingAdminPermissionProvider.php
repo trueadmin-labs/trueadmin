@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace HyperfTest\Support;
 
-use App\Foundation\Contract\AdminPermissionProviderInterface;
+use TrueAdmin\Kernel\Http\PermissionProviderInterface;
 use TrueAdmin\Kernel\Context\Actor;
 
-final class TestingAdminPermissionProvider implements AdminPermissionProviderInterface
+final class TestingAdminPermissionProvider implements PermissionProviderInterface
 {
     public function can(Actor $actor, string $permission): bool
     {
@@ -15,17 +15,5 @@ final class TestingAdminPermissionProvider implements AdminPermissionProviderInt
 
         return is_array($permissions)
             && (in_array('*', $permissions, true) || in_array($permission, $permissions, true));
-    }
-
-    public function menuTree(): array
-    {
-        return [
-            ['id' => 1, 'name' => '系统管理', 'path' => '/system', 'permission' => '', 'type' => 'directory'],
-        ];
-    }
-
-    public function permissionCodes(): array
-    {
-        return ['system:menu:list', 'system:permission:list'];
     }
 }

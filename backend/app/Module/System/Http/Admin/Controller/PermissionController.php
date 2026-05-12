@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Module\System\Http\Admin\Controller;
 
 use TrueAdmin\Kernel\Http\Controller\AdminController;
-use App\Foundation\Http\Middleware\PermissionMiddleware;
 use TrueAdmin\Kernel\Http\ApiResponse;
-use App\Foundation\Contract\AdminPermissionProviderInterface;
+use TrueAdmin\Kernel\Http\Middleware\PermissionMiddleware;
 use TrueAdmin\Kernel\DataPermission\DataPolicyRegistry;
 use App\Module\Auth\Http\Admin\Middleware\AdminAuthMiddleware;
+use App\Module\System\Service\AdminPermissionService;
 use TrueAdmin\Kernel\Http\Attribute\AdminController as AdminRouteController;
 use TrueAdmin\Kernel\Http\Attribute\AdminGet;
 use TrueAdmin\Kernel\Http\Attribute\Permission;
@@ -18,7 +18,7 @@ use TrueAdmin\Kernel\Http\Attribute\Permission;
 final class PermissionController extends AdminController
 {
     public function __construct(
-        private readonly AdminPermissionProviderInterface $permissions,
+        private readonly AdminPermissionService $permissions,
         private readonly DataPolicyRegistry $dataPolicyRegistry,
     ) {
     }
