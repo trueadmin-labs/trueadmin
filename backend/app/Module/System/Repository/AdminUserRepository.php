@@ -27,11 +27,11 @@ final class AdminUserRepository extends AbstractRepository
         'username' => ['eq', 'like'],
         'nickname' => ['eq', 'like'],
         'status' => ['eq', 'in'],
-        'primary_dept_id' => ['eq', 'in'],
-        'created_at' => ['between', 'gte', 'lte'],
+        'primaryDeptId' => ['eq', 'in'],
+        'createdAt' => ['between', 'gte', 'lte'],
     ];
 
-    protected array $sortable = ['id', 'username', 'status', 'created_at', 'updated_at'];
+    protected array $sortable = ['id', 'username', 'status', 'createdAt', 'updatedAt'];
 
     protected array $defaultSort = ['id' => 'asc'];
 

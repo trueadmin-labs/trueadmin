@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Module\System\Repository\Notification;
 
 use TrueAdmin\Kernel\Crud\CrudQuery;
+use TrueAdmin\Kernel\Crud\CrudQueryApplierOptions;
 use TrueAdmin\Kernel\Pagination\PageResult;
 use App\Foundation\Repository\AbstractRepository;
 use App\Module\System\Model\AdminNotificationDelivery;
@@ -16,6 +17,20 @@ use Hyperf\DbConnection\Db;
  */
 final class AdminNotificationDeliveryRepository extends AbstractRepository
 {
+    private const MESSAGE_FILTERABLE = [
+        'level' => ['eq', 'in'],
+        'type' => ['eq', 'in'],
+        'source' => ['eq', 'in'],
+        'createdAt' => ['between', 'gte', 'lte'],
+    ];
+
+    private const MESSAGE_FILTER_COLUMNS = [
+        'level' => 'admin_notification_batches.level',
+        'type' => 'admin_notification_batches.type',
+        'source' => 'admin_notification_batches.source',
+        'createdAt' => 'admin_notification_deliveries.sent_at',
+    ];
+
     protected ?string $modelClass = AdminNotificationDelivery::class;
 
     protected array $keywordFields = [
@@ -27,32 +42,32 @@ final class AdminNotificationDeliveryRepository extends AbstractRepository
 
     protected array $filterable = [
         'id' => ['eq', 'in'],
-        'batch_id' => ['eq', 'in'],
-        'receiver_id' => ['eq', 'in'],
+        'batchId' => ['eq', 'in'],
+        'receiverId' => ['eq', 'in'],
         'status' => ['eq', 'in'],
-        'read_at' => ['between', 'gte', 'lte'],
-        'archived_at' => ['between', 'gte', 'lte'],
-        'created_at' => ['between', 'gte', 'lte'],
+        'readAt' => ['between', 'gte', 'lte'],
+        'archivedAt' => ['between', 'gte', 'lte'],
+        'createdAt' => ['between', 'gte', 'lte'],
     ];
 
     protected array $filterColumns = [
         'id' => 'admin_notification_deliveries.id',
-        'batch_id' => 'admin_notification_deliveries.batch_id',
-        'receiver_id' => 'admin_notification_deliveries.receiver_id',
+        'batchId' => 'admin_notification_deliveries.batch_id',
+        'receiverId' => 'admin_notification_deliveries.receiver_id',
         'status' => 'admin_notification_deliveries.status',
-        'read_at' => 'admin_notification_deliveries.read_at',
-        'archived_at' => 'admin_notification_deliveries.archived_at',
-        'created_at' => 'admin_notification_deliveries.created_at',
+        'readAt' => 'admin_notification_deliveries.read_at',
+        'archivedAt' => 'admin_notification_deliveries.archived_at',
+        'createdAt' => 'admin_notification_deliveries.created_at',
     ];
 
-    protected array $sortable = ['id', 'created_at', 'updated_at', 'read_at', 'sent_at'];
+    protected array $sortable = ['id', 'createdAt', 'updatedAt', 'readAt', 'sentAt'];
 
     protected array $sortColumns = [
         'id' => 'admin_notification_deliveries.id',
-        'created_at' => 'admin_notification_deliveries.created_at',
-        'updated_at' => 'admin_notification_deliveries.updated_at',
-        'read_at' => 'admin_notification_deliveries.read_at',
-        'sent_at' => 'admin_notification_deliveries.sent_at',
+        'createdAt' => 'admin_notification_deliveries.created_at',
+        'updatedAt' => 'admin_notification_deliveries.updated_at',
+        'readAt' => 'admin_notification_deliveries.read_at',
+        'sentAt' => 'admin_notification_deliveries.sent_at',
     ];
 
     protected array $defaultSort = ['id' => 'desc'];
@@ -223,18 +238,11 @@ final class AdminNotificationDeliveryRepository extends AbstractRepository
             $query->whereNull('admin_notification_deliveries.archived_at');
         }
 
-        foreach (['level', 'type', 'source'] as $field) {
-            if ($adminQuery->hasParam($field)) {
-                $query->where('admin_notification_batches.' . $field, $adminQuery->param($field));
-            }
-        }
+        $this->crudQueryApplier()->applyFilters($query, $adminQuery, new CrudQueryApplierOptions(
+            filterable: self::MESSAGE_FILTERABLE,
+            filterColumns: self::MESSAGE_FILTER_COLUMNS,
+        ));
 
-        if ($adminQuery->hasParam('startAt')) {
-            $query->where('admin_notification_deliveries.sent_at', '>=', $adminQuery->param('startAt'));
-        }
-        if ($adminQuery->hasParam('endAt')) {
-            $query->where('admin_notification_deliveries.sent_at', '<=', $adminQuery->param('endAt'));
-        }
         if ($adminQuery->keyword !== '') {
             $keyword = '%' . $adminQuery->keyword . '%';
             $query->where(static function ($query) use ($keyword): void {

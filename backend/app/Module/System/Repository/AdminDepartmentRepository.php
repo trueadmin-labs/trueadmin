@@ -28,7 +28,7 @@ final class AdminDepartmentRepository extends AbstractRepository
         'status' => ['eq', 'in'],
     ];
 
-    protected array $sortable = ['id', 'level', 'sort', 'created_at', 'updated_at'];
+    protected array $sortable = ['id', 'level', 'sort', 'createdAt', 'updatedAt'];
 
     protected array $defaultSort = ['level' => 'asc', 'sort' => 'asc', 'id' => 'asc'];
 

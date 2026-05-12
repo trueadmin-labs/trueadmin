@@ -30,16 +30,16 @@ final class FileRepository extends AbstractRepository
 
     protected array $filterable = [
         'scope' => true,
-        'owner_type' => true,
-        'owner_id' => true,
-        'owner_dept_id' => true,
+        'ownerType' => true,
+        'ownerId' => true,
+        'ownerDeptId' => true,
         'category' => true,
         'disk' => true,
         'visibility' => true,
         'status' => true,
     ];
 
-    protected array $sortable = ['id', 'size', 'created_at'];
+    protected array $sortable = ['id', 'size', 'createdAt'];
 
     protected array $defaultSort = ['id' => 'desc'];
 

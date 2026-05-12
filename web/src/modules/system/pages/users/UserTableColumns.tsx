@@ -62,7 +62,7 @@ export function createUserColumns({
     {
       title: t('system.users.column.createdAt', '创建时间'),
       dataIndex: 'createdAt',
-      key: 'created_at',
+      key: 'createdAt',
       width: 180,
       sorter: true,
     },

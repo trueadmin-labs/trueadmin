@@ -89,7 +89,7 @@ export function createMessageColumns({
     },
     {
       dataIndex: 'createdAt',
-      key: 'created_at',
+      key: 'createdAt',
       sorter: true,
       title: t('notification.detail.createdAt', '时间'),
       width: 180,

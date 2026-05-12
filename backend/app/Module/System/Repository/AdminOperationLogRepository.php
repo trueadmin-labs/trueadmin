@@ -23,15 +23,15 @@ final class AdminOperationLogRepository extends AbstractRepository
         'module' => ['eq', 'like', 'in'],
         'action' => ['eq', 'like', 'in'],
         'remark' => ['eq', 'like'],
-        'principal_type' => ['eq', 'in'],
-        'principal_id' => ['eq', 'like'],
-        'operator_type' => ['eq', 'in'],
-        'operator_id' => ['eq', 'like'],
-        'operation_dept_id' => ['eq', 'in'],
-        'created_at' => ['between', 'gte', 'lte'],
+        'principalType' => ['eq', 'in'],
+        'principalId' => ['eq', 'like'],
+        'operatorType' => ['eq', 'in'],
+        'operatorId' => ['eq', 'like'],
+        'operationDeptId' => ['eq', 'in'],
+        'createdAt' => ['between', 'gte', 'lte'],
     ];
 
-    protected array $sortable = ['id', 'created_at'];
+    protected array $sortable = ['id', 'createdAt'];
 
     protected array $defaultSort = ['id' => 'desc'];
 

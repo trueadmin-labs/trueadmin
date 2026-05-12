@@ -7,9 +7,6 @@ export const levelColor: Record<AdminMessageLevel, string> = {
   warning: 'warning',
 };
 
-export const splitRange = (value: unknown) =>
-  typeof value === 'string' && value.length > 0 ? value.split(',').filter(Boolean) : [];
-
 export const toMessageRowKey = (message: Pick<AdminMessageItem, 'id' | 'kind'>) =>
   [message.kind, message.id].join(':');
 

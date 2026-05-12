@@ -74,15 +74,15 @@ describe('crudQueryStateUtils', () => {
     const params = new URLSearchParams('page=2&sorts[9][field]=stale');
 
     setSorts(params, [
-      { field: 'created_at', order: 'desc' },
+      { field: 'createdAt', order: 'desc' },
       { field: 'id', order: 'asc' },
     ]);
 
     expect(params.toString()).toBe(
-      'page=2&sorts%5B0%5D%5Bfield%5D=created_at&sorts%5B0%5D%5Border%5D=desc&sorts%5B1%5D%5Bfield%5D=id&sorts%5B1%5D%5Border%5D=asc',
+      'page=2&sorts%5B0%5D%5Bfield%5D=createdAt&sorts%5B0%5D%5Border%5D=desc&sorts%5B1%5D%5Bfield%5D=id&sorts%5B1%5D%5Border%5D=asc',
     );
     expect(getSorts(params)).toEqual([
-      { field: 'created_at', order: 'desc' },
+      { field: 'createdAt', order: 'desc' },
       { field: 'id', order: 'asc' },
     ]);
   });
@@ -104,7 +104,6 @@ describe('crudQueryStateUtils', () => {
       {
         label: 'Created',
         name: 'createdAt',
-        requestName: 'created_at',
         type: 'dateRange',
       },
     ];
@@ -123,7 +122,7 @@ describe('crudQueryStateUtils', () => {
         page: 2,
         pageSize: 50,
         quickSearchName: 'keyword',
-        sorts: [{ field: 'created_at', order: 'desc' }],
+        sorts: [{ field: 'createdAt', order: 'desc' }],
         values: {
           createdAt: '2026-01-01,2026-01-31',
           keyword: 'admin',
@@ -135,7 +134,7 @@ describe('crudQueryStateUtils', () => {
       filters: [
         { field: 'name', op: 'like', value: 'root' },
         { field: 'status', op: 'in', value: ['enabled', 'pending'] },
-        { field: 'created_at', op: 'between', value: ['2026-01-01', '2026-01-31'] },
+        { field: 'createdAt', op: 'between', value: ['2026-01-01', '2026-01-31'] },
       ],
       keyword: 'admin',
       page: 2,
@@ -143,7 +142,7 @@ describe('crudQueryStateUtils', () => {
       params: {
         tenantId: 'tenant-a',
       },
-      sorts: [{ field: 'created_at', order: 'desc' }],
+      sorts: [{ field: 'createdAt', order: 'desc' }],
     });
   });
 
@@ -153,7 +152,7 @@ describe('crudQueryStateUtils', () => {
         label: 'Date',
         name: 'date',
         transform: ({ value }) => ({
-          filters: [{ field: 'created_at', op: 'between', value: value.split(',') }],
+          filters: [{ field: 'createdAt', op: 'between', value: value.split(',') }],
         }),
         type: 'custom',
         render: () => null,
@@ -163,7 +162,7 @@ describe('crudQueryStateUtils', () => {
       {
         name: 'owner',
         transform: ({ value }) => ({
-          filters: [{ field: 'owner_id', op: 'eq', value }],
+          filters: [{ field: 'ownerId', op: 'eq', value }],
         }),
       },
     ];
@@ -182,8 +181,8 @@ describe('crudQueryStateUtils', () => {
       }),
     ).toEqual({
       filters: [
-        { field: 'created_at', op: 'between', value: ['2026-01-01', '2026-01-31'] },
-        { field: 'owner_id', op: 'eq', value: '100' },
+        { field: 'createdAt', op: 'between', value: ['2026-01-01', '2026-01-31'] },
+        { field: 'ownerId', op: 'eq', value: '100' },
       ],
       page: 1,
       pageSize: 20,

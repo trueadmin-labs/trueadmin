@@ -89,7 +89,7 @@ export function createAnnouncementColumns({
     },
     {
       dataIndex: 'publishedAt',
-      key: 'publish_at',
+      key: 'publishAt',
       render: (_, record) => record.publishedAt ?? record.scheduledAt ?? '-',
       sorter: true,
       title: t('system.announcementManagement.column.publishedAt', '发布时间'),

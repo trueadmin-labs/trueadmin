@@ -20,15 +20,15 @@ final class AdminLoginLogRepository extends AbstractRepository
 
     protected array $filterable = [
         'id' => ['eq', 'in'],
-        'admin_user_id' => ['eq', 'in'],
+        'adminUserId' => ['eq', 'in'],
         'username' => ['eq', 'like'],
         'ip' => ['eq', 'like'],
         'status' => ['eq', 'in'],
         'reason' => ['eq', 'like'],
-        'created_at' => ['between', 'gte', 'lte'],
+        'createdAt' => ['between', 'gte', 'lte'],
     ];
 
-    protected array $sortable = ['id', 'created_at'];
+    protected array $sortable = ['id', 'createdAt'];
 
     protected array $defaultSort = ['id' => 'desc'];
 

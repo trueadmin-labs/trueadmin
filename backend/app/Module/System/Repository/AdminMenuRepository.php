@@ -34,7 +34,7 @@ final class AdminMenuRepository extends AbstractRepository implements MetadataMe
         'status' => ['eq', 'in'],
     ];
 
-    protected array $sortable = ['id', 'sort', 'created_at', 'updated_at'];
+    protected array $sortable = ['id', 'sort', 'createdAt', 'updatedAt'];
 
     protected array $defaultSort = ['sort' => 'asc', 'id' => 'asc'];
 

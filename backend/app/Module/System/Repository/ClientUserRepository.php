@@ -25,12 +25,12 @@ final class ClientUserRepository extends AbstractRepository
         'email' => ['eq', 'like'],
         'nickname' => ['eq', 'like'],
         'status' => ['eq', 'in'],
-        'register_channel' => ['eq', 'in'],
-        'created_at' => ['between', 'gte', 'lte'],
-        'last_login_at' => ['between', 'gte', 'lte'],
+        'registerChannel' => ['eq', 'in'],
+        'createdAt' => ['between', 'gte', 'lte'],
+        'lastLoginAt' => ['between', 'gte', 'lte'],
     ];
 
-    protected array $sortable = ['id', 'username', 'phone', 'email', 'status', 'created_at', 'updated_at', 'last_login_at'];
+    protected array $sortable = ['id', 'username', 'phone', 'email', 'status', 'createdAt', 'updatedAt', 'lastLoginAt'];
 
     protected array $defaultSort = ['id' => 'desc'];
 

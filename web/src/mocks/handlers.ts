@@ -21,6 +21,11 @@ const getCrudParam = (url: URL, field: string, fallback = '') =>
 const getCrudFilter = (url: URL, field: string, fallback = '') => {
   for (let index = 0; index < 20; index += 1) {
     if (url.searchParams.get(`filters[${index}][field]`) === field) {
+      const arrayValue = url.searchParams.getAll(`filters[${index}][value][]`);
+      if (arrayValue.length > 0) {
+        return arrayValue.filter(Boolean).join(',');
+      }
+
       return url.searchParams.get(`filters[${index}][value]`) ?? fallback;
     }
   }
@@ -587,11 +592,10 @@ export const handlers = [
     const kind = getCrudParam(url, 'kind', 'all');
     const status = getCrudParam(url, 'status', 'all');
     const keyword = url.searchParams.get('keyword')?.trim().toLowerCase();
-    const level = getCrudParam(url, 'level');
-    const type = getCrudParam(url, 'type');
-    const source = getCrudParam(url, 'source');
-    const startAt = getCrudParam(url, 'startAt');
-    const endAt = getCrudParam(url, 'endAt');
+    const level = getCrudFilter(url, 'level');
+    const type = getCrudFilter(url, 'type');
+    const source = getCrudFilter(url, 'source');
+    const [startAt, endAt] = getCrudFilter(url, 'createdAt').split(',');
     const items = withMessageState().filter((message) => {
       if (kind !== 'all' && message.kind !== kind) {
         return false;

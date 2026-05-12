@@ -38,7 +38,7 @@ export default function AdminOperationLogsPage() {
       {
         title: t('system.operationLogs.column.createdAt', '操作时间'),
         dataIndex: 'createdAt',
-        key: 'created_at',
+        key: 'createdAt',
         width: 180,
         sorter: true,
       },
@@ -51,12 +51,12 @@ export default function AdminOperationLogsPage() {
       { name: 'module', label: t('system.operationLogs.column.module', '模块'), type: 'input' },
       { name: 'action', label: t('system.operationLogs.column.action', '动作'), type: 'input' },
       {
-        name: 'operator_id',
+        name: 'operatorId',
         label: t('system.operationLogs.column.operatorId', '操作者 ID'),
         type: 'input',
       },
       {
-        name: 'created_at',
+        name: 'createdAt',
         label: t('system.operationLogs.column.createdAt', '操作时间'),
         type: 'dateRange',
       },

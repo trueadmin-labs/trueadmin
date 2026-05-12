@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Module\System\Repository\Notification;
 
 use TrueAdmin\Kernel\Crud\CrudQuery;
+use TrueAdmin\Kernel\Crud\CrudQueryApplierOptions;
 use TrueAdmin\Kernel\Pagination\PageResult;
 use App\Foundation\Repository\AbstractRepository;
 use App\Module\System\Model\AdminAnnouncement;
@@ -17,6 +18,20 @@ use Hyperf\DbConnection\Db;
  */
 final class AdminAnnouncementRepository extends AbstractRepository
 {
+    private const MESSAGE_FILTERABLE = [
+        'level' => ['eq', 'in'],
+        'type' => ['eq', 'in'],
+        'source' => ['eq', 'in'],
+        'createdAt' => ['between', 'gte', 'lte'],
+    ];
+
+    private const MESSAGE_FILTER_COLUMNS = [
+        'level' => 'level',
+        'type' => 'type',
+        'source' => 'source',
+        'createdAt' => 'publish_at',
+    ];
+
     protected ?string $modelClass = AdminAnnouncement::class;
 
     protected array $keywordFields = ['title', 'content', 'operator_name'];
@@ -28,11 +43,11 @@ final class AdminAnnouncementRepository extends AbstractRepository
         'source' => ['eq', 'in'],
         'status' => ['eq', 'in'],
         'scope' => ['eq', 'in'],
-        'created_at' => ['between', 'gte', 'lte'],
-        'publish_at' => ['between', 'gte', 'lte'],
+        'createdAt' => ['between', 'gte', 'lte'],
+        'publishAt' => ['between', 'gte', 'lte'],
     ];
 
-    protected array $sortable = ['id', 'created_at', 'updated_at', 'publish_at', 'expire_at'];
+    protected array $sortable = ['id', 'createdAt', 'updatedAt', 'publishAt', 'expireAt'];
 
     protected array $defaultSort = ['pinned' => 'desc', 'id' => 'desc'];
 
@@ -249,17 +264,10 @@ final class AdminAnnouncementRepository extends AbstractRepository
 
     private function applyMessageFilters(Builder $query, CrudQuery $adminQuery): void
     {
-        foreach (['level', 'type', 'source'] as $field) {
-            if ($adminQuery->hasParam($field)) {
-                $query->where($field, $adminQuery->param($field));
-            }
-        }
-        if ($adminQuery->hasParam('startAt')) {
-            $query->where('publish_at', '>=', $adminQuery->param('startAt'));
-        }
-        if ($adminQuery->hasParam('endAt')) {
-            $query->where('publish_at', '<=', $adminQuery->param('endAt'));
-        }
+        $this->crudQueryApplier()->applyFilters($query, $adminQuery, new CrudQueryApplierOptions(
+            filterable: self::MESSAGE_FILTERABLE,
+            filterColumns: self::MESSAGE_FILTER_COLUMNS,
+        ));
     }
 
     private function visibleQuery(string $now): Builder

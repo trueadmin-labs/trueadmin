@@ -69,20 +69,20 @@ final class CrudRepositoryFilterSchemaTest extends TestCase
 
             protected function sortable(): array
             {
-                return ['created_at'];
+                return ['createdAt'];
             }
 
             protected function sortColumns(): array
             {
                 return [
-                    'created_at' => 'admin_users.created_at',
+                    'createdAt' => 'admin_users.created_at',
                 ];
             }
         };
 
         $repository->assertFilter('status', CrudOperator::Eq);
         $repository->assertFilter('username', CrudOperator::Like);
-        $this->assertSame('admin_users.created_at', $repository->sortColumnFor(CrudSortRule::desc('created_at')));
+        $this->assertSame('admin_users.created_at', $repository->sortColumnFor(CrudSortRule::desc('createdAt')));
 
         $this->expectException(BusinessException::class);
         $repository->assertFilter('status', CrudOperator::Like);
@@ -96,7 +96,7 @@ final class CrudRepositoryFilterSchemaTest extends TestCase
             ];
 
             protected array $sortable = [
-                'created_at',
+                'createdAt',
             ];
 
             public function filterColumnFor(string $field): string
@@ -121,7 +121,33 @@ final class CrudRepositoryFilterSchemaTest extends TestCase
         };
 
         $this->assertSame('custom_filters.status', $repository->filterColumnFor('status'));
-        $this->assertSame('custom_sorts.created_at', $repository->sortColumnFor(CrudSortRule::desc('created_at')));
+        $this->assertSame('custom_sorts.createdAt', $repository->sortColumnFor(CrudSortRule::desc('createdAt')));
+    }
+
+    public function testRepositoryCrudApplierDefaultsCamelFieldsToSnakeColumns(): void
+    {
+        $repository = new class () extends AbstractRepository {
+            protected array $filterable = [
+                'operatorId' => true,
+            ];
+
+            protected array $sortable = [
+                'createdAt',
+            ];
+
+            public function filterColumnFor(string $field): string
+            {
+                return $this->filterColumn($field);
+            }
+
+            public function sortColumnFor(CrudSortRule $sort): string
+            {
+                return $this->assertSortable($sort);
+            }
+        };
+
+        $this->assertSame('operator_id', $repository->filterColumnFor('operatorId'));
+        $this->assertSame('created_at', $repository->sortColumnFor(CrudSortRule::desc('createdAt')));
     }
 
     public function testCrudQueryRequestProtocolHooksCanBeCustomized(): void
@@ -153,14 +179,14 @@ final class CrudRepositoryFilterSchemaTest extends TestCase
                 ['field' => 'plugin:status', 'op' => 'eq', 'value' => 'enabled'],
             ],
             'sorts' => [
-                ['field' => 'plugin:created_at', 'order' => 'desc', 'nulls' => 'last'],
+                ['field' => 'plugin:createdAt', 'order' => 'desc', 'nulls' => 'last'],
             ],
         ]);
 
         $this->assertContains('view', $request->exposedRootKeys());
         $this->assertInstanceOf(CrudFilterCondition::class, $normalized['filters'][0]);
         $this->assertSame('plugin:status', $normalized['filters'][0]->field);
-        $this->assertSame('plugin:created_at', $normalized['sorts'][0]->field);
+        $this->assertSame('plugin:createdAt', $normalized['sorts'][0]->field);
         $this->assertSame('last', $normalized['sorts'][0]->nulls);
     }
 }

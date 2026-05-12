@@ -26,10 +26,10 @@ final class AdminNotificationBatchRepository extends AbstractRepository
         'type' => ['eq', 'in'],
         'source' => ['eq', 'in'],
         'status' => ['eq', 'in'],
-        'created_at' => ['between', 'gte', 'lte'],
+        'createdAt' => ['between', 'gte', 'lte'],
     ];
 
-    protected array $sortable = ['id', 'created_at', 'updated_at'];
+    protected array $sortable = ['id', 'createdAt', 'updatedAt'];
 
     protected array $defaultSort = ['id' => 'desc'];
 

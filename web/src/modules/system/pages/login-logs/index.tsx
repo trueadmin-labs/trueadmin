@@ -54,7 +54,7 @@ export default function AdminLoginLogsPage() {
       {
         title: t('system.loginLogs.column.createdAt', '登录时间'),
         dataIndex: 'createdAt',
-        key: 'created_at',
+        key: 'createdAt',
         width: 180,
         sorter: true,
       },
@@ -74,7 +74,7 @@ export default function AdminLoginLogsPage() {
         ],
       },
       {
-        name: 'created_at',
+        name: 'createdAt',
         label: t('system.loginLogs.column.createdAt', '登录时间'),
         type: 'dateRange',
       },

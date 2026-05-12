@@ -325,7 +325,7 @@ class ExampleTest extends TestCase
 
         $filteredUsers = $this->get('/api/admin/organization/users', [
             'filters' => [
-                ['field' => 'created_at', 'op' => 'between', 'value' => ['2000-01-01', '2999-12-31']],
+                ['field' => 'createdAt', 'op' => 'between', 'value' => ['2000-01-01', '2999-12-31']],
                 ['field' => 'status', 'op' => 'eq', 'value' => 'enabled'],
             ],
             'page' => 1,

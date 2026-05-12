@@ -40,7 +40,6 @@ export function createUserFilters({
     {
       name: 'createdAt',
       label: t('system.users.column.createdAt', '创建时间'),
-      requestName: 'created_at',
       type: 'dateRange',
     },
   ];
@@ -49,7 +48,6 @@ export function createUserFilters({
 export const createUserExtraQuery = (): CrudExtraQuerySchema[] => [
   {
     name: 'deptId',
-    requestName: 'deptId',
   },
   {
     defaultValue: '1',

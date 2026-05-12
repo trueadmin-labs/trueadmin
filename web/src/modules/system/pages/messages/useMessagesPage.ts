@@ -16,7 +16,7 @@ import {
   useAdminNotificationStore,
 } from '@/core/notification';
 import { createMessageColumns } from './MessageTableColumns';
-import { splitRange, toMessageRowKey } from './messagePageModel';
+import { toMessageRowKey } from './messagePageModel';
 
 type BatchActionOptions = {
   action: () => Promise<unknown>;
@@ -106,7 +106,6 @@ export function useMessagesPage() {
       {
         label: t('system.messages.level.placeholder', '等级'),
         name: 'level',
-        requestMode: 'param',
         options: [
           { label: levelText.info, value: 'info' },
           { label: levelText.success, value: 'success' },
@@ -118,7 +117,6 @@ export function useMessagesPage() {
       {
         label: t('system.messages.type.placeholder', '消息类型'),
         name: 'type',
-        requestMode: 'param',
         options: typeOptions,
         placeholder: t('system.messages.type.placeholder', '消息类型'),
         type: 'select',
@@ -126,7 +124,6 @@ export function useMessagesPage() {
       {
         label: t('notification.detail.source', '来源'),
         name: 'source',
-        requestMode: 'param',
         options: sourceOptions,
         placeholder: t('notification.detail.source', '来源'),
         type: 'select',
@@ -134,10 +131,6 @@ export function useMessagesPage() {
       {
         label: t('notification.detail.createdAt', '时间'),
         name: 'createdAt',
-        transform: ({ value }) => {
-          const [startAt, endAt] = splitRange(value);
-          return { params: { endAt, startAt } };
-        },
         type: 'dateRange',
       },
     ],
