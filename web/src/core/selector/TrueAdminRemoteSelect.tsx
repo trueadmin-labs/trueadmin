@@ -1,83 +1,17 @@
-import type { SelectProps } from 'antd';
-import { Select, Spin } from 'antd';
+import { Select } from 'antd';
 import type { DefaultOptionType, SelectValue } from 'antd/es/select';
-import type { ReactNode } from 'react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { errorCenter } from '@/core/error/errorCenter';
+import { RemoteSelectNotFoundContent } from './RemoteSelectNotFoundContent';
+import type { TrueAdminRemoteSelectProps, TrueAdminRemoteSelectValue } from './remoteSelectTypes';
+import { DEFAULT_PAGE_SIZE, DEFAULT_SEARCH_DELAY, toValueKey } from './remoteSelectUtils';
+import { useRemoteSelectOptions } from './useRemoteSelectOptions';
+import { useRemoteSelectRecords } from './useRemoteSelectRecords';
 
-export type TrueAdminRemoteSelectValue = string | number;
-
-export type TrueAdminRemoteSelectOption<
-  TValue extends TrueAdminRemoteSelectValue = TrueAdminRemoteSelectValue,
-  TRecord = unknown,
-> = {
-  label: ReactNode;
-  value: TValue;
-  disabled?: boolean;
-  record: TRecord;
-};
-
-export type TrueAdminRemoteSelectSearchParams = {
-  keyword: string;
-  page?: number;
-  pageSize?: number;
-};
-
-export type TrueAdminRemoteSelectProps<
-  TRecord,
-  TValue extends TrueAdminRemoteSelectValue = TrueAdminRemoteSelectValue,
-  TMultiple extends boolean = false,
-> = Omit<
-  SelectProps<TMultiple extends true ? TValue[] : TValue, DefaultOptionType>,
-  | 'filterOption'
-  | 'labelInValue'
-  | 'loading'
-  | 'mode'
-  | 'notFoundContent'
-  | 'onChange'
-  | 'onSearch'
-  | 'optionRender'
-  | 'options'
-  | 'showSearch'
-> & {
-  value?: TMultiple extends true ? TValue[] : TValue;
-  defaultValue?: TMultiple extends true ? TValue[] : TValue;
-  multiple?: TMultiple;
-  fetchOptions: (params: TrueAdminRemoteSelectSearchParams) => Promise<TRecord[]>;
-  fetchByValues?: (values: TValue[]) => Promise<TRecord[]>;
-  getValue: (record: TRecord) => TValue;
-  getLabel: (record: TRecord) => ReactNode;
-  getDisabled?: (record: TRecord) => boolean;
-  optionRender?: (record: TRecord) => ReactNode;
-  autoLoad?: boolean;
-  searchDelay?: number;
-  defaultKeyword?: string;
-  defaultOptions?: TRecord[];
-  selectedOptions?: TRecord[];
-  pageSize?: number;
-  searchOnFocus?: boolean;
-  loadingText?: ReactNode;
-  emptyText?: ReactNode;
-  onChange?: (
-    value: TMultiple extends true ? TValue[] : TValue | undefined,
-    records: TMultiple extends true ? TRecord[] : TRecord | undefined,
-  ) => void;
-  onLoadOptionsError?: (error: unknown) => false | undefined;
-};
-
-const DEFAULT_SEARCH_DELAY = 300;
-const DEFAULT_PAGE_SIZE = 20;
-
-const toValueArray = <TValue extends TrueAdminRemoteSelectValue>(
-  value: TValue | TValue[] | undefined,
-): TValue[] => {
-  if (value === undefined) {
-    return [];
-  }
-  return Array.isArray(value) ? value : [value];
-};
-
-const toValueKey = (value: TrueAdminRemoteSelectValue) => String(value);
+export type {
+  TrueAdminRemoteSelectOption,
+  TrueAdminRemoteSelectProps,
+  TrueAdminRemoteSelectSearchParams,
+  TrueAdminRemoteSelectValue,
+} from './remoteSelectTypes';
 
 export function TrueAdminRemoteSelect<
   TRecord,
@@ -106,115 +40,28 @@ export function TrueAdminRemoteSelect<
   defaultValue,
   ...selectProps
 }: TrueAdminRemoteSelectProps<TRecord, TValue, TMultiple>) {
-  const requestIdRef = useRef(0);
-  const [keyword, setKeyword] = useState(defaultKeyword);
-  const [searchSeed, setSearchSeed] = useState(autoLoad ? 1 : 0);
-  const [loading, setLoading] = useState(false);
-  const [records, setRecords] = useState<TRecord[]>(defaultOptions);
-  const [selectedRecords, setSelectedRecords] = useState<TRecord[]>([]);
-
-  const emitError = useCallback(
-    (error: unknown) => {
-      if (onLoadOptionsError?.(error) !== false) {
-        errorCenter.emit(error);
-      }
-    },
-    [onLoadOptionsError],
-  );
-
-  const loadOptions = useCallback(
-    async (nextKeyword: string) => {
-      const requestId = requestIdRef.current + 1;
-      requestIdRef.current = requestId;
-      setLoading(true);
-      try {
-        const nextRecords = await fetchOptions({
-          keyword: nextKeyword,
-          page: 1,
-          pageSize,
-        });
-        if (requestIdRef.current === requestId) {
-          setRecords(nextRecords);
-        }
-      } catch (error) {
-        if (requestIdRef.current === requestId) {
-          emitError(error);
-        }
-      } finally {
-        if (requestIdRef.current === requestId) {
-          setLoading(false);
-        }
-      }
-    },
-    [emitError, fetchOptions, pageSize],
-  );
-
-  useEffect(() => {
-    if (searchSeed === 0) {
-      return undefined;
-    }
-
-    const timer = window.setTimeout(() => {
-      void loadOptions(keyword);
-    }, searchDelay);
-
-    return () => window.clearTimeout(timer);
-  }, [keyword, loadOptions, searchDelay, searchSeed]);
-
-  useEffect(() => {
-    const values = toValueArray(value ?? defaultValue);
-    if (!fetchByValues || values.length === 0) {
-      setSelectedRecords((currentRecords) => (currentRecords.length === 0 ? currentRecords : []));
-      return;
-    }
-
-    let disposed = false;
-    fetchByValues(values)
-      .then((nextRecords) => {
-        if (!disposed) {
-          setSelectedRecords(nextRecords);
-        }
-      })
-      .catch((error) => {
-        if (!disposed) {
-          emitError(error);
-        }
-      });
-
-    return () => {
-      disposed = true;
-    };
-  }, [defaultValue, emitError, fetchByValues, value]);
-
-  const recordMap = useMemo(() => {
-    const map = new Map<string, TRecord>();
-    for (const record of [...records, ...selectedRecords, ...selectedOptions]) {
-      map.set(toValueKey(getValue(record)), record);
-    }
-    return map;
-  }, [getValue, records, selectedOptions, selectedRecords]);
-
-  const options = useMemo(
-    () =>
-      [...recordMap.values()].map((record) => {
-        const nextValue = getValue(record);
-        return {
-          disabled: getDisabled?.(record),
-          label: optionRender?.(record) ?? getLabel(record),
-          value: nextValue,
-        };
-      }),
-    [getDisabled, getLabel, getValue, optionRender, recordMap],
-  );
-
-  const notFoundContent = loading ? (
-    <div className="trueadmin-remote-select-loading">
-      <Spin size="small" />
-      {loadingText ? <span>{loadingText}</span> : null}
-    </div>
-  ) : (
-    emptyText
-  );
+  const { keyword, loadOptions, loading, records, search, selectedRecords } =
+    useRemoteSelectRecords<TRecord, TValue, TMultiple>({
+      autoLoad,
+      defaultKeyword,
+      defaultOptions,
+      defaultValue,
+      fetchByValues,
+      fetchOptions,
+      onLoadOptionsError,
+      pageSize,
+      searchDelay,
+      value,
+    });
+  const { options, recordMap } = useRemoteSelectOptions<TRecord, TValue, TMultiple>({
+    getDisabled,
+    getLabel,
+    getValue,
+    optionRender,
+    records,
+    selectedOptions,
+    selectedRecords,
+  });
 
   const handleChange = (nextValue: SelectValue) => {
     if (multiple) {
@@ -245,7 +92,13 @@ export function TrueAdminRemoteSelect<
       filterOption={false}
       loading={loading}
       mode={multiple ? 'multiple' : undefined}
-      notFoundContent={notFoundContent}
+      notFoundContent={
+        <RemoteSelectNotFoundContent
+          emptyText={emptyText}
+          loading={loading}
+          loadingText={loadingText}
+        />
+      }
       options={options}
       showSearch
       value={value}
@@ -256,10 +109,7 @@ export function TrueAdminRemoteSelect<
           void loadOptions(keyword);
         }
       }}
-      onSearch={(nextKeyword) => {
-        setKeyword(nextKeyword);
-        setSearchSeed((seed) => seed + 1);
-      }}
+      onSearch={search}
     />
   );
 }
