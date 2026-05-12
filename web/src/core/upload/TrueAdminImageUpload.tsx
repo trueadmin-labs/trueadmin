@@ -1,21 +1,18 @@
-import { PlusOutlined } from '@ant-design/icons';
 import type { UploadProps } from 'antd';
-import { Button, Empty, Image, message, Upload } from 'antd';
-import type { RcFile, UploadFile } from 'antd/es/upload/interface';
+import { Empty, Image } from 'antd';
 import type { ReactNode } from 'react';
-import { useMemo, useState } from 'react';
 import { useI18n } from '@/core/i18n/I18nProvider';
+import { ImageUploadAddTrigger } from './ImageUploadAddTrigger';
+import { ImageUploadReplaceTrigger } from './ImageUploadReplaceTrigger';
 import {
   DEFAULT_IMAGE_ACCEPT,
   getImagePreviewSizeStyle,
-  normalizeImageUploadResult,
-  type TrueAdminImageId,
   type TrueAdminImagePreviewSize,
   type TrueAdminImageUploadResult,
   type TrueAdminImageValue,
-  toImageValueArray,
 } from './imageUploadUtils';
 import { TrueAdminImageUploadItem } from './TrueAdminImageUploadItem';
+import { useImageUploadController } from './useImageUploadController';
 
 export type {
   TrueAdminImageId,
@@ -70,84 +67,25 @@ export function TrueAdminImageUpload({
   ...uploadProps
 }: TrueAdminImageUploadProps) {
   const { t } = useI18n();
-  const [uploading, setUploading] = useState(false);
-  const files = useMemo(() => toImageValueArray(value), [value]);
-  const [preview, setPreview] = useState<TrueAdminImageValue>();
-
-  const uploadFileList = useMemo<UploadFile[]>(
-    () =>
-      files.map((file) => ({
-        uid: String(file.id),
-        name: file.name,
-        status: 'done',
-        url: file.url,
-        size: file.size,
-        type: file.mimeType,
-      })),
-    [files],
-  );
-
-  const limit = multiple ? maxCount : 1;
+  const {
+    files,
+    handleBeforeUpload,
+    handleRemove,
+    limit,
+    preview,
+    setPreview,
+    uploadFileList,
+    uploading,
+  } = useImageUploadController({
+    maxCount,
+    multiple,
+    onChange,
+    onChangeValue,
+    upload,
+    value,
+  });
   const canUpload = !readonly && !disabled && (!limit || files.length < limit);
   const sizeStyle = getImagePreviewSizeStyle(previewSize);
-
-  const emitChange = (nextFiles: TrueAdminImageValue[]) => {
-    const nextValue = multiple ? nextFiles : (nextFiles[0] ?? null);
-    onChange?.(nextValue);
-    onChangeValue?.(nextValue);
-  };
-
-  const handleBeforeUpload = async (file: RcFile) => {
-    if (!canUpload && multiple) {
-      return Upload.LIST_IGNORE;
-    }
-
-    if (!file.type.startsWith('image/')) {
-      message.error(t('upload.image.invalidType', '请选择图片文件'));
-      return Upload.LIST_IGNORE;
-    }
-
-    setUploading(true);
-    try {
-      const nextFile = normalizeImageUploadResult(upload ? await upload(file) : undefined, file);
-      const nextFiles = multiple ? [...files, nextFile] : [nextFile];
-      emitChange(limit ? nextFiles.slice(0, limit) : nextFiles);
-    } catch (error) {
-      message.error(t('upload.image.uploadFailed', '图片上传失败'));
-      throw error;
-    } finally {
-      setUploading(false);
-    }
-
-    return Upload.LIST_IGNORE;
-  };
-
-  const handleRemove = (id: TrueAdminImageId) => {
-    emitChange(files.filter((file) => file.id !== id));
-  };
-
-  const uploader = (
-    <Upload
-      {...uploadProps}
-      accept={accept}
-      beforeUpload={handleBeforeUpload}
-      disabled={disabled || readonly || (!multiple && files.length > 0)}
-      fileList={uploadFileList}
-      maxCount={limit}
-      multiple={multiple}
-      showUploadList={false}
-    >
-      <button
-        type="button"
-        className="trueadmin-image-upload-add"
-        style={sizeStyle}
-        disabled={disabled || readonly || uploading || (!multiple && files.length > 0)}
-      >
-        <PlusOutlined />
-        <span>{addText ?? t('upload.image.add', '上传图片')}</span>
-      </button>
-    </Upload>
-  );
 
   return (
     <div className="trueadmin-image-upload">
@@ -163,7 +101,21 @@ export function TrueAdminImageUpload({
             onRemove={handleRemove}
           />
         ))}
-        {canUpload ? uploader : null}
+        {canUpload ? (
+          <ImageUploadAddTrigger
+            accept={accept}
+            addText={addText}
+            canUpload={canUpload}
+            fileList={uploadFileList}
+            limit={limit}
+            multiple={multiple}
+            sizeStyle={sizeStyle}
+            uploadProps={uploadProps}
+            uploading={uploading}
+            t={t}
+            onBeforeUpload={(file) => handleBeforeUpload(file, canUpload)}
+          />
+        ) : null}
       </div>
       {!files.length && !canUpload ? (
         <Empty
@@ -173,18 +125,15 @@ export function TrueAdminImageUpload({
         />
       ) : null}
       {!multiple && files.length > 0 && !readonly && !disabled ? (
-        <Upload
-          {...uploadProps}
+        <ImageUploadReplaceTrigger
           accept={accept}
-          beforeUpload={handleBeforeUpload}
           fileList={uploadFileList}
-          maxCount={1}
-          showUploadList={false}
-        >
-          <Button size="small" loading={uploading}>
-            {replaceText ?? t('upload.image.replace', '更换图片')}
-          </Button>
-        </Upload>
+          replaceText={replaceText}
+          uploadProps={uploadProps}
+          uploading={uploading}
+          t={t}
+          onBeforeUpload={(file) => handleBeforeUpload(file, canUpload)}
+        />
       ) : null}
       <Image
         src={preview?.url}
