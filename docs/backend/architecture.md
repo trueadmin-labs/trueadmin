@@ -347,7 +347,9 @@ sorts[0][order]=desc
 
 分页响应统一输出 `pageSize`，请求参数和 JSON 字段都使用 camelCase，数据库字段仍使用 snake_case。`filters[n][field]`、`filters[n][op]`、`sorts[n][field]` 只允许命中 Repository 声明的白名单字段，禁止把前端参数直接映射成任意 SQL 字段。后端不兼容旧 CRUD 查询协议；前端统一使用 `@trueadmin/web-core/crud` 的序列化结果。
 
-搜索条件优先通过 `applyParams()` 扩展业务参数。简单场景只需要配置 `$keywordFields`、`$filterable`、`$sortable`、`$defaultSort`；复杂场景仍应保留字段白名单和业务语义清晰的查询封装。
+搜索条件优先通过 `applyParams()` 扩展业务参数。简单场景只需要配置 `$keywordFields`、`$filterable`、`$sortable`、`$defaultSort`；动态场景可以覆盖 `keywordFields()`、`filterable()`、`filterColumn()`、`sortable()`、`sortColumn()`、`defaultSort()`；复杂场景覆盖 `applyParams()`、`applyFilterCondition()`、`applySortRule()` 等细粒度方法，仍必须保留字段白名单和业务语义清晰的查询封装。
+
+`applyCrudQuery()` 是标准查询管线入口，保持 final。子类通过 `beforeApplyCrudQuery()`、`applyParams()`、`afterApplyCrudQuery()` 和具体过滤/排序方法扩展，不复制整条管线。
 
 Repository 不应该处理 HTTP 语义。
 
@@ -886,7 +888,7 @@ handleItems
 批量审批
 ```
 
-第一版不提供空壳 `AbstractCrudController`。Controller 显式声明路由、权限、Request 和 Service 调用；通用能力收敛在 `CrudQueryRequest`、`CrudQuery`、`PageResult`、`AbstractRepository`、`AbstractService`。复杂业务允许不走标准 CRUD 模板。
+第一版不提供空壳 `AbstractCrudController`。Controller 显式声明路由、权限、Request 和 Service 调用；通用能力收敛在 `CrudQueryRequest`、`CrudQuery`、`PageResult`、`AbstractRepository`、`AbstractService`。复杂业务允许不走标准 CRUD 模板，但如果使用标准列表协议，仍应输出 `CrudQuery` 并交给 Repository 或 QueryApplier 处理。
 
 ## 13. 事件、监听器、队列、定时任务
 

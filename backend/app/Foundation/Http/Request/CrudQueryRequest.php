@@ -12,12 +12,12 @@ use App\Foundation\Crud\CrudSortRule;
 
 class CrudQueryRequest extends FormRequest
 {
-    private const FIELD_PATTERN = '/^[A-Za-z0-9_.]+$/';
+    protected const FIELD_PATTERN = '/^[A-Za-z0-9_.]+$/';
 
     /**
      * @var list<string>
      */
-    private const ROOT_KEYS = ['page', 'pageSize', 'keyword', 'filters', 'sorts', 'params'];
+    protected const ROOT_KEYS = ['page', 'pageSize', 'keyword', 'filters', 'sorts', 'params'];
 
     protected int $defaultPageSize = 20;
 
@@ -36,11 +36,11 @@ class CrudQueryRequest extends FormRequest
             'pageSize' => ['sometimes', 'integer', 'min:1', 'max:' . $this->maxPageSize],
             'keyword' => ['sometimes', 'string', 'max:100'],
             'filters' => ['sometimes', 'array', 'max:' . $this->maxFilterConditions],
-            'filters.*.field' => ['required_with:filters', 'string', 'max:64', 'regex:' . self::FIELD_PATTERN],
+            'filters.*.field' => ['required_with:filters', 'string', 'max:64', 'regex:' . $this->fieldPattern()],
             'filters.*.op' => ['required_with:filters', 'string', 'in:' . implode(',', $this->operatorValues())],
             'filters.*.value' => ['sometimes'],
             'sorts' => ['sometimes', 'array', 'max:' . $this->maxSortRules],
-            'sorts.*.field' => ['required_with:sorts', 'string', 'max:64', 'regex:' . self::FIELD_PATTERN],
+            'sorts.*.field' => ['required_with:sorts', 'string', 'max:64', 'regex:' . $this->fieldPattern()],
             'sorts.*.order' => ['required_with:sorts', 'string', 'in:asc,desc'],
             'sorts.*.nulls' => ['sometimes', 'string', 'in:first,last'],
             'params' => ['sometimes', 'array'],
@@ -51,7 +51,7 @@ class CrudQueryRequest extends FormRequest
     {
         $data = parent::validationData();
 
-        $unsupportedKeys = array_values(array_diff(array_keys($data), self::ROOT_KEYS));
+        $unsupportedKeys = array_values(array_diff(array_keys($data), $this->rootKeys()));
         if ($unsupportedKeys !== []) {
             $data['__unsupportedCrudKeys'] = $unsupportedKeys;
         }
@@ -87,7 +87,7 @@ class CrudQueryRequest extends FormRequest
     {
         $validated = $this->validated();
 
-        return new CrudQuery(
+        return $this->makeCrudQuery(
             page: $validated['page'],
             pageSize: $validated['pageSize'],
             keyword: $validated['keyword'],
@@ -100,7 +100,7 @@ class CrudQueryRequest extends FormRequest
     /**
      * @return list<CrudFilterCondition>
      */
-    private function decodeFilters(mixed $value): array
+    protected function decodeFilters(mixed $value): array
     {
         if (! is_array($value)) {
             return [];
@@ -113,7 +113,7 @@ class CrudQueryRequest extends FormRequest
             }
 
             $field = trim((string) ($item['field'] ?? ''));
-            $operator = CrudOperator::tryFrom(strtolower(trim((string) ($item['op'] ?? ''))));
+            $operator = $this->decodeOperator($item['op'] ?? '');
             if (! $this->isAllowedField($field) || $operator === null) {
                 continue;
             }
@@ -123,7 +123,7 @@ class CrudQueryRequest extends FormRequest
                 continue;
             }
 
-            $conditions[] = new CrudFilterCondition($field, $operator, $value);
+            $conditions[] = $this->makeFilterCondition($field, $operator, $value);
         }
 
         return $conditions;
@@ -132,7 +132,7 @@ class CrudQueryRequest extends FormRequest
     /**
      * @return list<CrudSortRule>
      */
-    private function decodeSorts(mixed $value): array
+    protected function decodeSorts(mixed $value): array
     {
         if (! is_array($value)) {
             return [];
@@ -145,7 +145,7 @@ class CrudQueryRequest extends FormRequest
             }
 
             $field = trim((string) ($item['field'] ?? ''));
-            $order = CrudSortOrder::tryFrom(strtolower(trim((string) ($item['order'] ?? ''))));
+            $order = $this->decodeSortOrder($item['order'] ?? '');
             $nulls = isset($item['nulls']) ? strtolower(trim((string) $item['nulls'])) : null;
             if (! $this->isAllowedField($field) || $order === null) {
                 continue;
@@ -154,7 +154,7 @@ class CrudQueryRequest extends FormRequest
                 $nulls = null;
             }
 
-            $sorts[] = new CrudSortRule($field, $order, $nulls);
+            $sorts[] = $this->makeSortRule($field, $order, $nulls);
         }
 
         return $sorts;
@@ -163,7 +163,7 @@ class CrudQueryRequest extends FormRequest
     /**
      * @return array<string, mixed>
      */
-    private function decodeParams(mixed $value): array
+    protected function decodeParams(mixed $value): array
     {
         if (! is_array($value)) {
             return [];
@@ -180,15 +180,15 @@ class CrudQueryRequest extends FormRequest
         return $params;
     }
 
-    private function isAllowedField(string $field): bool
+    protected function isAllowedField(string $field): bool
     {
-        return preg_match(self::FIELD_PATTERN, $field) === 1;
+        return preg_match($this->fieldPattern(), $field) === 1;
     }
 
     /**
      * @return list<string>
      */
-    private function operatorValues(): array
+    protected function operatorValues(): array
     {
         return array_map(
             static fn (CrudOperator $operator): string => $operator->value,
@@ -196,7 +196,7 @@ class CrudQueryRequest extends FormRequest
         );
     }
 
-    private function isEmptyValue(mixed $value): bool
+    protected function isEmptyValue(mixed $value): bool
     {
         if (is_string($value)) {
             $value = trim($value);
@@ -213,7 +213,7 @@ class CrudQueryRequest extends FormRequest
         return $this->normalizeValue($value) === [];
     }
 
-    private function normalizeValue(mixed $value): mixed
+    protected function normalizeValue(mixed $value): mixed
     {
         if (! is_array($value)) {
             return is_string($value) ? trim($value) : $value;
@@ -229,5 +229,54 @@ class CrudQueryRequest extends FormRequest
             }, $value),
             static fn (mixed $item): bool => $item !== null && $item !== '' && $item !== 'all',
         ));
+    }
+
+    /**
+     * @return list<string>
+     */
+    protected function rootKeys(): array
+    {
+        return static::ROOT_KEYS;
+    }
+
+    protected function fieldPattern(): string
+    {
+        return static::FIELD_PATTERN;
+    }
+
+    protected function decodeOperator(mixed $value): ?CrudOperator
+    {
+        return CrudOperator::tryFrom(strtolower(trim((string) $value)));
+    }
+
+    protected function decodeSortOrder(mixed $value): ?CrudSortOrder
+    {
+        return CrudSortOrder::tryFrom(strtolower(trim((string) $value)));
+    }
+
+    /**
+     * @param list<CrudFilterCondition> $filters
+     * @param list<CrudSortRule> $sorts
+     * @param array<string, mixed> $params
+     */
+    protected function makeCrudQuery(
+        int $page,
+        int $pageSize,
+        string $keyword,
+        array $filters,
+        array $sorts,
+        array $params,
+    ): CrudQuery {
+        return new CrudQuery($page, $pageSize, $keyword, $filters, $sorts, $params);
+    }
+
+    protected function makeFilterCondition(string $field, CrudOperator $operator, mixed $value): CrudFilterCondition
+    {
+        return new CrudFilterCondition($field, $operator, $value);
+    }
+
+    protected function makeSortRule(string $field, CrudSortOrder $order, ?string $nulls): CrudSortRule
+    {
+        return new CrudSortRule($field, $order, $nulls);
     }
 }

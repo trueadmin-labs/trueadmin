@@ -120,6 +120,7 @@ backend/plugins/*/*/Database/Seeders
 
 - [后端完整架构方案](architecture.md)
 - [层级边界规范](layer-boundaries.md)
+- [后端扩展 API 规范](extension-api.md)
 - [Composer 包抽取检查](composer-packages.md)
 - [模块目录规范](module-architecture.md)
 - [配置模式与注解模式](configuration-vs-attribute.md)

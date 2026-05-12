@@ -10,13 +10,13 @@ use Hyperf\Di\Annotation\AnnotationCollector;
 use TrueAdmin\Kernel\Http\Attribute\OpenApi;
 use TrueAdmin\Kernel\Http\Attribute\Permission;
 
-final class InterfaceMetadataScanner
+class InterfaceMetadataScanner
 {
-    private const MENU_TYPES = ['directory', 'menu', 'button', 'link'];
+    protected const MENU_TYPES = ['directory', 'menu', 'button', 'link'];
 
-    private const MENU_STATUSES = ['enabled', 'disabled'];
+    protected const MENU_STATUSES = ['enabled', 'disabled'];
 
-    private const LINK_OPEN_MODES = ['blank', 'self', 'iframe'];
+    protected const LINK_OPEN_MODES = ['blank', 'self', 'iframe'];
 
     /**
      * @var null|list<array<string, mixed>>
@@ -26,8 +26,7 @@ final class InterfaceMetadataScanner
     public function __construct(
         private readonly AttributeRouteRegistrar $routes,
         private readonly PluginRepository $plugins,
-    )
-    {
+    ) {
     }
 
     public function scan(): array
@@ -41,7 +40,7 @@ final class InterfaceMetadataScanner
         ];
     }
 
-    private function menus(): array
+    protected function menus(): array
     {
         $menus = [];
         foreach ($this->resourceMenus() as $menu) {
@@ -57,7 +56,7 @@ final class InterfaceMetadataScanner
      * @param array<string, array<string, mixed>> $menus
      * @param array<string, mixed> $menu
      */
-    private function appendMenu(array &$menus, array $menu): void
+    protected function appendMenu(array &$menus, array $menu): void
     {
         $normalized = $this->normalizeMenu($menu);
         $code = $normalized['code'];
@@ -72,7 +71,7 @@ final class InterfaceMetadataScanner
      * @param array<string, mixed> $menu
      * @return array<string, mixed>
      */
-    private function normalizeMenu(array $menu): array
+    protected function normalizeMenu(array $menu): array
     {
         $code = isset($menu['code']) ? trim((string) $menu['code']) : '';
         if ($code === '') {
@@ -84,12 +83,12 @@ final class InterfaceMetadataScanner
         }
 
         $type = isset($menu['type']) && (string) $menu['type'] !== '' ? (string) $menu['type'] : 'menu';
-        if (! in_array($type, self::MENU_TYPES, true)) {
+        if (! in_array($type, static::MENU_TYPES, true)) {
             throw new \RuntimeException(sprintf('Menu [%s] has an unsupported type [%s].', $code, $type));
         }
 
         $status = isset($menu['status']) && (string) $menu['status'] !== '' ? (string) $menu['status'] : 'enabled';
-        if (! in_array($status, self::MENU_STATUSES, true)) {
+        if (! in_array($status, static::MENU_STATUSES, true)) {
             throw new \RuntimeException(sprintf('Menu [%s] has an unsupported status [%s].', $code, $status));
         }
 
@@ -111,7 +110,7 @@ final class InterfaceMetadataScanner
                 throw new \RuntimeException(sprintf('Menu [%s] has an invalid link url.', $code));
             }
             $openMode = $openMode !== '' ? $openMode : 'blank';
-            if (! in_array($openMode, self::LINK_OPEN_MODES, true)) {
+            if (! in_array($openMode, static::LINK_OPEN_MODES, true)) {
                 throw new \RuntimeException(sprintf('Menu [%s] has an unsupported link open mode [%s].', $code, $openMode));
             }
         } else {
@@ -140,7 +139,7 @@ final class InterfaceMetadataScanner
     /**
      * @return list<array<string, mixed>>
      */
-    private function resourceMenus(): array
+    protected function resourceMenus(): array
     {
         if ($this->resourceMenus !== null) {
             return $this->resourceMenus;
@@ -165,7 +164,7 @@ final class InterfaceMetadataScanner
         return $this->resourceMenus = $menus;
     }
 
-    private function normalizeBoolean(mixed $value): bool
+    protected function normalizeBoolean(mixed $value): bool
     {
         return filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false;
     }
@@ -173,7 +172,7 @@ final class InterfaceMetadataScanner
     /**
      * @return list<string>
      */
-    private function menuResourceFiles(): array
+    protected function menuResourceFiles(): array
     {
         $files = [
             ...(glob(BASE_PATH . '/app/Module/*/resources/menus.php') ?: []),
@@ -189,7 +188,7 @@ final class InterfaceMetadataScanner
     /**
      * @return list<string>
      */
-    private function testingMenuResourceFiles(): array
+    protected function testingMenuResourceFiles(): array
     {
         if ((getenv('APP_ENV') ?: '') !== 'testing') {
             return [];
@@ -198,7 +197,7 @@ final class InterfaceMetadataScanner
         return glob(BASE_PATH . '/test/Support/Module/*/resources/menus.php') ?: [];
     }
 
-    private function permissions(): array
+    protected function permissions(): array
     {
         $permissions = [];
         $routes = $this->routeIndex();
@@ -239,7 +238,7 @@ final class InterfaceMetadataScanner
         return array_values($permissions);
     }
 
-    private function permissionRules(): array
+    protected function permissionRules(): array
     {
         $rules = [];
         $routes = $this->routeIndex();
@@ -271,7 +270,7 @@ final class InterfaceMetadataScanner
         return $rules;
     }
 
-    private function definedPermissionCodes(): array
+    protected function definedPermissionCodes(): array
     {
         $codes = [];
 
@@ -285,7 +284,7 @@ final class InterfaceMetadataScanner
         return $codes;
     }
 
-    private function menuCodeForPermission(string $permission): string
+    protected function menuCodeForPermission(string $permission): string
     {
         foreach ($this->resourceMenus() as $menu) {
             if ((string) ($menu['permission'] ?? '') === $permission) {
@@ -296,7 +295,7 @@ final class InterfaceMetadataScanner
         return '';
     }
 
-    private function permissionItems(): array
+    protected function permissionItems(): array
     {
         return [
             ...array_map(
@@ -308,7 +307,7 @@ final class InterfaceMetadataScanner
         ];
     }
 
-    private function openapi(): array
+    protected function openapi(): array
     {
         return array_values(array_map(
             static fn (array $item): array => [
@@ -335,7 +334,7 @@ final class InterfaceMetadataScanner
         ));
     }
 
-    private function routeIndex(): array
+    protected function routeIndex(): array
     {
         $routes = [];
         foreach ($this->routes->routes() as $route) {

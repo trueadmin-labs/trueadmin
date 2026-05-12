@@ -14,7 +14,7 @@ use TrueAdmin\Kernel\DataPermission\DataPolicyRule;
 use TrueAdmin\Kernel\DataPermission\DataPolicyTarget;
 use TrueAdmin\Kernel\Exception\BusinessException;
 
-final class DataPolicyManager
+class DataPolicyManager
 {
     /** @var array<string, DataPolicyStrategyInterface> */
     private array $strategies = [];
@@ -109,7 +109,7 @@ final class DataPolicyManager
     /**
      * @return list<DataPolicyRule>
      */
-    private function allowRules(Actor $actor, string $resource): array
+    protected function allowRules(Actor $actor, string $resource): array
     {
         $rules = array_values(array_filter(
             $this->provider->policiesFor($actor, $resource),
@@ -127,7 +127,7 @@ final class DataPolicyManager
     /**
      * @param list<DataPolicyRule> $rules
      */
-    private function hasAllScope(array $rules): bool
+    protected function hasAllScope(array $rules): bool
     {
         foreach ($rules as $rule) {
             if ($rule->isAllScope()) {
@@ -138,7 +138,7 @@ final class DataPolicyManager
         return false;
     }
 
-    private function strategy(string $key): DataPolicyStrategyInterface
+    protected function strategy(string $key): DataPolicyStrategyInterface
     {
         return $this->strategies[$key] ??= $this->registry->strategy($key);
     }

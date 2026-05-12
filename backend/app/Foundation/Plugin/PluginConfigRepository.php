@@ -6,7 +6,7 @@ namespace App\Foundation\Plugin;
 
 use Hyperf\Contract\ConfigInterface;
 
-final class PluginConfigRepository
+class PluginConfigRepository
 {
     public function __construct(
         private readonly ConfigInterface $config,
@@ -42,7 +42,7 @@ final class PluginConfigRepository
         return $config;
     }
 
-    private function find(string $pluginName): ?Plugin
+    protected function find(string $pluginName): ?Plugin
     {
         foreach ($this->plugins->all() as $plugin) {
             if ($plugin->name === $pluginName) {
@@ -56,7 +56,7 @@ final class PluginConfigRepository
     /**
      * @return array<string, mixed>
      */
-    private function projectConfig(string $pluginName): array
+    protected function projectConfig(string $pluginName): array
     {
         $config = $this->config->get('plugins.config.' . $pluginName, []);
 
@@ -68,7 +68,7 @@ final class PluginConfigRepository
      * @param array<string, mixed> $override
      * @return array<string, mixed>
      */
-    private function mergeRecursive(array $base, array $override): array
+    protected function mergeRecursive(array $base, array $override): array
     {
         foreach ($override as $key => $value) {
             if (is_array($value) && is_array($base[$key] ?? null)) {

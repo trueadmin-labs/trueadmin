@@ -8,7 +8,7 @@ use App\Foundation\Plugin\PluginRepository;
 use Hyperf\Contract\TranslatorLoaderInterface;
 use Hyperf\Support\Filesystem\Filesystem;
 
-final class ModuleTranslationLoader implements TranslatorLoaderInterface
+class ModuleTranslationLoader implements TranslatorLoaderInterface
 {
     private array $namespaces = [];
 
@@ -52,7 +52,7 @@ final class ModuleTranslationLoader implements TranslatorLoaderInterface
         return $this->namespaces;
     }
 
-    private function loadNamespaced(string $locale, string $group, string $namespace): array
+    protected function loadNamespaced(string $locale, string $group, string $namespace): array
     {
         $path = $this->namespaces[$namespace] ?? null;
         if (! is_string($path)) {
@@ -65,7 +65,7 @@ final class ModuleTranslationLoader implements TranslatorLoaderInterface
     /**
      * @param list<string> $paths
      */
-    private function loadGroup(string $locale, string $group, array $paths): array
+    protected function loadGroup(string $locale, string $group, array $paths): array
     {
         $lines = [];
         foreach ($paths as $path) {
@@ -78,7 +78,7 @@ final class ModuleTranslationLoader implements TranslatorLoaderInterface
         return $lines;
     }
 
-    private function loadJsonPaths(string $locale): array
+    protected function loadJsonPaths(string $locale): array
     {
         $lines = [];
         foreach ([...$this->jsonPaths, ...$this->languagePaths()] as $path) {
@@ -97,7 +97,7 @@ final class ModuleTranslationLoader implements TranslatorLoaderInterface
     /**
      * @return list<string>
      */
-    private function languagePaths(): array
+    protected function languagePaths(): array
     {
         $paths = $this->paths;
 

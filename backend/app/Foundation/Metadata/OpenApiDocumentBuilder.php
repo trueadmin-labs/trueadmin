@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Foundation\Metadata;
 
-final class OpenApiDocumentBuilder
+class OpenApiDocumentBuilder
 {
     public function __construct(private readonly InterfaceMetadataScanner $scanner)
     {
@@ -37,28 +37,52 @@ final class OpenApiDocumentBuilder
 
         return [
             'openapi' => '3.1.0',
-            'info' => [
-                'title' => 'TrueAdmin API',
-                'version' => '0.1.0',
-                'description' => 'Generated from TrueAdmin controller attributes. Code annotations provide default interface metadata.',
-            ],
-            'servers' => [
-                ['url' => '/'],
-            ],
+            'info' => $this->info(),
+            'servers' => $this->servers(),
             'paths' => $paths,
-            'components' => [
-                'securitySchemes' => [
-                    'bearerAuth' => [
-                        'type' => 'http',
-                        'scheme' => 'bearer',
-                        'bearerFormat' => 'JWT',
-                    ],
+            'components' => $this->components(),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function info(): array
+    {
+        return [
+            'title' => 'TrueAdmin API',
+            'version' => '0.1.0',
+            'description' => 'Generated from TrueAdmin controller attributes. Code annotations provide default interface metadata.',
+        ];
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    protected function servers(): array
+    {
+        return [
+            ['url' => '/'],
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function components(): array
+    {
+        return [
+            'securitySchemes' => [
+                'bearerAuth' => [
+                    'type' => 'http',
+                    'scheme' => 'bearer',
+                    'bearerFormat' => 'JWT',
                 ],
             ],
         ];
     }
 
-    private function operation(array $route, ?array $permissionRule, ?array $spec): array
+    protected function operation(array $route, ?array $permissionRule, ?array $spec): array
     {
         $summary = (string) ($spec['summary'] ?? '');
         if ($summary === '') {
@@ -107,12 +131,12 @@ final class OpenApiDocumentBuilder
         return $operation;
     }
 
-    private function normalizePath(string $path): string
+    protected function normalizePath(string $path): string
     {
         return preg_replace('#\{([^}/]+)\}#', '{$1}', $path) ?? $path;
     }
 
-    private function operationId(string $action, string $name): string
+    protected function operationId(string $action, string $name): string
     {
         $source = $name !== '' ? $name : str_replace('\\', '_', str_replace('@', '_', $action));
         $id = preg_replace('/[^A-Za-z0-9_]+/', '_', $source) ?? $source;
@@ -120,7 +144,7 @@ final class OpenApiDocumentBuilder
         return trim($id, '_');
     }
 
-    private function indexByAction(array $items): array
+    protected function indexByAction(array $items): array
     {
         $indexed = [];
         foreach ($items as $item) {

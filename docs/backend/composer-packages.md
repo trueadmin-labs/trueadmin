@@ -29,7 +29,7 @@
 - 读取项目私有配置或供应商配置。
 - 只是当前模板的组织方式，还没有稳定扩展协议。
 
-## P0：应尽快进入 kernel
+## P0：已进入 kernel main，等待发版后切模板
 
 ### CRUD 协议值对象
 
@@ -46,64 +46,64 @@
 
 ### 分页结果
 
-候选：
-
-```text
-backend/app/Foundation/Pagination/PageResult.php
-```
-
-建议进入：
+当前状态：
 
 ```text
 trueadmin-kernel/src/Pagination/PageResult.php
+```
+
+模板临时保留：
+
+```text
+backend/app/Foundation/Pagination/PageResult.php
 ```
 
 理由：分页响应是 CRUD/API 协议的一部分，不依赖业务表。前端 `@trueadmin/web-core/http` 已经有 `PageResult` 类型，后端应有同名标准值对象。
 
 ### API 响应 envelope
 
-候选：
-
-```text
-backend/app/Foundation/Support/ApiResponse.php
-```
-
-建议进入：
+当前状态：
 
 ```text
 trueadmin-kernel/src/Http/ApiResponse.php
+```
+
+模板临时保留：
+
+```text
+backend/app/Foundation/Support/ApiResponse.php
 ```
 
 理由：`code/message/data` 是框架 API 协议，不是项目私有实现。进入 kernel 后，异常处理、SSE 错误响应、Controller 基类都能复用同一份输出结构。
 
 ### FormRequest 基类
 
-候选：
-
-```text
-backend/app/Foundation/Http/Request/FormRequest.php
-```
-
-建议进入：
+当前状态：
 
 ```text
 trueadmin-kernel/src/Http/Request/FormRequest.php
+```
+
+模板临时保留：
+
+```text
+backend/app/Foundation/Http/Request/FormRequest.php
 ```
 
 理由：当前只是在 Hyperf FormRequest 上增加 `authorize=true` 和 `normalize()`，是标准框架输入契约能力。
 
 ### CRUD Query Request
 
-候选：
-
-```text
-backend/app/Foundation/Http/Request/CrudQueryRequest.php
-```
-
-建议进入：
+当前状态：
 
 ```text
 trueadmin-kernel/src/Crud/CrudQueryRequest.php
+```
+
+模板临时保留：
+
+```text
+backend/app/Foundation/Http/Request/CrudQueryRequest.php
 ```
 
 理由：它实现的是标准 `page/pageSize/keyword/filters[n]/sorts[n]/params[key]` 协议解析和校验，不依赖业务模块。进入 kernel 后，Admin、Client、Open 列表接口都能复用。

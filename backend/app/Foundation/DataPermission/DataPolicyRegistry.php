@@ -12,7 +12,7 @@ use TrueAdmin\Kernel\Constant\ErrorCode;
 use TrueAdmin\Kernel\DataPermission\DataPolicyRule;
 use TrueAdmin\Kernel\Exception\BusinessException;
 
-final class DataPolicyRegistry
+class DataPolicyRegistry
 {
     /** @var null|array<string, array<string, mixed>> */
     private ?array $resources = null;
@@ -232,7 +232,7 @@ final class DataPolicyRegistry
         return $this->strategies = $strategies;
     }
 
-    private function loadStrategies(): void
+    protected function loadStrategies(): void
     {
         if ($this->strategyInstances !== []) {
             return;
@@ -258,7 +258,7 @@ final class DataPolicyRegistry
     /**
      * @return list<array<string, mixed>>
      */
-    private function resourceDefinitions(): array
+    protected function resourceDefinitions(): array
     {
         if ($this->resourceDefinitions !== null) {
             return $this->resourceDefinitions;
@@ -277,7 +277,7 @@ final class DataPolicyRegistry
     /**
      * @return list<class-string>
      */
-    private function strategyClasses(): array
+    protected function strategyClasses(): array
     {
         if ($this->strategyClasses !== null) {
             return $this->strategyClasses;
@@ -300,7 +300,7 @@ final class DataPolicyRegistry
     /**
      * @return list<array{strategies: list<class-string>, resources: list<array<string, mixed>>}>
      */
-    private function dataPolicyDefinitions(): array
+    protected function dataPolicyDefinitions(): array
     {
         $definitions = [];
 
@@ -322,7 +322,7 @@ final class DataPolicyRegistry
      * @param array<string, mixed> $definition
      * @return array{strategies: list<class-string>, resources: list<array<string, mixed>>}
      */
-    private function normalizeDataPolicyDefinition(array $definition, string $source): array
+    protected function normalizeDataPolicyDefinition(array $definition, string $source): array
     {
         $strategies = $definition['strategies'] ?? [];
         $resources = $definition['resources'] ?? [];
@@ -345,7 +345,7 @@ final class DataPolicyRegistry
     /**
      * @return list<string>
      */
-    private function dataPolicyResourceFiles(): array
+    protected function dataPolicyResourceFiles(): array
     {
         $files = [
             ...(glob(BASE_PATH . '/app/Module/*/resources/data_policies.php') ?: []),
@@ -361,7 +361,7 @@ final class DataPolicyRegistry
      * @param mixed $scopes
      * @return list<array<string, mixed>>
      */
-    private function normalizeScopes(string $strategy, mixed $scopes): array
+    protected function normalizeScopes(string $strategy, mixed $scopes): array
     {
         $items = [];
         foreach ((array) $scopes as $scope) {
@@ -410,7 +410,7 @@ final class DataPolicyRegistry
      * @param mixed $schema
      * @return list<array<string, mixed>>
      */
-    private function normalizeConfigSchema(string $strategy, string $scope, mixed $schema): array
+    protected function normalizeConfigSchema(string $strategy, string $scope, mixed $schema): array
     {
         $items = [];
         foreach ((array) $schema as $field) {
@@ -444,7 +444,7 @@ final class DataPolicyRegistry
         return $items;
     }
 
-    private function validationError(string $reason): never
+    protected function validationError(string $reason): never
     {
         throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, [
             'field' => 'dataPolicies',

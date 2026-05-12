@@ -23,7 +23,7 @@ use TrueAdmin\Kernel\Http\Attribute\OpenPost;
 use TrueAdmin\Kernel\Http\Attribute\OpenPut;
 use TrueAdmin\Kernel\Http\Attribute\RouteMapping;
 
-final class AttributeRouteRegistrar
+class AttributeRouteRegistrar
 {
     /**
      * @return list<array{methods: list<string>, path: string, action: string, middleware: list<class-string>, name: string}>
@@ -65,7 +65,7 @@ final class AttributeRouteRegistrar
     /**
      * @return array{path: string, middleware: list<class-string>}|null
      */
-    private function controller(string $class): ?array
+    protected function controller(string $class): ?array
     {
         foreach ([AdminController::class, ClientController::class, OpenController::class] as $annotationClass) {
             $annotation = AnnotationCollector::getClassAnnotation($class, $annotationClass);
@@ -85,7 +85,7 @@ final class AttributeRouteRegistrar
     /**
      * @return list<array{class: class-string, method: string, annotation: RouteMapping}>
      */
-    private function methodMappings(): array
+    protected function methodMappings(): array
     {
         $items = [];
 
@@ -103,7 +103,7 @@ final class AttributeRouteRegistrar
     /**
      * @return list<class-string<RouteMapping>>
      */
-    private function mappingAnnotations(): array
+    protected function mappingAnnotations(): array
     {
         return [
             AdminGet::class,
@@ -121,7 +121,7 @@ final class AttributeRouteRegistrar
         ];
     }
 
-    private function routePath(string $controllerPath, string $methodPath): string
+    protected function routePath(string $controllerPath, string $methodPath): string
     {
         if (str_starts_with($methodPath, '/')) {
             return $this->join($methodPath);
@@ -130,7 +130,7 @@ final class AttributeRouteRegistrar
         return $this->join($controllerPath, $methodPath);
     }
 
-    private function join(string ...$segments): string
+    protected function join(string ...$segments): string
     {
         $path = implode('/', array_map(static fn (string $segment): string => trim($segment, '/'), $segments));
         $path = '/' . trim(preg_replace('#/+#', '/', $path) ?? '', '/');

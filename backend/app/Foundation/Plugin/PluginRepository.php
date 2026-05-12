@@ -6,7 +6,7 @@ namespace App\Foundation\Plugin;
 
 use Hyperf\Contract\ConfigInterface;
 
-final class PluginRepository
+class PluginRepository
 {
     public function __construct(private readonly ConfigInterface $config)
     {
@@ -145,7 +145,7 @@ final class PluginRepository
     /**
      * @return array<string, array<string, mixed>>
      */
-    private function installedPlugins(): array
+    protected function installedPlugins(): array
     {
         $installed = $this->config->get('plugins.installed', []);
         if (! is_array($installed)) {
@@ -158,7 +158,7 @@ final class PluginRepository
     /**
      * @return list<string>
      */
-    private function stringList(string $key): array
+    protected function stringList(string $key): array
     {
         $value = $this->config->get($key, []);
         if (! is_array($value)) {

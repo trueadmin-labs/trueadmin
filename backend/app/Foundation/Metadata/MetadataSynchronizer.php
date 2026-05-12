@@ -6,7 +6,7 @@ namespace App\Foundation\Metadata;
 
 use Hyperf\DbConnection\Db;
 
-final class MetadataSynchronizer
+class MetadataSynchronizer
 {
     public function __construct(
         private readonly InterfaceMetadataScanner $scanner,
@@ -51,7 +51,7 @@ final class MetadataSynchronizer
         return $synced;
     }
 
-    private function syncMenu(string $code, array $menus, array &$menuIds, string $now, bool $force, array $visiting): int
+    protected function syncMenu(string $code, array $menus, array &$menuIds, string $now, bool $force, array $visiting): int
     {
         if (isset($menuIds[$code])) {
             return $menuIds[$code];

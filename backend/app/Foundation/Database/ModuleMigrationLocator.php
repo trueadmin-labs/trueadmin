@@ -6,7 +6,7 @@ namespace App\Foundation\Database;
 
 use App\Foundation\Plugin\PluginRepository;
 
-final class ModuleMigrationLocator
+class ModuleMigrationLocator
 {
     public function __construct(private readonly ?PluginRepository $plugins = null)
     {
@@ -38,7 +38,7 @@ final class ModuleMigrationLocator
      * @param array<int, string|false> $paths
      * @return list<string>
      */
-    private function existingDirectories(array $paths): array
+    protected function existingDirectories(array $paths): array
     {
         $directories = array_values(array_filter(
             array_map(static fn ($path): string => is_string($path) ? $path : '', $paths),

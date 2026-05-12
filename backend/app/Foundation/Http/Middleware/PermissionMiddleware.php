@@ -17,7 +17,7 @@ use TrueAdmin\Kernel\Context\ActorContext;
 use TrueAdmin\Kernel\Exception\BusinessException;
 use TrueAdmin\Kernel\Http\Attribute\Permission;
 
-final class PermissionMiddleware implements MiddlewareInterface
+class PermissionMiddleware implements MiddlewareInterface
 {
     public function __construct(private readonly AdminPermissionProviderInterface $permissions)
     {
@@ -41,7 +41,7 @@ final class PermissionMiddleware implements MiddlewareInterface
         return $handler->handle($request);
     }
 
-    private function allows(Actor $actor, Permission $permission): bool
+    protected function allows(Actor $actor, Permission $permission): bool
     {
         return match ($permission->mode()) {
             'anyOf' => $this->allowsAny($actor, $permission->codes()),
@@ -50,7 +50,7 @@ final class PermissionMiddleware implements MiddlewareInterface
         };
     }
 
-    private function allowsAny(Actor $actor, array $permissions): bool
+    protected function allowsAny(Actor $actor, array $permissions): bool
     {
         foreach ($permissions as $permission) {
             if ($this->permissions->can($actor, $permission)) {
@@ -61,7 +61,7 @@ final class PermissionMiddleware implements MiddlewareInterface
         return false;
     }
 
-    private function allowsAll(Actor $actor, array $permissions): bool
+    protected function allowsAll(Actor $actor, array $permissions): bool
     {
         foreach ($permissions as $permission) {
             if (! $this->permissions->can($actor, $permission)) {
@@ -72,7 +72,7 @@ final class PermissionMiddleware implements MiddlewareInterface
         return true;
     }
 
-    private function permissionFromRoute(ServerRequestInterface $request): ?Permission
+    protected function permissionFromRoute(ServerRequestInterface $request): ?Permission
     {
         $dispatched = $request->getAttribute(Dispatched::class);
         $callback = $dispatched instanceof Dispatched ? $dispatched->handler?->callback : null;
