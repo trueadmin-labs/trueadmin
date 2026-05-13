@@ -19,7 +19,6 @@ import {
   type MenuIconMode,
   ROOT_PARENT_ID,
 } from './MenuFormModal';
-import { MenuRowActions } from './MenuRowActions';
 import { createMenuColumns } from './MenuTableColumns';
 import { createMenuFilters } from './menuPageModel';
 
@@ -198,20 +197,21 @@ export default function AdminMenusPage() {
         </Dropdown>
       }
       rowActions={{
-        delete: false,
+        presets: ['edit', 'delete'],
         width: 150,
-        render: ({ action, record }) => (
-          <MenuRowActions
-            action={action}
-            record={record}
-            t={t}
-            onEdit={openEdit}
-            onDeleteSuccess={async () => {
-              message.success(t('system.menus.deleteSuccess', '资源已删除'));
-              await loadMenuTree();
-            }}
-          />
-        ),
+        overrides: {
+          delete: {
+            confirm: t('system.menus.deleteConfirm', '确认删除该资源吗？'),
+            visible: ({ record }) => record.source === 'custom',
+          },
+          edit: {
+            onClick: ({ record }) => openEdit(record),
+          },
+        },
+      }}
+      onDeleteSuccess={async () => {
+        message.success(t('system.menus.deleteSuccess', '资源已删除'));
+        await loadMenuTree();
       }}
       locale={{
         actionColumnTitle: t('crud.column.action', '操作'),

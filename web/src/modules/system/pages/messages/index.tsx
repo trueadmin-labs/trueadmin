@@ -1,4 +1,3 @@
-import { Button } from 'antd';
 import { TrueAdminCrudPage } from '@/core/crud/TrueAdminCrudPage';
 import type { CrudListParams } from '@/core/crud/types';
 import { type AdminMessageItem, TrueAdminMessageDetailModal } from '@/core/notification';
@@ -34,17 +33,14 @@ export default function AdminMessagesPage() {
           }) as CrudListParams
         }
         rowActions={{
-          render: ({ record }) => (
-            <Button
-              key="detail"
-              size="small"
-              type="link"
-              onClick={() => page.setDetailMessage(record)}
-            >
-              {page.t('system.messages.action.detail', '详情')}
-            </Button>
-          ),
+          presets: ['detail'],
           width: 100,
+          overrides: {
+            detail: {
+              label: page.t('system.messages.action.detail', '详情'),
+              onClick: ({ record }) => page.setDetailMessage(record),
+            },
+          },
         }}
         rowSelection={{
           selectedRowKeys: page.selectedRowKeys,

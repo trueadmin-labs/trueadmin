@@ -1,4 +1,4 @@
-import { PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
 import { App, Button, Form } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { TrueAdminCrudPage, useCrudRecordDetail } from '@/core/crud';
@@ -8,7 +8,6 @@ import { roleApi } from '../../services/role.api';
 import type { AdminRole, AdminRolePayload } from '../../types/role';
 import { RoleAuthorizeModal } from './RoleAuthorizeModal';
 import { RoleFormModal } from './RoleFormModal';
-import { RoleRowActions } from './RoleRowActions';
 import { createRoleColumns } from './RoleTableColumns';
 import { isBuiltinRole, type RoleFormValues } from './roleAuthorization';
 import { createRoleFilters } from './rolePageModel';
@@ -129,17 +128,32 @@ export default function AdminRolesPage() {
         </Button>
       }
       rowActions={{
-        delete: false,
+        presets: ['edit', 'delete'],
+        maxInline: 2,
+        order: ['edit', 'authorize', 'delete'],
         width: 210,
-        render: ({ action, record }) => (
-          <RoleRowActions
-            action={action}
-            record={record}
-            t={t}
-            onEdit={openEdit}
-            onAuthorize={roleAuthorization.openAuthorize}
-          />
-        ),
+        overrides: {
+          delete: {
+            confirm: t('system.roles.deleteConfirm', '确认删除该角色吗？'),
+            disabled: ({ record }) => isBuiltinRole(record),
+          },
+          edit: {
+            disabled: ({ record }) => isBuiltinRole(record),
+            onClick: ({ record }) => openEdit(record),
+          },
+        },
+        items: [
+          {
+            key: 'authorize',
+            disabled: ({ record }) => isBuiltinRole(record),
+            icon: <SafetyCertificateOutlined />,
+            label: t('system.roles.action.authorize', '授权'),
+            onClick: ({ record }) => roleAuthorization.openAuthorize(record),
+            permission: 'system:role:authorize',
+            size: 'small',
+            type: 'link',
+          },
+        ],
       }}
       locale={{
         actionColumnTitle: t('crud.column.action', '操作'),

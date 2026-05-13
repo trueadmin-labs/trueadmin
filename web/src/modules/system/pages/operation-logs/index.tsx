@@ -1,7 +1,5 @@
 import { EyeOutlined } from '@ant-design/icons';
-import { Button } from 'antd';
 import { useMemo } from 'react';
-import { TrueAdminPermission } from '@/core/auth';
 import { TrueAdminCrudPage, useCrudRecordDetail } from '@/core/crud';
 import type { CrudColumns, CrudFilterSchema } from '@/core/crud/types';
 import { useI18n } from '@/core/i18n/I18nProvider';
@@ -84,20 +82,14 @@ export default function AdminOperationLogsPage() {
           ),
         }}
         rowActions={{
-          delete: false,
+          presets: ['detail'],
           width: 108,
-          render: ({ record }) => (
-            <TrueAdminPermission code="system:operation-log:detail">
-              <Button
-                icon={<EyeOutlined />}
-                size="small"
-                type="link"
-                onClick={() => void detail.openRecord(record.id, { initialRecord: record })}
-              >
-                {t('crud.action.detail', '详情')}
-              </Button>
-            </TrueAdminPermission>
-          ),
+          overrides: {
+            detail: {
+              icon: <EyeOutlined />,
+              onClick: ({ record }) => void detail.openRecord(record.id, { initialRecord: record }),
+            },
+          },
         }}
         toolbarProps={{
           quickSearchInputProps: { allowClear: true },

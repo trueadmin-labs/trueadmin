@@ -12,11 +12,12 @@ import type {
   FormProps,
   InputProps,
   PaginationProps,
+  PopconfirmProps,
   SpaceProps,
   TableColumnsType,
   TableProps,
 } from 'antd';
-import type { CSSProperties, ReactNode } from 'react';
+import type { CSSProperties, Key, ReactNode } from 'react';
 
 export type { CrudOperator, CrudSortOrder, CrudSortRule };
 
@@ -364,14 +365,83 @@ export type CrudRowActionContext<
   record: TRecord;
 };
 
+export type CrudBuiltinRowAction = 'detail' | 'edit' | 'delete';
+
+export type CrudRowActionPlacement = 'auto' | 'inline' | 'more';
+
+export type CrudRowActionAlign = 'left' | 'center' | 'right';
+
+export type CrudRowActionValue<
+  TValue,
+  TRecord extends Record<string, unknown>,
+  TMeta,
+  TCreate,
+  TUpdate,
+> = TValue | ((context: CrudRowActionContext<TRecord, TMeta, TCreate, TUpdate>) => TValue);
+
+export type CrudRowActionPermissionMode = 'and' | 'or';
+
+export type CrudRowActionConfirm<
+  TRecord extends Record<string, unknown>,
+  TMeta = Record<string, unknown>,
+  TCreate = Partial<TRecord>,
+  TUpdate = Partial<TRecord>,
+> = CrudRowActionValue<ReactNode | PopconfirmProps | undefined, TRecord, TMeta, TCreate, TUpdate>;
+
+export type CrudRowActionItem<
+  TRecord extends Record<string, unknown>,
+  TMeta = Record<string, unknown>,
+  TCreate = Partial<TRecord>,
+  TUpdate = Partial<TRecord>,
+> = Omit<ButtonProps, 'children' | 'danger' | 'disabled' | 'onClick'> & {
+  key: Key;
+  label: ReactNode;
+  confirm?: CrudRowActionConfirm<TRecord, TMeta, TCreate, TUpdate>;
+  danger?: CrudRowActionValue<boolean | undefined, TRecord, TMeta, TCreate, TUpdate>;
+  disabled?: CrudRowActionValue<boolean | undefined, TRecord, TMeta, TCreate, TUpdate>;
+  errorMessage?: ReactNode | false;
+  onClick?: (
+    context: CrudRowActionContext<TRecord, TMeta, TCreate, TUpdate>,
+  ) => void | Promise<void>;
+  onError?: (error: unknown) => void;
+  onSuccess?: () => void;
+  order?: number;
+  permission?: CrudRowActionValue<
+    string | string[] | false | undefined,
+    TRecord,
+    TMeta,
+    TCreate,
+    TUpdate
+  >;
+  permissionMode?: CrudRowActionPermissionMode;
+  placement?: CrudRowActionPlacement;
+  successMessage?: ReactNode | false;
+  visible?: CrudRowActionValue<boolean | undefined, TRecord, TMeta, TCreate, TUpdate>;
+};
+
 export type CrudRowActionsConfig<
   TRecord extends Record<string, unknown>,
   TMeta = Record<string, unknown>,
   TCreate = Partial<TRecord>,
   TUpdate = Partial<TRecord>,
 > = {
-  delete?: false;
-  render?: (context: CrudRowActionContext<TRecord, TMeta, TCreate, TUpdate>) => ReactNode;
+  align?: CrudRowActionAlign;
+  hidden?: Key[];
+  items?: CrudRowActionItem<TRecord, TMeta, TCreate, TUpdate>[];
+  maxInline?: number;
+  moreText?: ReactNode;
+  order?: Key[];
+  overrides?: Partial<
+    Record<
+      CrudBuiltinRowAction | string,
+      Partial<CrudRowActionItem<TRecord, TMeta, TCreate, TUpdate>>
+    >
+  >;
+  presets?: boolean | CrudBuiltinRowAction[];
+  render?: (
+    context: CrudRowActionContext<TRecord, TMeta, TCreate, TUpdate>,
+    defaultNode: ReactNode,
+  ) => ReactNode;
   title?: ReactNode;
   width?: number;
 };

@@ -153,12 +153,13 @@ export default function AdminUsersPage() {
         </Button>
       }
       rowActions={{
+        presets: ['edit', 'delete'],
         width: 150,
-        render: ({ record }) => (
-          <Button size="small" type="link" onClick={() => openEdit(record)}>
-            {t('crud.action.edit', '编辑')}
-          </Button>
-        ),
+        overrides: {
+          edit: {
+            onClick: ({ record }) => openEdit(record),
+          },
+        },
       }}
       asideWidth={260}
       aside={({ query }) => (

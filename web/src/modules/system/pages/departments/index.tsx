@@ -1,8 +1,7 @@
 import { PlusOutlined } from '@ant-design/icons';
 import type { TreeSelectProps } from 'antd';
-import { App, Button, Form, Space } from 'antd';
+import { App, Button, Form } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { TrueAdminPermissionButton } from '@/core/auth';
 import { TrueAdminCrudPage, useCrudRecordDetail } from '@/core/crud';
 import type { CrudTableAction } from '@/core/crud/types';
 import { useI18n } from '@/core/i18n/I18nProvider';
@@ -165,22 +164,25 @@ export default function AdminDepartmentsPage() {
         </Button>
       }
       rowActions={{
+        presets: ['edit', 'delete'],
+        maxInline: 2,
+        order: ['edit', 'positions', 'delete'],
         width: 190,
-        render: ({ record }) => (
-          <Space size={4}>
-            <Button size="small" type="link" onClick={() => openEdit(record)}>
-              {t('crud.action.edit', '编辑')}
-            </Button>
-            <TrueAdminPermissionButton
-              permission="system:position:list"
-              size="small"
-              type="link"
-              onClick={() => openPositions(record)}
-            >
-              {t('system.departments.positions.action.open', '岗位')}
-            </TrueAdminPermissionButton>
-          </Space>
-        ),
+        overrides: {
+          edit: {
+            onClick: ({ record }) => openEdit(record),
+          },
+        },
+        items: [
+          {
+            key: 'positions',
+            label: t('system.departments.positions.action.open', '岗位'),
+            onClick: ({ record }) => openPositions(record),
+            permission: 'system:position:list',
+            size: 'small',
+            type: 'link',
+          },
+        ],
       }}
       onDeleteSuccess={(_, context) => {
         if (selectedDepartment && String(selectedDepartment.id) === String(context.id)) {

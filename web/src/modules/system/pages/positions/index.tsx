@@ -1,5 +1,5 @@
 import { PlusOutlined } from '@ant-design/icons';
-import { App, Button, Form, Space } from 'antd';
+import { App, Button, Form } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { TrueAdminCrudPage, useCrudRecordDetail } from '@/core/crud';
 import type { CrudTableAction } from '@/core/crud/types';
@@ -147,17 +147,25 @@ export default function AdminPositionsPage() {
         </Button>
       }
       rowActions={{
+        presets: ['edit', 'delete'],
+        maxInline: 2,
+        order: ['edit', 'members', 'delete'],
         width: 190,
-        render: ({ record }) => (
-          <Space size={4}>
-            <Button size="small" type="link" onClick={() => openEdit(record)}>
-              {t('crud.action.edit', '编辑')}
-            </Button>
-            <Button size="small" type="link" onClick={() => openMembers(record)}>
-              {t('system.positions.action.members', '成员')}
-            </Button>
-          </Space>
-        ),
+        overrides: {
+          edit: {
+            onClick: ({ record }) => openEdit(record),
+          },
+        },
+        items: [
+          {
+            key: 'members',
+            label: t('system.positions.action.members', '成员'),
+            onClick: ({ record }) => openMembers(record),
+            permission: 'system:position:update',
+            size: 'small',
+            type: 'link',
+          },
+        ],
       }}
       locale={{
         actionColumnTitle: t('crud.column.action', '操作'),

@@ -46,10 +46,11 @@ export default function ActionExamplePage() {
                 {
                   key: 'delete',
                   label: t('examples.components.actions.delete', '删除'),
+                  confirm: t('examples.components.permission.confirm', '确认执行该操作？'),
                   danger: true,
                   icon: <DeleteOutlined />,
-                  onClick: () =>
-                    message.warning(t('examples.components.actions.deleted', '已删除')),
+                  onClick: () => undefined,
+                  successMessage: t('examples.components.actions.deleted', '已删除'),
                 },
               ]}
             />

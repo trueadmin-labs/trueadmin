@@ -3105,6 +3105,14 @@ body,
   display: inline-flex;
 }
 
+.trueadmin-crud-operation-column {
+  white-space: nowrap;
+}
+
+.trueadmin-crud-row-actions {
+  min-width: 0;
+}
+
 .trueadmin-permission-button-tooltip-wrap {
   display: inline-flex;
 }

@@ -141,7 +141,7 @@ import { TrueAdminPageModal } from '@core/modal';
 
 框架级通用组件只沉淀无领域归属的交互模式，组件 API 参考 Ant Design：优先透传原生组件 props，补充 `className`、`style`、`classNames`、`styles` 和 render/trigger 扩展点。
 
-- `TrueAdminActionBar`：由 `@trueadmin/web-antd/action` 提供，统一页面标题、详情页、弹窗 footer 和表格上下文操作。支持 `actions`、`max`、更多下拉和 `children` 混排。
+- `TrueAdminActionBar`：由 `@trueadmin/web-antd/action` 提供，统一页面标题、详情页、弹窗 footer 和表格上下文操作。支持 `actions`、`max`、确认操作、成功/失败反馈、更多下拉和 `children` 混排。
 - `TrueAdminPermissionButton`：按钮级权限封装。基于 `TrueAdminPermission` 能力，支持无权限隐藏或禁用、tooltip、confirm 和 AntD Button props。
 - `TrueAdminResultState`：页面、区块、弹窗内统一结果态。支持 `empty`、`403`、`404`、`500`、`error`、`success` 等 AntD Result 状态，并提供紧凑模式和重试入口。
 - `TrueAdminUploadPreview`：附件预览弹窗。图片和 PDF 直接预览，其他文件提供下载兜底；支持受控/非受控 open 和 trigger。

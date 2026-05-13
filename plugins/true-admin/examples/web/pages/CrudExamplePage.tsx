@@ -648,12 +648,14 @@ export default function CrudExamplePage() {
         );
       }}
       rowActions={{
-        render: ({ record }) => (
-          <Button key="edit" type="link" size="small" onClick={() => openEditForm(record)}>
-            {t('examples.crud.action.edit', '编辑')}
-          </Button>
-        ),
+        presets: ['edit', 'delete'],
         width: 150,
+        overrides: {
+          edit: {
+            label: t('examples.crud.action.edit', '编辑'),
+            onClick: ({ record }) => openEditForm(record),
+          },
+        },
       }}
       rowSelection={{
         selectedRowKeys,

@@ -189,25 +189,46 @@ toolbarRender={({ action }) => (
 
 ## 行操作
 
-标准表格默认在配置了 `service.delete` 时展示删除操作列，并使用 `resource` 自动推导权限码。页面可以通过 `rowActions` 扩展或关闭行操作：
+标准表格使用声明式 `rowActions` 生成操作列。操作列默认固定在右侧、内容右对齐，`maxInline` 默认展示 2 个主操作，超过的动作自动收敛到“更多”下拉菜单。内置动作有 `detail`、`edit`、`delete`，其中 `delete` 会在配置了 `service.delete` 时自动接入核心删除流程，权限码默认由 `resource` 推导。
 
 ```tsx
 <TrueAdminCrudPage
   rowActions={{
-    width: 160,
-    render: ({ record, action }) => (
-      <Button type="link" size="small" onClick={() => openEdit(record)}>
-        编辑
-      </Button>
-    ),
+    maxInline: 2,
+    order: ['detail', 'edit', 'reset-password', 'delete'],
+    overrides: {
+      edit: {
+        onClick: ({ record }) => openEdit(record),
+      },
+      delete: {
+        confirm: '确认删除该成员吗？',
+      },
+    },
+    items: [
+      {
+        key: 'reset-password',
+        label: '重置密码',
+        permission: 'system:user:update',
+        confirm: '确认重置该成员密码吗？',
+        onClick: async ({ record, action }) => {
+          await resetPassword(record.id);
+          action.reload();
+        },
+      },
+    ],
   }}
 />
 ```
 
-- `rowActions.render`：在默认删除按钮前追加业务操作。
-- `rowActions.delete = false`：保留操作列，但不展示默认删除。
+- `rowActions.presets`：控制内置动作，支持 `['detail', 'edit', 'delete']` 或 `false`。
+- `rowActions.hidden`：按 key 隐藏动作。
+- `rowActions.overrides`：覆盖内置动作或同 key 自定义动作的文案、权限、确认、显隐、点击行为。
+- `rowActions.items`：追加业务动作。
+- `rowActions.order`：控制最终排序；未声明的动作按默认权重追加，删除默认靠后。
+- `rowActions.maxInline`：控制行内展示数量，超出的动作进入“更多”。
 - `rowActions = false`：完全关闭核心行操作列。
-- `rowActions.title` / `rowActions.width`：覆盖操作列标题和宽度。
+- `rowActions.title` / `rowActions.width` / `rowActions.align`：覆盖操作列标题、宽度和对齐。
+- `rowActions.render(context, defaultNode)`：最后的逃生口，用于包裹或完全替换默认操作节点。
 
 删除成功提示由核心提供兜底。如果页面配置了 `onDeleteSuccess`，成功反馈由业务钩子负责，避免重复提示。
 

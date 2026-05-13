@@ -1,3 +1,4 @@
+import { RedoOutlined } from '@ant-design/icons';
 import { App } from 'antd';
 import { useMemo, useState } from 'react';
 import { TrueAdminCrudPage, useCrudRecordDetail } from '@/core/crud';
@@ -19,7 +20,6 @@ import {
 } from '@/core/notification';
 import { DeliveryRecordsModal } from './DeliveryRecordsModal';
 import { NotificationDetailModal } from './NotificationDetailModal';
-import { NotificationRowActions } from './NotificationRowActions';
 import { createNotificationColumns } from './NotificationTableColumns';
 import { NotificationToolbar } from './NotificationToolbar';
 
@@ -172,30 +172,56 @@ export default function AdminNotificationManagementPage() {
           [],
         )}
         rowActions={{
+          maxInline: 2,
+          order: ['detail', 'deliveries', 'resend'],
+          presets: false,
           width: 190,
-          render: ({ record, action }) => (
-            <NotificationRowActions
-              action={action}
-              record={record}
-              t={t}
-              onOpenDetail={(nextDetail) => {
-                void detailRecord.openRecord(nextDetail.id, { initialRecord: nextDetail });
-              }}
-              onOpenDeliveries={(nextDeliveryBatch) => {
-                setDeliveryBatch(nextDeliveryBatch);
+          items: [
+            {
+              key: 'detail',
+              label: t('system.notificationManagement.action.detail', '详情'),
+              onClick: ({ record }) => {
+                void detailRecord.openRecord(record.id, { initialRecord: record });
+              },
+              permission: 'system:notification:detail',
+              size: 'small',
+              type: 'link',
+            },
+            {
+              key: 'deliveries',
+              label: t('system.notificationManagement.action.deliveries', '投递记录'),
+              onClick: ({ record }) => {
+                setDeliveryBatch(record);
                 setDeliveryOpen(true);
-              }}
-              onResendSuccess={(resent) => {
+              },
+              permission: 'system:notification:delivery:list',
+              size: 'small',
+              type: 'link',
+            },
+            {
+              key: 'resend',
+              confirm: t('system.notificationManagement.confirm.resend', '确认重发失败投递吗？'),
+              icon: <RedoOutlined />,
+              label: t('system.notificationManagement.action.resend', '重发'),
+              onClick: async ({ action, record }) => {
+                const result = await adminNotificationManagementApi
+                  .resendNotification(record.id)
+                  .send();
                 message.success(
                   t(
                     'system.notificationManagement.success.resendCount',
                     '已重发 {{count}} 条',
-                  ).replace('{{count}}', String(resent)),
+                  ).replace('{{count}}', String(result.resent)),
                 );
                 setRefreshSeed((seed) => seed + 1);
-              }}
-            />
-          ),
+                action.reload();
+              },
+              permission: 'system:notification:delivery:resend',
+              size: 'small',
+              type: 'link',
+              visible: ({ record }) => record.failedTotal > 0,
+            },
+          ],
         }}
         toolbarRender={({ query }) => (
           <NotificationToolbar query={query} statusText={statusText} t={t} />
