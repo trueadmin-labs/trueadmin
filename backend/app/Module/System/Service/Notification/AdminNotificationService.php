@@ -1,17 +1,26 @@
 <?php
 
 declare(strict_types=1);
+/**
+ * This file is part of Hyperf.
+ *
+ * @link     https://www.hyperf.io
+ * @document https://hyperf.wiki
+ * @contact  group@hyperf.io
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace App\Module\System\Service\Notification;
 
-use TrueAdmin\Kernel\Database\AfterCommitCallbacks;
 use App\Module\System\Model\AdminNotificationBatch;
+use App\Module\System\Repository\AdminUserRepository;
 use App\Module\System\Repository\Notification\AdminNotificationBatchRepository;
 use App\Module\System\Repository\Notification\AdminNotificationDeliveryRepository;
 use Hyperf\DbConnection\Db;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use TrueAdmin\Kernel\Constant\ErrorCode;
 use TrueAdmin\Kernel\Context\ActorContext;
+use TrueAdmin\Kernel\Database\AfterCommitCallbacks;
 use TrueAdmin\Kernel\Exception\BusinessException;
 
 final class AdminNotificationService
@@ -23,6 +32,7 @@ final class AdminNotificationService
         private readonly AfterCommitCallbacks $afterCommit,
         private readonly AdminNotificationTemplateRegistry $templates,
         private readonly AttachmentSnapshotNormalizer $attachments,
+        private readonly AdminUserRepository $users,
     ) {
     }
 
@@ -247,7 +257,7 @@ final class AdminNotificationService
             $roleIds = array_merge($roleIds, Db::table('admin_roles')->whereIn('code', array_values(array_unique($roleCodes)))->pluck('id')->map(static fn (mixed $id): int => (int) $id)->all());
         }
         if ($roleIds !== []) {
-            $adminIds = array_merge($adminIds, Db::table('admin_role_user')->whereIn('role_id', array_values(array_unique($roleIds)))->pluck('user_id')->map(static fn (mixed $id): int => (int) $id)->all());
+            $adminIds = array_merge($adminIds, $this->users->userIdsByEffectiveRoleIds($roleIds));
         }
 
         $adminIds = array_values(array_unique(array_filter($adminIds, static fn (int $id): bool => $id > 0)));

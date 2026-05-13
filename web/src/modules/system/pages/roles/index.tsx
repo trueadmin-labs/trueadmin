@@ -88,7 +88,11 @@ export default function AdminRolesPage() {
       return;
     }
 
-    const values = await form.validateFields();
+    const values = await form.validateFields().catch(() => undefined);
+    if (values === undefined) {
+      return;
+    }
+
     setSubmitting(true);
     try {
       if (editing) {

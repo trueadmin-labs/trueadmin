@@ -16,6 +16,7 @@ export type AdminRoleOption = {
   name: string;
   sort: number;
   status: string;
+  dataPolicies?: AdminRoleDataPolicy[];
 };
 
 type RoleListResponse<TRole> = TRole[] | ApiEnvelope<TRole[]>;

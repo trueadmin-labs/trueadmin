@@ -7,6 +7,8 @@
   </testsuites>
   <php>
     <env name="APP_ENV" value="testing" force="true"/>
+    <env name="TRUEADMIN_SUPER_ADMIN_PASSWORD" value="123456" force="true"/>
+    <env name="TRUEADMIN_ADMIN_PASSWORD" value="123456" force="true"/>
   </php>
   <source>
     <include>

@@ -49,7 +49,7 @@ export function ExampleProfilePreferencePanel({
         type="info"
         showIcon
         icon={<ExperimentOutlined />}
-        message={t('examples.profilePreference.notice', '这是插件注册的个人偏好面板')}
+        title={t('examples.profilePreference.notice', '这是插件注册的个人偏好面板')}
         description={t(
           'examples.profilePreference.noticeDesc',
           '用于演示插件如何在个人中心注册自定义配置、读取当前值并保存到自己的 namespace。',

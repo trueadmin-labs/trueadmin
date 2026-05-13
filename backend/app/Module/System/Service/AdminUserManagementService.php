@@ -1,25 +1,34 @@
 <?php
 
 declare(strict_types=1);
+/**
+ * This file is part of Hyperf.
+ *
+ * @link     https://www.hyperf.io
+ * @document https://hyperf.wiki
+ * @contact  group@hyperf.io
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace App\Module\System\Service;
 
-use TrueAdmin\Kernel\Pagination\PageResult;
-use TrueAdmin\Kernel\Crud\CrudQuery;
-use TrueAdmin\Kernel\Service\AbstractService;
-use TrueAdmin\Kernel\Database\AfterCommitCallbacks;
-use TrueAdmin\Kernel\Support\Password;
 use App\Module\System\Event\AdminUserCreated;
 use App\Module\System\Event\AdminUserDeleted;
 use App\Module\System\Event\AdminUserUpdated;
 use App\Module\System\Model\AdminUser;
 use App\Module\System\Repository\AdminDepartmentRepository;
+use App\Module\System\Repository\AdminPositionRepository;
 use App\Module\System\Repository\AdminRoleRepository;
 use App\Module\System\Repository\AdminUserRepository;
 use Hyperf\DbConnection\Db;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use TrueAdmin\Kernel\Constant\ErrorCode;
+use TrueAdmin\Kernel\Crud\CrudQuery;
+use TrueAdmin\Kernel\Database\AfterCommitCallbacks;
 use TrueAdmin\Kernel\Exception\BusinessException;
+use TrueAdmin\Kernel\Pagination\PageResult;
+use TrueAdmin\Kernel\Service\AbstractService;
+use TrueAdmin\Kernel\Support\Password;
 
 final class AdminUserManagementService extends AbstractService
 {
@@ -27,6 +36,7 @@ final class AdminUserManagementService extends AbstractService
         private readonly AdminUserRepository $users,
         private readonly AdminRoleRepository $roles,
         private readonly AdminDepartmentRepository $departments,
+        private readonly AdminPositionRepository $positions,
         private readonly EventDispatcherInterface $dispatcher,
         private readonly AfterCommitCallbacks $afterCommit,
     ) {
@@ -49,7 +59,10 @@ final class AdminUserManagementService extends AbstractService
             $this->assertUnique($this->users->existsUsername($username), 'username');
 
             $departmentIds = $this->departmentIds($this->departmentInput($payload));
+            $this->users->assertDepartmentIdsAllowedByDataPolicy($departmentIds);
             $primaryDeptId = $this->primaryDeptId($payload['primaryDeptId'] ?? $payload['deptId'] ?? null, $departmentIds);
+            $positionIds = $this->positionIds($payload['positionIds'] ?? []);
+            $this->assertPositionCoverage($positionIds, $departmentIds);
 
             $user = $this->users->create([
                 'username' => $username,
@@ -61,6 +74,7 @@ final class AdminUserManagementService extends AbstractService
 
             $this->users->syncRoles($user, $this->roleIds($payload['roleIds'] ?? []));
             $this->users->syncDepartments($user, $departmentIds, $primaryDeptId);
+            $this->users->syncPositions($user, $positionIds);
             $user = $this->users->findById((int) $user->getAttribute('id')) ?? $user;
             $this->dispatchAfterCommit(new AdminUserCreated(
                 userId: (int) $user->getAttribute('id'),
@@ -84,9 +98,14 @@ final class AdminUserManagementService extends AbstractService
 
             $hasDepartmentPayload = array_key_exists('deptIds', $payload) || array_key_exists('primaryDeptId', $payload) || array_key_exists('deptId', $payload);
             $departmentIds = $hasDepartmentPayload ? $this->departmentIds($this->departmentInput($payload)) : $this->users->departmentIds($user);
+            $this->users->assertDepartmentIdsAllowedByDataPolicy($departmentIds);
             $primaryDeptId = $hasDepartmentPayload
                 ? $this->primaryDeptId($payload['primaryDeptId'] ?? $payload['deptId'] ?? null, $departmentIds)
                 : ($user->getAttribute('primary_dept_id') === null ? null : (int) $user->getAttribute('primary_dept_id'));
+            $positionIds = array_key_exists('positionIds', $payload)
+                ? $this->positionIds($payload['positionIds'])
+                : $this->users->positionIds($user);
+            $this->assertPositionCoverage($positionIds, $departmentIds);
 
             $data = [
                 'username' => $username,
@@ -108,6 +127,9 @@ final class AdminUserManagementService extends AbstractService
             }
             if ($hasDepartmentPayload) {
                 $this->users->syncDepartments($user, $departmentIds, $primaryDeptId);
+            }
+            if (array_key_exists('positionIds', $payload)) {
+                $this->users->syncPositions($user, $positionIds);
             }
             $user = $this->users->findById((int) $user->getAttribute('id')) ?? $user;
             $this->dispatchAfterCommit(new AdminUserUpdated(
@@ -179,6 +201,22 @@ final class AdminUserManagementService extends AbstractService
         return $roleIds;
     }
 
+    /**
+     * @return list<int>
+     */
+    private function positionIds(mixed $value): array
+    {
+        if (! is_array($value)) {
+            return [];
+        }
+
+        $positionIds = array_values(array_unique(array_filter(array_map('intval', $value), static fn (int $id): bool => $id > 0)));
+        $this->assertExistingIds($positionIds, $this->positions->existingIds($positionIds), 'positionIds', 'contains_missing_position');
+        $this->positions->assertIdsAllowedByDataPolicy($positionIds);
+
+        return $positionIds;
+    }
+
     private function departmentInput(array $payload): mixed
     {
         if (array_key_exists('deptIds', $payload)) {
@@ -204,6 +242,48 @@ final class AdminUserManagementService extends AbstractService
         $this->assertExistingIds($departmentIds, $this->departments->existingIds($departmentIds), 'deptIds', 'contains_missing_department');
 
         return $departmentIds;
+    }
+
+    /**
+     * @param list<int> $positionIds
+     * @param list<int> $departmentIds
+     */
+    private function assertPositionCoverage(array $positionIds, array $departmentIds): void
+    {
+        if ($departmentIds === []) {
+            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'deptIds', 'reason' => 'user_requires_department']);
+        }
+        if ($positionIds === []) {
+            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['field' => 'positionIds', 'reason' => 'user_requires_position']);
+        }
+
+        $positionDeptIds = $this->positions->deptIdsByPositionIds($positionIds);
+        $assignedDeptIds = array_values(array_unique(array_values($positionDeptIds)));
+        $extraDeptIds = array_values(array_diff($assignedDeptIds, $departmentIds));
+        if ($extraDeptIds !== []) {
+            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, [
+                'field' => 'positionIds',
+                'reason' => 'position_must_belong_to_user_departments',
+                'deptIds' => $this->idList($extraDeptIds),
+            ]);
+        }
+
+        $uncoveredDeptIds = array_values(array_diff($departmentIds, $assignedDeptIds));
+        if ($uncoveredDeptIds !== []) {
+            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, [
+                'field' => 'positionIds',
+                'reason' => 'each_department_requires_position',
+                'deptIds' => $this->idList($uncoveredDeptIds),
+            ]);
+        }
+    }
+
+    /**
+     * @param list<int> $ids
+     */
+    private function idList(array $ids): string
+    {
+        return implode(',', array_values(array_unique(array_map('intval', $ids))));
     }
 
     private function primaryDeptId(mixed $value, array $departmentIds): ?int

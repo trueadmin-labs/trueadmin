@@ -2,7 +2,7 @@ import { LockOutlined, WarningOutlined } from '@ant-design/icons';
 import { ApiError, errorCenter } from '@trueadmin/web-core/error';
 import { Alert, Button, Card, Space, Typography } from 'antd';
 import { Link } from 'react-router';
-import { Permission } from '@/core/auth/Permission';
+import { TrueAdminPermission } from '@/core/auth';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { TrueAdminPage } from '@/core/page/TrueAdminPage';
 
@@ -35,7 +35,7 @@ export default function PermissionExamplePage() {
         <Alert
           showIcon
           type="info"
-          message={t('examples.permission.alert.message', '这个页面用于确认权限展示分层')}
+          title={t('examples.permission.alert.message', '这个页面用于确认权限展示分层')}
           description={t(
             'examples.permission.alert.description',
             '页面级无权限、局部组件无权限、接口级无权限分别走不同展示方式。',
@@ -55,14 +55,14 @@ export default function PermissionExamplePage() {
         <Card title={t('examples.permission.blockLevel.title', '局部组件无权限')}>
           <Paragraph>
             {t('examples.permission.blockLevel.beforeCode', '抽屉、详情、卡片内容等局部区域可以用')}{' '}
-            <Text code>{'<Permission fallback="block" />'}</Text>
+            <Text code>{'<TrueAdminPermission fallback="block" />'}</Text>
             {t('examples.permission.blockLevel.afterCode', '展示无权限占位。')}
           </Paragraph>
-          <Permission code="true-admin.examples.secret.view" deny fallback="block">
+          <TrueAdminPermission code="true-admin.examples.secret.view" deny fallback="block">
             <Card size="small">
               {t('examples.permission.blockLevel.secret', '只有有权限时才会看到这里。')}
             </Card>
-          </Permission>
+          </TrueAdminPermission>
         </Card>
 
         <Card title={t('examples.permission.buttonLevel.title', '按钮级权限')}>
@@ -76,11 +76,11 @@ export default function PermissionExamplePage() {
             <Button icon={<LockOutlined />}>
               {t('examples.permission.buttonLevel.allowed', '有权限按钮')}
             </Button>
-            <Permission code="true-admin.examples.secret.delete" deny>
+            <TrueAdminPermission code="true-admin.examples.secret.delete" deny>
               <Button danger>
                 {t('examples.permission.buttonLevel.hidden', '无权限按钮不会出现')}
               </Button>
-            </Permission>
+            </TrueAdminPermission>
           </Space>
         </Card>
 

@@ -1,6 +1,14 @@
 <?php
 
 declare(strict_types=1);
+/**
+ * This file is part of Hyperf.
+ *
+ * @link     https://www.hyperf.io
+ * @document https://hyperf.wiki
+ * @contact  group@hyperf.io
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace App\Foundation\DataPermission\Organization;
 
@@ -53,9 +61,15 @@ final class OrganizationDataPolicyStrategy implements DataPolicyStrategyInterfac
         $createdByColumn = $target->string('createdByColumn', 'created_by');
         $deptIds = $this->departmentIds($actor, $rule);
 
-        if ($deptIds !== [] && $deptColumn !== '') {
-            $query->whereIn($deptColumn, $deptIds);
-            return;
+        if ($deptIds !== []) {
+            if ($this->applyMembershipTarget($query, $target, $deptIds)) {
+                return;
+            }
+
+            if ($deptColumn !== '') {
+                $query->whereIn($deptColumn, $deptIds);
+                return;
+            }
         }
 
         if ($rule->scope === 'self' && $createdByColumn !== '') {
@@ -91,6 +105,31 @@ final class OrganizationDataPolicyStrategy implements DataPolicyStrategyInterfac
     }
 
     /**
+     * @param list<int> $deptIds
+     */
+    private function applyMembershipTarget(ModelBuilder|QueryBuilder $query, DataPolicyTarget $target, array $deptIds): bool
+    {
+        $membershipTable = $target->string('membershipTable');
+        $membershipOwnerColumn = $target->string('membershipOwnerColumn');
+        $membershipDeptColumn = $target->string('membershipDeptColumn');
+        $ownerColumn = $target->string('ownerColumn', 'id');
+
+        if ($membershipTable === '' || $membershipOwnerColumn === '' || $membershipDeptColumn === '' || $ownerColumn === '') {
+            return false;
+        }
+
+        $query->whereExists(static function (QueryBuilder $subQuery) use ($membershipTable, $membershipOwnerColumn, $membershipDeptColumn, $ownerColumn, $deptIds): void {
+            $subQuery
+                ->selectRaw('1')
+                ->from($membershipTable)
+                ->whereColumn($membershipOwnerColumn, $ownerColumn)
+                ->whereIn($membershipDeptColumn, $deptIds);
+        });
+
+        return true;
+    }
+
+    /**
      * @return list<int>
      */
     private function departmentIds(Actor $actor, DataPolicyRule $rule): array
@@ -107,7 +146,7 @@ final class OrganizationDataPolicyStrategy implements DataPolicyStrategyInterfac
             return $this->scopeProvider->selfAndDescendantDepartmentIds($this->normalizeDeptIds($rule->config['deptIds'] ?? []));
         }
 
-        $operationDeptId = $this->scopeProvider->operationDepartmentId($actor);
+        $operationDeptId = $this->contextDepartmentId($rule) ?? $this->scopeProvider->operationDepartmentId($actor);
         if ($operationDeptId === null) {
             return [];
         }
@@ -121,6 +160,18 @@ final class OrganizationDataPolicyStrategy implements DataPolicyStrategyInterfac
         }
 
         return [];
+    }
+
+    private function contextDepartmentId(DataPolicyRule $rule): ?int
+    {
+        $context = $rule->config['_context'] ?? null;
+        if (! is_array($context)) {
+            return null;
+        }
+
+        $deptId = (int) ($context['deptId'] ?? 0);
+
+        return $deptId > 0 ? $deptId : null;
     }
 
     private function containsDepartmentIds(mixed $parentDeptIds, mixed $childDeptIds): bool

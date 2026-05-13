@@ -8,6 +8,12 @@ import type {
   AdminNotificationDelivery,
 } from '@/core/notification';
 import type { TrueAdminAttachmentValue } from '@/core/upload';
+import type { AdminMenu } from '@/modules/system/types/menu';
+import type {
+  AdminRole,
+  AdminRoleDataPolicy,
+  DataPolicyMetadata,
+} from '@/modules/system/types/role';
 
 const success = <T>(data: T) => HttpResponse.json({ code: 'SUCCESS', message: 'success', data });
 
@@ -32,6 +38,13 @@ const getCrudFilter = (url: URL, field: string, fallback = '') => {
   return fallback;
 };
 
+type DepartmentMockNode = {
+  id: number;
+  name: string;
+  code: string;
+  children?: DepartmentMockNode[];
+};
+
 const users = [
   {
     id: 1,
@@ -40,16 +53,37 @@ const users = [
     avatar: '',
     preferences: {},
     status: 'enabled',
-    primaryDeptId: null,
-    deptIds: [],
+    primaryDeptId: 1,
+    primaryDeptName: '总部',
+    primaryDeptPath: '总部',
+    deptIds: [1],
+    positions: [
+      {
+        id: 1,
+        deptId: 1,
+        deptName: '总部',
+        deptPath: '总部',
+        code: 'super-admin',
+        name: '超级管理员',
+        status: 'enabled',
+        primary: true,
+        roleIds: [1],
+        roleNames: ['超级管理员'],
+      },
+    ],
+    positionIds: [1],
     roles: ['super-admin'],
+    roleNames: ['超级管理员'],
     roleIds: [1],
+    directRoles: ['super-admin'],
+    directRoleNames: ['超级管理员'],
+    directRoleIds: [1],
     createdAt: '2026-05-06 10:00:00',
     updatedAt: '2026-05-06 10:00:00',
   },
 ];
 
-const departmentTree = [
+const departmentTree: DepartmentMockNode[] = [
   {
     id: 1,
     name: '总部',
@@ -71,7 +105,15 @@ const departmentTree = [
   },
 ];
 
-const roleOptions = [
+type MockRole = AdminRole & {
+  dataPolicies: AdminRoleDataPolicy[];
+  menuIds: number[];
+  parentId?: number;
+  level?: number;
+  path?: string;
+};
+
+const roleOptions: MockRole[] = [
   {
     id: 1,
     parentId: 0,
@@ -81,6 +123,21 @@ const roleOptions = [
     path: '',
     sort: 0,
     status: 'enabled',
+    builtin: true,
+    menuIds: [100, 110, 111, 112, 113, 120, 121, 122, 123, 130, 131, 132, 133, 140, 141],
+    dataPolicies: [
+      {
+        id: 1,
+        roleId: 1,
+        resource: 'admin_user',
+        strategy: 'organization',
+        effect: 'allow',
+        scope: 'all',
+        config: {},
+        status: 'enabled',
+        sort: 0,
+      },
+    ],
   },
   {
     id: 2,
@@ -91,6 +148,21 @@ const roleOptions = [
     path: ',1,',
     sort: 10,
     status: 'enabled',
+    builtin: false,
+    menuIds: [100, 110, 120, 130],
+    dataPolicies: [
+      {
+        id: 2,
+        roleId: 2,
+        resource: 'admin_user',
+        strategy: 'organization',
+        effect: 'allow',
+        scope: 'department_and_children',
+        config: {},
+        status: 'enabled',
+        sort: 0,
+      },
+    ],
   },
   {
     id: 3,
@@ -101,6 +173,21 @@ const roleOptions = [
     path: ',1,',
     sort: 20,
     status: 'enabled',
+    builtin: false,
+    menuIds: [100, 140],
+    dataPolicies: [
+      {
+        id: 3,
+        roleId: 3,
+        resource: 'admin_announcement',
+        strategy: 'organization',
+        effect: 'allow',
+        scope: 'self',
+        config: {},
+        status: 'enabled',
+        sort: 0,
+      },
+    ],
   },
 ];
 
@@ -108,6 +195,363 @@ const roleTree = [
   {
     ...roleOptions[0],
     children: [roleOptions[1], roleOptions[2]],
+  },
+];
+
+const menuPermissionTree: AdminMenu[] = [
+  {
+    id: 100,
+    parentId: 0,
+    code: 'organization',
+    type: 'directory',
+    name: '组织权限',
+    path: '/organization',
+    url: '',
+    openMode: '',
+    showLinkHeader: false,
+    icon: 'ApartmentOutlined',
+    permission: '',
+    source: 'code',
+    sort: 30,
+    status: 'enabled',
+    children: [
+      {
+        id: 110,
+        parentId: 100,
+        code: 'system.departments',
+        type: 'menu',
+        name: '部门管理',
+        path: '/organization/departments',
+        url: '',
+        openMode: '',
+        showLinkHeader: false,
+        icon: 'TeamOutlined',
+        permission: 'system:department:list',
+        source: 'code',
+        sort: 10,
+        status: 'enabled',
+        children: [
+          {
+            id: 111,
+            parentId: 110,
+            code: 'system.departments.create',
+            type: 'button',
+            name: '新增部门',
+            path: '',
+            url: '',
+            openMode: '',
+            showLinkHeader: false,
+            icon: '',
+            permission: 'system:department:create',
+            source: 'code',
+            sort: 11,
+            status: 'enabled',
+          },
+          {
+            id: 112,
+            parentId: 110,
+            code: 'system.departments.update',
+            type: 'button',
+            name: '编辑部门',
+            path: '',
+            url: '',
+            openMode: '',
+            showLinkHeader: false,
+            icon: '',
+            permission: 'system:department:update',
+            source: 'code',
+            sort: 12,
+            status: 'enabled',
+          },
+          {
+            id: 113,
+            parentId: 110,
+            code: 'system.departments.delete',
+            type: 'button',
+            name: '删除部门',
+            path: '',
+            url: '',
+            openMode: '',
+            showLinkHeader: false,
+            icon: '',
+            permission: 'system:department:delete',
+            source: 'code',
+            sort: 13,
+            status: 'enabled',
+          },
+        ],
+      },
+      {
+        id: 120,
+        parentId: 100,
+        code: 'system.users',
+        type: 'menu',
+        name: '成员管理',
+        path: '/organization/users',
+        url: '',
+        openMode: '',
+        showLinkHeader: false,
+        icon: 'UserOutlined',
+        permission: 'system:user:list',
+        source: 'code',
+        sort: 20,
+        status: 'enabled',
+        children: [
+          {
+            id: 121,
+            parentId: 120,
+            code: 'system.users.create',
+            type: 'button',
+            name: '新增成员',
+            path: '',
+            url: '',
+            openMode: '',
+            showLinkHeader: false,
+            icon: '',
+            permission: 'system:user:create',
+            source: 'code',
+            sort: 21,
+            status: 'enabled',
+          },
+          {
+            id: 122,
+            parentId: 120,
+            code: 'system.users.update',
+            type: 'button',
+            name: '编辑成员',
+            path: '',
+            url: '',
+            openMode: '',
+            showLinkHeader: false,
+            icon: '',
+            permission: 'system:user:update',
+            source: 'code',
+            sort: 22,
+            status: 'enabled',
+          },
+          {
+            id: 123,
+            parentId: 120,
+            code: 'system.users.delete',
+            type: 'button',
+            name: '删除成员',
+            path: '',
+            url: '',
+            openMode: '',
+            showLinkHeader: false,
+            icon: '',
+            permission: 'system:user:delete',
+            source: 'code',
+            sort: 23,
+            status: 'enabled',
+          },
+        ],
+      },
+      {
+        id: 130,
+        parentId: 100,
+        code: 'system.positions',
+        type: 'menu',
+        name: '岗位管理',
+        path: '/organization/positions',
+        url: '',
+        openMode: '',
+        showLinkHeader: false,
+        icon: 'IdcardOutlined',
+        permission: 'system:position:list',
+        source: 'code',
+        sort: 25,
+        status: 'enabled',
+        children: [
+          {
+            id: 131,
+            parentId: 130,
+            code: 'system.positions.create',
+            type: 'button',
+            name: '新增岗位',
+            path: '',
+            url: '',
+            openMode: '',
+            showLinkHeader: false,
+            icon: '',
+            permission: 'system:position:create',
+            source: 'code',
+            sort: 26,
+            status: 'enabled',
+          },
+          {
+            id: 132,
+            parentId: 130,
+            code: 'system.positions.update',
+            type: 'button',
+            name: '编辑岗位',
+            path: '',
+            url: '',
+            openMode: '',
+            showLinkHeader: false,
+            icon: '',
+            permission: 'system:position:update',
+            source: 'code',
+            sort: 27,
+            status: 'enabled',
+          },
+          {
+            id: 133,
+            parentId: 130,
+            code: 'system.positions.delete',
+            type: 'button',
+            name: '删除岗位',
+            path: '',
+            url: '',
+            openMode: '',
+            showLinkHeader: false,
+            icon: '',
+            permission: 'system:position:delete',
+            source: 'code',
+            sort: 28,
+            status: 'enabled',
+          },
+        ],
+      },
+      {
+        id: 140,
+        parentId: 100,
+        code: 'system.roles',
+        type: 'menu',
+        name: '角色管理',
+        path: '/organization/roles',
+        url: '',
+        openMode: '',
+        showLinkHeader: false,
+        icon: 'LockOutlined',
+        permission: 'system:role:list',
+        source: 'code',
+        sort: 30,
+        status: 'enabled',
+        children: [
+          {
+            id: 141,
+            parentId: 140,
+            code: 'system.roles.authorize',
+            type: 'button',
+            name: '角色授权',
+            path: '',
+            url: '',
+            openMode: '',
+            showLinkHeader: false,
+            icon: '',
+            permission: 'system:role:authorize',
+            source: 'code',
+            sort: 31,
+            status: 'enabled',
+          },
+        ],
+      },
+    ],
+  },
+];
+
+const dataPolicyMetadata: DataPolicyMetadata = {
+  resources: [
+    {
+      key: 'admin_user',
+      label: '成员管理',
+      i18n: 'dataPolicy.resource.adminUser',
+      strategies: ['organization'],
+      sort: 10,
+    },
+    {
+      key: 'admin_position',
+      label: '岗位管理',
+      i18n: 'dataPolicy.resource.adminPosition',
+      strategies: ['organization'],
+      sort: 25,
+    },
+  ],
+  strategies: [
+    {
+      key: 'organization',
+      label: '组织范围',
+      i18n: 'dataPolicy.strategy.organization',
+      scopes: [
+        { key: 'all', label: '全部数据', i18n: 'dataPolicy.scope.all', sort: 10 },
+        { key: 'department', label: '本部门', i18n: 'dataPolicy.scope.department', sort: 20 },
+        {
+          key: 'department_and_children',
+          label: '本部门及子部门',
+          i18n: 'dataPolicy.scope.departmentAndChildren',
+          sort: 30,
+        },
+        { key: 'self', label: '仅本人', i18n: 'dataPolicy.scope.self', sort: 40 },
+        {
+          key: 'custom_departments',
+          label: '自定义部门',
+          i18n: 'dataPolicy.scope.customDepartments',
+          sort: 50,
+          configSchema: [
+            {
+              key: 'deptIds',
+              type: 'department_tree',
+              label: '可见部门',
+              i18n: 'dataPolicy.config.deptIds',
+            },
+          ],
+        },
+        {
+          key: 'custom_departments_and_children',
+          label: '自定义部门及子部门',
+          i18n: 'dataPolicy.scope.customDepartmentsAndChildren',
+          sort: 60,
+          configSchema: [
+            {
+              key: 'deptIds',
+              type: 'department_tree',
+              label: '可见部门',
+              i18n: 'dataPolicy.config.deptIds',
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};
+
+const positions = [
+  {
+    id: 1,
+    deptId: 1,
+    deptName: '总部',
+    deptPath: '总部',
+    code: 'super-admin',
+    name: '超级管理员',
+    type: 'system',
+    isLeadership: true,
+    description: '系统内置超级管理员岗位',
+    sort: 0,
+    status: 'enabled',
+    roleIds: [1],
+    roleNames: ['超级管理员'],
+    memberCount: 1,
+    createdAt: '2026-05-06 10:00:00',
+    updatedAt: '2026-05-06 10:00:00',
+  },
+  {
+    id: 2,
+    deptId: 11,
+    deptName: '产品研发部',
+    deptPath: '总部/产品研发部',
+    code: 'rd-operator',
+    name: '研发运营',
+    type: 'normal',
+    isLeadership: false,
+    description: '研发部门日常运营岗位',
+    sort: 10,
+    status: 'enabled',
+    roleIds: [2],
+    roleNames: ['运营管理员'],
+    memberCount: 0,
+    createdAt: '2026-05-06 10:00:00',
+    updatedAt: '2026-05-06 10:00:00',
   },
 ];
 
@@ -367,6 +811,123 @@ const withMessageState = () =>
     };
   });
 
+const paginate = <T>(items: T[], page: number, pageSize: number) => {
+  const start = Math.max(0, (page - 1) * pageSize);
+  return items.slice(start, start + pageSize);
+};
+
+const positionMemberIds = (positionId: number) =>
+  users.filter((user) => user.positionIds.includes(positionId)).map((user) => user.id);
+
+const refreshPositionMemberCounts = () => {
+  for (const position of positions) {
+    position.memberCount = positionMemberIds(position.id).length;
+  }
+};
+
+const toUserPosition = (position: (typeof positions)[number], primary = false) => ({
+  id: position.id,
+  deptId: position.deptId,
+  deptName: position.deptName,
+  deptPath: position.deptPath,
+  code: position.code,
+  name: position.name,
+  status: position.status,
+  primary,
+  roleIds: position.roleIds,
+  roleNames: position.roleNames,
+});
+
+const refreshUserPositions = (user: (typeof users)[number]) => {
+  user.positions = user.positionIds
+    .map((positionId, index) => {
+      const position = positions.find((item) => item.id === positionId);
+
+      return position ? toUserPosition(position, index === 0) : null;
+    })
+    .filter((position): position is NonNullable<typeof position> => Boolean(position));
+};
+
+const refreshUserEffectiveRoles = (user: (typeof users)[number]) => {
+  const positionRoleIds = user.positionIds.flatMap((positionId) => {
+    const position = positions.find((item) => item.id === positionId);
+    return position?.roleIds ?? [];
+  });
+  user.roleIds = Array.from(new Set([...user.directRoleIds, ...positionRoleIds]));
+  user.roles = roleOptions
+    .filter((role) => user.roleIds.includes(role.id))
+    .map((role) => role.code);
+  user.roleNames = roleOptions
+    .filter((role) => user.roleIds.includes(role.id))
+    .map((role) => role.name);
+};
+
+const syncPositionMembers = (positionId: number, userIds: number[]) => {
+  const position = positions.find((item) => item.id === positionId);
+  if (!position) {
+    return;
+  }
+
+  const nextUserIds = new Set(userIds);
+  for (const user of users) {
+    const hasPosition = user.positionIds.includes(positionId);
+    const shouldHavePosition = nextUserIds.has(user.id);
+    if (shouldHavePosition && !hasPosition) {
+      user.positionIds.push(positionId);
+      refreshUserPositions(user);
+    }
+    if (!shouldHavePosition && hasPosition) {
+      user.positionIds = user.positionIds.filter((id) => id !== positionId);
+      refreshUserPositions(user);
+    }
+    refreshUserEffectiveRoles(user);
+  }
+  refreshPositionMemberCounts();
+};
+
+const flattenDepartments = (items: DepartmentMockNode[]): DepartmentMockNode[] =>
+  items.flatMap((item) => [item, ...flattenDepartments(item.children ?? [])]);
+
+const departmentById = (deptId: number) =>
+  flattenDepartments(departmentTree).find((department) => department.id === deptId);
+
+const departmentPathById = (deptId: number) => {
+  const department = departmentById(deptId);
+  if (!department) {
+    return '';
+  }
+  if (deptId >= 10 && deptId < 20) {
+    return `总部/${department.name}`;
+  }
+  if (deptId >= 20 && deptId < 30) {
+    return `华东分公司/${department.name}`;
+  }
+  return department.name;
+};
+
+const roleNamesByIds = (roleIds: number[]) =>
+  roleOptions.filter((role) => roleIds.includes(role.id)).map((role) => role.name);
+
+const roleCodesByIds = (roleIds: number[]) =>
+  roleOptions.filter((role) => roleIds.includes(role.id)).map((role) => role.code);
+
+const toRoleListItem = (role: MockRole): AdminRole => ({
+  id: role.id,
+  code: role.code,
+  name: role.name,
+  sort: role.sort,
+  status: role.status,
+  builtin: role.builtin,
+});
+
+const toRoleDetail = (role: MockRole): AdminRole => ({
+  ...toRoleListItem(role),
+  menuIds: role.menuIds,
+  dataPolicies: role.dataPolicies,
+});
+
+const roleById = (id: number) => roleOptions.find((role) => role.id === id);
+
 export const handlers = [
   http.post('/api/admin/auth/login', async () =>
     success({ tokenType: 'Bearer', accessToken: 'mock-token', expiresIn: 7200 }),
@@ -380,10 +941,27 @@ export const handlers = [
       avatar: '',
       preferences: users[0].preferences,
       roles: ['super-admin'],
+      roleIds: [1],
+      effectiveRoles: ['super-admin'],
       permissions: ['*'],
-      primaryDeptId: null,
-      deptIds: [],
-      operationDeptId: null,
+      primaryDeptId: users[0].primaryDeptId,
+      deptIds: users[0].deptIds,
+      operationDeptId: users[0].primaryDeptId,
+      positions: users[0].positions,
+      directRoles: users[0].directRoles,
+      directRoleIds: users[0].directRoleIds,
+      positionRoles: users[0].roles,
+      positionRoleBindings: users[0].positions.flatMap((position) =>
+        position.roleIds.map((roleId, index) => ({
+          positionId: position.id,
+          positionName: position.name,
+          deptId: position.deptId,
+          deptName: position.deptName,
+          roleId,
+          roleCode: roleCodesByIds([roleId])[0] ?? '',
+          roleName: position.roleNames[index] ?? '',
+        })),
+      ),
     }),
   ),
   http.get('/api/admin/system-config/menu-tree', () =>
@@ -421,6 +999,15 @@ export const handlers = [
             i18n: 'menu.system.users',
             path: '/organization/users',
             icon: 'UserOutlined',
+            type: 'menu',
+            status: 'enabled',
+          },
+          {
+            code: 'system.positions',
+            title: '岗位管理',
+            i18n: 'menu.system.positions',
+            path: '/organization/positions',
+            icon: 'IdcardOutlined',
             type: 'menu',
             status: 'enabled',
           },
@@ -580,10 +1167,452 @@ export const handlers = [
     const url = new URL(request.url);
     const page = Number(url.searchParams.get('page') || 1);
     const pageSize = Number(url.searchParams.get('pageSize') || 20);
-    return success({ items: users, total: users.length, page, pageSize });
+    const positionId = Number(getCrudParam(url, 'positionId', '0'));
+    const deptId = Number(getCrudParam(url, 'deptId', '0'));
+    const filtered = users.filter((user) => {
+      if (positionId > 0 && !user.positionIds.includes(positionId)) {
+        return false;
+      }
+      if (deptId > 0 && !user.deptIds.includes(deptId)) {
+        return false;
+      }
+      return true;
+    });
+    return success({
+      items: paginate(filtered, page, pageSize),
+      total: filtered.length,
+      page,
+      pageSize,
+    });
+  }),
+  http.post('/api/admin/organization/users', async ({ request }) => {
+    const body = (await request.json()) as {
+      deptIds?: number[];
+      nickname?: string;
+      password?: string;
+      positionIds?: number[];
+      primaryDeptId?: number | null;
+      roleIds?: number[];
+      status?: 'enabled' | 'disabled';
+      username?: string;
+    };
+    const username = body.username?.trim() ?? '';
+    if (!username) {
+      return fail('KERNEL.REQUEST.VALIDATION_FAILED', '请输入用户名');
+    }
+    if (users.some((user) => user.username === username)) {
+      return fail('KERNEL.REQUEST.VALIDATION_FAILED', '用户名已存在', {
+        field: 'username',
+        reason: 'duplicated',
+      });
+    }
+
+    const deptIds = Array.from(new Set((body.deptIds ?? []).map(Number).filter((id) => id > 0)));
+    const positionIds = Array.from(
+      new Set((body.positionIds ?? []).map(Number).filter((id) => id > 0)),
+    );
+    if (deptIds.length === 0 || positionIds.length === 0) {
+      return fail('KERNEL.REQUEST.VALIDATION_FAILED', '请选择部门和岗位');
+    }
+
+    const primaryDeptId =
+      body.primaryDeptId && deptIds.includes(Number(body.primaryDeptId))
+        ? Number(body.primaryDeptId)
+        : deptIds[0];
+    const primaryDepartment = departmentById(primaryDeptId);
+    const directRoleIds = Array.from(
+      new Set((body.roleIds ?? []).map(Number).filter((id) => id > 0)),
+    );
+    const user: (typeof users)[number] = {
+      id: Math.max(...users.map((item) => item.id)) + 1,
+      username,
+      nickname: body.nickname?.trim() || username,
+      avatar: '',
+      preferences: {},
+      status: body.status ?? 'enabled',
+      primaryDeptId,
+      primaryDeptName: primaryDepartment?.name ?? '',
+      primaryDeptPath: departmentPathById(primaryDeptId),
+      deptIds,
+      positions: [],
+      positionIds,
+      roles: [],
+      roleNames: [],
+      roleIds: [],
+      directRoles: roleCodesByIds(directRoleIds),
+      directRoleNames: roleNamesByIds(directRoleIds),
+      directRoleIds,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    refreshUserPositions(user);
+    refreshUserEffectiveRoles(user);
+    users.push(user);
+    refreshPositionMemberCounts();
+
+    return success(user);
+  }),
+  http.get('/api/admin/organization/users/:id', ({ params }) => {
+    const user = users.find((item) => String(item.id) === String(params.id));
+    if (!user) {
+      return fail('SYSTEM.USER.NOT_FOUND', '成员不存在或已被删除');
+    }
+
+    return success(user);
+  }),
+  http.put('/api/admin/organization/users/:id', async ({ params, request }) => {
+    const user = users.find((item) => String(item.id) === String(params.id));
+    if (!user) {
+      return fail('SYSTEM.USER.NOT_FOUND', '成员不存在或已被删除');
+    }
+
+    const body = (await request.json()) as Partial<typeof user> & { password?: string };
+    const username = body.username?.trim() ?? user.username;
+    if (users.some((item) => item.id !== user.id && item.username === username)) {
+      return fail('KERNEL.REQUEST.VALIDATION_FAILED', '用户名已存在', {
+        field: 'username',
+        reason: 'duplicated',
+      });
+    }
+
+    const deptIds =
+      body.deptIds === undefined
+        ? user.deptIds
+        : Array.from(new Set(body.deptIds.map(Number).filter((id) => id > 0)));
+    const positionIds =
+      body.positionIds === undefined
+        ? user.positionIds
+        : Array.from(new Set(body.positionIds.map(Number).filter((id) => id > 0)));
+    const primaryDeptId =
+      body.primaryDeptId && deptIds.includes(Number(body.primaryDeptId))
+        ? Number(body.primaryDeptId)
+        : (deptIds[0] ?? user.primaryDeptId);
+    const primaryDepartment = primaryDeptId ? departmentById(primaryDeptId) : undefined;
+
+    user.username = username;
+    user.nickname = body.nickname?.trim() || user.nickname;
+    user.status = body.status ?? user.status;
+    user.deptIds = deptIds;
+    user.positionIds = positionIds;
+    user.primaryDeptId = primaryDeptId;
+    user.primaryDeptName = primaryDepartment?.name ?? '';
+    user.primaryDeptPath = primaryDeptId ? departmentPathById(primaryDeptId) : '';
+    if (body.roleIds !== undefined) {
+      user.directRoleIds = Array.from(new Set(body.roleIds.map(Number).filter((id) => id > 0)));
+      user.directRoles = roleCodesByIds(user.directRoleIds);
+      user.directRoleNames = roleNamesByIds(user.directRoleIds);
+    }
+    user.updatedAt = now;
+
+    refreshUserPositions(user);
+    refreshUserEffectiveRoles(user);
+    refreshPositionMemberCounts();
+
+    return success(user);
+  }),
+  http.delete('/api/admin/organization/users/:id', ({ params }) => {
+    const index = users.findIndex((item) => String(item.id) === String(params.id));
+    if (index < 0 || users[index].id === 1) {
+      return fail('SYSTEM.USER.NOT_FOUND', '成员不存在或已被删除', {
+        reason: 'record_missing',
+        traceId: 'mock-trace-user-delete',
+      });
+    }
+
+    users.splice(index, 1);
+    refreshPositionMemberCounts();
+
+    return success(null);
   }),
   http.get('/api/admin/organization/roles/tree', () => success(roleTree)),
   http.get('/api/admin/organization/roles/options', () => success(roleOptions)),
+  http.get('/api/admin/organization/roles', ({ request }) => {
+    const url = new URL(request.url);
+    const page = Number(url.searchParams.get('page') || 1);
+    const pageSize = Number(url.searchParams.get('pageSize') || 20);
+    const keyword = url.searchParams.get('keyword')?.trim().toLowerCase();
+    const status = getCrudFilter(url, 'status');
+    const filtered = roleOptions.filter((role) => {
+      if (keyword && !`${role.name} ${role.code}`.toLowerCase().includes(keyword)) {
+        return false;
+      }
+      if (status && role.status !== status) {
+        return false;
+      }
+
+      return true;
+    });
+
+    return success({
+      items: paginate(filtered.map(toRoleListItem), page, pageSize),
+      total: filtered.length,
+      page,
+      pageSize,
+    });
+  }),
+  http.post('/api/admin/organization/roles', async ({ request }) => {
+    const body = (await request.json()) as Partial<AdminRole> & {
+      dataPolicies?: AdminRoleDataPolicy[];
+      menuIds?: number[];
+    };
+    const code = body.code?.trim() ?? '';
+    const name = body.name?.trim() ?? '';
+    if (!code || !name) {
+      return fail('KERNEL.REQUEST.VALIDATION_FAILED', '请输入角色名称和编码');
+    }
+    if (roleOptions.some((role) => role.code === code)) {
+      return fail('KERNEL.REQUEST.VALIDATION_FAILED', '角色编码已存在', {
+        field: 'code',
+        reason: 'duplicated',
+      });
+    }
+
+    const role: MockRole = {
+      id: Math.max(...roleOptions.map((item) => item.id)) + 1,
+      code,
+      name,
+      sort: body.sort ?? 0,
+      status: body.status ?? 'enabled',
+      builtin: false,
+      menuIds: body.menuIds ?? [],
+      dataPolicies: body.dataPolicies ?? [],
+    };
+    roleOptions.push(role);
+
+    return success(toRoleDetail(role));
+  }),
+  http.get('/api/admin/organization/roles/:id', ({ params }) => {
+    const role = roleById(Number(params.id));
+    if (!role) {
+      return fail('SYSTEM.ROLE.NOT_FOUND', '角色不存在或已被删除');
+    }
+
+    return success(toRoleDetail(role));
+  }),
+  http.put('/api/admin/organization/roles/:id', async ({ params, request }) => {
+    const role = roleById(Number(params.id));
+    if (!role) {
+      return fail('SYSTEM.ROLE.NOT_FOUND', '角色不存在或已被删除');
+    }
+    if (role.builtin) {
+      return fail('KERNEL.REQUEST.VALIDATION_FAILED', '内置角色不能修改', {
+        field: 'role',
+        reason: 'cannot_update_builtin_role',
+      });
+    }
+
+    const body = (await request.json()) as Partial<AdminRole> & {
+      dataPolicies?: AdminRoleDataPolicy[];
+      menuIds?: number[];
+    };
+    const code = body.code?.trim() ?? role.code;
+    if (roleOptions.some((item) => item.id !== role.id && item.code === code)) {
+      return fail('KERNEL.REQUEST.VALIDATION_FAILED', '角色编码已存在', {
+        field: 'code',
+        reason: 'duplicated',
+      });
+    }
+
+    role.code = code;
+    role.name = body.name?.trim() || role.name;
+    role.sort = body.sort ?? role.sort;
+    role.status = body.status ?? role.status;
+    if (body.menuIds !== undefined) {
+      role.menuIds = body.menuIds;
+    }
+    if (body.dataPolicies !== undefined) {
+      role.dataPolicies = body.dataPolicies;
+    }
+
+    return success(toRoleDetail(role));
+  }),
+  http.delete('/api/admin/organization/roles/:id', ({ params }) => {
+    const index = roleOptions.findIndex((role) => role.id === Number(params.id));
+    if (index < 0) {
+      return fail('SYSTEM.ROLE.NOT_FOUND', '角色不存在或已被删除');
+    }
+    if (roleOptions[index].builtin) {
+      return fail('KERNEL.REQUEST.VALIDATION_FAILED', '内置角色不能删除', {
+        field: 'role',
+        reason: 'cannot_delete_builtin_role',
+      });
+    }
+
+    roleOptions.splice(index, 1);
+    return success(null);
+  }),
+  http.post('/api/admin/organization/roles/:id/authorize', async ({ params, request }) => {
+    const role = roleById(Number(params.id));
+    if (!role) {
+      return fail('SYSTEM.ROLE.NOT_FOUND', '角色不存在或已被删除');
+    }
+    if (role.builtin) {
+      return fail('KERNEL.REQUEST.VALIDATION_FAILED', '内置角色不能授权', {
+        field: 'role',
+        reason: 'cannot_authorize_builtin_role',
+      });
+    }
+
+    const body = (await request.json()) as {
+      dataPolicies?: AdminRoleDataPolicy[];
+      menuIds?: number[];
+    };
+    role.menuIds = body.menuIds ?? [];
+    role.dataPolicies = body.dataPolicies ?? [];
+
+    return success(toRoleDetail(role));
+  }),
+  http.get('/api/admin/system-config/menus/tree', () => success(menuPermissionTree)),
+  http.get('/api/admin/system-config/data-policies/metadata', () => success(dataPolicyMetadata)),
+  http.get('/api/admin/organization/positions', ({ request }) => {
+    refreshPositionMemberCounts();
+    const url = new URL(request.url);
+    const page = Number(url.searchParams.get('page') || 1);
+    const pageSize = Number(url.searchParams.get('pageSize') || 20);
+    const keyword = url.searchParams.get('keyword')?.trim().toLowerCase();
+    const status = getCrudFilter(url, 'status');
+    const filtered = positions.filter((position) => {
+      if (keyword && !`${position.name} ${position.code}`.toLowerCase().includes(keyword)) {
+        return false;
+      }
+      if (status && position.status !== status) {
+        return false;
+      }
+      return true;
+    });
+
+    return success({
+      items: paginate(filtered, page, pageSize),
+      total: filtered.length,
+      page,
+      pageSize,
+    });
+  }),
+  http.get('/api/admin/organization/positions/options', ({ request }) => {
+    const url = new URL(request.url);
+    const deptIds = new Set(
+      (url.searchParams.get('deptIds') ?? '')
+        .split(',')
+        .map((id) => Number(id))
+        .filter((id) => Number.isInteger(id) && id > 0),
+    );
+    return success(
+      positions
+        .filter((position) => position.status === 'enabled')
+        .filter((position) => deptIds.size === 0 || deptIds.has(position.deptId))
+        .map(({ memberCount: _memberCount, roleNames: _roleNames, ...position }) => position),
+    );
+  }),
+  http.post('/api/admin/organization/positions', async ({ request }) => {
+    const body = (await request.json()) as {
+      code: string;
+      deptId: number;
+      description?: string;
+      isLeadership?: boolean;
+      name: string;
+      roleIds?: number[];
+      sort?: number;
+      status?: 'enabled' | 'disabled';
+      type?: string;
+    };
+    const department = departmentById(Number(body.deptId));
+    if (!department) {
+      return fail('SYSTEM.DEPARTMENT.NOT_FOUND', '部门不存在');
+    }
+
+    const roleIds = body.roleIds ?? [];
+    const position = {
+      id: Math.max(...positions.map((item) => item.id)) + 1,
+      deptId: Number(body.deptId),
+      deptName: department.name,
+      deptPath: departmentPathById(Number(body.deptId)),
+      code: body.code,
+      name: body.name,
+      type: body.type ?? 'normal',
+      isLeadership: Boolean(body.isLeadership),
+      description: body.description ?? '',
+      sort: body.sort ?? 0,
+      status: body.status ?? 'enabled',
+      roleIds,
+      roleNames: roleNamesByIds(roleIds),
+      memberCount: 0,
+      createdAt: now,
+      updatedAt: now,
+    };
+    positions.push(position);
+
+    return success(position);
+  }),
+  http.put('/api/admin/organization/positions/:id', async ({ params, request }) => {
+    const position = positions.find((item) => String(item.id) === String(params.id));
+    if (!position) {
+      return fail('SYSTEM.POSITION.NOT_FOUND', '岗位不存在或已被删除');
+    }
+
+    const body = (await request.json()) as Partial<typeof position>;
+    const department = departmentById(Number(body.deptId ?? position.deptId));
+    if (!department) {
+      return fail('SYSTEM.DEPARTMENT.NOT_FOUND', '部门不存在');
+    }
+
+    position.deptId = Number(body.deptId ?? position.deptId);
+    position.deptName = department.name;
+    position.deptPath = departmentPathById(position.deptId);
+    position.code = body.code ?? position.code;
+    position.name = body.name ?? position.name;
+    position.type = body.type ?? position.type;
+    position.isLeadership = Boolean(body.isLeadership ?? position.isLeadership);
+    position.description = body.description ?? position.description;
+    position.sort = body.sort ?? position.sort;
+    position.status = body.status ?? position.status;
+    position.roleIds = body.roleIds ?? position.roleIds;
+    position.roleNames = roleNamesByIds(position.roleIds);
+    position.updatedAt = now;
+
+    return success(position);
+  }),
+  http.delete('/api/admin/organization/positions/:id', ({ params }) => {
+    const index = positions.findIndex((item) => String(item.id) === String(params.id));
+    if (index < 0) {
+      return fail('SYSTEM.POSITION.NOT_FOUND', '岗位不存在或已被删除');
+    }
+    if (positionMemberIds(positions[index].id).length > 0) {
+      return fail('SYSTEM.POSITION.HAS_MEMBERS', '岗位下仍有成员，不能删除');
+    }
+
+    positions.splice(index, 1);
+    return success(null);
+  }),
+  http.get('/api/admin/organization/positions/:id/member-ids', ({ params }) => {
+    const positionId = Number(params.id);
+    if (!positions.some((position) => position.id === positionId)) {
+      return fail('SYSTEM.POSITION.NOT_FOUND', '岗位不存在或已被删除');
+    }
+
+    return success(positionMemberIds(positionId));
+  }),
+  http.put('/api/admin/organization/positions/:id/members', async ({ params, request }) => {
+    const positionId = Number(params.id);
+    const position = positions.find((item) => item.id === positionId);
+    if (!position) {
+      return fail('SYSTEM.POSITION.NOT_FOUND', '岗位不存在或已被删除');
+    }
+
+    const body = (await request.json()) as { userIds?: number[] };
+    syncPositionMembers(positionId, body.userIds ?? []);
+
+    return success(position);
+  }),
+  http.get('/api/admin/organization/positions/:id', ({ params }) => {
+    refreshPositionMemberCounts();
+    const position = positions.find((item) => String(item.id) === String(params.id));
+    if (!position) {
+      return fail('SYSTEM.POSITION.NOT_FOUND', '岗位不存在或已被删除');
+    }
+
+    return success(position);
+  }),
   http.get('/api/admin/messages', ({ request }) => {
     const url = new URL(request.url);
     const page = Number(url.searchParams.get('page') || 1);
@@ -653,6 +1682,16 @@ export const handlers = [
       total: unreadItems.length,
     });
   }),
+  http.get(
+    '/api/admin/messages/stream',
+    () =>
+      new HttpResponse('event: sync_required\ndata: {"type":"sync_required","reason":"mock"}\n\n', {
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Content-Type': 'text/event-stream; charset=utf-8',
+        },
+      }),
+  ),
   http.get('/api/admin/messages/:kind/:id', ({ params }) => {
     const item = withMessageState().find(
       (message) => message.kind === params.kind && String(message.id) === String(params.id),
@@ -1009,10 +2048,4 @@ export const handlers = [
     announcement.updatedAt = now;
     return success(announcement);
   }),
-  http.delete('/api/admin/organization/users/:id', () =>
-    fail('SYSTEM.USER.NOT_FOUND', '成员不存在或已被删除', {
-      reason: 'record_missing',
-      traceId: 'mock-trace-user-delete',
-    }),
-  ),
 ];

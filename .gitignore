@@ -3,6 +3,7 @@
 .vscode/
 node_modules/
 vendor/
+.playwright-cli/
 dist/
 build/
 .env

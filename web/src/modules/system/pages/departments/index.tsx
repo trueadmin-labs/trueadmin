@@ -95,7 +95,11 @@ export default function AdminDepartmentsPage() {
   const submit = async (
     action: CrudTableAction<DepartmentTreeNode, DepartmentPayload, DepartmentPayload>,
   ) => {
-    const values = await form.validateFields();
+    const values = await form.validateFields().catch(() => undefined);
+    if (values === undefined) {
+      return;
+    }
+
     setSubmitting(true);
     try {
       if (editing) {

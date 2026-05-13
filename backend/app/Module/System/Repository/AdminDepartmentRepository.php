@@ -1,14 +1,22 @@
 <?php
 
 declare(strict_types=1);
+/**
+ * This file is part of Hyperf.
+ *
+ * @link     https://www.hyperf.io
+ * @document https://hyperf.wiki
+ * @contact  group@hyperf.io
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace App\Module\System\Repository;
 
-use TrueAdmin\Kernel\Crud\CrudQuery;
 use App\Foundation\Repository\AbstractRepository;
-use TrueAdmin\Kernel\Support\TreeHelper;
 use App\Module\System\Model\AdminDepartment;
 use Hyperf\DbConnection\Db;
+use TrueAdmin\Kernel\Crud\CrudQuery;
+use TrueAdmin\Kernel\Support\TreeHelper;
 
 /**
  * @extends AbstractRepository<AdminDepartment>
@@ -47,10 +55,8 @@ final class AdminDepartmentRepository extends AbstractRepository
 
     public function find(int $id): ?AdminDepartment
     {
-        /** @var null|AdminDepartment $department */
-        $department = $this->findModelById($id);
-
-        return $department;
+        /* @var null|AdminDepartment $department */
+        return $this->findModelById($id);
     }
 
     public function findByCode(string $code): ?AdminDepartment
@@ -62,18 +68,14 @@ final class AdminDepartmentRepository extends AbstractRepository
 
     public function create(array $data): AdminDepartment
     {
-        /** @var AdminDepartment $department */
-        $department = $this->createModel($data);
-
-        return $department;
+        /* @var AdminDepartment $department */
+        return $this->createModel($data);
     }
 
     public function update(AdminDepartment $department, array $data): AdminDepartment
     {
-        /** @var AdminDepartment $department */
-        $department = $this->updateModel($department, $data);
-
-        return $department;
+        /* @var AdminDepartment $department */
+        return $this->updateModel($department, $data);
     }
 
     public function delete(AdminDepartment $department): void
@@ -103,6 +105,35 @@ final class AdminDepartmentRepository extends AbstractRepository
             ->count();
     }
 
+    public function positionCount(int $id): int
+    {
+        return (int) Db::table('admin_positions')
+            ->where('dept_id', $id)
+            ->count();
+    }
+
+    public function updateDescendantTreeState(int $id, string $oldSubtreePath, string $newSubtreePath, int $levelDelta): void
+    {
+        if ($oldSubtreePath === $newSubtreePath && $levelDelta === 0) {
+            return;
+        }
+
+        AdminDepartment::query()
+            ->where('path', 'like', '%,' . $id . ',%')
+            ->get()
+            ->each(function (AdminDepartment $department) use ($oldSubtreePath, $newSubtreePath, $levelDelta): void {
+                $path = (string) $department->getAttribute('path');
+                $nextPath = str_starts_with($path, $oldSubtreePath)
+                    ? $newSubtreePath . substr($path, strlen($oldSubtreePath))
+                    : str_replace($oldSubtreePath, $newSubtreePath, $path);
+
+                $this->updateModel($department, [
+                    'path' => $nextPath,
+                    'level' => max(1, (int) $department->getAttribute('level') + $levelDelta),
+                ]);
+            });
+    }
+
     /**
      * @param list<int> $ids
      * @return list<int>
@@ -112,12 +143,11 @@ final class AdminDepartmentRepository extends AbstractRepository
         return $this->existingModelIds(array_values(array_unique(array_map('intval', $ids))));
     }
 
-
     /**
      * @param int|list<int> $ids
      * @return list<int>
      */
-    public function selfAndDescendantIds(int|array $ids): array
+    public function selfAndDescendantIds(array|int $ids): array
     {
         $normalizedIds = array_values(array_unique(array_filter(array_map('intval', is_array($ids) ? $ids : [$ids]), static fn (int $id): bool => $id > 0)));
         if ($normalizedIds === []) {

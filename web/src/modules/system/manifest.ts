@@ -21,6 +21,11 @@ export default defineModule({
       meta: { title: 'system.users.title', auth: true },
     },
     {
+      path: '/organization/positions',
+      component: lazy(() => import('./pages/positions')),
+      meta: { title: 'system.positions.title', auth: true },
+    },
+    {
       path: '/organization/roles',
       component: lazy(() => import('./pages/roles')),
       meta: { title: 'system.roles.title', auth: true },

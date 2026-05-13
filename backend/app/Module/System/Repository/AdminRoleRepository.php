@@ -1,14 +1,22 @@
 <?php
 
 declare(strict_types=1);
+/**
+ * This file is part of Hyperf.
+ *
+ * @link     https://www.hyperf.io
+ * @document https://hyperf.wiki
+ * @contact  group@hyperf.io
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace App\Module\System\Repository;
 
-use TrueAdmin\Kernel\Crud\CrudQuery;
-use TrueAdmin\Kernel\Pagination\PageResult;
 use App\Foundation\Repository\AbstractRepository;
 use App\Module\System\Model\AdminRole;
 use Hyperf\DbConnection\Db;
+use TrueAdmin\Kernel\Crud\CrudQuery;
+use TrueAdmin\Kernel\Pagination\PageResult;
 
 /**
  * @extends AbstractRepository<AdminRole>
@@ -52,10 +60,8 @@ final class AdminRoleRepository extends AbstractRepository
 
     public function find(int $id): ?AdminRole
     {
-        /** @var null|AdminRole $role */
-        $role = $this->findModelById($id);
-
-        return $role;
+        /* @var null|AdminRole $role */
+        return $this->findModelById($id);
     }
 
     public function findByCode(string $code): ?AdminRole
@@ -67,18 +73,14 @@ final class AdminRoleRepository extends AbstractRepository
 
     public function create(array $data): AdminRole
     {
-        /** @var AdminRole $role */
-        $role = $this->createModel($data);
-
-        return $role;
+        /* @var AdminRole $role */
+        return $this->createModel($data);
     }
 
     public function update(AdminRole $role, array $data): AdminRole
     {
-        /** @var AdminRole $role */
-        $role = $this->updateModel($role, $data);
-
-        return $role;
+        /* @var AdminRole $role */
+        return $this->updateModel($role, $data);
     }
 
     public function delete(AdminRole $role): void
@@ -87,6 +89,7 @@ final class AdminRoleRepository extends AbstractRepository
         Db::table('admin_role_data_policies')->where('role_id', $roleId)->delete();
         Db::table('admin_role_menu')->where('role_id', $roleId)->delete();
         Db::table('admin_role_user')->where('role_id', $roleId)->delete();
+        Db::table('admin_position_roles')->where('role_id', $roleId)->delete();
         $this->deleteModel($role);
     }
 
@@ -128,19 +131,28 @@ final class AdminRoleRepository extends AbstractRepository
     }
 
     /**
-     * @return list<array{id:int,code:string,name:string,status:string}>
+     * @return list<array<string, mixed>>
      */
     public function options(): array
     {
-        return AdminRole::query()
+        $roles = AdminRole::query()
             ->where('status', 'enabled')
             ->orderBy('sort')
             ->orderBy('id')
-            ->get()
-            ->map(fn (AdminRole $role): array => $this->toArray($role))
+            ->get();
+
+        $roleIds = $roles
+            ->map(static fn (AdminRole $role): int => (int) $role->getAttribute('id'))
+            ->all();
+        $policiesByRoleId = $this->policiesByRoleId($roleIds);
+
+        return $roles
+            ->map(fn (AdminRole $role): array => [
+                ...$this->toArray($role),
+                'dataPolicies' => $policiesByRoleId[(int) $role->getAttribute('id')] ?? [],
+            ])
             ->all();
     }
-
 
     /**
      * @param list<string> $codes
@@ -173,5 +185,42 @@ final class AdminRoleRepository extends AbstractRepository
             'status' => (string) $role->getAttribute('status'),
             'builtin' => $code === self::SUPER_ADMIN_CODE,
         ];
+    }
+
+    /**
+     * @param list<int> $roleIds
+     * @return array<int, list<array<string, mixed>>>
+     */
+    private function policiesByRoleId(array $roleIds): array
+    {
+        if ($roleIds === []) {
+            return [];
+        }
+
+        $result = [];
+        $rows = Db::table('admin_role_data_policies')
+            ->whereIn('role_id', array_values(array_unique($roleIds)))
+            ->where('status', 'enabled')
+            ->orderBy('sort')
+            ->orderBy('id')
+            ->get();
+
+        foreach ($rows as $row) {
+            $roleId = (int) $row->role_id;
+            $config = json_decode((string) $row->config, true);
+            $result[$roleId][] = [
+                'id' => (int) $row->id,
+                'roleId' => $roleId,
+                'resource' => (string) $row->resource,
+                'strategy' => (string) $row->strategy,
+                'effect' => (string) $row->effect,
+                'scope' => (string) $row->scope,
+                'config' => is_array($config) ? $config : [],
+                'status' => (string) $row->status,
+                'sort' => (int) $row->sort,
+            ];
+        }
+
+        return $result;
     }
 }

@@ -45,7 +45,11 @@ docker compose -f deploy/docker/docker-compose.yml down
 - `DB_PASSWORD=trueadmin`
 - `REDIS_HOST=127.0.0.1`
 - `REDIS_PORT=6379`
-- `JWT_SECRET=change-me`
+- `JWT_SECRET=<至少 32 位随机字符串>`，可使用 `openssl rand -hex 32` 生成
+- `TRUEADMIN_SUPER_ADMIN_PASSWORD=<内置 trueadmin 账号初始密码>`
+- `TRUEADMIN_ADMIN_PASSWORD=<内置 admin 账号初始密码>`
+
+生产环境运行 System Seeder 前必须显式配置内置管理员初始密码，且不能使用空值、过短密码或常见弱密码；本地开发也建议显式配置后再初始化数据。
 
 TrueAdmin 默认优先使用 PostgreSQL，后端通过 Hyperf 官方扩展包 `hyperf/database-pgsql` 支持 `DB_DRIVER=pgsql`。如需兼容 MySQL，可切换 `DB_DRIVER=mysql` 并使用对应的 MySQL 连接信息。
 

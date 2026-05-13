@@ -1,26 +1,38 @@
 <?php
 
 declare(strict_types=1);
+/**
+ * This file is part of Hyperf.
+ *
+ * @link     https://www.hyperf.io
+ * @document https://hyperf.wiki
+ * @contact  group@hyperf.io
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace HyperfTest\Cases;
 
-use TrueAdmin\Kernel\Context\ActorFactory;
-use TrueAdmin\Kernel\DataPermission\DataPolicyStrategyInterface;
-use TrueAdmin\Kernel\DataPermission\DataPolicyManager;
-use TrueAdmin\Kernel\DataPermission\DataPolicyRegistry;
-use TrueAdmin\Kernel\Plugin\PluginRepository;
-use TrueAdmin\Kernel\Crud\CrudQuery;
+use App\Module\System\Repository\AdminUserRepository;
 use App\Module\System\Repository\Notification\AdminAnnouncementRepository;
 use App\Module\System\Repository\Notification\AdminNotificationBatchRepository;
-use App\Module\System\Repository\AdminUserRepository;
-use Hyperf\Contract\ConfigInterface;
 use Hyperf\Context\ApplicationContext;
+use Hyperf\Contract\ConfigInterface;
 use Hyperf\DbConnection\Db;
 use Hyperf\Testing\TestCase;
 use HyperfTest\Support\TestingDataPolicyStrategy;
+use Psr\Container\ContainerInterface;
+use RuntimeException;
 use TrueAdmin\Kernel\Constant\ErrorCode;
+use TrueAdmin\Kernel\Context\Actor;
 use TrueAdmin\Kernel\Context\ActorContext;
+use TrueAdmin\Kernel\Context\ActorFactory;
+use TrueAdmin\Kernel\Crud\CrudQuery;
+use TrueAdmin\Kernel\DataPermission\DataPolicyManager;
+use TrueAdmin\Kernel\DataPermission\DataPolicyRegistry;
+use TrueAdmin\Kernel\DataPermission\DataPolicyRule;
+use TrueAdmin\Kernel\DataPermission\DataPolicyStrategyInterface;
 use TrueAdmin\Kernel\Exception\BusinessException;
+use TrueAdmin\Kernel\Plugin\PluginRepository;
 
 /**
  * @internal
@@ -52,6 +64,7 @@ final class DataPolicyTest extends TestCase
         $metadata = $this->container()->get(DataPolicyRegistry::class)->metadata();
 
         $this->assertContains('admin_user', array_column($metadata['resources'], 'key'));
+        $this->assertContains('admin_position', array_column($metadata['resources'], 'key'));
         $this->assertContains('organization', array_column($metadata['strategies'], 'key'));
         $this->assertSame('dataPolicy.resource.adminUser', $metadata['resources'][0]['i18n']);
     }
@@ -74,6 +87,28 @@ final class DataPolicyTest extends TestCase
         $this->assertVisibleUserIds(['custom_departments' => ['deptIds' => [$deptC]]], $actorId, $deptA, $suffix, [$userC]);
         $this->assertVisibleUserIds(['custom_departments' => ['deptIds' => [$deptA]]], $actorId, $deptC, $suffix, [$userA]);
         $this->assertVisibleUserIds(['custom_departments_and_children' => ['deptIds' => [$deptA]]], $actorId, $deptC, $suffix, [$userA, $userB]);
+    }
+
+    public function testOrganizationScopesFilterAdminUsersByDepartmentMembership(): void
+    {
+        $suffix = str_replace('.', '', uniqid('dp-membership', true));
+        $primaryDeptId = $this->createDepartment('dp-membership-primary-' . $suffix);
+        $memberDeptId = $this->createDepartment('dp-membership-member-' . $suffix);
+        $outsideDeptId = $this->createDepartment('dp-membership-outside-' . $suffix);
+        $visibleUserId = $this->createUser('dp-membership-visible-' . $suffix, $primaryDeptId, 1, [$memberDeptId]);
+        $hiddenUserId = $this->createUser('dp-membership-hidden-' . $suffix, $outsideDeptId, 1);
+        $roleId = $this->createRole('dp-membership-' . $suffix);
+        $this->createPolicy($roleId, 'department');
+
+        ActorContext::set(ActorFactory::fromAdmin(801008, 'dp-membership', 'DP Membership', ['dp-membership'], [$roleId], [], $memberDeptId, [$memberDeptId]));
+
+        $repository = $this->container()->get(AdminUserRepository::class);
+        $result = $repository->paginate(new CrudQuery(page: 1, pageSize: 50, keyword: $suffix));
+        $ids = array_column($result->items, 'id');
+
+        $this->assertContains($visibleUserId, $ids);
+        $this->assertNotContains($hiddenUserId, $ids);
+        $this->assertNotNull($repository->findByIdWithDataPolicy($visibleUserId));
     }
 
     public function testRegisteredResourceWithoutPolicyDenies(): void
@@ -111,7 +146,7 @@ final class DataPolicyTest extends TestCase
     {
         ActorContext::set(ActorFactory::fromAdmin(801003, 'dp-config', 'DP Config', [], [], [], null, []));
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Data policy resource [missing_resource] is not registered.');
 
         $this->container()->get(DataPolicyManager::class)->apply(Db::table('admin_users'), 'missing_resource');
@@ -224,6 +259,48 @@ final class DataPolicyTest extends TestCase
         $this->assertNotContains($hiddenId, $ids);
     }
 
+    public function testPositionRoleDataPolicyUsesPositionDepartmentContext(): void
+    {
+        $suffix = str_replace('.', '', uniqid('dp-position', true));
+        $operationDeptId = $this->createDepartment('dp-position-operation-' . $suffix);
+        $positionDeptId = $this->createDepartment('dp-position-context-' . $suffix);
+        $operationUserId = $this->createUser('dp-position-operation-' . $suffix, $operationDeptId, 1);
+        $positionUserId = $this->createUser('dp-position-visible-' . $suffix, $positionDeptId, 1);
+        $roleId = $this->createRole('dp-position-' . $suffix);
+        $positionId = $this->createPosition('dp-position-' . $suffix, $positionDeptId, [$roleId]);
+        $this->createPolicy($roleId, 'department');
+
+        ActorContext::set(new Actor(
+            type: 'admin',
+            id: 801007,
+            name: 'dp-position',
+            claims: [
+                'roles' => ['dp-position'],
+                'roleIds' => [$roleId],
+                'directRoleIds' => [],
+                'permissions' => [],
+                'primaryDeptId' => $operationDeptId,
+                'deptIds' => [$operationDeptId, $positionDeptId],
+                'operationDeptId' => $operationDeptId,
+                'positionRoleBindings' => [[
+                    'positionId' => $positionId,
+                    'positionName' => 'Position Context',
+                    'deptId' => $positionDeptId,
+                    'deptName' => 'Position Dept',
+                    'roleId' => $roleId,
+                    'roleCode' => 'dp-position',
+                    'roleName' => 'Position Role',
+                ]],
+            ],
+        ));
+
+        $result = $this->container()->get(AdminUserRepository::class)->paginate(new CrudQuery(page: 1, pageSize: 50, keyword: $suffix));
+        $ids = array_column($result->items, 'id');
+
+        $this->assertContains($positionUserId, $ids);
+        $this->assertNotContains($operationUserId, $ids);
+    }
+
     public function testModuleDataPolicyResourceFileRegistersStrategiesAndResources(): void
     {
         $this->writeDataPolicies([
@@ -255,7 +332,7 @@ final class DataPolicyTest extends TestCase
             ],
         ]);
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Duplicate data policy resource [testing_duplicate].');
 
         $this->newRegistry()->resources();
@@ -270,7 +347,7 @@ final class DataPolicyTest extends TestCase
             ],
         ]);
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('references unregistered strategy [missing_strategy]');
 
         $this->newRegistry()->resources();
@@ -285,7 +362,7 @@ final class DataPolicyTest extends TestCase
             ],
         ]);
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('must not define actions');
 
         $this->newRegistry()->resources();
@@ -315,7 +392,7 @@ final class DataPolicyTest extends TestCase
     {
         $now = date('Y-m-d H:i:s');
         $parent = $parentId > 0 ? Db::table('admin_departments')->where('id', $parentId)->first() : null;
-        $id = (int) Db::table('admin_departments')->insertGetId([
+        return (int) Db::table('admin_departments')->insertGetId([
             'parent_id' => $parentId,
             'code' => $code,
             'name' => $code,
@@ -326,8 +403,6 @@ final class DataPolicyTest extends TestCase
             'created_at' => $now,
             'updated_at' => $now,
         ]);
-
-        return $id;
     }
 
     private function createRole(string $code): int
@@ -343,10 +418,45 @@ final class DataPolicyTest extends TestCase
         ]);
     }
 
-    private function createUser(string $username, int $deptId, int $createdBy): int
+    /**
+     * @param list<int> $roleIds
+     */
+    private function createPosition(string $code, int $deptId, array $roleIds): int
     {
         $now = date('Y-m-d H:i:s');
-        return (int) Db::table('admin_users')->insertGetId([
+        $positionId = (int) Db::table('admin_positions')->insertGetId([
+            'dept_id' => $deptId,
+            'code' => $code,
+            'name' => $code,
+            'type' => 'normal',
+            'is_leadership' => false,
+            'description' => '',
+            'sort' => 0,
+            'status' => 'enabled',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        foreach ($roleIds as $index => $roleId) {
+            Db::table('admin_position_roles')->insert([
+                'position_id' => $positionId,
+                'role_id' => $roleId,
+                'sort' => $index,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
+        }
+
+        return $positionId;
+    }
+
+    /**
+     * @param list<int> $extraDeptIds
+     */
+    private function createUser(string $username, int $deptId, int $createdBy, array $extraDeptIds = []): int
+    {
+        $now = date('Y-m-d H:i:s');
+        $userId = (int) Db::table('admin_users')->insertGetId([
             'username' => $username,
             'password' => 'test',
             'nickname' => $username,
@@ -356,6 +466,16 @@ final class DataPolicyTest extends TestCase
             'created_at' => $now,
             'updated_at' => $now,
         ]);
+
+        foreach (array_values(array_unique([$deptId, ...$extraDeptIds])) as $assignedDeptId) {
+            Db::table('admin_user_departments')->insert([
+                'user_id' => $userId,
+                'dept_id' => $assignedDeptId,
+                'is_primary' => $assignedDeptId === $deptId,
+            ]);
+        }
+
+        return $userId;
     }
 
     /**
@@ -437,9 +557,9 @@ final class DataPolicyTest extends TestCase
         ]);
     }
 
-    private function rule(string $scope, array $config = []): \TrueAdmin\Kernel\DataPermission\DataPolicyRule
+    private function rule(string $scope, array $config = []): DataPolicyRule
     {
-        return new \TrueAdmin\Kernel\DataPermission\DataPolicyRule('admin_user', 'organization', $scope, 'allow', $config);
+        return new DataPolicyRule('admin_user', 'organization', $scope, 'allow', $config);
     }
 
     /**
@@ -479,7 +599,7 @@ final class DataPolicyTest extends TestCase
         );
     }
 
-    private function container(): \Psr\Container\ContainerInterface
+    private function container(): ContainerInterface
     {
         return ApplicationContext::getContainer();
     }

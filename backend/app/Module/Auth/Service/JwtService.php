@@ -1,15 +1,26 @@
 <?php
 
 declare(strict_types=1);
+/**
+ * This file is part of Hyperf.
+ *
+ * @link     https://www.hyperf.io
+ * @document https://hyperf.wiki
+ * @contact  group@hyperf.io
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace App\Module\Auth\Service;
 
+use Hyperf\Config\Annotation\Value;
+use RuntimeException;
 use TrueAdmin\Kernel\Constant\ErrorCode;
 use TrueAdmin\Kernel\Exception\BusinessException;
-use Hyperf\Config\Annotation\Value;
 
 final class JwtService
 {
+    private const MIN_SECRET_LENGTH = 32;
+
     #[Value('jwt.secret')]
     private string $secret;
 
@@ -21,6 +32,7 @@ final class JwtService
 
     public function issue(array $claims): string
     {
+        $this->assertSecretConfigured();
         $now = time();
         $payload = array_merge($claims, [
             'iss' => $this->issuer,
@@ -41,6 +53,7 @@ final class JwtService
 
     public function parse(string $token): array
     {
+        $this->assertSecretConfigured();
         $segments = explode('.', $token);
         if (count($segments) !== 3) {
             throw new BusinessException(ErrorCode::UNAUTHORIZED, 401, ['reason' => 'invalid_token']);
@@ -62,6 +75,14 @@ final class JwtService
     private function signature(string $header, string $payload): string
     {
         return $this->base64UrlEncode(hash_hmac('sha256', $header . '.' . $payload, $this->secret, true));
+    }
+
+    private function assertSecretConfigured(): void
+    {
+        $secret = trim($this->secret);
+        if ($secret === '' || $secret === 'change-me' || strlen($secret) < self::MIN_SECRET_LENGTH) {
+            throw new RuntimeException('JWT_SECRET must be configured with at least 32 characters before issuing admin tokens.');
+        }
     }
 
     private function base64UrlEncode(string $value): string

@@ -1,7 +1,14 @@
 <?php
 
 declare(strict_types=1);
-
+/**
+ * This file is part of Hyperf.
+ *
+ * @link     https://www.hyperf.io
+ * @document https://hyperf.wiki
+ * @contact  group@hyperf.io
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 return [
     [
         'code' => 'workbench',
@@ -101,6 +108,48 @@ return [
         'parent' => 'system.users',
         'permission' => 'system:user:delete',
         'sort' => 24,
+        'type' => 'button',
+    ],
+    [
+        'code' => 'system.positions',
+        'title' => '岗位管理',
+        'path' => '/organization/positions',
+        'parent' => 'organization',
+        'permission' => 'system:position:list',
+        'icon' => 'IdcardOutlined',
+        'sort' => 25,
+        'type' => 'menu',
+    ],
+    [
+        'code' => 'system.positions.detail',
+        'title' => '岗位详情',
+        'parent' => 'system.positions',
+        'permission' => 'system:position:detail',
+        'sort' => 26,
+        'type' => 'button',
+    ],
+    [
+        'code' => 'system.positions.create',
+        'title' => '新增岗位',
+        'parent' => 'system.positions',
+        'permission' => 'system:position:create',
+        'sort' => 27,
+        'type' => 'button',
+    ],
+    [
+        'code' => 'system.positions.update',
+        'title' => '编辑岗位',
+        'parent' => 'system.positions',
+        'permission' => 'system:position:update',
+        'sort' => 28,
+        'type' => 'button',
+    ],
+    [
+        'code' => 'system.positions.delete',
+        'title' => '删除岗位',
+        'parent' => 'system.positions',
+        'permission' => 'system:position:delete',
+        'sort' => 29,
         'type' => 'button',
     ],
     [

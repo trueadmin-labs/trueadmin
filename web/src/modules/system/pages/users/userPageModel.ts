@@ -1,15 +1,16 @@
 import type { TranslateFunction } from '@trueadmin/web-core/i18n';
 import type { CrudExtraQuerySchema, CrudFilterSchema } from '@/core/crud/types';
+import type { AdminRoleOption } from '../../services/role.api';
 import type { AdminUser } from '../../types/admin-user';
 
 export const ALL_DEPARTMENTS_VALUE = 'all';
 
 export function createUserFilters({
-  roleText,
+  roleOptions,
   statusText,
   t,
 }: {
-  roleText: Record<string, string>;
+  roleOptions: AdminRoleOption[];
   statusText: Record<AdminUser['status'], string>;
   t: TranslateFunction;
 }): CrudFilterSchema[] {
@@ -30,12 +31,7 @@ export function createUserFilters({
       mode: 'multiple',
       requestMode: 'param',
       requestName: 'roleCodes',
-      options: [
-        { label: roleText['super-admin'], value: 'super-admin' },
-        { label: roleText.admin, value: 'admin' },
-        { label: roleText.operator, value: 'operator' },
-        { label: roleText.auditor, value: 'auditor' },
-      ],
+      options: roleOptions.map((role) => ({ label: role.name, value: role.code })),
     },
     {
       name: 'createdAt',

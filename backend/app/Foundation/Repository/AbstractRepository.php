@@ -1,12 +1,20 @@
 <?php
 
 declare(strict_types=1);
+/**
+ * This file is part of Hyperf.
+ *
+ * @link     https://www.hyperf.io
+ * @document https://hyperf.wiki
+ * @contact  group@hyperf.io
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace App\Foundation\Repository;
 
-use TrueAdmin\Kernel\DataPermission\DataPolicyManager;
 use Hyperf\Context\ApplicationContext;
 use Hyperf\Database\Model\Builder;
+use Hyperf\Database\Query\Builder as QueryBuilder;
 use Hyperf\DbConnection\Model\Model;
 use RuntimeException;
 use TrueAdmin\Kernel\Crud\CrudOperator;
@@ -14,6 +22,8 @@ use TrueAdmin\Kernel\Crud\CrudQuery;
 use TrueAdmin\Kernel\Crud\CrudQueryApplier;
 use TrueAdmin\Kernel\Crud\CrudQueryApplierOptions;
 use TrueAdmin\Kernel\Crud\CrudSortRule;
+use TrueAdmin\Kernel\DataPermission\DataPolicyManager;
+use TrueAdmin\Kernel\DataPermission\DataPolicyTarget;
 use TrueAdmin\Kernel\Pagination\PageResult;
 
 /**
@@ -32,12 +42,12 @@ abstract class AbstractRepository
     protected array $keywordFields = [];
 
     /**
-     * @var array<string, bool|string|list<string>>
+     * @var array<string, bool|list<string>|string>
      */
     protected array $filterable = [];
 
     /**
-     * @var list<string>|'*'
+     * @var '*'|list<string>
      */
     protected array|string $defaultFilterOps = ['eq', 'in'];
 
@@ -174,34 +184,34 @@ abstract class AbstractRepository
     }
 
     /**
-     * @param array<string, mixed>|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target
+     * @param array<string, mixed>|DataPolicyTarget $target
      */
-    protected function applyDataPolicy(Builder $query, string $resource, array|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target = []): void
+    protected function applyDataPolicy(Builder|QueryBuilder $query, string $resource, array|DataPolicyTarget $target = []): void
     {
         $this->dataPolicyManager()->apply($query, $resource, $target);
     }
 
     /**
-     * @param array<string, mixed>|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target
+     * @param array<string, mixed>|DataPolicyTarget $target
      */
-    protected function dataPolicyAllows(Builder $query, string $resource, array|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target = []): bool
+    protected function dataPolicyAllows(Builder|QueryBuilder $query, string $resource, array|DataPolicyTarget $target = []): bool
     {
         return $this->dataPolicyManager()->allows($query, $resource, $target);
     }
 
     /**
-     * @param array<string, mixed>|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target
+     * @param array<string, mixed>|DataPolicyTarget $target
      */
-    protected function assertDataPolicyAllows(Builder $query, string $resource, array|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target = []): void
+    protected function assertDataPolicyAllows(Builder|QueryBuilder $query, string $resource, array|DataPolicyTarget $target = []): void
     {
         $this->dataPolicyManager()->assertAllows($query, $resource, $target);
     }
 
     /**
      * @param list<int|string> $ids
-     * @param array<string, mixed>|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target
+     * @param array<string, mixed>|DataPolicyTarget $target
      */
-    protected function assertDataPolicyAllowsAll(Builder $query, string $resource, array $ids, string $idColumn = 'id', array|\TrueAdmin\Kernel\DataPermission\DataPolicyTarget $target = []): void
+    protected function assertDataPolicyAllowsAll(Builder|QueryBuilder $query, string $resource, array $ids, string $idColumn = 'id', array|DataPolicyTarget $target = []): void
     {
         $this->dataPolicyManager()->assertAllowsAll($query, $resource, $ids, $idColumn, $target);
     }
@@ -328,7 +338,7 @@ abstract class AbstractRepository
     }
 
     /**
-     * @return array<string, bool|string|list<string>>
+     * @return array<string, bool|list<string>|string>
      */
     protected function filterable(): array
     {
@@ -336,7 +346,7 @@ abstract class AbstractRepository
     }
 
     /**
-     * @return list<string>|'*'
+     * @return '*'|list<string>
      */
     protected function defaultFilterOps(): array|string
     {

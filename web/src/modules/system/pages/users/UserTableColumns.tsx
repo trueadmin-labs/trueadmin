@@ -1,26 +1,14 @@
 import type { TranslateFunction } from '@trueadmin/web-core/i18n';
-import { Tag } from 'antd';
+import { Space, Tag, Typography } from 'antd';
 import type { CrudColumns } from '@/core/crud/types';
 import type { AdminUser } from '../../types/admin-user';
 
-const roleColorMap: Record<string, string> = {
-  auditor: 'default',
-  operator: 'processing',
-  'super-admin': 'gold',
-  super_admin: 'gold',
-};
-
 type UserColumnsOptions = {
-  roleText: Record<string, string>;
   statusText: Record<AdminUser['status'], string>;
   t: TranslateFunction;
 };
 
-export function createUserColumns({
-  roleText,
-  statusText,
-  t,
-}: UserColumnsOptions): CrudColumns<AdminUser> {
+export function createUserColumns({ statusText, t }: UserColumnsOptions): CrudColumns<AdminUser> {
   return [
     {
       title: 'ID',
@@ -51,13 +39,34 @@ export function createUserColumns({
     {
       title: t('system.users.column.roles', '角色'),
       dataIndex: 'roles',
-      width: 260,
+      width: 300,
       render: (_, record) =>
-        record.roles.map((role) => (
-          <Tag color={roleColorMap[role] ?? 'default'} key={role}>
-            {roleText[role] ?? role}
-          </Tag>
-        )),
+        record.roleNames.length > 0 ? (
+          record.roleNames.map((role) => <Tag key={role}>{role}</Tag>)
+        ) : (
+          <Typography.Text type="secondary">
+            {t('system.users.column.roles.empty', '无')}
+          </Typography.Text>
+        ),
+    },
+    {
+      title: t('system.users.column.positions', '岗位'),
+      dataIndex: 'positions',
+      width: 360,
+      render: (_, record) =>
+        record.positions.length > 0 ? (
+          <Space wrap size={[4, 4]}>
+            {record.positions.map((position) => (
+              <Tag key={position.id}>
+                {position.deptName} / {position.name}
+              </Tag>
+            ))}
+          </Space>
+        ) : (
+          <Typography.Text type="secondary">
+            {t('system.users.column.positions.empty', '未绑定岗位')}
+          </Typography.Text>
+        ),
     },
     {
       title: t('system.users.column.createdAt', '创建时间'),

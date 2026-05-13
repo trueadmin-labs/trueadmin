@@ -1,15 +1,23 @@
 <?php
 
 declare(strict_types=1);
+/**
+ * This file is part of Hyperf.
+ *
+ * @link     https://www.hyperf.io
+ * @document https://hyperf.wiki
+ * @contact  group@hyperf.io
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace HyperfTest\Cases;
 
 use App\Module\System\Service\Notification\AdminAnnouncementService;
 use App\Module\System\Service\Notification\AdminNotificationService;
 use App\Module\System\Service\Notification\AdminNotificationTemplateRegistry;
-use Hyperf\DbConnection\Db;
 use Hyperf\Database\Schema\Blueprint;
 use Hyperf\Database\Schema\Schema;
+use Hyperf\DbConnection\Db;
 use Hyperf\Testing\TestCase;
 use TrueAdmin\Kernel\Exception\BusinessException;
 
@@ -89,6 +97,44 @@ class AdminNotificationTest extends TestCase
         }
     }
 
+    public function testRoleTargetsResolvePositionRoleMembers(): void
+    {
+        $target = $this->createPositionRoleMember('notification-position');
+
+        $result = make(AdminNotificationService::class)->send([
+            'roleIds' => [$target['roleId']],
+            'title' => '岗位角色通知',
+        ]);
+
+        $this->assertSame('completed', $result['status']);
+        $delivery = Db::table('admin_notification_deliveries')
+            ->where('batch_id', (int) $result['id'])
+            ->where('receiver_id', $target['userId'])
+            ->first();
+
+        $this->assertNotNull($delivery);
+        $this->assertSame('sent', $delivery->status);
+
+        $announcement = make(AdminAnnouncementService::class)->create([
+            'title' => '岗位角色公告',
+            'content' => 'content',
+            'level' => 'info',
+            'type' => 'announcement',
+            'source' => 'system',
+            'targetType' => 'role',
+            'targetRoleIds' => [$target['roleId']],
+            'targetUrl' => null,
+            'payload' => [],
+            'attachments' => [],
+            'pinned' => false,
+            'scheduledAt' => null,
+            'expireAt' => null,
+        ]);
+
+        $this->assertSame(1, $announcement['deliveryTotal']);
+        $this->assertSame(1, $announcement['sentTotal']);
+    }
+
     public function testAnnouncementRestoreReactivatesOfflineAnnouncement(): void
     {
         $service = make(AdminAnnouncementService::class);
@@ -139,6 +185,72 @@ class AdminNotificationTest extends TestCase
             'created_at' => $now,
             'updated_at' => $now,
         ]);
+    }
+
+    /**
+     * @return array{userId:int,roleId:int}
+     */
+    private function createPositionRoleMember(string $prefix): array
+    {
+        $suffix = str_replace('.', '', uniqid($prefix, true));
+        $now = date('Y-m-d H:i:s');
+        $deptId = (int) Db::table('admin_departments')->insertGetId([
+            'parent_id' => 0,
+            'code' => 'dept-' . $suffix,
+            'name' => '部门' . $suffix,
+            'level' => 1,
+            'path' => '',
+            'sort' => 0,
+            'status' => 'enabled',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        $roleId = (int) Db::table('admin_roles')->insertGetId([
+            'code' => 'role-' . $suffix,
+            'name' => '岗位角色' . $suffix,
+            'sort' => 0,
+            'status' => 'enabled',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        $positionId = (int) Db::table('admin_positions')->insertGetId([
+            'dept_id' => $deptId,
+            'code' => 'position-' . $suffix,
+            'name' => '岗位' . $suffix,
+            'type' => 'normal',
+            'is_leadership' => false,
+            'description' => '',
+            'sort' => 0,
+            'status' => 'enabled',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        $userId = (int) Db::table('admin_users')->insertGetId([
+            'username' => 'user-' . $suffix,
+            'password' => 'test',
+            'nickname' => '成员' . $suffix,
+            'status' => 'enabled',
+            'primary_dept_id' => $deptId,
+            'deleted_at' => null,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        Db::table('admin_position_roles')->insert([
+            'position_id' => $positionId,
+            'role_id' => $roleId,
+            'sort' => 0,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        Db::table('admin_user_positions')->insert([
+            'user_id' => $userId,
+            'position_id' => $positionId,
+            'is_primary' => true,
+            'assigned_at' => $now,
+        ]);
+
+        return ['userId' => $userId, 'roleId' => $roleId];
     }
 
     private function ensureNotificationTables(): void

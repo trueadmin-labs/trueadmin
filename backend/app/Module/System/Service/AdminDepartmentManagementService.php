@@ -1,16 +1,25 @@
 <?php
 
 declare(strict_types=1);
+/**
+ * This file is part of Hyperf.
+ *
+ * @link     https://www.hyperf.io
+ * @document https://hyperf.wiki
+ * @contact  group@hyperf.io
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace App\Module\System\Service;
 
-use TrueAdmin\Kernel\Crud\CrudQuery;
-use TrueAdmin\Kernel\Service\AbstractService;
-use TrueAdmin\Kernel\Support\TreeHelper;
 use App\Module\System\Model\AdminDepartment;
 use App\Module\System\Repository\AdminDepartmentRepository;
+use Hyperf\DbConnection\Db;
 use TrueAdmin\Kernel\Constant\ErrorCode;
+use TrueAdmin\Kernel\Crud\CrudQuery;
 use TrueAdmin\Kernel\Exception\BusinessException;
+use TrueAdmin\Kernel\Service\AbstractService;
+use TrueAdmin\Kernel\Support\TreeHelper;
 
 final class AdminDepartmentManagementService extends AbstractService
 {
@@ -51,27 +60,40 @@ final class AdminDepartmentManagementService extends AbstractService
 
     public function update(int $id, array $payload): array
     {
-        $department = $this->mustFind($id);
-        $code = (string) $payload['code'];
-        $exists = $this->departments->findByCode($code);
-        $this->assertUnique($exists !== null && (int) $exists->getAttribute('id') !== $id, 'code');
+        return Db::transaction(function () use ($id, $payload): array {
+            $department = $this->mustFind($id);
+            $code = (string) $payload['code'];
+            $exists = $this->departments->findByCode($code);
+            $this->assertUnique($exists !== null && (int) $exists->getAttribute('id') !== $id, 'code');
 
-        $parentId = array_key_exists('parentId', $payload)
-            ? (int) $payload['parentId']
-            : (int) $department->getAttribute('parent_id');
-        $parent = $this->parentDepartment($parentId, $id);
+            $oldPath = (string) $department->getAttribute('path');
+            $oldLevel = (int) $department->getAttribute('level');
+            $parentId = array_key_exists('parentId', $payload)
+                ? (int) $payload['parentId']
+                : (int) $department->getAttribute('parent_id');
+            $parent = $this->parentDepartment($parentId, $id);
+            $newPath = $this->tree->path($parent);
+            $newLevel = $this->tree->level($parent);
 
-        $department = $this->departments->update($department, [
-            'parent_id' => $parent === null ? 0 : (int) $parent->getAttribute('id'),
-            'code' => $code,
-            'name' => (string) $payload['name'],
-            'level' => $this->tree->level($parent),
-            'path' => $this->tree->path($parent),
-            'sort' => (int) ($payload['sort'] ?? $department->getAttribute('sort')),
-            'status' => (string) ($payload['status'] ?? $department->getAttribute('status')),
-        ]);
+            $department = $this->departments->update($department, [
+                'parent_id' => $parent === null ? 0 : (int) $parent->getAttribute('id'),
+                'code' => $code,
+                'name' => (string) $payload['name'],
+                'level' => $newLevel,
+                'path' => $newPath,
+                'sort' => (int) ($payload['sort'] ?? $department->getAttribute('sort')),
+                'status' => (string) ($payload['status'] ?? $department->getAttribute('status')),
+            ]);
 
-        return $this->detail((int) $department->getAttribute('id'));
+            $this->departments->updateDescendantTreeState(
+                $id,
+                $this->subtreePath($oldPath, $id),
+                $this->subtreePath($newPath, $id),
+                $newLevel - $oldLevel,
+            );
+
+            return $this->detail((int) $department->getAttribute('id'));
+        });
     }
 
     public function delete(int $id): void
@@ -82,6 +104,9 @@ final class AdminDepartmentManagementService extends AbstractService
         }
         if ($this->departments->assignedUserCount($id) > 0 || $this->departments->primaryUserCount($id) > 0) {
             throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['reason' => 'cannot_delete_department_with_users']);
+        }
+        if ($this->departments->positionCount($id) > 0) {
+            throw new BusinessException(ErrorCode::VALIDATION_FAILED, 422, ['reason' => 'cannot_delete_department_with_positions']);
         }
 
         $this->departments->delete($department);
@@ -114,5 +139,10 @@ final class AdminDepartmentManagementService extends AbstractService
         }
 
         return $parent;
+    }
+
+    private function subtreePath(string $path, int $id): string
+    {
+        return rtrim($path, ',') . ',' . $id . ',';
     }
 }

@@ -129,7 +129,7 @@ export function TrueAdminImportModal({
           <Alert
             type="info"
             showIcon
-            message={t('crud.import.noConfirmHandler', '当前页面尚未配置确认导入处理。')}
+            title={t('crud.import.noConfirmHandler', '当前页面尚未配置确认导入处理。')}
           />
         ) : null}
       </Space>

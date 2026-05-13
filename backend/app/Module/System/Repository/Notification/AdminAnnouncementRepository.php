@@ -1,17 +1,26 @@
 <?php
 
 declare(strict_types=1);
+/**
+ * This file is part of Hyperf.
+ *
+ * @link     https://www.hyperf.io
+ * @document https://hyperf.wiki
+ * @contact  group@hyperf.io
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace App\Module\System\Repository\Notification;
 
-use TrueAdmin\Kernel\Crud\CrudQuery;
-use TrueAdmin\Kernel\Crud\CrudQueryApplierOptions;
-use TrueAdmin\Kernel\Pagination\PageResult;
 use App\Foundation\Repository\AbstractRepository;
 use App\Module\System\Model\AdminAnnouncement;
 use App\Module\System\Model\AdminAnnouncementRead;
+use App\Module\System\Repository\AdminUserRepository;
 use Hyperf\Database\Model\Builder;
 use Hyperf\DbConnection\Db;
+use TrueAdmin\Kernel\Crud\CrudQuery;
+use TrueAdmin\Kernel\Crud\CrudQueryApplierOptions;
+use TrueAdmin\Kernel\Pagination\PageResult;
 
 /**
  * @extends AbstractRepository<AdminAnnouncement>
@@ -51,6 +60,10 @@ final class AdminAnnouncementRepository extends AbstractRepository
 
     protected array $defaultSort = ['pinned' => 'desc', 'id' => 'desc'];
 
+    public function __construct(private readonly AdminUserRepository $users)
+    {
+    }
+
     public function paginate(CrudQuery $adminQuery): PageResult
     {
         $query = AdminAnnouncement::query();
@@ -83,10 +96,8 @@ final class AdminAnnouncementRepository extends AbstractRepository
 
     public function findById(int $id): ?AdminAnnouncement
     {
-        /** @var null|AdminAnnouncement $announcement */
-        $announcement = $this->findModelById($id);
-
-        return $announcement;
+        /* @var null|AdminAnnouncement $announcement */
+        return $this->findModelById($id);
     }
 
     public function findByIdWithDataPolicy(int $id): ?AdminAnnouncement
@@ -117,18 +128,14 @@ final class AdminAnnouncementRepository extends AbstractRepository
 
     public function create(array $data): AdminAnnouncement
     {
-        /** @var AdminAnnouncement $announcement */
-        $announcement = $this->createModel($data);
-
-        return $announcement;
+        /* @var AdminAnnouncement $announcement */
+        return $this->createModel($data);
     }
 
     public function update(AdminAnnouncement $announcement, array $data): AdminAnnouncement
     {
-        /** @var AdminAnnouncement $announcement */
-        $announcement = $this->updateModel($announcement, $data);
-
-        return $announcement;
+        /* @var AdminAnnouncement $announcement */
+        return $this->updateModel($announcement, $data);
     }
 
     public function delete(AdminAnnouncement $announcement): void
@@ -227,22 +234,6 @@ final class AdminAnnouncementRepository extends AbstractRepository
         ];
     }
 
-    private function applyManagementDataPolicy(Builder $query): void
-    {
-        $this->applyDataPolicy($query, 'admin_announcement', [
-            'deptColumn' => 'operator_dept_id',
-            'createdByColumn' => 'operator_id',
-        ]);
-    }
-
-    private function assertManagementDataPolicy(Builder $query): void
-    {
-        $this->assertDataPolicyAllows($query, 'admin_announcement', [
-            'deptColumn' => 'operator_dept_id',
-            'createdByColumn' => 'operator_id',
-        ]);
-    }
-
     protected function applyParams(Builder $query, CrudQuery $adminQuery): void
     {
         foreach (['level', 'type', 'source', 'status'] as $field) {
@@ -260,6 +251,22 @@ final class AdminAnnouncementRepository extends AbstractRepository
         if ($adminQuery->hasParam('endAt')) {
             $query->where('publish_at', '<=', $adminQuery->param('endAt'));
         }
+    }
+
+    private function applyManagementDataPolicy(Builder $query): void
+    {
+        $this->applyDataPolicy($query, 'admin_announcement', [
+            'deptColumn' => 'operator_dept_id',
+            'createdByColumn' => 'operator_id',
+        ]);
+    }
+
+    private function assertManagementDataPolicy(Builder $query): void
+    {
+        $this->assertDataPolicyAllows($query, 'admin_announcement', [
+            'deptColumn' => 'operator_dept_id',
+            'createdByColumn' => 'operator_id',
+        ]);
     }
 
     private function applyMessageFilters(Builder $query, CrudQuery $adminQuery): void
@@ -330,13 +337,7 @@ final class AdminAnnouncementRepository extends AbstractRepository
             return 0;
         }
 
-        return (int) Db::table('admin_users')
-            ->join('admin_role_user', 'admin_role_user.user_id', '=', 'admin_users.id')
-            ->where('admin_users.status', 'enabled')
-            ->whereNull('admin_users.deleted_at')
-            ->whereIn('admin_role_user.role_id', $roleIds)
-            ->distinct('admin_users.id')
-            ->count('admin_users.id');
+        return $this->users->enabledUserCountByEffectiveRoleIds($roleIds);
     }
 
     private function roleNames(array $roleIds): array

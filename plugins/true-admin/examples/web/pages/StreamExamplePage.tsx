@@ -7,11 +7,11 @@ import { useI18n } from '@/core/i18n/I18nProvider';
 import { TrueAdminPage } from '@/core/page/TrueAdminPage';
 import { TrueAdminPageSection } from '@/core/page/TrueAdminPageSection';
 import {
-  StreamError,
   type StreamEventPayload,
-  StreamProgressPanel,
-  type StreamProgressPanelStatus,
   streamRequest,
+  TrueAdminStreamError,
+  TrueAdminStreamProgressPanel,
+  type TrueAdminStreamProgressPanelStatus,
 } from '@/core/stream';
 
 type StreamDemoItem = {
@@ -59,7 +59,7 @@ export default function StreamExamplePage() {
   const { message } = App.useApp();
   const { t } = useI18n();
   const abortRef = useRef<AbortController | null>(null);
-  const [status, setStatus] = useState<StreamProgressPanelStatus>('idle');
+  const [status, setStatus] = useState<TrueAdminStreamProgressPanelStatus>('idle');
   const [events, setEvents] = useState<StreamEventPayload[]>([]);
   const [streamResult, setStreamResult] = useState<StreamDemoResult>();
   const [normalResult, setNormalResult] = useState<StreamDemoResult>();
@@ -110,7 +110,7 @@ export default function StreamExamplePage() {
       setStatus('success');
       message.success(t('examples.stream.message.streamSuccess', '流式请求完成'));
     } catch (error) {
-      if (error instanceof StreamError && error.reason === 'aborted') {
+      if (error instanceof TrueAdminStreamError && error.reason === 'aborted') {
         setStatus('aborted');
         setErrorMessage(t('examples.stream.message.aborted', '请求已取消'));
         return;
@@ -204,7 +204,7 @@ export default function StreamExamplePage() {
                 '后端每个处理阶段会发送 progress 事件，最终通过 result 块返回标准 ApiResponse。',
               )}
             >
-              <StreamProgressPanel
+              <TrueAdminStreamProgressPanel
                 status={status}
                 events={events}
                 errorMessage={errorMessage}

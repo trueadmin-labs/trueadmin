@@ -1,6 +1,14 @@
 <?php
 
 declare(strict_types=1);
+/**
+ * This file is part of Hyperf.
+ *
+ * @link     https://www.hyperf.io
+ * @document https://hyperf.wiki
+ * @contact  group@hyperf.io
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace App\Module\System\Http\Admin\Request;
 
@@ -17,6 +25,8 @@ class SaveAdminUserRequest extends FormRequest
             'status' => ['sometimes', 'string', 'in:enabled,disabled'],
             'roleIds' => ['sometimes', 'array'],
             'roleIds.*' => ['integer', 'min:1'],
+            'positionIds' => ['sometimes', 'array'],
+            'positionIds.*' => ['integer', 'min:1'],
             'deptIds' => ['sometimes', 'array'],
             'deptIds.*' => ['integer', 'min:1'],
             'deptId' => ['sometimes', 'nullable', 'integer', 'min:1'],
@@ -41,6 +51,9 @@ class SaveAdminUserRequest extends FormRequest
         }
         if (array_key_exists('roleIds', $data)) {
             $normalized['roleIds'] = array_values(array_unique(array_map('intval', $data['roleIds'])));
+        }
+        if (array_key_exists('positionIds', $data)) {
+            $normalized['positionIds'] = array_values(array_unique(array_map('intval', $data['positionIds'])));
         }
         if (array_key_exists('deptIds', $data)) {
             $normalized['deptIds'] = array_values(array_unique(array_map('intval', $data['deptIds'])));

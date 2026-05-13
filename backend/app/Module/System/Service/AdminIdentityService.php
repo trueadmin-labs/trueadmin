@@ -1,6 +1,14 @@
 <?php
 
 declare(strict_types=1);
+/**
+ * This file is part of Hyperf.
+ *
+ * @link     https://www.hyperf.io
+ * @document https://hyperf.wiki
+ * @contact  group@hyperf.io
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace App\Module\System\Service;
 
@@ -49,6 +57,10 @@ final class AdminIdentityService implements AdminIdentityProviderInterface
             $user->getAttribute('primary_dept_id') === null ? null : (int) $user->getAttribute('primary_dept_id'),
             $this->users->departmentIds($user),
             is_array($user->getAttribute('preferences')) ? $user->getAttribute('preferences') : [],
+            $this->users->positions($user),
+            $this->users->directRoleCodes($user),
+            $this->users->directRoleIds($user),
+            $this->users->positionRoleBindings($user),
         );
     }
 }

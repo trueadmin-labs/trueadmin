@@ -1,22 +1,39 @@
+import { PlusOutlined } from '@ant-design/icons';
+import { App, Button, Form } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { TrueAdminCrudPage } from '@/core/crud/TrueAdminCrudPage';
+import { TrueAdminCrudPage, useCrudRecordDetail } from '@/core/crud';
+import type { CrudTableAction } from '@/core/crud/types';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { adminUserApi } from '../../services/admin-user.api';
 import { departmentApi } from '../../services/department.api';
+import { positionApi } from '../../services/position.api';
+import { type AdminRoleOption, roleApi } from '../../services/role.api';
 import type {
   AdminUser,
   AdminUserCreatePayload,
   AdminUserUpdatePayload,
 } from '../../types/admin-user';
 import type { DepartmentTreeNode } from '../../types/department';
+import type { AdminPositionOption } from '../../types/position';
+import { toDepartmentTreeSelectData } from '../departments/departmentPageModel';
 import { UserDepartmentFilter } from './UserDepartmentFilter';
+import { UserFormModal } from './UserFormModal';
 import { createUserColumns } from './UserTableColumns';
 import { createUserExtraQuery, createUserFilters } from './userPageModel';
 
 export default function AdminUsersPage() {
+  const { message } = App.useApp();
   const { t } = useI18n();
+  const [form] = Form.useForm<AdminUserCreatePayload>();
+  const [createOpen, setCreateOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const editRecord = useCrudRecordDetail<AdminUser>({ load: adminUserApi.detail });
   const [departmentTree, setDepartmentTree] = useState<DepartmentTreeNode[]>([]);
   const [departmentTreeLoading, setDepartmentTreeLoading] = useState(false);
+  const [positionOptions, setPositionOptions] = useState<AdminPositionOption[]>([]);
+  const [roleOptions, setRoleOptions] = useState<AdminRoleOption[]>([]);
+  const editing = editRecord.record;
+  const open = createOpen || editRecord.open;
 
   const reloadDepartmentTree = useCallback(async () => {
     setDepartmentTreeLoading(true);
@@ -27,9 +44,34 @@ export default function AdminUsersPage() {
     }
   }, []);
 
+  const reloadReferences = useCallback(async () => {
+    const [positions, roles] = await Promise.all([positionApi.options(), roleApi.options()]);
+    setPositionOptions(positions);
+    setRoleOptions(roles);
+  }, []);
+
   useEffect(() => {
     void reloadDepartmentTree();
   }, [reloadDepartmentTree]);
+
+  useEffect(() => {
+    void reloadReferences();
+  }, [reloadReferences]);
+
+  useEffect(() => {
+    if (!editRecord.open || !editing) {
+      return;
+    }
+
+    form.setFieldsValue({
+      deptIds: editing.deptIds,
+      nickname: editing.nickname,
+      positionIds: editing.positionIds,
+      primaryDeptId: editing.primaryDeptId ?? null,
+      status: editing.status,
+      username: editing.username,
+    });
+  }, [editRecord.open, editing, form]);
 
   const statusText = useMemo<Record<AdminUser['status'], string>>(
     () => ({
@@ -39,33 +81,65 @@ export default function AdminUsersPage() {
     [t],
   );
 
-  const roleText = useMemo<Record<string, string>>(
-    () => ({
-      admin: t('system.users.role.admin', '管理员'),
-      auditor: t('system.users.role.auditor', '审计员'),
-      operator: t('system.users.role.operator', '运营管理员'),
-      'super-admin': t('system.users.role.superAdmin', '超级管理员'),
-      super_admin: t('system.users.role.superAdmin', '超级管理员'),
-    }),
-    [t],
-  );
-
   const filters = useMemo(
-    () => createUserFilters({ roleText, statusText, t }),
-    [roleText, statusText, t],
+    () => createUserFilters({ roleOptions, statusText, t }),
+    [roleOptions, statusText, t],
   );
 
   const extraQuery = useMemo(() => createUserExtraQuery(), []);
 
-  const columns = useMemo(
-    () => createUserColumns({ roleText, statusText, t }),
-    [roleText, statusText, t],
-  );
+  const columns = useMemo(() => createUserColumns({ statusText, t }), [statusText, t]);
+
+  const treeData = useMemo(() => toDepartmentTreeSelectData(departmentTree), [departmentTree]);
+
+  const openCreate = () => {
+    editRecord.close();
+    setCreateOpen(true);
+    form.resetFields();
+    form.setFieldsValue({ status: 'enabled', deptIds: [], positionIds: [] });
+  };
+
+  const openEdit = (record: AdminUser) => {
+    setCreateOpen(false);
+    form.resetFields();
+    void editRecord.openRecord(record.id, { initialRecord: record });
+  };
+
+  const closeForm = () => {
+    setCreateOpen(false);
+    editRecord.close();
+    form.resetFields();
+  };
+
+  const submit = async (
+    action: CrudTableAction<AdminUser, AdminUserCreatePayload, AdminUserUpdatePayload>,
+  ) => {
+    const values = await form.validateFields().catch(() => undefined);
+    if (values === undefined) {
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      if (editing) {
+        const { password, ...rest } = values;
+        await action.update?.(editing.id, password ? values : rest);
+        message.success(t('system.users.success.update', '成员已保存'));
+      } else {
+        await action.create?.(values);
+        message.success(t('system.users.success.create', '成员已创建'));
+      }
+      closeForm();
+      await reloadReferences();
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <TrueAdminCrudPage<AdminUser, AdminUserCreatePayload, AdminUserUpdatePayload>
       title={t('system.users.title', '成员管理')}
-      description={t('system.users.description', '维护后台成员账号、部门归属、角色和状态。')}
+      description={t('system.users.description', '维护后台成员账号、部门归属、岗位和状态。')}
       resource="system.user"
       rowKey="id"
       columns={columns}
@@ -73,6 +147,19 @@ export default function AdminUsersPage() {
       extraQuery={extraQuery}
       quickSearch={{ placeholder: t('system.users.quickSearch.placeholder', '搜索用户名 / 昵称') }}
       filters={filters}
+      extra={
+        <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
+          {t('system.users.action.create', '新增成员')}
+        </Button>
+      }
+      rowActions={{
+        width: 150,
+        render: ({ record }) => (
+          <Button size="small" type="link" onClick={() => openEdit(record)}>
+            {t('crud.action.edit', '编辑')}
+          </Button>
+        ),
+      }}
       asideWidth={260}
       aside={({ query }) => (
         <UserDepartmentFilter
@@ -111,7 +198,25 @@ export default function AdminUsersPage() {
       paginationProps={{
         showQuickJumper: true,
       }}
-      tableScrollX={1080}
+      tableScrollX={1320}
+      tableRender={({ action }, defaultDom) => (
+        <>
+          {defaultDom}
+          <UserFormModal
+            editing={editing}
+            form={form}
+            loading={editRecord.loading}
+            open={open}
+            positionOptions={positionOptions}
+            statusText={statusText}
+            submitting={submitting}
+            t={t}
+            treeData={treeData}
+            onCancel={closeForm}
+            onSubmit={() => void submit(action)}
+          />
+        </>
+      )}
     />
   );
 }

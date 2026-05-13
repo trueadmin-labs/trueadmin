@@ -1,7 +1,7 @@
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { LoginForm, ProFormText } from '@ant-design/pro-components';
 import { appConfig } from '@config/index';
-import { App, Card, Typography } from 'antd';
+import { App, Card } from 'antd';
 import { motion } from 'motion/react';
 import { useNavigate, useSearchParams } from 'react-router';
 import { useLoginMutation } from '@/core/auth/hooks';
@@ -48,9 +48,6 @@ export default function LoginPage() {
               return true;
             }}
           >
-            <Typography.Paragraph type="secondary" className="trueadmin-login-hint">
-              默认账号：trueadmin / 123456，admin / 123456。
-            </Typography.Paragraph>
             <ProFormText
               name="username"
               fieldProps={{ size: 'large', prefix: <UserOutlined /> }}

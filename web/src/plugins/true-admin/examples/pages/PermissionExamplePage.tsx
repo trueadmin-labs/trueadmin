@@ -35,7 +35,7 @@ export default function PermissionExamplePage() {
         <Alert
           showIcon
           type="info"
-          message={t('examples.permission.alert.message', '这个页面用于确认权限展示分层')}
+          title={t('examples.permission.alert.message', '这个页面用于确认权限展示分层')}
           description={t(
             'examples.permission.alert.description',
             '页面级无权限、局部组件无权限、接口级无权限分别走不同展示方式。',

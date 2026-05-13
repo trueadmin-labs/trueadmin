@@ -1,18 +1,26 @@
 <?php
 
 declare(strict_types=1);
+/**
+ * This file is part of Hyperf.
+ *
+ * @link     https://www.hyperf.io
+ * @document https://hyperf.wiki
+ * @contact  group@hyperf.io
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace App\Module\Auth\Http\Admin\Middleware;
 
-use TrueAdmin\Kernel\Constant\ErrorCode;
-use TrueAdmin\Kernel\Exception\BusinessException;
-use TrueAdmin\Kernel\Context\ActorFactory;
 use App\Module\Auth\Service\PassportService;
 use Psr\Http\Message\ResponseInterface;
-use TrueAdmin\Kernel\Context\ActorContext;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use TrueAdmin\Kernel\Constant\ErrorCode;
+use TrueAdmin\Kernel\Context\Actor;
+use TrueAdmin\Kernel\Context\ActorContext;
+use TrueAdmin\Kernel\Exception\BusinessException;
 
 final class AdminAuthMiddleware implements MiddlewareInterface
 {
@@ -34,18 +42,26 @@ final class AdminAuthMiddleware implements MiddlewareInterface
 
         $user = $this->passportService->userFromToken($token);
         $operationDeptId = $this->operationDeptId($request->getHeaderLine('X-Operation-Dept-Id'), $user->deptIds, $user->primaryDeptId);
-        ActorContext::set(ActorFactory::fromAdmin(
+        ActorContext::set(new Actor(
+            type: 'admin',
             id: $user->id,
-            username: $user->username,
-            nickname: $user->nickname,
-            avatar: $user->avatar,
-            roles: $user->roles,
-            roleIds: $user->roleIds,
-            permissions: $user->permissions,
-            primaryDeptId: $user->primaryDeptId,
-            deptIds: $user->deptIds,
-            operationDeptId: $operationDeptId,
-            preferences: $user->preferences,
+            name: $user->username,
+            source: 'http',
+            claims: [
+                'nickname' => $user->nickname,
+                'avatar' => $user->avatar,
+                'roles' => $user->roles,
+                'roleIds' => $user->roleIds,
+                'permissions' => $user->permissions,
+                'primaryDeptId' => $user->primaryDeptId,
+                'deptIds' => $user->deptIds,
+                'operationDeptId' => $operationDeptId,
+                'preferences' => $user->preferences,
+                'positions' => $user->positions,
+                'directRoles' => $user->directRoles,
+                'directRoleIds' => $user->directRoleIds,
+                'positionRoleBindings' => $user->positionRoleBindings,
+            ],
         ));
 
         return $handler->handle($request);
