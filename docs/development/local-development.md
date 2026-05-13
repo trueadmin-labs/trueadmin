@@ -105,6 +105,14 @@ php backend/bin/hyperf.php migrate:fresh --seed
 composer --working-dir=backend start
 ```
 
+`SystemSeeder` 会初始化一套轻量组织样例，方便首次安装后直接理解岗位权限模型：
+
+- 部门：总部、总经办、销售部、财务部、仓储部、技术部。
+- 角色权限包：超级管理员、管理员、销售管理、财务管理、仓储管理、技术管理、普通成员。
+- 岗位：总部内置管理员岗位，以及各业务部门的负责人和普通成员岗位。
+- 岗位默认在部门管理中按部门维护，独立岗位路由保留为高级维护入口，不在默认导航中展示。
+- 默认账号仍只创建 `trueadmin` 和 `admin`，不会创建额外示例成员账号。
+
 修改注解、AOP、插件扫描路径或执行 `composer dump-autoload` 后，必须重启 Hyperf。`composer dump-autoload` 会清理 `runtime/container`，运行中的 worker 如果继续引用旧代理文件，可能出现偶发 `KERNEL.SERVER.INTERNAL_ERROR`。本地可用以下命令重启：
 
 ```bash

@@ -78,6 +78,57 @@ export type ModuleProfileManifest = {
   preferences?: ProfilePreferenceManifest[];
 };
 
+export type WorkbenchSlot =
+  | 'header.main'
+  | 'header.actions'
+  | 'notice'
+  | 'overview.metrics'
+  | 'overview.shortcuts'
+  | 'main.priority'
+  | 'main.focus'
+  | 'aside.top'
+  | 'aside.middle'
+  | 'aside.bottom'
+  | 'insights.left'
+  | 'insights.right'
+  | 'operations'
+  | 'activity'
+  | 'bottom.full';
+
+export type WorkbenchWidgetSize = 'compact' | 'normal' | 'tall' | 'full';
+
+export type WorkbenchWidgetOverflow = 'hidden' | 'auto' | 'visible';
+
+export type WorkbenchWidgetSpan = 6 | 8 | 12 | 16 | 24;
+
+export type WorkbenchWidgetRenderContext = {
+  source: string;
+  slot: WorkbenchSlot;
+  widget: WorkbenchWidgetManifest;
+};
+
+export type WorkbenchWidgetComponent = ComponentType<WorkbenchWidgetRenderContext>;
+
+export type WorkbenchWidgetManifest = {
+  key: string;
+  slot: WorkbenchSlot;
+  title?: string | TransText;
+  description?: string | TransText;
+  order?: number;
+  span?: WorkbenchWidgetSpan;
+  size?: WorkbenchWidgetSize;
+  height?: number;
+  minHeight?: number;
+  maxHeight?: number;
+  overflow?: WorkbenchWidgetOverflow;
+  permission?: string;
+  component?: WorkbenchWidgetComponent;
+};
+
+export type ModuleWorkbenchManifest = {
+  widgets?: WorkbenchWidgetManifest[];
+};
+
 export type ModuleManifest = {
   id: string;
   routes?: FrontendRoute[];
@@ -86,6 +137,7 @@ export type ModuleManifest = {
   errors?: ErrorRegistry;
   notification?: ModuleNotificationManifest;
   profile?: ModuleProfileManifest;
+  workbench?: ModuleWorkbenchManifest;
 };
 
 export const defineModule = <T extends ModuleManifest>(manifest: T): T => manifest;

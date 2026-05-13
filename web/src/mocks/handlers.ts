@@ -351,7 +351,7 @@ const menuPermissionTree: AdminMenu[] = [
         id: 130,
         parentId: 100,
         code: 'system.positions',
-        type: 'menu',
+        type: 'button',
         name: '岗位管理',
         path: '/organization/positions',
         url: '',
@@ -967,6 +967,194 @@ export const handlers = [
   http.get('/api/admin/system-config/menu-tree', () =>
     success([
       {
+        code: 'true-admin.examples',
+        title: '开发示例',
+        i18n: 'menu.true-admin.examples',
+        path: '/examples',
+        icon: 'true-admin.examples.logo',
+        type: 'directory',
+        status: 'enabled',
+        children: [
+          {
+            code: 'true-admin.examples.permission',
+            title: '权限展示',
+            i18n: 'menu.true-admin.examples.permission',
+            path: '/examples/permission',
+            icon: 'LockOutlined',
+            type: 'menu',
+            status: 'enabled',
+          },
+          {
+            code: 'true-admin.examples.loading',
+            title: '加载态展示',
+            i18n: 'menu.true-admin.examples.loading',
+            path: '/examples/loading',
+            icon: 'SyncOutlined',
+            type: 'menu',
+            status: 'enabled',
+          },
+          {
+            code: 'true-admin.examples.pageContainer',
+            title: '页面容器',
+            i18n: 'menu.true-admin.examples.pageContainer',
+            path: '/examples/page-container',
+            icon: 'AppstoreOutlined',
+            type: 'menu',
+            status: 'enabled',
+          },
+          {
+            code: 'true-admin.examples.crud',
+            title: 'CRUD 页面',
+            i18n: 'menu.true-admin.examples.crud',
+            path: '/examples/crud',
+            icon: 'TableOutlined',
+            type: 'menu',
+            status: 'enabled',
+          },
+          {
+            code: 'true-admin.examples.components',
+            title: '通用组件',
+            i18n: 'menu.true-admin.examples.components',
+            path: '/examples/components',
+            icon: 'AppstoreOutlined',
+            type: 'directory',
+            status: 'enabled',
+            children: [
+              {
+                code: 'true-admin.examples.formControls',
+                title: '表单控件',
+                i18n: 'menu.true-admin.examples.formControls',
+                path: '/examples/form-controls',
+                icon: 'AppstoreOutlined',
+                type: 'menu',
+                status: 'enabled',
+              },
+              {
+                code: 'true-admin.examples.attachments',
+                title: '附件上传',
+                i18n: 'menu.true-admin.examples.attachments',
+                path: '/examples/attachments',
+                icon: 'AppstoreOutlined',
+                type: 'menu',
+                status: 'enabled',
+              },
+              {
+                code: 'true-admin.examples.display',
+                title: '数据展示',
+                i18n: 'menu.true-admin.examples.display',
+                path: '/examples/display',
+                icon: 'AppstoreOutlined',
+                type: 'menu',
+                status: 'enabled',
+              },
+              {
+                code: 'true-admin.examples.markdown',
+                title: 'Markdown',
+                i18n: 'menu.true-admin.examples.markdown',
+                path: '/examples/markdown',
+                icon: 'AppstoreOutlined',
+                type: 'menu',
+                status: 'enabled',
+              },
+              {
+                code: 'true-admin.examples.actions',
+                title: '操作反馈',
+                i18n: 'menu.true-admin.examples.actions',
+                path: '/examples/actions',
+                icon: 'AppstoreOutlined',
+                type: 'menu',
+                status: 'enabled',
+              },
+              {
+                code: 'true-admin.examples.audit',
+                title: '审计日志',
+                i18n: 'menu.true-admin.examples.audit',
+                path: '/examples/audit',
+                icon: 'AppstoreOutlined',
+                type: 'menu',
+                status: 'enabled',
+              },
+            ],
+          },
+          {
+            code: 'true-admin.examples.selector',
+            title: '选择器',
+            i18n: 'menu.true-admin.examples.selector',
+            path: '/examples/selector',
+            icon: 'AppstoreOutlined',
+            type: 'menu',
+            status: 'enabled',
+          },
+          {
+            code: 'true-admin.examples.stream',
+            title: '流式响应',
+            i18n: 'menu.true-admin.examples.stream',
+            path: '/examples/stream',
+            icon: 'SyncOutlined',
+            type: 'menu',
+            status: 'enabled',
+          },
+          {
+            code: 'true-admin.examples.notification',
+            title: '站内消息',
+            i18n: 'menu.true-admin.examples.notification',
+            path: '/examples/notification',
+            icon: 'BellOutlined',
+            type: 'menu',
+            status: 'enabled',
+          },
+          {
+            code: 'true-admin.examples.complexForm',
+            title: '复杂表单',
+            i18n: 'menu.true-admin.examples.complexForm',
+            path: '/examples/complex-form',
+            icon: 'AppstoreOutlined',
+            type: 'menu',
+            status: 'enabled',
+          },
+          {
+            code: 'true-admin.examples.complexDetail',
+            title: '复杂详情',
+            i18n: 'menu.true-admin.examples.complexDetail',
+            path: '/examples/complex-detail',
+            icon: 'AppstoreOutlined',
+            type: 'menu',
+            status: 'enabled',
+          },
+          {
+            code: 'true-admin.examples.multilevel',
+            title: '多级菜单',
+            i18n: 'menu.true-admin.examples.multilevel',
+            path: '/examples/multilevel',
+            icon: 'AppstoreOutlined',
+            type: 'directory',
+            status: 'enabled',
+            children: [
+              {
+                code: 'true-admin.examples.multilevel.second',
+                title: '二级菜单',
+                i18n: 'menu.true-admin.examples.multilevel.second',
+                path: '/examples/multilevel/second',
+                icon: 'AppstoreOutlined',
+                type: 'directory',
+                status: 'enabled',
+                children: [
+                  {
+                    code: 'true-admin.examples.multilevel.second.third',
+                    title: '三级菜单',
+                    i18n: 'menu.true-admin.examples.multilevel.third',
+                    path: '/examples/multilevel/second/third',
+                    icon: 'AppstoreOutlined',
+                    type: 'menu',
+                    status: 'enabled',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      {
         code: 'system.messages',
         title: '消息中心',
         i18n: 'menu.system.messages',
@@ -999,15 +1187,6 @@ export const handlers = [
             i18n: 'menu.system.users',
             path: '/organization/users',
             icon: 'UserOutlined',
-            type: 'menu',
-            status: 'enabled',
-          },
-          {
-            code: 'system.positions',
-            title: '岗位管理',
-            i18n: 'menu.system.positions',
-            path: '/organization/positions',
-            icon: 'IdcardOutlined',
             type: 'menu',
             status: 'enabled',
           },
@@ -1472,11 +1651,20 @@ export const handlers = [
     const pageSize = Number(url.searchParams.get('pageSize') || 20);
     const keyword = url.searchParams.get('keyword')?.trim().toLowerCase();
     const status = getCrudFilter(url, 'status');
+    const deptIds = new Set(
+      getCrudFilter(url, 'deptId')
+        .split(',')
+        .map((id) => Number(id))
+        .filter((id) => Number.isInteger(id) && id > 0),
+    );
     const filtered = positions.filter((position) => {
       if (keyword && !`${position.name} ${position.code}`.toLowerCase().includes(keyword)) {
         return false;
       }
       if (status && position.status !== status) {
+        return false;
+      }
+      if (deptIds.size > 0 && !deptIds.has(position.deptId)) {
         return false;
       }
       return true;

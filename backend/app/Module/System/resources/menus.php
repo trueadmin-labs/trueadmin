@@ -75,7 +75,7 @@ return [
         'parent' => 'organization',
         'permission' => 'system:user:list',
         'icon' => 'UserOutlined',
-        'sort' => 20,
+        'sort' => 50,
         'type' => 'menu',
     ],
     [
@@ -118,7 +118,7 @@ return [
         'permission' => 'system:position:list',
         'icon' => 'IdcardOutlined',
         'sort' => 25,
-        'type' => 'menu',
+        'type' => 'button',
     ],
     [
         'code' => 'system.positions.detail',

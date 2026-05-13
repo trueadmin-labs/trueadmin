@@ -39,6 +39,11 @@ export default {
   'system.departments.success.update': 'Department saved',
   'system.departments.deleteConfirm': 'Delete this department?',
   'system.departments.deleteSuccess': 'Department deleted',
+  'system.departments.positions.title': 'Department Positions',
+  'system.departments.positions.empty': 'Select a department to view positions',
+  'system.departments.positions.action.open': 'Positions',
+  'system.departments.positions.action.create': 'Create Position',
+  'system.departments.positions.count': '{{count}} positions',
   'system.roles.title': 'Role Management',
   'system.roles.description':
     'Maintain admin roles, feature permissions, and data policies. Roles are flat permission sets, not organization hierarchy.',

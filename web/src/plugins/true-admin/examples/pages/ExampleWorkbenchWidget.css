@@ -1,0 +1,114 @@
+.trueadmin-example-workbench {
+  display: grid;
+  min-width: 0;
+  gap: 8px;
+}
+
+.trueadmin-example-workbench-context {
+  gap: 4px;
+}
+
+.trueadmin-example-workbench-action-grid,
+.trueadmin-example-workbench-shortcuts {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
+  gap: 8px;
+}
+
+.trueadmin-example-workbench-action-grid .ant-btn,
+.trueadmin-example-workbench-shortcuts .ant-btn {
+  min-width: 0;
+}
+
+.trueadmin-example-workbench-notice {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-content: flex-start;
+}
+
+.trueadmin-example-workbench-notice .ant-tag {
+  max-width: 100%;
+  margin-inline-end: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trueadmin-example-workbench-metric {
+  gap: 6px;
+}
+
+.trueadmin-example-workbench-value {
+  margin-inline-end: 8px;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.trueadmin-example-workbench-list {
+  display: grid;
+  min-width: 0;
+  gap: 8px;
+}
+
+.trueadmin-example-workbench-row {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+}
+
+.trueadmin-example-workbench-row .ant-typography {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trueadmin-example-workbench-pipeline {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+  gap: 10px;
+}
+
+.trueadmin-example-workbench-step {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+  padding: 10px;
+  border-radius: 6px;
+  background: var(--ant-color-fill-quaternary, rgba(0, 0, 0, 0.02));
+}
+
+.trueadmin-example-workbench-step span {
+  display: inline-grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border-radius: 999px;
+  color: #0958d9;
+  background: rgba(22, 119, 255, 0.12);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.trueadmin-example-workbench-bar {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(72px, 120px) minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+
+.trueadmin-shell.is-dark .trueadmin-example-workbench-step {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.trueadmin-shell.is-dark .trueadmin-example-workbench-step span {
+  color: #91caff;
+  background: rgba(22, 119, 255, 0.22);
+}

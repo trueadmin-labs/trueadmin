@@ -9,7 +9,7 @@ return [
         'true-admin.examples' => [
             'path' => BASE_PATH . '/plugins/true-admin/examples',
             'version' => '0.1.0',
-            'enabled' => false,
+            'enabled' => true,
             'defaults' => [],
         ],
     ],

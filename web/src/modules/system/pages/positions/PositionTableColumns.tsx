@@ -4,16 +4,21 @@ import type { CrudColumns } from '@/core/crud/types';
 import type { AdminPosition } from '../../types/position';
 
 type PositionColumnsOptions = {
+  showDepartment?: boolean;
+  showId?: boolean;
   statusText: Record<AdminPosition['status'], string>;
+  sortable?: boolean;
   t: TranslateFunction;
 };
 
 export function createPositionColumns({
+  showDepartment = true,
+  showId = true,
   statusText,
+  sortable = true,
   t,
 }: PositionColumnsOptions): CrudColumns<AdminPosition> {
-  return [
-    { title: 'ID', dataIndex: 'id', width: 80, sorter: true },
+  const columns: CrudColumns<AdminPosition> = [
     {
       title: t('system.positions.column.name', '岗位名称'),
       dataIndex: 'name',
@@ -24,12 +29,6 @@ export function createPositionColumns({
           <Typography.Text type="secondary">{record.code}</Typography.Text>
         </Space>
       ),
-    },
-    {
-      title: t('system.positions.column.department', '所属部门'),
-      dataIndex: 'deptPath',
-      width: 260,
-      render: (_, record) => record.deptPath || record.deptName,
     },
     {
       title: t('system.positions.column.roles', '绑定角色'),
@@ -63,7 +62,22 @@ export function createPositionColumns({
       title: t('system.positions.column.sort', '排序'),
       dataIndex: 'sort',
       width: 90,
-      sorter: true,
+      sorter: sortable,
     },
   ];
+
+  if (showDepartment) {
+    columns.splice(1, 0, {
+      title: t('system.positions.column.department', '所属部门'),
+      dataIndex: 'deptPath',
+      width: 260,
+      render: (_, record) => record.deptPath || record.deptName,
+    });
+  }
+
+  if (showId) {
+    columns.unshift({ title: 'ID', dataIndex: 'id', width: 80, sorter: sortable });
+  }
+
+  return columns;
 }

@@ -20,6 +20,7 @@ import type { AdminPosition } from '../../types/position';
 import type { PositionFormValues } from './positionPageModel';
 
 type PositionFormModalProps = {
+  departmentSelectDisabled?: boolean;
   editing?: AdminPosition;
   form: FormInstance<PositionFormValues>;
   loading?: boolean;
@@ -35,6 +36,7 @@ type PositionFormModalProps = {
 };
 
 export function PositionFormModal({
+  departmentSelectDisabled = false,
   editing,
   form,
   loading = false,
@@ -98,6 +100,7 @@ export function PositionFormModal({
           >
             <TreeSelect
               showSearch
+              disabled={departmentSelectDisabled}
               treeData={treeData}
               treeDefaultExpandAll
               treeNodeFilterProp="title"

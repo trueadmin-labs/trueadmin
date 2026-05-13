@@ -38,6 +38,11 @@ export default {
   'system.departments.success.update': '部门已保存',
   'system.departments.deleteConfirm': '确认删除该部门吗？',
   'system.departments.deleteSuccess': '部门已删除',
+  'system.departments.positions.title': '部门岗位',
+  'system.departments.positions.empty': '选择部门后查看岗位',
+  'system.departments.positions.action.open': '岗位',
+  'system.departments.positions.action.create': '新增岗位',
+  'system.departments.positions.count': '{{count}} 个岗位',
   'system.roles.title': '角色管理',
   'system.roles.description':
     '维护后台角色、功能权限和数据权限。角色是平铺的权限集合，不表达组织层级。',

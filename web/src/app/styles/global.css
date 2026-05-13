@@ -1549,105 +1549,11 @@ body,
   background: var(--trueadmin-color-primary-bg, rgba(22, 119, 255, 0.08));
 }
 
-.trueadmin-workbench-stack {
-  width: 100%;
-}
-
-.trueadmin-workbench-summary {
-  display: flex;
-  min-height: 88px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 20px 24px;
-  border: 1px solid var(--trueadmin-shell-border);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.78);
-}
-
-.trueadmin-workbench-summary .ant-typography {
-  margin-bottom: 0;
-}
-
-.trueadmin-workbench-metric {
-  min-height: 116px;
-}
-
-.trueadmin-workbench-metric .ant-card-body {
-  position: relative;
-  display: grid;
-  gap: 8px;
-}
-
-.trueadmin-workbench-metric-icon {
-  display: inline-grid;
-  width: 32px;
-  height: 32px;
-  place-items: center;
-  border-radius: 6px;
-  color: #1677ff;
-  background: rgba(22, 119, 255, 0.08);
-}
-
-.trueadmin-workbench-metric-trend {
-  position: absolute;
-  inset-block-start: 16px;
-  inset-inline-end: 16px;
-  font-size: 12px;
-}
-
-.trueadmin-workbench-shortcuts {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(136px, 1fr));
-  gap: 10px;
-}
-
-.trueadmin-workbench-shortcuts .ant-btn {
-  justify-content: flex-start;
-  height: 38px;
-}
-
-.trueadmin-workbench-list,
 .trueadmin-example-list,
 .trueadmin-message-list {
   padding: 0;
   margin: 0;
   list-style: none;
-}
-
-.trueadmin-workbench-list-item {
-  display: flex;
-  min-height: 48px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 10px 0;
-  border-block-end: 1px solid var(--ant-color-border-secondary, rgba(5, 5, 5, 0.06));
-}
-
-.trueadmin-workbench-list-item:last-child {
-  border-block-end: 0;
-}
-
-.trueadmin-workbench-list-item:not(.is-actionable) {
-  justify-content: flex-start;
-}
-
-.trueadmin-workbench-list-content {
-  display: grid;
-  min-width: 0;
-  gap: 2px;
-}
-
-.trueadmin-workbench-health-list {
-  width: 100%;
-}
-
-.trueadmin-workbench-health-item {
-  display: grid;
-  grid-template-columns: minmax(128px, 180px) 1fr;
-  gap: 16px;
-  align-items: center;
 }
 
 .trueadmin-role-authorize-modal .ant-modal-body {
@@ -1832,27 +1738,7 @@ body,
   width: 100%;
 }
 
-.trueadmin-shell.is-dark .trueadmin-workbench-summary {
-  border-color: var(--trueadmin-shell-dark-border);
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.trueadmin-shell.is-dark .trueadmin-workbench-metric-icon {
-  color: #69b1ff;
-  background: rgba(22, 119, 255, 0.16);
-}
-
 @media (max-width: 768px) {
-  .trueadmin-workbench-summary {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .trueadmin-workbench-health-item {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-
   .trueadmin-data-policy-row,
   .trueadmin-data-policy-main-row,
   .trueadmin-data-policy-departments-row {

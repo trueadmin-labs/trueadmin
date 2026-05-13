@@ -1,210 +1,320 @@
+import { AppstoreOutlined, ClockCircleOutlined, UserOutlined } from '@ant-design/icons';
 import {
-  ApiOutlined,
-  CheckCircleOutlined,
-  ClockCircleOutlined,
-  DatabaseOutlined,
-  SafetyCertificateOutlined,
-  TeamOutlined,
-  UserOutlined,
-} from '@ant-design/icons';
-import { Badge, Button, Card, Col, Progress, Row, Space, Statistic, Tag, Typography } from 'antd';
+  Avatar,
+  Badge,
+  Button,
+  Card,
+  Col,
+  Descriptions,
+  Empty,
+  Flex,
+  List,
+  Row,
+  Skeleton,
+  Space,
+  Tabs,
+  Tag,
+  Typography,
+} from 'antd';
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router';
+import { useTabsStore } from '@/app/layout/tabs/tabsStore';
+import { useCurrentUserQuery } from '@/core/auth';
+import type { CurrentAdminUser } from '@/core/auth/types';
 import { useI18n } from '@/core/i18n/I18nProvider';
+import { TrueAdminIcon } from '@/core/icon/TrueAdminIcon';
+import { useMenuTreeQuery } from '@/core/menu/hooks';
+import type { BackendMenu } from '@/core/menu/types';
 import { TrueAdminPage } from '@/core/page/TrueAdminPage';
 
 const { Text, Title } = Typography;
 
-const useWorkbenchData = (t: (key?: string, fallback?: string) => string) => ({
-  metrics: [
-    {
-      key: 'pending',
-      title: t('workbench.metric.pending', '待处理'),
-      value: 6,
-      suffix: '',
-      icon: <ClockCircleOutlined />,
-      trend: t('workbench.metric.trend.new', '+2'),
-    },
-    {
-      key: 'online',
-      title: t('workbench.metric.online', '在线用户'),
-      value: 128,
-      suffix: '',
-      icon: <TeamOutlined />,
-      trend: t('workbench.metric.trend.online', '+12%'),
-    },
-    {
-      key: 'api',
-      title: t('workbench.metric.api', '接口成功率'),
-      value: 99.8,
-      suffix: '%',
-      icon: <ApiOutlined />,
-      trend: t('workbench.metric.trend.day', '24 小时'),
-    },
-    {
-      key: 'risk',
-      title: t('workbench.metric.risk', '风险提醒'),
-      value: 1,
-      suffix: '',
-      icon: <SafetyCertificateOutlined />,
-      trend: t('workbench.metric.trend.low', '低'),
-    },
-  ],
-  todos: [
-    {
-      title: t('workbench.todo.userAudit', '复核新成员账号'),
-      time: t('workbench.todo.minutesAgo', '18 分钟前').replace('{{count}}', '18'),
-      status: 'processing' as const,
-    },
-    {
-      title: t('workbench.todo.permission', '确认权限变更申请'),
-      time: t('workbench.todo.minutesAgo', '42 分钟前').replace('{{count}}', '42'),
-      status: 'warning' as const,
-    },
-    {
-      title: t('workbench.todo.backup', '检查备份任务结果'),
-      time: t('workbench.todo.minutesAgo', '55 分钟前').replace('{{count}}', '55'),
-      status: 'default' as const,
-    },
-  ],
-  shortcuts: [
-    {
-      label: t('workbench.quick.users', '成员管理'),
-      path: '/organization/users',
-      icon: <UserOutlined />,
-    },
-    {
-      label: t('workbench.quick.permission', '权限示例'),
-      path: '/examples/permission',
-      icon: <SafetyCertificateOutlined />,
-    },
-    {
-      label: t('workbench.quick.loading', '加载态示例'),
-      path: '/examples/loading',
-      icon: <ClockCircleOutlined />,
-    },
-  ],
-  health: [
-    {
-      label: t('workbench.health.auth', '认证服务'),
-      value: 100,
-      icon: <SafetyCertificateOutlined />,
-    },
-    { label: t('workbench.health.database', '数据库连接'), value: 96, icon: <DatabaseOutlined /> },
-    { label: t('workbench.health.queue', '后台队列'), value: 88, icon: <ApiOutlined /> },
-  ],
-  recent: [
-    { label: t('workbench.recent.users', '成员管理'), path: '/organization/users' },
-    { label: t('workbench.recent.loading', '加载态展示'), path: '/examples/loading' },
-    {
-      label: t('workbench.recent.multilevel', '多级菜单'),
-      path: '/examples/multilevel/second/third',
-    },
-  ],
-});
+type Translate = (key?: string, fallback?: string) => string;
+
+type WorkbenchMenuSummary = {
+  enabled: number;
+  navigable: BackendMenu[];
+};
+
+const flattenMenus = (menus: BackendMenu[] = []): BackendMenu[] =>
+  menus.flatMap((menu) => [menu, ...flattenMenus(menu.children ?? [])]);
+
+const isEnabledMenu = (menu: BackendMenu) => menu.status !== 'disabled';
+
+const isNavigableMenu = (menu: BackendMenu) =>
+  isEnabledMenu(menu) && menu.type !== 'button' && Boolean(menu.path || menu.url);
+
+const resolveMenuTitle = (menu: BackendMenu, t: Translate) =>
+  menu.i18n ? t(menu.i18n, menu.title) : menu.title || menu.code || menu.path;
+
+const summarizeMenus = (menus: BackendMenu[] = []): WorkbenchMenuSummary => {
+  const enabledMenus = flattenMenus(menus).filter(isEnabledMenu);
+
+  return {
+    enabled: enabledMenus.length,
+    navigable: enabledMenus.filter(isNavigableMenu),
+  };
+};
+
+const getGreeting = () => {
+  const hour = new Date().getHours();
+
+  if (hour < 6) {
+    return '夜深了';
+  }
+  if (hour < 12) {
+    return '早上好';
+  }
+  if (hour < 18) {
+    return '下午好';
+  }
+
+  return '晚上好';
+};
+
+const getDisplayName = (user?: CurrentAdminUser) => user?.nickname || user?.username || '管理员';
+
+const getUserRoles = (user?: CurrentAdminUser) =>
+  user?.effectiveRoles?.length ? user.effectiveRoles : (user?.roles ?? []);
+
+const getRecordText = (record: Record<string, unknown>, keys: string[]) => {
+  for (const key of keys) {
+    const value = record[key];
+
+    if (typeof value === 'string' && value.trim()) {
+      return value;
+    }
+    if (typeof value === 'number') {
+      return String(value);
+    }
+  }
+
+  return undefined;
+};
+
+const getPositionLabels = (user?: CurrentAdminUser) =>
+  (user?.positions ?? []).map(
+    (position, index) =>
+      getRecordText(position, ['name', 'title', 'positionName', 'code']) ?? `岗位 ${index + 1}`,
+  );
+
+const getErrorMessage = (error: unknown) =>
+  error instanceof Error ? error.message : error ? String(error) : '';
 
 export default function WorkbenchPage() {
-  const { t } = useI18n();
   const navigate = useNavigate();
-  const data = useWorkbenchData(t);
+  const { t } = useI18n();
+  const { data: currentUser, error: userError, isLoading: userLoading } = useCurrentUserQuery();
+  const { data: menuTree, error: menuError, isLoading: menuLoading } = useMenuTreeQuery();
+  const tabs = useTabsStore((state) => state.tabs);
+
+  const menuSummary = useMemo(() => summarizeMenus(menuTree), [menuTree]);
+  const quickMenus = useMemo(
+    () => menuSummary.navigable.filter((menu) => menu.path !== '/').slice(0, 10),
+    [menuSummary.navigable],
+  );
+  const recentTabs = useMemo(
+    () =>
+      [...tabs]
+        .filter((tab) => !tab.home)
+        .sort((left, right) => right.openedAt - left.openedAt)
+        .slice(0, 6),
+    [tabs],
+  );
+
+  const roleList = getUserRoles(currentUser);
+  const positionLabels = getPositionLabels(currentUser);
+  const loading = userLoading || menuLoading;
+
+  const statusItems = [
+    userError
+      ? {
+          key: 'user-error',
+          status: 'error' as const,
+          title: '用户信息加载失败',
+          description: getErrorMessage(userError),
+        }
+      : {
+          key: 'user',
+          status: currentUser ? ('success' as const) : ('processing' as const),
+          title: currentUser ? '当前用户已就绪' : '正在加载当前用户',
+          description: currentUser ? `账号：${currentUser.username}` : '等待后端返回账号资料',
+        },
+    menuError
+      ? {
+          key: 'menu-error',
+          status: 'error' as const,
+          title: '菜单树加载失败',
+          description: getErrorMessage(menuError),
+        }
+      : {
+          key: 'menu',
+          status: menuLoading ? ('processing' as const) : ('success' as const),
+          title: menuLoading ? '正在加载菜单' : `可访问入口 ${menuSummary.navigable.length} 个`,
+          description: menuLoading ? '等待后端返回菜单资源' : `启用资源 ${menuSummary.enabled} 个`,
+        },
+  ];
+
+  const openMenu = (menu: BackendMenu) => {
+    if (menu.path) {
+      navigate(menu.path);
+      return;
+    }
+
+    if (menu.url) {
+      window.open(menu.url, '_blank', 'noopener,noreferrer');
+    }
+  };
 
   return (
-    <TrueAdminPage className="trueadmin-workbench">
-      <Space orientation="vertical" size={16} className="trueadmin-workbench-stack">
-        <section className="trueadmin-workbench-summary">
-          <div>
-            <Title level={4}>{t('workbench.greeting', '早上好，超级管理员')}</Title>
-            <Text type="secondary">
-              {t('workbench.summary', '当前系统运行稳定，今日还有 6 项事务待处理。')}
-            </Text>
-          </div>
-          <Tag icon={<CheckCircleOutlined />} color="success">
-            {t('workbench.health.normal', '正常')}
-          </Tag>
-        </section>
-
+    <TrueAdminPage>
+      <Space direction="vertical" size={16}>
         <Row gutter={[16, 16]}>
-          {data.metrics.map((metric) => (
-            <Col key={metric.key} xs={24} sm={12} lg={6}>
-              <Card size="small" className="trueadmin-workbench-metric">
-                <div className="trueadmin-workbench-metric-icon">{metric.icon}</div>
-                <Statistic
-                  title={metric.title}
-                  value={metric.value}
-                  suffix={metric.suffix}
-                  precision={metric.suffix === '%' ? 1 : 0}
-                />
-                <Text type="secondary" className="trueadmin-workbench-metric-trend">
-                  {metric.trend}
-                </Text>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-
-        <Row gutter={[16, 16]} align="stretch">
-          <Col xs={24} xl={14}>
-            <Card size="small" title={t('workbench.todo.title', '待办事项')}>
-              <ul className="trueadmin-workbench-list">
-                {data.todos.map((item) => (
-                  <li key={item.title} className="trueadmin-workbench-list-item">
-                    <Badge status={item.status} />
-                    <div className="trueadmin-workbench-list-content">
-                      <Text>{item.title}</Text>
-                      <Text type="secondary">{item.time}</Text>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </Card>
-          </Col>
-          <Col xs={24} xl={10}>
-            <Card size="small" title={t('workbench.quick.title', '快捷入口')}>
-              <div className="trueadmin-workbench-shortcuts">
-                {data.shortcuts.map((shortcut) => (
-                  <Button
-                    key={shortcut.path}
-                    icon={shortcut.icon}
-                    onClick={() => navigate(shortcut.path)}
-                  >
-                    {shortcut.label}
-                  </Button>
-                ))}
-              </div>
-            </Card>
-          </Col>
-        </Row>
-
-        <Row gutter={[16, 16]} align="stretch">
-          <Col xs={24} xl={14}>
-            <Card size="small" title={t('workbench.health.title', '系统状态')}>
-              <Space orientation="vertical" size={14} className="trueadmin-workbench-health-list">
-                {data.health.map((item) => (
-                  <div key={item.label} className="trueadmin-workbench-health-item">
-                    <Space>
-                      {item.icon}
-                      <Text>{item.label}</Text>
+          <Col xs={24} lg={16}>
+            <Card>
+              <Skeleton active avatar paragraph={{ rows: 2 }} loading={userLoading}>
+                <Flex align="center" gap={16} justify="space-between" wrap>
+                  <Flex align="center" gap={16} wrap>
+                    <Avatar size={72} src={currentUser?.avatar} icon={<UserOutlined />} />
+                    <Space direction="vertical" size={4}>
+                      <Title level={3}>
+                        {getGreeting()}，{getDisplayName(currentUser)}
+                      </Title>
+                      <Text type="secondary">@{currentUser?.username ?? '-'}</Text>
+                      <Space size={[6, 6]} wrap>
+                        {roleList.slice(0, 3).map((role) => (
+                          <Tag color="blue" key={role}>
+                            {role}
+                          </Tag>
+                        ))}
+                        {roleList.length > 3 ? <Tag>+{roleList.length - 3}</Tag> : null}
+                      </Space>
                     </Space>
-                    <Progress percent={item.value} size="small" status="active" />
-                  </div>
-                ))}
-              </Space>
+                  </Flex>
+                  <Button type="primary" onClick={() => navigate('/profile')}>
+                    个人中心
+                  </Button>
+                </Flex>
+
+                <Descriptions
+                  column={{ xs: 1, sm: 2, md: 4 }}
+                  items={[
+                    {
+                      key: 'deptScope',
+                      label: '部门范围',
+                      children: currentUser?.deptIds?.length ?? 0,
+                    },
+                    {
+                      key: 'positions',
+                      label: '岗位',
+                      children: positionLabels.length,
+                    },
+                    {
+                      key: 'primaryDept',
+                      label: '主部门',
+                      children: currentUser?.primaryDeptId ?? '-',
+                    },
+                    {
+                      key: 'operationDept',
+                      label: '操作部门',
+                      children: currentUser?.operationDeptId ?? '-',
+                    },
+                  ]}
+                  size="small"
+                />
+              </Skeleton>
             </Card>
           </Col>
-          <Col xs={24} xl={10}>
-            <Card size="small" title={t('workbench.recent.title', '最近访问')}>
-              <ul className="trueadmin-workbench-list">
-                {data.recent.map((item) => (
-                  <li key={item.path} className="trueadmin-workbench-list-item is-actionable">
-                    <Text>{item.label}</Text>
-                    <Button type="link" onClick={() => navigate(item.path)}>
-                      {t('workbench.action.open', '打开')}
-                    </Button>
-                  </li>
-                ))}
-              </ul>
+
+          <Col xs={24} lg={8}>
+            <Card title="当前状态">
+              <List
+                dataSource={statusItems}
+                renderItem={(item) => (
+                  <List.Item>
+                    <List.Item.Meta
+                      avatar={<Badge status={item.status} />}
+                      title={item.title}
+                      description={item.description}
+                    />
+                  </List.Item>
+                )}
+              />
             </Card>
           </Col>
         </Row>
+
+        <Card title="常用访问">
+          <Skeleton active loading={loading} paragraph={{ rows: 5 }}>
+            <Tabs
+              items={[
+                {
+                  key: 'quick',
+                  label: (
+                    <Space>
+                      <AppstoreOutlined />
+                      快捷入口
+                    </Space>
+                  ),
+                  children:
+                    quickMenus.length > 0 ? (
+                      <List
+                        grid={{ gutter: 12, xs: 1, sm: 2, md: 3, lg: 4, xl: 5, xxl: 5 }}
+                        dataSource={quickMenus}
+                        renderItem={(menu) => (
+                          <List.Item>
+                            <Button
+                              block
+                              icon={<TrueAdminIcon icon={menu.icon} />}
+                              onClick={() => openMenu(menu)}
+                            >
+                              {resolveMenuTitle(menu, t)}
+                            </Button>
+                          </List.Item>
+                        )}
+                      />
+                    ) : (
+                      <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无可访问入口" />
+                    ),
+                },
+                {
+                  key: 'recent',
+                  label: (
+                    <Space>
+                      <ClockCircleOutlined />
+                      最近打开
+                    </Space>
+                  ),
+                  children:
+                    recentTabs.length > 0 ? (
+                      <List
+                        dataSource={recentTabs}
+                        renderItem={(tab) => (
+                          <List.Item
+                            actions={[
+                              <Button key="open" type="link" onClick={() => navigate(tab.path)}>
+                                打开
+                              </Button>,
+                            ]}
+                          >
+                            <List.Item.Meta
+                              avatar={
+                                <TrueAdminIcon icon={tab.icon} fallback={<ClockCircleOutlined />} />
+                              }
+                              title={t(tab.title, tab.title)}
+                              description={tab.path}
+                            />
+                          </List.Item>
+                        )}
+                      />
+                    ) : (
+                      <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无最近打开页面" />
+                    ),
+                },
+              ]}
+            />
+          </Skeleton>
+        </Card>
       </Space>
     </TrueAdminPage>
   );

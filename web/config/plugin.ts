@@ -3,6 +3,6 @@ import type { PluginRuntimeConfig } from '@trueadmin/web-core/plugin';
 
 export const pluginConfig: Record<string, PluginRuntimeConfig> = {
   'true-admin.examples': {
-    enabled: false,
+    enabled: true,
   },
 };

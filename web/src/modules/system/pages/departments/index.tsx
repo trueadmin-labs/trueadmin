@@ -1,13 +1,15 @@
 import { PlusOutlined } from '@ant-design/icons';
 import type { TreeSelectProps } from 'antd';
-import { App, Button, Form } from 'antd';
+import { App, Button, Form, Space } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { TrueAdminPermissionButton } from '@/core/auth';
 import { TrueAdminCrudPage, useCrudRecordDetail } from '@/core/crud';
 import type { CrudTableAction } from '@/core/crud/types';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { departmentApi } from '../../services/department.api';
 import type { DepartmentPayload, DepartmentTreeNode } from '../../types/department';
 import { DepartmentFormModal } from './DepartmentFormModal';
+import { DepartmentPositionsPanel } from './DepartmentPositionsPanel';
 import { createDepartmentColumns } from './DepartmentTableColumns';
 import {
   createDepartmentFilters,
@@ -15,6 +17,23 @@ import {
   ROOT_PARENT_ID,
   toDepartmentTreeSelectData,
 } from './departmentPageModel';
+
+const findDepartmentById = (
+  departments: DepartmentTreeNode[],
+  id: number,
+): DepartmentTreeNode | undefined => {
+  for (const department of departments) {
+    if (department.id === id) {
+      return department;
+    }
+    const child = findDepartmentById(department.children ?? [], id);
+    if (child) {
+      return child;
+    }
+  }
+
+  return undefined;
+};
 
 export default function AdminDepartmentsPage() {
   const { message } = App.useApp();
@@ -24,6 +43,7 @@ export default function AdminDepartmentsPage() {
   const [submitting, setSubmitting] = useState(false);
   const editRecord = useCrudRecordDetail<DepartmentTreeNode>({ load: departmentApi.detail });
   const [departmentTree, setDepartmentTree] = useState<DepartmentTreeNode[]>([]);
+  const [selectedDepartment, setSelectedDepartment] = useState<DepartmentTreeNode>();
   const editing = editRecord.record;
   const open = createOpen || editRecord.open;
 
@@ -36,7 +56,11 @@ export default function AdminDepartmentsPage() {
   );
 
   const loadDepartmentTree = useCallback(async () => {
-    setDepartmentTree(await departmentApi.tree());
+    const nextTree = await departmentApi.tree();
+    setDepartmentTree(nextTree);
+    setSelectedDepartment((current) =>
+      current ? findDepartmentById(nextTree, current.id) : current,
+    );
   }, []);
 
   useEffect(() => {
@@ -68,6 +92,10 @@ export default function AdminDepartmentsPage() {
     setCreateOpen(false);
     form.resetFields();
     void editRecord.openRecord(record.id, { initialRecord: record });
+  };
+
+  const openPositions = (record: DepartmentTreeNode) => {
+    setSelectedDepartment(record);
   };
 
   const closeForm = () => {
@@ -137,12 +165,28 @@ export default function AdminDepartmentsPage() {
         </Button>
       }
       rowActions={{
-        width: 150,
+        width: 190,
         render: ({ record }) => (
-          <Button size="small" type="link" onClick={() => openEdit(record)}>
-            {t('crud.action.edit', '编辑')}
-          </Button>
+          <Space size={4}>
+            <Button size="small" type="link" onClick={() => openEdit(record)}>
+              {t('crud.action.edit', '编辑')}
+            </Button>
+            <TrueAdminPermissionButton
+              permission="system:position:list"
+              size="small"
+              type="link"
+              onClick={() => openPositions(record)}
+            >
+              {t('system.departments.positions.action.open', '岗位')}
+            </TrueAdminPermissionButton>
+          </Space>
         ),
+      }}
+      onDeleteSuccess={(_, context) => {
+        if (selectedDepartment && String(selectedDepartment.id) === String(context.id)) {
+          setSelectedDepartment(undefined);
+        }
+        void loadDepartmentTree();
       }}
       locale={{
         actionColumnTitle: t('crud.column.action', '操作'),
@@ -166,6 +210,13 @@ export default function AdminDepartmentsPage() {
       tableRender={({ action }, defaultDom) => (
         <>
           {defaultDom}
+          <DepartmentPositionsPanel
+            department={selectedDepartment}
+            departmentTree={departmentTree}
+            open={Boolean(selectedDepartment)}
+            t={t}
+            onClose={() => setSelectedDepartment(undefined)}
+          />
           <DepartmentFormModal
             editing={editing}
             form={form}
