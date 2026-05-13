@@ -2,6 +2,7 @@ import { Layout, Result, Spin } from 'antd';
 import { PreferenceBootstrap } from '@/app/providers/PreferenceBootstrap';
 import { useAppLayoutController } from './AppLayoutController';
 import { ClassicLayout, ColumnsLayout, MixedLayout } from './AppLayoutViews';
+import './layout.css';
 
 export function AppLayout() {
   const layout = useAppLayoutController();

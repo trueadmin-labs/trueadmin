@@ -2,6 +2,7 @@ import type { CSSProperties, ReactElement, ReactNode } from 'react';
 import { cloneElement, isValidElement } from 'react';
 import type { TrueAdminIconInput } from './iconRegistry';
 import { getFallbackIconDefinition, getIconDefinition, isImageIconValue } from './iconRegistry';
+import './icon.css';
 
 export type { TrueAdminIconInput } from './iconRegistry';
 export { isImageIconValue, registerIcons } from './iconRegistry';

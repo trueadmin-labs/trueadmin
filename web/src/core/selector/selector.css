@@ -1,0 +1,81 @@
+.trueadmin-table-picker {
+  display: flex;
+  box-sizing: border-box;
+  min-height: 0;
+  height: min(680px, calc(100vh - 186px));
+  flex-direction: column;
+  background: var(--ant-color-bg-container, #fff);
+}
+
+.trueadmin-table-picker-body {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+.trueadmin-table-picker.has-aside .trueadmin-table-picker-body {
+  gap: var(--trueadmin-table-picker-aside-gap, 0px);
+}
+
+.trueadmin-table-picker-aside {
+  display: flex;
+  width: var(--trueadmin-table-picker-aside-width, 280px);
+  min-width: 0;
+  min-height: 0;
+  flex: 0 0 var(--trueadmin-table-picker-aside-width, 280px);
+  flex-direction: column;
+  overflow: auto;
+  border: 1px solid var(--trueadmin-shell-border);
+  background: var(--ant-color-bg-container, #fff);
+}
+
+.trueadmin-table-picker-main {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--trueadmin-shell-border);
+  background: var(--ant-color-bg-container, #fff);
+}
+
+.trueadmin-table-picker-main .trueadmin-crud-table-card.ant-card {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.trueadmin-table-picker-main .trueadmin-crud-table-card > .ant-card-body {
+  background: transparent;
+}
+
+.trueadmin-table-picker-table {
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.trueadmin-page-modal.is-fullscreen .trueadmin-table-picker {
+  height: 100%;
+}
+
+.trueadmin-page-modal.is-fullscreen .trueadmin-table-picker-body,
+.trueadmin-page-modal.is-fullscreen .trueadmin-table-picker-main,
+.trueadmin-page-modal.is-fullscreen .trueadmin-table-picker-table,
+.trueadmin-page-modal.is-fullscreen .trueadmin-table-picker-table .trueadmin-crud-table,
+.trueadmin-page-modal.is-fullscreen .trueadmin-table-picker-table .trueadmin-crud-table-card {
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.trueadmin-page-modal.is-dark .trueadmin-table-picker,
+.trueadmin-shell.is-dark .trueadmin-table-picker,
+.trueadmin-page-modal.is-dark .trueadmin-table-picker-aside,
+.trueadmin-shell.is-dark .trueadmin-table-picker-aside,
+.trueadmin-page-modal.is-dark .trueadmin-table-picker-main,
+.trueadmin-shell.is-dark .trueadmin-table-picker-main {
+  border-color: var(--trueadmin-shell-dark-border);
+  background: var(--ant-color-bg-container, #141414);
+}

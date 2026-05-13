@@ -1,0 +1,508 @@
+.trueadmin-role-authorize-modal .ant-modal-body {
+  box-sizing: border-box;
+  min-height: 0;
+}
+
+.trueadmin-role-authorize-body,
+.trueadmin-role-authorize-body .ant-spin-nested-loading,
+.trueadmin-role-authorize-body .ant-spin,
+.trueadmin-role-authorize-body .ant-spin-container,
+.trueadmin-role-authorize-tabs,
+.trueadmin-role-authorize-tabs .ant-tabs-content,
+.trueadmin-role-authorize-tabs .ant-tabs-tabpane,
+.trueadmin-role-authorize-pane {
+  min-height: 0;
+  height: 100%;
+}
+
+.trueadmin-role-authorize-body,
+.trueadmin-role-authorize-body .ant-spin-nested-loading,
+.trueadmin-role-authorize-body .ant-spin-container {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+}
+
+.trueadmin-role-authorize-body .ant-spin-container::after {
+  display: none;
+}
+
+.trueadmin-role-authorize-tabs {
+  display: grid;
+  width: 100%;
+  --trueadmin-role-authorize-tabs-nav-height: 44px;
+  --trueadmin-role-authorize-tabs-nav-gap: 12px;
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
+}
+
+.trueadmin-role-authorize-tabs .ant-tabs-nav {
+  height: var(--trueadmin-role-authorize-tabs-nav-height);
+  margin-bottom: var(--trueadmin-role-authorize-tabs-nav-gap);
+}
+
+.trueadmin-role-authorize-tabs .ant-tabs-content-holder {
+  align-self: stretch;
+  min-height: 0;
+  height: calc(
+    100% -
+    var(--trueadmin-role-authorize-tabs-nav-height) -
+    var(--trueadmin-role-authorize-tabs-nav-gap)
+  );
+  max-height: calc(
+    100% -
+    var(--trueadmin-role-authorize-tabs-nav-height) -
+    var(--trueadmin-role-authorize-tabs-nav-gap)
+  );
+  overflow: hidden;
+}
+
+.trueadmin-role-authorize-tabs .ant-tabs-content {
+  display: flex;
+  max-height: 100%;
+}
+
+.trueadmin-role-authorize-tabs .ant-tabs-tabpane {
+  flex: 0 0 100%;
+  max-height: 100%;
+  overflow: hidden;
+}
+
+.trueadmin-role-authorize-pane {
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 6px;
+}
+
+.trueadmin-role-authorize-tree-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.trueadmin-role-authorize-tree-label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.trueadmin-menu-permission-card-list {
+  display: grid;
+  gap: 10px;
+}
+
+.trueadmin-menu-permission-card .ant-card-head {
+  min-height: 38px;
+  padding: 0 12px;
+}
+
+.trueadmin-menu-permission-card .ant-card-head-title {
+  padding: 9px 0;
+}
+
+.trueadmin-menu-permission-card .ant-card-extra {
+  padding: 7px 0;
+}
+
+.trueadmin-menu-permission-card .ant-card-body {
+  padding: 8px 12px 10px;
+}
+
+.trueadmin-menu-permission-card .ant-tree {
+  background: transparent;
+}
+
+.trueadmin-data-policy-list {
+  display: grid;
+  gap: 10px;
+}
+
+.trueadmin-data-policy-card .ant-card-head {
+  min-height: 38px;
+  padding: 0 12px;
+}
+
+.trueadmin-data-policy-card .ant-card-head-title {
+  padding: 9px 0;
+}
+
+.trueadmin-data-policy-card .ant-card-body {
+  padding: 4px 12px 10px;
+}
+
+.trueadmin-data-policy-card-rows {
+  display: grid;
+  gap: 8px;
+}
+
+.trueadmin-data-policy-row {
+  display: grid;
+  gap: 8px;
+}
+
+.trueadmin-data-policy-main-row {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 240px);
+  gap: 12px;
+  align-items: start;
+}
+
+.trueadmin-data-policy-departments-row {
+  display: grid;
+  min-width: 0;
+  grid-column: 1 / -1;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+
+.trueadmin-data-policy-departments-row > .ant-typography {
+  min-height: 32px;
+  line-height: 32px;
+}
+
+.trueadmin-data-policy-scope-item,
+.trueadmin-data-policy-departments-item {
+  margin-bottom: 0;
+}
+
+.trueadmin-data-policy-scope-item .ant-form-item-explain,
+.trueadmin-data-policy-departments-item .ant-form-item-explain {
+  min-height: 0;
+}
+
+.trueadmin-data-policy-scope-item .ant-select,
+.trueadmin-data-policy-departments-item .ant-select {
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .trueadmin-data-policy-row,
+  .trueadmin-data-policy-main-row,
+  .trueadmin-data-policy-departments-row {
+    grid-template-columns: 1fr;
+  }
+
+  .trueadmin-data-policy-departments-row > .ant-typography {
+    min-height: 0;
+    line-height: 1.5;
+  }
+}
+
+.trueadmin-system-link-frame-page-body,
+.trueadmin-system-link-frame-loading,
+.trueadmin-system-link-frame-loading .trueadmin-loading-container-layer,
+.trueadmin-system-link-frame-loading .trueadmin-loading-container-measure,
+.trueadmin-system-link-frame {
+  height: 100%;
+  min-height: 0;
+}
+
+.trueadmin-system-link-frame {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  background: #fff;
+}
+
+.trueadmin-system-link-frame-header {
+  display: flex;
+  min-width: 0;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--ant-color-border-secondary);
+  background: var(--ant-color-bg-container);
+}
+
+.trueadmin-system-link-frame-url {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.trueadmin-system-link-frame-url .ant-input-group-addon {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trueadmin-system-link-frame-url .ant-input[readonly] {
+  cursor: copy;
+  color: var(--ant-color-text-secondary);
+  background: var(--ant-color-bg-container);
+}
+
+.trueadmin-system-link-frame-iframe {
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  border: 0;
+  background: #fff;
+}
+
+.trueadmin-message-cell {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  max-width: 520px;
+}
+
+.trueadmin-message-cell-type {
+  display: flex;
+  width: 72px;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.trueadmin-message-cell-type .ant-tag {
+  max-width: 72px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trueadmin-system-menu-icon {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  color: var(--ant-color-text-secondary, rgba(0, 0, 0, 0.65));
+}
+
+.trueadmin-notification-delivery-modal.ant-modal .ant-modal-content {
+  display: flex;
+  height: min(760px, calc(100vh - 96px));
+  max-height: calc(100vh - 96px);
+  flex-direction: column;
+}
+
+.trueadmin-notification-delivery-modal.ant-modal .ant-modal-header,
+.trueadmin-notification-delivery-modal.ant-modal .ant-modal-footer {
+  flex: 0 0 auto;
+}
+
+.trueadmin-notification-delivery-modal.ant-modal .ant-modal-body {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.trueadmin-notification-delivery-modal-body {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.trueadmin-notification-management-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.trueadmin-notification-management-stats .ant-statistic {
+  padding: 10px 12px;
+  border: 1px solid var(--ant-color-border-secondary, rgba(5, 5, 5, 0.06));
+  border-radius: var(--ant-border-radius-lg, 8px);
+  background: var(--ant-color-fill-quaternary, rgba(0, 0, 0, 0.02));
+}
+
+.trueadmin-notification-management-audit {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--ant-color-border-secondary, rgba(5, 5, 5, 0.06));
+  border-radius: var(--ant-border-radius-lg, 8px);
+}
+
+@media (max-width: 767px) {
+  .trueadmin-notification-management-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.trueadmin-profile-layout {
+  width: 100%;
+}
+
+.trueadmin-profile-card .ant-card-body {
+  padding: 28px 32px;
+}
+
+.trueadmin-profile-identity-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.trueadmin-profile-summary-text h4.ant-typography {
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+
+.trueadmin-profile-role-list {
+  display: flex;
+  max-width: 100%;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+}
+
+.trueadmin-profile-meta-grid {
+  display: grid;
+  width: 100%;
+  max-width: 760px;
+  margin-top: 8px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.trueadmin-profile-meta-item {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid var(--ant-color-border-secondary, rgba(5, 5, 5, 0.06));
+  border-radius: 8px;
+  background: var(--ant-color-fill-quaternary, rgba(0, 0, 0, 0.02));
+}
+
+.trueadmin-profile-meta-item .ant-typography {
+  max-width: 100%;
+  margin-bottom: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trueadmin-profile-tabs.ant-tabs > .ant-tabs-nav {
+  margin-bottom: 12px;
+}
+
+.trueadmin-profile-tabs .ant-tabs-tab {
+  padding-inline: 4px;
+}
+
+.trueadmin-profile-tabs .ant-card {
+  max-width: 760px;
+}
+
+.trueadmin-profile-preference-workspace {
+  display: grid;
+  min-height: 360px;
+  min-width: 0;
+  grid-template-columns: 240px minmax(0, 1fr);
+  align-items: start;
+  gap: 16px;
+}
+
+.trueadmin-profile-preference-nav {
+  position: sticky;
+  top: calc(var(--trueadmin-header-height) + 16px);
+  min-width: 0;
+  border: 1px solid var(--ant-color-border-secondary, rgba(5, 5, 5, 0.06));
+  border-radius: 8px;
+  background: var(--ant-color-bg-container, #fff);
+  overflow: hidden;
+}
+
+.trueadmin-profile-preference-nav .ant-menu {
+  border-inline-end: 0;
+}
+
+.trueadmin-profile-preference-detail {
+  min-width: 0;
+}
+
+.trueadmin-profile-preference-card .ant-card-body {
+  padding-top: 14px;
+}
+
+.trueadmin-profile-preference-description.ant-typography {
+  margin-bottom: 14px;
+}
+
+.trueadmin-profile-preference-panel {
+  width: 100%;
+}
+
+.trueadmin-profile-preference-section {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.trueadmin-profile-preference-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ant-color-text, rgba(0, 0, 0, 0.88));
+  font-weight: 600;
+  line-height: 22px;
+}
+
+.trueadmin-profile-preference-color-grid {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(24px, 1fr));
+  gap: 8px;
+}
+
+.trueadmin-profile-preference-row {
+  min-height: 30px;
+  gap: 12px;
+}
+
+.trueadmin-profile-preference-hint.ant-typography {
+  margin-bottom: 0;
+  font-size: 12px;
+}
+
+@media (max-width: 575px) {
+  .trueadmin-profile-preference-color-grid {
+    grid-template-columns: repeat(4, minmax(24px, 1fr));
+  }
+}
+
+@media (max-width: 991px) {
+  .trueadmin-profile-meta-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .trueadmin-profile-preference-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .trueadmin-profile-preference-nav {
+    position: static;
+  }
+}
+
+.trueadmin-log-detail-code {
+  max-width: 100%;
+  margin-bottom: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New",
+    monospace;
+}

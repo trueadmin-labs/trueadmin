@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactNode } from 'react';
 import type { TrueAdminTablePickerProps } from './TrueAdminTablePicker';
 import { joinClassNames, toSizeValue } from './tablePickerUtils';
+import './selector.css';
 
 type TrueAdminTablePickerFrameProps<
   TRecord extends Record<string, unknown>,

@@ -1,0 +1,204 @@
+.trueadmin-error-modal-root .ant-modal-content {
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.trueadmin-error-modal-root .ant-modal-header {
+  margin-bottom: 0;
+  padding: 20px 24px 12px;
+  border-bottom: 1px solid rgba(5, 5, 5, 0.06);
+}
+
+.trueadmin-error-modal-root .ant-modal-body {
+  padding: 20px 24px 4px;
+}
+
+.trueadmin-error-modal-root .ant-modal-footer {
+  margin-top: 0;
+  padding: 12px 24px 20px;
+}
+
+.trueadmin-error-modal {
+  width: 100%;
+}
+
+.trueadmin-error-modal-summary-card {
+  display: flex;
+  gap: 12px;
+}
+
+.trueadmin-error-modal-icon {
+  display: inline-grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  margin-top: 1px;
+  font-size: 22px;
+}
+
+.trueadmin-error-modal-summary-card.is-error .trueadmin-error-modal-icon {
+  color: #ff4d4f;
+}
+
+.trueadmin-error-modal-summary-card.is-warning .trueadmin-error-modal-icon {
+  color: #faad14;
+}
+
+.trueadmin-error-modal-summary-card.is-info .trueadmin-error-modal-icon {
+  color: #1677ff;
+}
+
+.trueadmin-error-modal-summary {
+  min-width: 0;
+  flex: 1;
+}
+
+.trueadmin-error-modal-summary h4.ant-typography.trueadmin-error-modal-main-title {
+  margin: 0 0 6px;
+  color: rgba(0, 0, 0, 0.88);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.trueadmin-error-modal-message.ant-typography {
+  margin-bottom: 0;
+  color: rgba(0, 0, 0, 0.65);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.trueadmin-error-modal-action-list {
+  margin-top: 16px;
+  padding: 12px 16px;
+  border: 1px solid rgba(5, 5, 5, 0.06);
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.trueadmin-error-modal-action-list h5.ant-typography {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  color: rgba(0, 0, 0, 0.82);
+  font-size: 14px;
+}
+
+.trueadmin-error-modal-action-list h5.ant-typography .anticon {
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.trueadmin-error-modal-action-list ul {
+  margin: 0;
+  padding-left: 18px;
+  color: rgba(0, 0, 0, 0.72);
+  line-height: 1.7;
+}
+
+.trueadmin-error-modal-action-list li + li {
+  margin-top: 4px;
+}
+
+.trueadmin-error-modal-details.ant-collapse {
+  margin-top: 12px;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.trueadmin-error-modal-details.ant-collapse > .ant-collapse-item {
+  border-bottom: 0;
+}
+
+.trueadmin-error-modal-details.ant-collapse .ant-collapse-header {
+  padding: 4px 0;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 13px;
+}
+
+.trueadmin-error-modal-details.ant-collapse .ant-collapse-content-box {
+  padding: 4px 0 0;
+}
+
+.trueadmin-error-modal-diagnostics {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.trueadmin-error-modal-diagnostic-item {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  min-width: 0;
+}
+
+.trueadmin-error-modal-diagnostic-item > span:first-child {
+  display: block;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 12px;
+}
+
+.trueadmin-error-modal-diagnostic-item .ant-typography {
+  max-width: 100%;
+  margin-bottom: 0;
+  color: rgba(0, 0, 0, 0.76);
+  font-size: 12px;
+}
+
+.trueadmin-error-modal-code-text {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  word-break: break-all;
+}
+
+.trueadmin-error-modal-root.is-dark .ant-modal-content {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: #141414;
+}
+
+.trueadmin-error-modal-root.is-dark .ant-modal-header {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+  background: #141414;
+}
+
+.trueadmin-error-modal-root.is-dark
+  .trueadmin-error-modal-summary
+  h4.ant-typography.trueadmin-error-modal-main-title {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.trueadmin-error-modal-root.is-dark .trueadmin-error-modal-message.ant-typography,
+.trueadmin-error-modal-root.is-dark .trueadmin-error-modal-action-list ul {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.trueadmin-error-modal-root.is-dark .trueadmin-error-modal-action-list {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.trueadmin-error-modal-root.is-dark .trueadmin-error-modal-action-list h5.ant-typography {
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.trueadmin-error-modal-root.is-dark
+  .trueadmin-error-modal-details.ant-collapse
+  .ant-collapse-header,
+.trueadmin-error-modal-root.is-dark .trueadmin-error-modal-diagnostic-item > span:first-child {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.trueadmin-error-modal-root.is-dark .trueadmin-error-modal-diagnostic-item .ant-typography {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+@media (max-width: 640px) {
+  .trueadmin-error-modal-root.ant-modal {
+    max-width: calc(100vw - 24px);
+  }
+
+  .trueadmin-error-modal-diagnostic-item {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+}

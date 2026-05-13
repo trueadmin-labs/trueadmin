@@ -1,0 +1,42 @@
+.trueadmin-scroll-shadow {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.trueadmin-scroll-shadow::before,
+.trueadmin-scroll-shadow::after {
+  position: absolute;
+  z-index: 1;
+  inset-inline: 0;
+  height: 30px;
+  opacity: 0;
+  content: "";
+  pointer-events: none;
+  transition:
+    box-shadow 0.3s,
+    opacity 0.3s;
+}
+
+.trueadmin-scroll-shadow::before {
+  inset-block-start: 0;
+}
+
+.trueadmin-scroll-shadow::after {
+  inset-block-end: 0;
+}
+
+.trueadmin-scroll-shadow[data-shadow-top="true"]::before {
+  box-shadow: inset 0 10px 8px -8px var(--trueadmin-shell-border);
+  opacity: 1;
+}
+
+.trueadmin-scroll-shadow[data-shadow-bottom="true"]::after {
+  box-shadow: inset 0 -10px 8px -8px var(--trueadmin-shell-border);
+  opacity: 1;
+}
+
+.trueadmin-scroll-shadow-scroller {
+  min-height: 0;
+  overflow: auto;
+}

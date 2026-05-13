@@ -6,6 +6,7 @@ import { getRouteLayoutMeta } from '@/core/layout/routeLayoutMeta';
 import { useOptionalWorkspaceViewport } from '@/core/layout/WorkspaceViewport';
 import { TrueAdminLoadingContainer } from '@/core/loading';
 import { PageTransition } from './PageTransition';
+import './page.css';
 
 export type TrueAdminPageLayout = 'natural' | 'workspace';
 export type TrueAdminPageContentAlign = 'start' | 'center' | 'stretch';

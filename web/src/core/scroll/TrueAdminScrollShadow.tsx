@@ -1,5 +1,6 @@
 import type { CSSProperties, HTMLAttributes, ReactNode, UIEvent } from 'react';
 import { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import './scroll.css';
 
 export type TrueAdminScrollShadowClassNames = {
   root?: string;

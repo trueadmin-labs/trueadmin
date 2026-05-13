@@ -11,6 +11,7 @@ import { TrueAdminAttachmentList } from './TrueAdminAttachmentList';
 import { TrueAdminUploadPreview, type TrueAdminUploadPreviewProps } from './TrueAdminUploadPreview';
 import { useAttachmentUploadAnimation } from './useAttachmentUploadAnimation';
 import { useAttachmentUploadController } from './useAttachmentUploadController';
+import './upload.css';
 
 export type {
   TrueAdminAttachmentId,

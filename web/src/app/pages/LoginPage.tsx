@@ -7,6 +7,7 @@ import { useNavigate, useSearchParams } from 'react-router';
 import { useLoginMutation } from '@/core/auth/hooks';
 import { queryClient } from '@/core/query/client';
 import { tokenStorage } from '@/shared/utils/storage';
+import './login.css';
 
 const normalizeRedirectPath = (value: string | null) => {
   if (!value?.startsWith('/') || value.startsWith('//') || value.startsWith('/login')) {

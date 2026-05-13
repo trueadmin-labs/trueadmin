@@ -17,6 +17,7 @@ import { useI18n } from '@/core/i18n/I18nProvider';
 import { TrueAdminModal } from '@/core/modal';
 import { useLayoutStore } from '@/core/store/layoutStore';
 import { getErrorExplanation } from './errorRegistry';
+import './error.css';
 
 const toReasonText = (details: unknown): string | undefined => {
   if (typeof details !== 'object' || details === null) {

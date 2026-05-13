@@ -7,6 +7,7 @@ import {
   ExampleProfilePreferencePanel,
 } from './pages/ExampleProfilePreferencePanel';
 import { ExampleWorkbenchWidget } from './pages/ExampleWorkbenchWidget';
+import './examples.css';
 
 export default defineModule({
   id: 'true-admin.examples',

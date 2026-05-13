@@ -11,6 +11,7 @@ import { useCrudTableLayout } from './useCrudTableLayout';
 import { useCrudTableQueryState } from './useCrudTableQueryState';
 import { useCrudTableRenderContext } from './useCrudTableRenderContext';
 import { useCrudTableSelection } from './useCrudTableSelection';
+import './crud.css';
 
 const DEFAULT_PAGE_SIZE = 20;
 

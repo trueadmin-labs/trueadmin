@@ -8,6 +8,7 @@ import {
   TrueAdminScrollShadow,
   type TrueAdminScrollShadowProps,
 } from '@/core/scroll/TrueAdminScrollShadow';
+import './modal.css';
 
 const DEFAULT_MODAL_CONTENT_PADDING_BLOCK = '20px';
 const DEFAULT_MODAL_CONTENT_PADDING_INLINE = '24px';

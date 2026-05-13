@@ -6,6 +6,7 @@ import {
   applySystemLayoutPreference,
   SYSTEM_LAYOUT_PREFERENCE_KEY,
 } from './profile/layoutPreference';
+import './system.css';
 
 export default defineModule({
   id: 'system',

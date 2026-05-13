@@ -3,6 +3,7 @@ import { Button, Popconfirm, Tooltip } from 'antd';
 import type { ReactNode } from 'react';
 import { useCurrentUserQuery } from './hooks';
 import { hasTrueAdminPermission, type TrueAdminPermissionMode } from './TrueAdminPermission';
+import './auth.css';
 
 export type TrueAdminPermissionButtonProps = ButtonProps & {
   permission?: string | string[];

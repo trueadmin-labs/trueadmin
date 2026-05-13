@@ -1,0 +1,60 @@
+.trueadmin-audit-timeline-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.trueadmin-audit-timeline-title {
+  color: var(--ant-color-text);
+  font-weight: 500;
+}
+
+.trueadmin-audit-timeline-description,
+.trueadmin-audit-timeline-meta {
+  color: var(--ant-color-text-secondary);
+  font-size: 12px;
+}
+
+.trueadmin-audit-timeline-meta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.trueadmin-audit-panel.ant-card > .ant-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.trueadmin-audit-panel-header {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.trueadmin-audit-panel-main {
+  min-width: 0;
+}
+
+.trueadmin-audit-panel-main .ant-typography {
+  margin: 0;
+}
+
+.trueadmin-audit-panel-main h5.ant-typography {
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.trueadmin-audit-panel-actions {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.trueadmin-audit-panel-body {
+  min-width: 0;
+}

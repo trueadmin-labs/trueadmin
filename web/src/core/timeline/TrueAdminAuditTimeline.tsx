@@ -1,6 +1,7 @@
 import type { TimelineProps } from 'antd';
 import { Timeline, Typography } from 'antd';
 import type { ReactNode } from 'react';
+import './timeline.css';
 
 export type TrueAdminAuditTimelineItem = {
   key?: React.Key;

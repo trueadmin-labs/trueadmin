@@ -3,6 +3,7 @@ import { useAppTabsBarController } from './AppTabsBarController';
 import { restrictToHorizontalAxis, sameGroupCollisionDetection } from './AppTabsBarDnd';
 import { SortableTabGroup } from './AppTabsBarItems';
 import { TabsMoreButton } from './AppTabsBarMenu';
+import './tabs.css';
 
 export function AppTabsBar({ activeKey }: { activeKey?: string }) {
   const tabsBar = useAppTabsBarController(activeKey);

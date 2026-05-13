@@ -8,6 +8,7 @@ import type { TrueAdminAttachmentValue } from './attachmentUploadUtils';
 import { UploadPreviewBody } from './UploadPreviewBody';
 import { UploadPreviewFooter } from './UploadPreviewFooter';
 import { getUploadPreviewDisplayName } from './uploadPreviewUtils';
+import './upload.css';
 
 export type TrueAdminUploadPreviewClassNames = {
   root?: string;

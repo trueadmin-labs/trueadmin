@@ -3,6 +3,7 @@ import type { ButtonProps, EmptyProps, ResultProps } from 'antd';
 import { Button, Empty, Result } from 'antd';
 import type { CSSProperties, ReactNode } from 'react';
 import { useI18n } from '@/core/i18n/I18nProvider';
+import './result.css';
 
 export type TrueAdminResultStateStatus = 'empty' | NonNullable<ResultProps['status']>;
 

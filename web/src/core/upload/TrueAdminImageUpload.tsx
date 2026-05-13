@@ -13,6 +13,7 @@ import {
 } from './imageUploadUtils';
 import { TrueAdminImageUploadItem } from './TrueAdminImageUploadItem';
 import { useImageUploadController } from './useImageUploadController';
+import './upload.css';
 
 export type {
   TrueAdminImageId,

@@ -1,5 +1,6 @@
 import { Result } from 'antd';
 import { useI18n } from '@/core/i18n/I18nProvider';
+import './auth.css';
 
 type TrueAdminForbiddenBlockProps = {
   title?: string;

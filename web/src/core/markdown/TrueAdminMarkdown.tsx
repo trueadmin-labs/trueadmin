@@ -1,6 +1,7 @@
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import type { TrueAdminMarkdownProps } from './types';
+import './markdown.css';
 
 export function TrueAdminMarkdown({
   className,

@@ -4,6 +4,7 @@ import type { CSSProperties, ReactNode } from 'react';
 import { useLayoutEffect, useRef, useState } from 'react';
 import { useI18n } from '@/core/i18n/I18nProvider';
 import { useLayoutStore } from '@/core/store/layoutStore';
+import './loading.css';
 
 export type TrueAdminLoadingContainerMode = 'spin' | 'none';
 

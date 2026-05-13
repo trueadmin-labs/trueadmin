@@ -1,0 +1,148 @@
+.trueadmin-page-modal.ant-modal .ant-modal-container {
+  padding: 0;
+}
+
+.trueadmin-modal.ant-modal .ant-modal-content {
+  overflow: hidden;
+  padding: 0;
+}
+
+.trueadmin-page-modal.ant-modal .ant-modal-body {
+  background: var(--trueadmin-shell-bg);
+}
+
+.trueadmin-page-modal.ant-modal.is-dark .ant-modal-body {
+  background: var(--trueadmin-shell-dark-bg);
+}
+
+.trueadmin-modal-render-root {
+  position: relative;
+}
+
+.trueadmin-modal-wrap {
+  --trueadmin-modal-viewport-gap: 24px;
+}
+
+.trueadmin-modal-wrap:not(.is-fullscreen) {
+  padding-block: var(--trueadmin-modal-viewport-gap);
+}
+
+.trueadmin-modal-wrap:not(.is-fullscreen) .trueadmin-modal.ant-modal {
+  top: 0;
+  padding-bottom: 0;
+}
+
+.trueadmin-modal-wrap:not(.is-fullscreen) .trueadmin-modal.ant-modal:not(.ant-modal-centered) {
+  margin-block: 0;
+}
+
+.trueadmin-modal-wrap:not(.is-fullscreen) .trueadmin-modal .trueadmin-modal-render-root,
+.trueadmin-modal-wrap:not(.is-fullscreen) .trueadmin-modal .ant-modal-content {
+  max-height: calc(100vh - var(--trueadmin-modal-viewport-gap) * 2);
+}
+
+.trueadmin-modal-wrap:not(.is-fullscreen) .trueadmin-modal .ant-modal-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.trueadmin-modal-wrap:not(.is-fullscreen) .trueadmin-modal .ant-modal-header,
+.trueadmin-modal-wrap:not(.is-fullscreen) .trueadmin-modal .ant-modal-footer {
+  flex: 0 0 auto;
+}
+
+.trueadmin-modal-wrap:not(.is-fullscreen) .trueadmin-modal .ant-modal-body {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: auto;
+}
+
+.trueadmin-modal.is-fullscreen .ant-modal-render,
+.trueadmin-modal.is-fullscreen .trueadmin-modal-render-root {
+  height: 100%;
+}
+
+.trueadmin-modal-header-actions {
+  position: absolute;
+  z-index: 10;
+  top: 12px;
+  inset-inline-end: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  pointer-events: auto;
+}
+
+.trueadmin-modal-header-actions-extra {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.trueadmin-modal.is-fullscreen.ant-modal {
+  top: 0;
+  max-width: 100%;
+  height: 100%;
+  margin: 0;
+  padding-bottom: 0;
+}
+
+.ant-modal-wrap:has(.trueadmin-modal.is-fullscreen) {
+  overflow: hidden;
+}
+
+.ant-modal-wrap:has(.trueadmin-modal.is-fullscreen) .ant-modal-root,
+.ant-modal-wrap:has(.trueadmin-modal.is-fullscreen) .ant-modal-wrap {
+  height: 100%;
+}
+
+.trueadmin-modal.is-fullscreen .ant-modal-container,
+.trueadmin-modal.is-fullscreen .ant-modal-content {
+  display: flex;
+  height: 100%;
+  max-height: 100%;
+  flex-direction: column;
+}
+
+.trueadmin-modal.is-fullscreen .ant-modal-content {
+  border-radius: 0;
+}
+
+.trueadmin-modal.is-fullscreen.ant-modal .ant-modal-header {
+  flex: 0 0 auto;
+}
+
+.trueadmin-modal.is-fullscreen .ant-modal-body {
+  min-height: 0;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.trueadmin-modal.is-fullscreen.ant-modal .ant-modal-footer {
+  flex: 0 0 auto;
+}
+
+.trueadmin-modal.is-fullscreen-changing .ant-modal-content,
+.trueadmin-modal.is-fullscreen-changing .ant-modal-body,
+.trueadmin-modal.is-fullscreen-changing .ant-table,
+.trueadmin-modal.is-fullscreen-changing .ant-table-wrapper,
+.trueadmin-modal.is-fullscreen-changing .ant-spin-nested-loading,
+.trueadmin-modal.is-fullscreen-changing .ant-spin-container,
+.trueadmin-modal.is-fullscreen-changing .ant-table-container,
+.trueadmin-modal.is-fullscreen-changing .ant-table-body,
+.trueadmin-modal.is-fullscreen-changing .trueadmin-notification-delivery-modal-body,
+.trueadmin-modal.is-fullscreen-changing .trueadmin-crud-shell,
+.trueadmin-modal.is-fullscreen-changing .trueadmin-crud-table-card,
+.trueadmin-modal.is-fullscreen-changing .trueadmin-crud-table-card > .ant-card-body,
+.trueadmin-modal.is-fullscreen-changing .trueadmin-crud-table-main {
+  transition: none;
+}
+
+.trueadmin-page-modal.is-fullscreen .trueadmin-scroll-shadow,
+.trueadmin-page-modal.is-fullscreen .trueadmin-scroll-shadow-scroller {
+  height: 100%;
+  max-height: none;
+  flex: 1 1 auto;
+}

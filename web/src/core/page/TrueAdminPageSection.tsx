@@ -1,6 +1,7 @@
 import { Typography } from 'antd';
 import type { CSSProperties, ReactNode } from 'react';
 import { TrueAdminLoadingContainer } from '@/core/loading';
+import './page.css';
 
 type TrueAdminPageSectionPadding = boolean | 'horizontal' | 'vertical';
 

@@ -1,0 +1,23 @@
+.trueadmin-result-state {
+  min-width: 0;
+}
+
+.trueadmin-result-state.is-compact.ant-result {
+  padding: 24px 12px;
+}
+
+.trueadmin-result-state.is-compact .ant-result-icon {
+  margin-bottom: 12px;
+}
+
+.trueadmin-result-state.is-compact .ant-result-title {
+  font-size: 16px;
+}
+
+.trueadmin-result-state.is-compact .ant-result-subtitle {
+  font-size: 13px;
+}
+
+.trueadmin-result-state.is-compact .ant-empty {
+  margin-block: 24px;
+}

@@ -1,3 +1,5 @@
+import './notification.css';
+
 export * from './components/TrueAdminMessageDetailModal';
 export * from './components/TrueAdminMessageList';
 export * from './components/TrueAdminNotificationBell';

@@ -7,6 +7,7 @@ import { useI18n } from '@/core/i18n/I18nProvider';
 import { TrueAdminPage } from '@/core/page/TrueAdminPage';
 import { TrueAdminCrudTable } from './TrueAdminCrudTable';
 import type { CrudTableRenderContext, TrueAdminCrudPageProps } from './types';
+import './crud.css';
 
 const toSizeValue = (value: number | string) =>
   typeof value === 'number' ? `${String(value)}px` : value;

@@ -1,0 +1,59 @@
+.trueadmin-login-page {
+  position: relative;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 8% 12%, rgba(22, 119, 255, 0.1), transparent 28%),
+    radial-gradient(circle at 92% 14%, rgba(47, 84, 235, 0.08), transparent 26%),
+    linear-gradient(180deg, #f7f9fc 0%, #eef3fa 100%);
+}
+
+.trueadmin-login-page::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background-image:
+    linear-gradient(rgba(22, 119, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(22, 119, 255, 0.045) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.75), transparent 78%);
+  pointer-events: none;
+}
+
+.trueadmin-login-card {
+  position: relative;
+  z-index: 1;
+  width: min(420px, calc(100vw - 32px));
+}
+
+.trueadmin-login-card .ant-card {
+  overflow: hidden;
+  border: 1px solid rgba(230, 235, 245, 0.92);
+  border-radius: 16px;
+  box-shadow: 0 16px 48px rgba(15, 23, 42, 0.1);
+}
+
+.trueadmin-login-card .ant-card-body {
+  padding: 34px 34px 28px;
+}
+
+.trueadmin-login-card .ant-pro-form-login-container {
+  padding: 0;
+}
+
+.trueadmin-login-card .ant-pro-form-login-header {
+  margin-bottom: 24px;
+}
+
+.trueadmin-login-card .ant-pro-form-login-title {
+  color: rgba(0, 0, 0, 0.88);
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.trueadmin-login-card .ant-pro-form-login-desc {
+  color: var(--trueadmin-text-subtle);
+}
